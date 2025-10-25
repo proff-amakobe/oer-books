@@ -1,0 +1,1710 @@
+# Chapter 4: Greedy Algorithms - When Local Optimality Leads to Global Solutions
+
+## The Art of Making the Best Choice Now
+
+_"The perfect is the enemy of the good." - Voltaire_
+
+---
+
+## Introduction: The Power of Greed
+
+Imagine you're a cashier making change. A customer buys something for $6.37 and hands you $10. You need to give $3.63 in change. How do you decide which coins to use?
+
+Your instinct is probably: use the largest coin possible at each step.
+
+- First, a dollar bill ($1) → Remaining: $2.63
+- Another dollar → Remaining: $1.63
+- Another dollar → Remaining: $0.63
+- A half-dollar (50¢) → Remaining: $0.13
+- A dime (10¢) → Remaining: $0.03
+- Three pennies (3¢) → Done!
+
+**7 coins total.** You just used a **greedy algorithm** at each step, you made the locally optimal choice (largest coin that fits) without worrying about future consequences.
+
+But here's the remarkable part: for US currency, this greedy approach always gives the **globally optimal** solution (minimum number of coins). No backtracking needed. No complex analysis. Just make the best choice at each step, and you're guaranteed the best overall result.
+
+### When Greed Works (And When It Doesn't)
+
+The coin change example showcases both the power and the peril of greedy algorithms:
+
+**With US coins** (1¢, 5¢, 10¢, 25¢, 50¢, $1):
+
+- Greedy works perfectly!
+- Change for 63¢: 50¢ + 10¢ + 3×1¢ = 5 coins ✓
+
+**With fictional coins** (1¢, 3¢, 4¢):
+
+- Greedy fails!
+- Change for 6¢:
+    - Greedy: 4¢ + 1¢ + 1¢ = 3 coins
+    - Optimal: 3¢ + 3¢ = 2 coins ✗
+
+The critical question: **How do we know when a greedy approach will work?**
+
+### The Greedy Paradigm
+
+Greedy algorithms build solutions piece by piece, always choosing the piece that offers the most immediate benefit. They:
+
+1. **Never reconsider** past choices (no backtracking)
+2. **Make locally optimal** choices at each step
+3. **Hope** these choices lead to a global optimum
+
+**When it works**, greedy algorithms are:
+
+- **Fast**: Usually O(n log n) or better
+- **Simple**: Easy to implement and understand
+- **Memory efficient**: O(1) extra space often suffices
+
+**The challenge** is proving correctness—showing that local optimality leads to global optimality.
+
+### Real-World Impact
+
+Greedy algorithms power critical systems worldwide:
+
+**Networking:**
+
+- **Dijkstra's Algorithm**: Internet routing protocols (OSPF, IS-IS)
+- **Kruskal's/Prim's**: Network design, circuit layout
+- **TCP Congestion Control**: Additive increase, multiplicative decrease
+
+**Data Compression:**
+
+- **Huffman Coding**: ZIP files, JPEG, MP3
+- **LZ77/LZ78**: GZIP, PNG compression
+- **Arithmetic Coding**: Modern video codecs
+
+**Scheduling:**
+
+- **CPU Scheduling**: Shortest job first, earliest deadline first
+- **Task Scheduling**: Cloud computing resource allocation
+- **Calendar Scheduling**: Meeting room optimization
+
+**Finance:**
+
+- **Portfolio Optimization**: Asset allocation strategies
+- **Trading Algorithms**: Market making, arbitrage
+- **Risk Management**: Margin calculations
+
+### Chapter Roadmap
+
+We'll master the art and science of greedy algorithms:
+
+- **Section 4.1**: Core principles and the greedy choice property
+- **Section 4.2**: Classic scheduling problems and interval selection
+- **Section 4.3**: Huffman coding and data compression
+- **Section 4.4**: Minimum spanning trees (Kruskal's and Prim's)
+- **Section 4.5**: Shortest paths and Dijkstra's algorithm
+- **Section 4.6**: When greed fails and how to prove correctness
+
+---
+
+## Section 4.1: The Greedy Choice Property
+
+### Understanding Greedy Algorithms
+
+A greedy algorithm makes a series of choices. At each decision point:
+
+1. **Evaluate** all currently available options
+2. **Select** the option that looks best right now
+3. **Commit** to this choice (never undo it)
+4. **Reduce** the problem to a smaller subproblem
+
+### The Key Properties for Greedy Success
+
+For a greedy algorithm to produce an optimal solution, the problem must have:
+
+#### 1. **Greedy Choice Property**
+
+We can assemble a globally optimal solution by making locally optimal choices.
+
+#### 2. **Optimal Substructure**
+
+An optimal solution contains optimal solutions to subproblems.
+
+### Proving Correctness: The Exchange Argument
+
+One powerful technique for proving greedy algorithms correct is the **exchange argument**:
+
+1. Consider any optimal solution O
+2. Show that you can transform O into the greedy solution G
+3. Each transformation doesn't increase cost
+4. Therefore, G is also optimal
+
+Let's see this in action!
+
+---
+
+## Section 4.2: Interval Scheduling - The Classic Greedy Problem
+
+### The Activity Selection Problem
+
+**Problem:** Given n activities with start and finish times, select the maximum number of non-overlapping activities.
+
+**Applications:**
+
+- Scheduling meeting rooms
+- CPU task scheduling
+- Bandwidth allocation
+- Course scheduling
+
+### Greedy Strategies - Which Works?
+
+Let's consider different greedy strategies:
+
+1. **Earliest start time first** - Pick activity that starts earliest
+2. **Shortest duration first** - Pick shortest activity
+3. **Earliest finish time first** - Pick activity that ends earliest
+4. **Fewest conflicts first** - Pick activity with fewest overlaps
+
+Which one guarantees an optimal solution?
+
+### Implementation and Proof
+
+```python
+def activity_selection(activities):
+    """
+    Select maximum number of non-overlapping activities.
+    
+    Strategy: Choose activity that finishes earliest.
+    This greedy choice is OPTIMAL!
+    
+    Time Complexity: O(n log n) for sorting
+    Space Complexity: O(1) extra space
+    
+    Args:
+        activities: List of (start, finish, name) tuples
+        
+    Returns:
+        List of selected activities
+    
+    Example:
+        >>> activities = [(1,4,"A"), (3,5,"B"), (0,6,"C"), 
+        ...              (5,7,"D"), (3,9,"E"), (5,9,"F"),
+        ...              (6,10,"G"), (8,11,"H"), (8,12,"I")]
+        >>> result = activity_selection(activities)
+        >>> result
+        ["A", "D", "H"]  # or similar optimal selection
+    """
+    if not activities:
+        return []
+    
+    # Sort by finish time (greedy choice!)
+    activities.sort(key=lambda x: x[1])
+    
+    selected = []
+    last_finish = float('-inf')
+    
+    for start, finish, name in activities:
+        if start >= last_finish:
+            # Activity doesn't overlap with previously selected
+            selected.append(name)
+            last_finish = finish
+    
+    return selected
+
+
+def activity_selection_with_proof():
+    """
+    Proof of correctness using exchange argument.
+    """
+    proof = """
+    Theorem: Earliest-finish-time-first gives optimal solution.
+    
+    Proof by Exchange Argument:
+    
+    1. Let G be our greedy solution: [g₁, g₂, ..., gₖ]
+       (sorted by finish time)
+    
+    2. Let O be any optimal solution: [o₁, o₂, ..., oₘ]
+       (sorted by finish time)
+    
+    3. We'll show k = m (same number of activities)
+    
+    4. If g₁ ≠ o₁:
+       - g₁ finishes before o₁ (greedy choice)
+       - We can replace o₁ with g₁ in O
+       - Still feasible (g₁ finishes earlier)
+       - Still optimal (same number of activities)
+    
+    5. Repeat for g₂, g₃, ... until O = G
+    
+    6. Therefore, greedy solution is optimal! ∎
+    """
+    return proof
+```
+
+### Weighted Activity Selection
+
+What if activities have different values?
+
+```python
+def weighted_activity_selection(activities):
+    """
+    Select activities to maximize total value (not count).
+    
+    Note: Greedy DOESN'T work here! Need Dynamic Programming.
+    This shows the limits of greedy approaches.
+    
+    Args:
+        activities: List of (start, finish, value) tuples
+    """
+    # Sort by finish time
+    activities.sort(key=lambda x: x[1])
+    n = len(activities)
+    
+    # dp[i] = maximum value using activities 0..i-1
+    dp = [0] * (n + 1)
+    
+    for i in range(1, n + 1):
+        start_i, finish_i, value_i = activities[i-1]
+        
+        # Find latest activity that doesn't conflict
+        latest_compatible = 0
+        for j in range(i-1, 0, -1):
+            if activities[j-1][1] <= start_i:
+                latest_compatible = j
+                break
+        
+        # Max of: skip activity i, or take it
+        dp[i] = max(dp[i-1], dp[latest_compatible] + value_i)
+    
+    return dp[n]
+```
+
+### Interval Partitioning
+
+**Problem:** Assign all activities to minimum number of resources (rooms).
+
+```python
+def interval_partitioning(activities):
+    """
+    Partition activities into minimum number of resources.
+    
+    Greedy: When activity starts, use any free resource,
+    or allocate new one if none free.
+    
+    Time Complexity: O(n log n)
+    
+    Returns:
+        Number of resources needed
+    """
+    import heapq
+    
+    if not activities:
+        return 0
+    
+    # Create events: (time, type, activity_id)
+    # type: 1 for start, -1 for end
+    events = []
+    for i, (start, finish) in enumerate(activities):
+        events.append((start, 1, i))
+        events.append((finish, -1, i))
+    
+    events.sort()
+    
+    max_resources = 0
+    current_resources = 0
+    
+    for time, event_type, _ in events:
+        if event_type == 1:  # Activity starts
+            current_resources += 1
+            max_resources = max(max_resources, current_resources)
+        else:  # Activity ends
+            current_resources -= 1
+    
+    return max_resources
+
+
+def interval_partitioning_with_assignment(activities):
+    """
+    Actually assign activities to specific resources.
+    
+    Returns:
+        Dictionary mapping activity to resource number
+    """
+    import heapq
+    
+    if not activities:
+        return {}
+    
+    # Sort by start time
+    indexed_activities = [(s, f, i) for i, (s, f) in enumerate(activities)]
+    indexed_activities.sort()
+    
+    # Min heap of (finish_time, resource_number)
+    resources = []
+    assignments = {}
+    next_resource = 0
+    
+    for start, finish, activity_id in indexed_activities:
+        if resources and resources[0][0] <= start:
+            # Reuse earliest finishing resource
+            _, resource_num = heapq.heappop(resources)
+        else:
+            # Need new resource
+            resource_num = next_resource
+            next_resource += 1
+        
+        assignments[activity_id] = resource_num
+        heapq.heappush(resources, (finish, resource_num))
+    
+    return assignments
+```
+
+---
+
+## Section 4.3: Huffman Coding - Optimal Data Compression
+
+### The Compression Problem
+
+**Goal:** Encode text using fewer bits than standard fixed-length encoding.
+
+**Key Insight:** Use shorter codes for frequent characters, longer codes for rare ones.
+
+### Building the Huffman Tree
+
+```python
+import heapq
+from collections import defaultdict, Counter
+import math
+
+
+class HuffmanNode:
+    """Node in Huffman tree."""
+    
+    def __init__(self, char=None, freq=0, left=None, right=None):
+        self.char = char
+        self.freq = freq
+        self.left = left
+        self.right = right
+    
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+
+class HuffmanCoding:
+    """
+    Huffman coding for optimal compression.
+    
+    Greedy choice: Always merge two least frequent nodes.
+    This produces optimal prefix-free code!
+    """
+    
+    def __init__(self):
+        self.codes = {}
+        self.reverse_codes = {}
+        self.root = None
+    
+    def build_frequency_table(self, text):
+        """Count character frequencies."""
+        return Counter(text)
+    
+    def build_huffman_tree(self, freq_table):
+        """
+        Build Huffman tree using greedy algorithm.
+        
+        Time Complexity: O(n log n) where n = unique characters
+        """
+        if len(freq_table) <= 1:
+            # Handle edge case
+            char = list(freq_table.keys())[0] if freq_table else ''
+            return HuffmanNode(char, freq_table.get(char, 0))
+        
+        # Create min heap of nodes
+        heap = []
+        for char, freq in freq_table.items():
+            heapq.heappush(heap, HuffmanNode(char, freq))
+        
+        # Greedily merge least frequent nodes
+        while len(heap) > 1:
+            # Take two minimum frequency nodes
+            left = heapq.heappop(heap)
+            right = heapq.heappop(heap)
+            
+            # Create parent node
+            parent = HuffmanNode(
+                freq=left.freq + right.freq,
+                left=left,
+                right=right
+            )
+            
+            heapq.heappush(heap, parent)
+        
+        return heap[0]
+    
+    def generate_codes(self, root, code=""):
+        """Generate binary codes for each character."""
+        if not root:
+            return
+        
+        # Leaf node - store code
+        if root.char is not None:
+            self.codes[root.char] = code if code else "0"
+            self.reverse_codes[code if code else "0"] = root.char
+            return
+        
+        # Recursive traversal
+        self.generate_codes(root.left, code + "0")
+        self.generate_codes(root.right, code + "1")
+    
+    def encode(self, text):
+        """
+        Encode text using Huffman codes.
+        
+        Returns:
+            Encoded binary string
+        """
+        if not text:
+            return ""
+        
+        # Build frequency table
+        freq_table = self.build_frequency_table(text)
+        
+        # Build Huffman tree
+        self.root = self.build_huffman_tree(freq_table)
+        
+        # Generate codes
+        self.codes = {}
+        self.reverse_codes = {}
+        self.generate_codes(self.root)
+        
+        # Encode text
+        encoded = []
+        for char in text:
+            encoded.append(self.codes[char])
+        
+        return ''.join(encoded)
+    
+    def decode(self, encoded_text):
+        """
+        Decode binary string back to text.
+        
+        Time Complexity: O(n) where n = length of encoded text
+        """
+        if not encoded_text or not self.root:
+            return ""
+        
+        decoded = []
+        current = self.root
+        
+        for bit in encoded_text:
+            # Traverse tree based on bit
+            if bit == '0':
+                current = current.left
+            else:
+                current = current.right
+            
+            # Reached leaf node
+            if current.char is not None:
+                decoded.append(current.char)
+                current = self.root
+        
+        return ''.join(decoded)
+    
+    def calculate_compression_ratio(self, text):
+        """
+        Calculate compression efficiency.
+        """
+        if not text:
+            return 0.0
+        
+        # Original size (8 bits per character)
+        original_bits = len(text) * 8
+        
+        # Compressed size
+        encoded = self.encode(text)
+        compressed_bits = len(encoded)
+        
+        # Compression ratio
+        ratio = compressed_bits / original_bits
+        
+        return {
+            'original_bits': original_bits,
+            'compressed_bits': compressed_bits,
+            'compression_ratio': ratio,
+            'space_saved': f"{(1 - ratio) * 100:.1f}%"
+        }
+
+
+def huffman_proof_of_optimality():
+    """
+    Proof that Huffman coding is optimal.
+    """
+    proof = """
+    Theorem: Huffman coding produces optimal prefix-free code.
+    
+    Proof Sketch:
+    
+    1. Optimal code must be:
+       - Prefix-free (no code is prefix of another)
+       - Full binary tree (every internal node has 2 children)
+    
+    2. Lemma 1: In optimal tree, deeper nodes have lower frequency
+       (Otherwise, swap them for better code)
+    
+    3. Lemma 2: Two least frequent characters are siblings at max depth
+       (By Lemma 1 and tree structure)
+    
+    4. Induction on number of characters:
+       - Base: 2 characters → trivial (0 and 1)
+       - Step: Merge two least frequent → subproblem with n-1 chars
+       - By IH, greedy gives optimal for subproblem
+       - Combined with Lemma 2, optimal for original
+    
+    5. Therefore, greedy Huffman algorithm is optimal! ∎
+    """
+    return proof
+```
+
+### Example: Compressing Text
+
+```python
+def huffman_example():
+    """
+    Complete example of Huffman coding.
+    """
+    text = "this is an example of a huffman tree"
+    
+    huffman = HuffmanCoding()
+    
+    # Encode
+    encoded = huffman.encode(text)
+    print(f"Original: {text}")
+    print(f"Encoded: {encoded[:50]}...")  # First 50 bits
+    
+    # Show codes
+    print("\nCharacter codes:")
+    for char in sorted(huffman.codes.keys()):
+        if char == ' ':
+            print(f"SPACE: {huffman.codes[char]}")
+        else:
+            print(f"{char}: {huffman.codes[char]}")
+    
+    # Decode
+    decoded = huffman.decode(encoded)
+    print(f"\nDecoded: {decoded}")
+    
+    # Compression stats
+    stats = huffman.calculate_compression_ratio(text)
+    print(f"\nCompression Statistics:")
+    print(f"Original: {stats['original_bits']} bits")
+    print(f"Compressed: {stats['compressed_bits']} bits")
+    print(f"Compression ratio: {stats['compression_ratio']:.2f}")
+    print(f"Space saved: {stats['space_saved']}")
+    
+    return encoded, decoded, stats
+```
+
+---
+
+## Section 4.4: Minimum Spanning Trees
+
+### The MST Problem
+
+**Given:** Connected, weighted, undirected graph **Find:** Subset of edges that connects all vertices with minimum total weight
+
+**Applications:**
+
+- Network design (cable, fiber optic)
+- Circuit design (VLSI)
+- Clustering algorithms
+- Image segmentation
+
+### Kruskal's Algorithm - Edge-Centric Greedy
+
+```python
+class KruskalMST:
+    """
+    Kruskal's algorithm for Minimum Spanning Tree.
+    
+    Greedy choice: Add minimum weight edge that doesn't create cycle.
+    """
+    
+    def __init__(self, vertices):
+        self.vertices = vertices
+        self.edges = []
+    
+    def add_edge(self, u, v, weight):
+        """Add edge to graph."""
+        self.edges.append((weight, u, v))
+    
+    def find_mst(self):
+        """
+        Find MST using Kruskal's algorithm.
+        
+        Time Complexity: O(E log E) for sorting edges
+        Space Complexity: O(V) for Union-Find
+        
+        Returns:
+            (mst_edges, total_weight)
+        """
+        # Sort edges by weight (greedy choice!)
+        self.edges.sort()
+        
+        # Initialize Union-Find
+        parent = {v: v for v in self.vertices}
+        rank = {v: 0 for v in self.vertices}
+        
+        def find(x):
+            """Find with path compression."""
+            if parent[x] != x:
+                parent[x] = find(parent[x])
+            return parent[x]
+        
+        def union(x, y):
+            """Union by rank."""
+            root_x, root_y = find(x), find(y)
+            
+            if root_x == root_y:
+                return False  # Already connected
+            
+            if rank[root_x] < rank[root_y]:
+                parent[root_x] = root_y
+            elif rank[root_x] > rank[root_y]:
+                parent[root_y] = root_x
+            else:
+                parent[root_y] = root_x
+                rank[root_x] += 1
+            
+            return True
+        
+        mst_edges = []
+        total_weight = 0
+        
+        for weight, u, v in self.edges:
+            # Try to add edge (won't create cycle if different components)
+            if union(u, v):
+                mst_edges.append((u, v, weight))
+                total_weight += weight
+                
+                # Early termination
+                if len(mst_edges) == len(self.vertices) - 1:
+                    break
+        
+        return mst_edges, total_weight
+    
+    def verify_mst_properties(self, mst_edges):
+        """
+        Verify MST has correct properties.
+        """
+        # Check if it's a tree (V-1 edges for V vertices)
+        if len(mst_edges) != len(self.vertices) - 1:
+            return False, "Not a tree: wrong number of edges"
+        
+        # Check if it's spanning (all vertices connected)
+        connected = set()
+        for u, v, _ in mst_edges:
+            connected.add(u)
+            connected.add(v)
+        
+        if connected != set(self.vertices):
+            return False, "Not spanning: some vertices disconnected"
+        
+        return True, "Valid MST"
+```
+
+### Prim's Algorithm - Vertex-Centric Greedy
+
+```python
+import heapq
+
+class PrimMST:
+    """
+    Prim's algorithm for Minimum Spanning Tree.
+    
+    Greedy choice: Add minimum weight edge from tree to non-tree vertex.
+    """
+    
+    def __init__(self):
+        self.graph = defaultdict(list)
+        self.vertices = set()
+    
+    def add_edge(self, u, v, weight):
+        """Add undirected edge."""
+        self.graph[u].append((weight, v))
+        self.graph[v].append((weight, u))
+        self.vertices.add(u)
+        self.vertices.add(v)
+    
+    def find_mst(self, start=None):
+        """
+        Find MST using Prim's algorithm.
+        
+        Time Complexity: O(E log V) with binary heap
+        Could be O(E + V log V) with Fibonacci heap
+        
+        Returns:
+            (mst_edges, total_weight)
+        """
+        if not self.vertices:
+            return [], 0
+        
+        if start is None:
+            start = next(iter(self.vertices))
+        
+        mst_edges = []
+        total_weight = 0
+        visited = {start}
+        
+        # Min heap of (weight, from_vertex, to_vertex)
+        edges = []
+        for weight, neighbor in self.graph[start]:
+            heapq.heappush(edges, (weight, start, neighbor))
+        
+        while edges and len(visited) < len(self.vertices):
+            weight, u, v = heapq.heappop(edges)
+            
+            if v in visited:
+                continue
+            
+            # Add edge to MST
+            mst_edges.append((u, v, weight))
+            total_weight += weight
+            visited.add(v)
+            
+            # Add new edges from v
+            for next_weight, neighbor in self.graph[v]:
+                if neighbor not in visited:
+                    heapq.heappush(edges, (next_weight, v, neighbor))
+        
+        return mst_edges, total_weight
+    
+    def find_mst_with_path(self, start=None):
+        """
+        Prim's algorithm tracking the growing tree.
+        Useful for visualization.
+        """
+        if not self.vertices:
+            return [], 0, []
+        
+        if start is None:
+            start = next(iter(self.vertices))
+        
+        mst_edges = []
+        total_weight = 0
+        visited = {start}
+        tree_growth = [start]  # Order vertices were added
+        
+        # Track cheapest edge to each vertex
+        min_edge = {}
+        for weight, neighbor in self.graph[start]:
+            min_edge[neighbor] = (weight, start)
+        
+        while len(visited) < len(self.vertices):
+            # Find minimum edge from tree to non-tree
+            min_weight = float('inf')
+            min_vertex = None
+            min_from = None
+            
+            for vertex, (weight, from_vertex) in min_edge.items():
+                if vertex not in visited and weight < min_weight:
+                    min_weight = weight
+                    min_vertex = vertex
+                    min_from = from_vertex
+            
+            if min_vertex is None:
+                break  # Graph not connected
+            
+            # Add to MST
+            mst_edges.append((min_from, min_vertex, min_weight))
+            total_weight += min_weight
+            visited.add(min_vertex)
+            tree_growth.append(min_vertex)
+            
+            # Update minimum edges
+            del min_edge[min_vertex]
+            for weight, neighbor in self.graph[min_vertex]:
+                if neighbor not in visited:
+                    if neighbor not in min_edge or weight < min_edge[neighbor][0]:
+                        min_edge[neighbor] = (weight, min_vertex)
+        
+        return mst_edges, total_weight, tree_growth
+```
+
+### MST Properties and Proofs
+
+```python
+def mst_cut_property():
+    """
+    The fundamental property that makes greedy MST algorithms work.
+    """
+    explanation = """
+    Cut Property:
+    For any cut (S, V-S) of the graph, the minimum weight edge
+    crossing the cut belongs to some MST.
+    
+    Proof:
+    1. Suppose e = (u,v) is min-weight edge crossing cut
+    2. Suppose MST T doesn't contain e
+    3. Add e to T → creates cycle C
+    4. C must cross the cut at some other edge e'
+    5. Since weight(e) ≤ weight(e'), we can:
+       - Remove e' from T ∪ {e}
+       - Get tree T' with weight ≤ weight(T)
+    6. So T' is also an MST containing e ∎
+    
+    This proves both Kruskal's and Prim's are correct!
+    - Kruskal: Cut between components
+    - Prim: Cut between tree and non-tree vertices
+    """
+    return explanation
+
+
+def mst_uniqueness():
+    """
+    When is the MST unique?
+    """
+    explanation = """
+    MST Uniqueness:
+    
+    The MST is unique if all edge weights are distinct.
+    
+    If weights are not distinct:
+    - May have multiple MSTs
+    - All have same total weight
+    - Kruskal/Prim may give different MSTs
+    
+    Example where MST not unique:
+    
+        1
+    A -------- B
+    |          |
+    2|          |2
+    |          |
+    C -------- D
+        1
+    
+    Two possible MSTs, both with weight 4:
+    1. Edges: AB, AC, CD
+    2. Edges: AB, BD, CD
+    """
+    return explanation
+```
+
+---
+
+## Section 4.5: Dijkstra's Algorithm - Shortest Paths
+
+### Single-Source Shortest Paths
+
+```python
+import heapq
+
+class Dijkstra:
+    """
+    Dijkstra's algorithm for shortest paths.
+    
+    Greedy choice: Extend shortest known path.
+    Works for non-negative edge weights only!
+    """
+    
+    def __init__(self):
+        self.graph = defaultdict(list)
+    
+    def add_edge(self, u, v, weight):
+        """Add directed edge."""
+        if weight < 0:
+            raise ValueError("Dijkstra requires non-negative weights")
+        self.graph[u].append((v, weight))
+    
+    def shortest_paths(self, source):
+        """
+        Find shortest paths from source to all vertices.
+        
+        Time Complexity: 
+        - O(E log V) with binary heap
+        - O(E + V log V) with Fibonacci heap
+        
+        Returns:
+            (distances, predecessors)
+        """
+        # Initialize distances
+        distances = {source: 0}
+        predecessors = {source: None}
+        
+        # Min heap of (distance, vertex)
+        pq = [(0, source)]
+        visited = set()
+        
+        while pq:
+            current_dist, u = heapq.heappop(pq)
+            
+            if u in visited:
+                continue
+            
+            visited.add(u)
+            
+            # Relax edges
+            for v, weight in self.graph[u]:
+                if v in visited:
+                    continue
+                
+                # Greedy choice: extend shortest known path
+                new_dist = current_dist + weight
+                
+                if v not in distances or new_dist < distances[v]:
+                    distances[v] = new_dist
+                    predecessors[v] = u
+                    heapq.heappush(pq, (new_dist, v))
+        
+        return distances, predecessors
+    
+    def shortest_path(self, source, target):
+        """
+        Find shortest path from source to target.
+        
+        Returns:
+            (path, distance)
+        """
+        distances, predecessors = self.shortest_paths(source)
+        
+        if target not in distances:
+            return None, float('inf')
+        
+        # Reconstruct path
+        path = []
+        current = target
+        
+        while current is not None:
+            path.append(current)
+            current = predecessors[current]
+        
+        path.reverse()
+        return path, distances[target]
+    
+    def dijkstra_with_proof():
+        """
+        Proof of correctness for Dijkstra's algorithm.
+        """
+        proof = """
+        Theorem: Dijkstra correctly finds shortest paths (non-negative weights).
+        
+        Proof by Induction:
+        
+        Invariant: When vertex u is visited, distance[u] is shortest path from source.
+        
+        Base: distance[source] = 0 is correct.
+        
+        Inductive Step:
+        1. Assume all previously visited vertices have correct distances
+        2. Let u be next vertex visited with distance d
+        3. Suppose there's shorter path P to u with length < d
+        4. P must leave the visited set at some vertex v
+        5. When we visited v, we relaxed edge to next vertex on P
+        6. So we considered path through v (contradiction!)
+        7. Therefore distance[u] = d is shortest path
+        
+        Note: Proof fails with negative weights!
+        Negative edge could make path through later vertex shorter.
+        """
+        return proof
+
+
+class BidirectionalDijkstra:
+    """
+    Bidirectional search optimization for point-to-point shortest path.
+    Often 2x faster than standard Dijkstra.
+    """
+    
+    def __init__(self, graph):
+        self.graph = graph
+        self.reverse_graph = defaultdict(list)
+        
+        # Build reverse graph
+        for u in graph:
+            for v, weight in graph[u]:
+                self.reverse_graph[v].append((u, weight))
+    
+    def shortest_path(self, source, target):
+        """
+        Find shortest path using bidirectional search.
+        """
+        # Forward search from source
+        forward_dist = {source: 0}
+        forward_pq = [(0, source)]
+        forward_visited = set()
+        
+        # Backward search from target  
+        backward_dist = {target: 0}
+        backward_pq = [(0, target)]
+        backward_visited = set()
+        
+        best_distance = float('inf')
+        meeting_point = None
+        
+        while forward_pq and backward_pq:
+            # Alternate between forward and backward
+            if len(forward_pq) <= len(backward_pq):
+                # Forward step
+                dist, u = heapq.heappop(forward_pq)
+                
+                if u in forward_visited:
+                    continue
+                
+                forward_visited.add(u)
+                
+                # Check if we've met the backward search
+                if u in backward_dist:
+                    total = forward_dist[u] + backward_dist[u]
+                    if total < best_distance:
+                        best_distance = total
+                        meeting_point = u
+                
+                # Relax edges
+                for v, weight in self.graph[u]:
+                    if v not in forward_visited:
+                        new_dist = dist + weight
+                        if v not in forward_dist or new_dist < forward_dist[v]:
+                            forward_dist[v] = new_dist
+                            heapq.heappush(forward_pq, (new_dist, v))
+            
+            else:
+                # Backward step (similar logic with reverse graph)
+                dist, u = heapq.heappop(backward_pq)
+                
+                if u in backward_visited:
+                    continue
+                
+                backward_visited.add(u)
+                
+                if u in forward_dist:
+                    total = forward_dist[u] + backward_dist[u]
+                    if total < best_distance:
+                        best_distance = total
+                        meeting_point = u
+                
+                for v, weight in self.reverse_graph[u]:
+                    if v not in backward_visited:
+                        new_dist = dist + weight
+                        if v not in backward_dist or new_dist < backward_dist[v]:
+                            backward_dist[v] = new_dist
+                            heapq.heappush(backward_pq, (new_dist, v))
+            
+            # Early termination
+            if forward_pq and backward_pq:
+                if forward_pq[0][0] + backward_pq[0][0] >= best_distance:
+                    break
+        
+        return meeting_point, best_distance
+```
+
+---
+
+## Section 4.6: When Greedy Fails - Correctness and Limitations
+
+### Common Pitfalls
+
+```python
+class GreedyFailures:
+    """
+    Examples where greedy algorithms fail.
+    Understanding these helps recognize when NOT to use greedy.
+    """
+    
+    @staticmethod
+    def knapsack_counterexample():
+        """
+        0/1 Knapsack: Greedy by value/weight ratio fails.
+        """
+        items = [
+            (10, 20, "A"),  # weight=10, value=20, ratio=2.0
+            (20, 30, "B"),  # weight=20, value=30, ratio=1.5
+            (15, 25, "C"),  # weight=15, value=25, ratio=1.67
+        ]
+        capacity = 30
+        
+        # Greedy by ratio: Take A and B (can't fit C)
+        greedy_items = ["A", "B"]
+        greedy_value = 50
+        
+        # Optimal: Take B and C
+        optimal_items = ["B", "C"]
+        optimal_value = 55
+        
+        return {
+            'greedy': (greedy_items, greedy_value),
+            'optimal': (optimal_items, optimal_value),
+            'greedy_is_optimal': False
+        }
+    
+    @staticmethod
+    def shortest_path_negative_weights():
+        """
+        Dijkstra fails with negative edge weights.
+        """
+        # Graph with negative edge
+        edges = [
+            ("A", "B", 1),
+            ("A", "C", 4),
+            ("B", "C", -5),  # Negative edge!
+        ]
+        
+        # Dijkstra might find: A → C (cost 4)
+        # Actual shortest: A → B → C (cost 1 + (-5) = -4)
+        
+        dijkstra_result = ("A", "C", 4)
+        actual_shortest = ("A", "B", "C", -4)
+        
+        return {
+            'dijkstra_wrong': dijkstra_result,
+            'correct_path': actual_shortest,
+            'issue': "Negative weights violate Dijkstra's assumptions"
+        }
+    
+    @staticmethod
+    def traveling_salesman_nearest_neighbor():
+        """
+        TSP: Nearest neighbor greedy heuristic can be arbitrarily bad.
+        """
+        # Example where greedy is far from optimal
+        cities = {
+            "A": (0, 0),
+            "B": (1, 0),
+            "C": (2, 0),
+            "D": (1, 10),
+        }
+        
+        def distance(c1, c2):
+            x1, y1 = cities[c1]
+            x2, y2 = cities[c2]
+            return ((x2-x1)**2 + (y2-y1)**2) ** 0.5
+        
+        # Greedy nearest neighbor from A
+        greedy_path = ["A", "B", "C", "D", "A"]
+        greedy_cost = (distance("A", "B") + distance("B", "C") + 
+                      distance("C", "D") + distance("D", "A"))
+        
+        # Optimal path
+        optimal_path = ["A", "B", "D", "C", "A"]
+        optimal_cost = (distance("A", "B") + distance("B", "D") + 
+                       distance("D", "C") + distance("C", "A"))
+        
+        return {
+            'greedy_path': greedy_path,
+            'greedy_cost': greedy_cost,
+            'optimal_path': optimal_path,
+            'optimal_cost': optimal_cost,
+            'ratio': greedy_cost / optimal_cost
+        }
+```
+
+### Proving Greedy Correctness
+
+```python
+class GreedyProofTechniques:
+    """
+    Common techniques for proving greedy algorithms correct.
+    """
+    
+    @staticmethod
+    def exchange_argument_template():
+        """
+        Template for exchange argument proofs.
+        """
+        template = """
+        Exchange Argument Template:
+        
+        1. Define greedy solution G = [g₁, g₂, ..., gₖ]
+        2. Consider arbitrary optimal solution O = [o₁, o₂, ..., oₘ]
+        3. Transform O → G step by step:
+           
+           For each position i where gᵢ ≠ oᵢ:
+           a) Show we can replace oᵢ with gᵢ
+           b) Prove replacement doesn't increase cost
+           c) Prove replacement maintains feasibility
+        
+        4. Conclude: G is also optimal
+        
+        Example Application: Activity Selection
+        - If first activity in O finishes after first in G
+        - Can replace it with G's first (finishes earlier)
+        - Still feasible (no new conflicts)
+        - Same number of activities (still optimal)
+        """
+        return template
+    
+    @staticmethod
+    def greedy_stays_ahead():
+        """
+        Template for "greedy stays ahead" proofs.
+        """
+        template = """
+        Greedy Stays Ahead Template:
+        
+        1. Define measure of "progress" at each step
+        2. Show greedy is ahead initially
+        3. Prove inductively: if greedy ahead at step i,
+           then greedy ahead at step i+1
+        4. Conclude: greedy ahead at end → optimal
+        
+        Example Application: Interval Scheduling
+        - Measure: number of activities scheduled by time t
+        - Greedy schedules activity ending earliest
+        - Always has ≥ activities than any other algorithm
+        - At end, has maximum activities
+        """
+        return template
+    
+    @staticmethod
+    def matroid_theory():
+        """
+        When greedy works: Matroid structure.
+        """
+        explanation = """
+        Matroid Theory:
+        
+        A problem has matroid structure if:
+        1. Hereditary property: Subsets of feasible sets are feasible
+        2. Exchange property: If |A| < |B| are feasible,
+           ∃ x ∈ B-A such that A ∪ {x} is feasible
+        
+        Theorem: Greedy gives optimal solution for matroids
+        
+        Examples of Matroids:
+        - MST: Forests in a graph
+        - Maximum weight independent set in matroid
+        - Finding basis in linear algebra
+        
+        NOT Matroids:
+        - Knapsack (no exchange property)
+        - Shortest path (not hereditary)
+        - Vertex cover (not hereditary)
+        """
+        return explanation
+```
+
+---
+
+## Section 4.7: Project - Greedy Algorithm Toolkit
+
+### Comprehensive Implementation
+
+```python
+# src/greedy_algorithms/scheduler.py
+from typing import List, Tuple, Dict
+import heapq
+
+
+class TaskScheduler:
+    """
+    Multiple greedy scheduling algorithms with comparison.
+    """
+    
+    def __init__(self, tasks: List[Dict]):
+        """
+        Initialize with list of tasks.
+        Each task: {'id': str, 'duration': int, 'deadline': int, 
+                   'weight': float, 'arrival': int}
+        """
+        self.tasks = tasks
+    
+    def shortest_job_first(self) -> List[str]:
+        """
+        SJF minimizes average completion time.
+        Optimal for this objective!
+        """
+        sorted_tasks = sorted(self.tasks, key=lambda x: x['duration'])
+        return [task['id'] for task in sorted_tasks]
+    
+    def earliest_deadline_first(self) -> List[str]:
+        """
+        EDF minimizes maximum lateness.
+        Optimal for this objective!
+        """
+        sorted_tasks = sorted(self.tasks, key=lambda x: x['deadline'])
+        return [task['id'] for task in sorted_tasks]
+    
+    def weighted_shortest_job_first(self) -> List[str]:
+        """
+        WSJF maximizes weighted completion time.
+        Sort by weight/duration ratio.
+        """
+        sorted_tasks = sorted(
+            self.tasks, 
+            key=lambda x: x['weight'] / x['duration'],
+            reverse=True
+        )
+        return [task['id'] for task in sorted_tasks]
+    
+    def minimum_lateness_schedule(self) -> Tuple[List[str], int]:
+        """
+        Schedule to minimize maximum lateness.
+        Returns schedule and max lateness.
+        """
+        # Sort by deadline (EDF)
+        sorted_tasks = sorted(self.tasks, key=lambda x: x['deadline'])
+        
+        schedule = []
+        current_time = 0
+        max_lateness = 0
+        
+        for task in sorted_tasks:
+            start_time = max(current_time, task.get('arrival', 0))
+            completion_time = start_time + task['duration']
+            lateness = max(0, completion_time - task['deadline'])
+            max_lateness = max(max_lateness, lateness)
+            
+            schedule.append({
+                'task_id': task['id'],
+                'start': start_time,
+                'end': completion_time,
+                'lateness': lateness
+            })
+            
+            current_time = completion_time
+        
+        return schedule, max_lateness
+    
+    def interval_partitioning_schedule(self) -> Dict[str, int]:
+        """
+        Assign tasks to minimum number of machines.
+        Tasks have start/end times instead of duration.
+        """
+        # Convert to interval format if needed
+        intervals = []
+        for task in self.tasks:
+            if 'start' in task and 'end' in task:
+                intervals.append((task['start'], task['end'], task['id']))
+            else:
+                # Assume tasks must be scheduled immediately
+                start = task.get('arrival', 0)
+                end = start + task['duration']
+                intervals.append((start, end, task['id']))
+        
+        # Sort by start time
+        intervals.sort()
+        
+        # Assign to machines
+        machines = []  # List of end times for each machine
+        assignment = {}
+        
+        for start, end, task_id in intervals:
+            # Find available machine
+            assigned = False
+            for i, machine_end in enumerate(machines):
+                if machine_end <= start:
+                    machines[i] = end
+                    assignment[task_id] = i
+                    assigned = True
+                    break
+            
+            if not assigned:
+                # Need new machine
+                machines.append(end)
+                assignment[task_id] = len(machines) - 1
+        
+        return assignment
+    
+    def compare_algorithms(self) -> Dict:
+        """
+        Compare different scheduling algorithms.
+        """
+        results = {}
+        
+        # SJF - minimizes average completion time
+        sjf_order = self.shortest_job_first()
+        sjf_metrics = self._calculate_metrics(sjf_order)
+        results['SJF'] = sjf_metrics
+        
+        # EDF - minimizes maximum lateness  
+        edf_order = self.earliest_deadline_first()
+        edf_metrics = self._calculate_metrics(edf_order)
+        results['EDF'] = edf_metrics
+        
+        # WSJF - maximizes weighted completion
+        wsjf_order = self.weighted_shortest_job_first()
+        wsjf_metrics = self._calculate_metrics(wsjf_order)
+        results['WSJF'] = wsjf_metrics
+        
+        return results
+    
+    def _calculate_metrics(self, order: List[str]) -> Dict:
+        """Calculate performance metrics for a schedule."""
+        task_map = {task['id']: task for task in self.tasks}
+        
+        current_time = 0
+        total_completion = 0
+        weighted_completion = 0
+        max_lateness = 0
+        
+        for task_id in order:
+            task = task_map[task_id]
+            current_time += task['duration']
+            total_completion += current_time
+            weighted_completion += current_time * task.get('weight', 1)
+            lateness = max(0, current_time - task.get('deadline', float('inf')))
+            max_lateness = max(max_lateness, lateness)
+        
+        n = len(order)
+        return {
+            'average_completion': total_completion / n if n > 0 else 0,
+            'weighted_completion': weighted_completion,
+            'max_lateness': max_lateness
+        }
+```
+
+### Testing and Benchmarking
+
+```python
+# tests/test_greedy.py
+import unittest
+from src.greedy_algorithms import *
+
+
+class TestGreedyAlgorithms(unittest.TestCase):
+    """
+    Comprehensive tests for greedy algorithms.
+    """
+    
+    def test_activity_selection(self):
+        """Test activity selection gives optimal count."""
+        activities = [
+            (1, 4, "A"), (3, 5, "B"), (0, 6, "C"),
+            (5, 7, "D"), (3, 9, "E"), (5, 9, "F"),
+            (6, 10, "G"), (8, 11, "H"), (8, 12, "I"),
+            (2, 14, "J"), (12, 16, "K")
+        ]
+        
+        selected = activity_selection(activities)
+        
+        # Should select 4 non-overlapping activities
+        self.assertEqual(len(selected), 4)
+        
+        # Verify no overlaps
+        activities_dict = {name: (start, end) 
+                          for start, end, name in activities}
+        for i in range(len(selected) - 1):
+            end_i = activities_dict[selected[i]][1]
+            start_next = activities_dict[selected[i+1]][0]
+            self.assertLessEqual(end_i, start_next)
+    
+    def test_huffman_coding(self):
+        """Test Huffman coding produces valid encoding."""
+        text = "this is an example of a huffman tree"
+        
+        huffman = HuffmanCoding()
+        encoded = huffman.encode(text)
+        decoded = huffman.decode(encoded)
+        
+        # Verify correctness
+        self.assertEqual(decoded, text)
+        
+        # Verify compression
+        original_bits = len(text) * 8
+        compressed_bits = len(encoded)
+        self.assertLess(compressed_bits, original_bits)
+        
+        # Verify prefix-free property
+        codes = list(huffman.codes.values())
+        for i, code1 in enumerate(codes):
+            for j, code2 in enumerate(codes):
+                if i != j:
+                    self.assertFalse(code1.startswith(code2))
+    
+    def test_mst_algorithms(self):
+        """Test Kruskal and Prim give same MST weight."""
+        edges = [
+            ("A", "B", 4), ("A", "C", 2), ("B", "C", 1),
+            ("B", "D", 5), ("C", "D", 8), ("C", "E", 10),
+            ("D", "E", 2), ("D", "F", 6), ("E", "F", 3)
+        ]
+        
+        # Kruskal's algorithm
+        kruskal = KruskalMST(["A", "B", "C", "D", "E", "F"])
+        for u, v, w in edges:
+            kruskal.add_edge(u, v, w)
+        kruskal_edges, kruskal_weight = kruskal.find_mst()
+        
+        # Prim's algorithm  
+        prim = PrimMST()
+        for u, v, w in edges:
+            prim.add_edge(u, v, w)
+        prim_edges, prim_weight = prim.find_mst()
+        
+        # Should have same weight (may have different edges if ties)
+        self.assertEqual(kruskal_weight, prim_weight)
+        self.assertEqual(len(kruskal_edges), 5)  # n-1 edges
+        self.assertEqual(len(prim_edges), 5)
+    
+    def test_dijkstra_shortest_path(self):
+        """Test Dijkstra finds correct shortest paths."""
+        dijkstra = Dijkstra()
+        
+        # Build graph
+        edges = [
+            ("A", "B", 4), ("A", "C", 2),
+            ("B", "C", 1), ("B", "D", 5),
+            ("C", "D", 8), ("C", "E", 10),
+            ("D", "E", 2), ("D", "F", 6),
+            ("E", "F", 3)
+        ]
+        
+        for u, v, w in edges:
+            dijkstra.add_edge(u, v, w)
+            dijkstra.add_edge(v, u, w)  # Undirected
+        
+        # Find shortest paths from A
+        distances, _ = dijkstra.shortest_paths("A")
+        
+        # Verify known shortest paths
+        self.assertEqual(distances["A"], 0)
+        self.assertEqual(distances["B"], 3)  # A→C→B
+        self.assertEqual(distances["C"], 2)  # A→C
+        self.assertEqual(distances["D"], 8)  # A→C→B→D
+        self.assertEqual(distances["E"], 10) # A→C→B→D→E
+        self.assertEqual(distances["F"], 13) # A→C→B→D→E→F
+        
+        # Verify specific path
+        path, dist = dijkstra.shortest_path("A", "F")
+        self.assertEqual(dist, 13)
+        self.assertEqual(len(path), 6)  # A→C→B→D→E→F
+
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+---
+
+## Chapter 4 Exercises
+
+### Theoretical Problems
+
+**4.1 Prove or Disprove** For each claim, prove it's true or give a counterexample: a) If all edge weights are distinct, Kruskal and Prim give the same MST b) Greedy algorithm for vertex cover (pick vertex with most edges) gives 2-approximation c) In a DAG, greedy coloring gives optimal solution d) For unit-weight jobs, any greedy scheduling minimizes average completion time
+
+**4.2 Exchange Arguments** Prove these algorithms are optimal using exchange arguments: a) Huffman coding produces optimal prefix-free code b) Kruskal's algorithm produces MST c) Earliest deadline first minimizes maximum lateness d) Cashier's algorithm works for US coins
+
+**4.3 Greedy Failures** For each problem, show why greedy fails: a) Set cover: pick set covering most uncovered elements b) Bin packing: first-fit decreasing c) Graph coloring: color vertices in arbitrary order d) Maximum independent set: pick minimum degree vertex
+
+### Implementation Problems
+
+**4.4 Advanced Scheduling**
+
+```python
+def job_scheduling_with_penalties(jobs):
+    """
+    Schedule jobs to minimize total penalty.
+    Each job has: duration, deadline, penalty function
+    """
+    pass
+
+def parallel_machine_scheduling(jobs, m):
+    """
+    Schedule jobs on m identical machines.
+    Minimize makespan (max completion time).
+    """
+    pass
+```
+
+**4.5 Compression Variants**
+
+```python
+def adaptive_huffman_coding(stream):
+    """
+    Implement adaptive Huffman for streaming data.
+    Update tree as frequencies change.
+    """
+    pass
+
+def lempel_ziv_compression(text):
+    """
+    Implement LZ77 compression algorithm.
+    """
+    pass
+```
+
+**4.6 Graph Algorithms**
+
+```python
+def boruvka_mst(graph):
+    """
+    Third MST algorithm: Boruvka's algorithm.
+    Parallel-friendly approach.
+    """
+    pass
+
+def a_star_search(graph, start, goal, heuristic):
+    """
+    A* algorithm: Dijkstra with heuristic.
+    Greedy best-first search component.
+    """
+    pass
+```
+
+### Application Problems
+
+**4.7 Real-World Scheduling** Design and implement: a) Course scheduling system minimizing conflicts b) Cloud resource allocator with job priorities c) Delivery route optimizer with time windows d) Production line scheduler with dependencies
+
+**4.8 Network Design** Create solutions for: a) Fiber optic cable layout for a campus b) Power grid connections minimizing cost c) Water pipeline network design d) Telecommunication tower placement
+
+**4.9 Performance Analysis** Benchmark and analyze: a) Compare Huffman vs arithmetic coding compression ratios b) Dijkstra vs A* for pathfinding in games c) Different MST algorithms on various graph types d) Scheduling algorithm performance under different loads
+
+---
+
+## Chapter 4 Summary
+
+### Key Takeaways
+
+1. **Greedy Works When:**
+    
+    - Problem has greedy choice property
+    - Problem has optimal substructure
+    - Local optimality leads to global optimality
+2. **Classic Greedy Algorithms:**
+    
+    - **Activity Selection**: Earliest finish time
+    - **Huffman Coding**: Merge least frequent
+    - **MST**: Add minimum weight edge
+    - **Dijkstra**: Extend shortest known path
+3. **Proof Techniques:**
+    
+    - Exchange argument
+    - Greedy stays ahead
+    - Cut property (for MST)
+    - Matroid theory
+4. **When Greedy Fails:**
+    
+    - Knapsack problem
+    - Traveling salesman
+    - Graph coloring
+    - Most NP-hard problems
+5. **Implementation Tips:**
+    
+    - Sort first (often by deadline, weight, or ratio)
+    - Use priority queues for dynamic selection
+    - Union-Find for cycle detection
+    - Careful with edge cases
+
+### Greedy Algorithm Design Process
+
+1. **Identify the choice to make** at each step
+2. **Define the selection criterion** (what makes a choice "best")
+3. **Prove the greedy choice property** holds
+4. **Implement and optimize** the algorithm
+5. **Verify correctness** with test cases
+
+### When to Use Greedy
+
+✅ **Use Greedy When:**
+
+- Making irreversible choices is okay
+- Problem has matroid structure
+- You can prove greedy choice property
+- Simple and fast solution needed
+
+❌ **Avoid Greedy When:**
+
+- Future choices affect current optimality
+- Need to consider combinations
+- Problem is known NP-hard
+- Can't prove correctness
+
+### Next Chapter Preview
+
+Chapter 5 dives deep into **Dynamic Programming**, where we'll handle problems that greedy can't solve. We'll learn to break problems into overlapping subproblems and build optimal solutions from the bottom up.
+
+### Final Thought
+
+"Greed is good... sometimes. The art lies in recognizing when."
+
+Greedy algorithms represent algorithmic elegance—when they work, they provide simple, efficient, and often beautiful solutions. Master the technique of proving their correctness, and you'll have a powerful tool for solving optimization problems.
