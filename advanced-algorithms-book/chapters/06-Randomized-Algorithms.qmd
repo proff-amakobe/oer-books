@@ -1,0 +1,2363 @@
+# Chapter 6: Randomized Algorithms - The Power of Controlled Chaos
+
+## When Dice Make Better Decisions
+*"God does not play dice with the universe." - Einstein*  
+*"But randomized algorithms do, and they win." - Computer Scientists*
+
+---
+
+## Introduction: Embracing Uncertainty for Certainty
+
+Imagine you're at a party with 30 people. What are the odds that two people share the same birthday? 
+
+Your intuition might say it's unlikely—after all, there are 365 days in a year. But mathematics says otherwise: the probability is over 70%! This counterintuitive result, known as the **Birthday Paradox**, illustrates a fundamental principle of randomized algorithms: **probability often defies intuition, and we can exploit this to our advantage**.
+
+### The Paradox of Random Success
+
+Consider this seemingly impossible scenario:
+- You need to check if two files are identical
+- The files are on different continents (network latency is huge)
+- The files are massive (terabytes)
+
+**Deterministic approach**: Send entire file across network—takes hours, costs fortune.
+
+**Randomized approach**: 
+1. Pick 100 random positions
+2. Compare bytes at those positions
+3. If all match, declare "probably identical" with 99.999...% confidence
+4. Takes seconds, costs pennies!
+
+This is the magic of randomized algorithms: **trading absolute certainty for near-certainty with massive efficiency gains**.
+
+### Why Randomness?
+
+Randomized algorithms offer unique advantages:
+
+1. **Simplicity**: Often much simpler than deterministic alternatives
+2. **Speed**: Expected running time frequently beats worst-case deterministic
+3. **Robustness**: No pathological inputs (adversary can't predict random choices)
+4. **Impossibility Breaking**: Solve problems with no deterministic solution
+5. **Load Balancing**: Natural distribution of work
+6. **Symmetry Breaking**: Resolve ties and deadlocks elegantly
+
+### Real-World Impact
+
+Randomized algorithms power critical systems:
+
+**Internet Security**:
+- **RSA Encryption**: Randomized primality testing
+- **TLS/SSL**: Random nonces prevent replay attacks
+- **Password Hashing**: Random salts defeat rainbow tables
+
+**Big Data**:
+- **MinHash**: Find similar documents in billions
+- **HyperLogLog**: Count distinct elements in streams
+- **Bloom Filters**: Space-efficient membership testing
+
+**Machine Learning**:
+- **Stochastic Gradient Descent**: Random sampling speeds training
+- **Random Forests**: Random feature selection improves accuracy
+- **Monte Carlo Tree Search**: Game-playing AI (AlphaGo)
+
+**Distributed Systems**:
+- **Consistent Hashing**: Random node placement
+- **Gossip Protocols**: Random peer selection
+- **Byzantine Consensus**: Random leader election
+
+### Chapter Roadmap
+
+We'll master the art and science of randomized algorithms:
+
+- **Section 6.1**: Fundamentals - Las Vegas vs Monte Carlo algorithms
+- **Section 6.2**: Randomized QuickSort and selection algorithms
+- **Section 6.3**: Probabilistic analysis and concentration inequalities
+- **Section 6.4**: Hash functions and fingerprinting techniques
+- **Section 6.5**: Advanced algorithms - MinCut, primality testing
+- **Section 6.6**: Streaming algorithms and sketching
+- **Section 6.7**: Project - Comprehensive randomized algorithm library
+
+---
+
+## Section 6.1: Fundamentals of Randomized Algorithms
+
+### Types of Randomized Algorithms
+
+#### Las Vegas Algorithms
+**Always correct, running time is random**
+
+- Output is always correct
+- Running time varies (expected time analysis)
+- Can verify correctness of output
+- Example: Randomized QuickSort
+
+```python
+def randomized_quicksort(arr):
+    """
+    Las Vegas algorithm: Always sorts correctly.
+    Expected O(n log n), worst case O(n²) but rare.
+    """
+    if len(arr) <= 1:
+        return arr
+    
+    # Random pivot selection - the key randomization!
+    import random
+    pivot = arr[random.randint(0, len(arr) - 1)]
+    
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    
+    return randomized_quicksort(left) + middle + randomized_quicksort(right)
+```
+
+#### Monte Carlo Algorithms
+**Running time is fixed, may be incorrect with small probability**
+
+- Might give wrong answer (bounded probability)
+- Fixed running time
+- Cannot always verify correctness
+- Example: Primality testing
+
+```python
+def miller_rabin_primality(n, k=10):
+    """
+    Monte Carlo algorithm: Tests if n is prime.
+    Error probability ≤ 1/4^k
+    
+    Args:
+        n: Number to test
+        k: Number of rounds (higher = more accurate)
+    
+    Returns:
+        False if definitely composite, True if probably prime
+    """
+    if n < 2:
+        return False
+    if n == 2 or n == 3:
+        return True
+    if n % 2 == 0:
+        return False
+    
+    # Write n-1 as 2^r * d
+    r, d = 0, n - 1
+    while d % 2 == 0:
+        r += 1
+        d //= 2
+    
+    # Witness loop
+    import random
+    for _ in range(k):
+        a = random.randrange(2, n - 1)
+        x = pow(a, d, n)  # a^d mod n
+        
+        if x == 1 or x == n - 1:
+            continue
+        
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
+            return False  # Definitely composite
+    
+    return True  # Probably prime
+```
+
+### Probability Basics for Algorithm Analysis
+
+```python
+class ProbabilityTools:
+    """
+    Essential probability tools for analyzing randomized algorithms.
+    """
+    
+    @staticmethod
+    def expectation_linearity():
+        """
+        E[X + Y] = E[X] + E[Y] always holds (even if dependent!)
+        This is the workhorse of expected time analysis.
+        """
+        import random
+        
+        # Example: Expected number of comparisons in QuickSort
+        def quicksort_comparisons(n):
+            """
+            For each pair (i,j), probability they're compared = 2/(j-i+1)
+            E[comparisons] = Σ Σ 2/(j-i+1) = Θ(n log n)
+            """
+            total = 0
+            for i in range(n):
+                for j in range(i + 1, n):
+                    prob_compared = 2.0 / (j - i + 1)
+                    total += prob_compared
+            return total
+        
+        return quicksort_comparisons
+    
+    @staticmethod
+    def birthday_paradox(n=365, k=23):
+        """
+        Probability that k people all have different birthdays.
+        
+        P(all different) = n/n × (n-1)/n × ... × (n-k+1)/n
+                         ≈ e^(-k²/2n)
+        
+        For n=365, k=23: P(collision) ≈ 50.7%
+        """
+        prob_all_different = 1.0
+        for i in range(k):
+            prob_all_different *= (n - i) / n
+        
+        prob_collision = 1 - prob_all_different
+        
+        # Approximation using e^(-k²/2n)
+        import math
+        approx = 1 - math.exp(-k * (k - 1) / (2 * n))
+        
+        return {
+            'exact': prob_collision,
+            'approximation': approx,
+            'error': abs(prob_collision - approx)
+        }
+    
+    @staticmethod
+    def coupon_collector(n):
+        """
+        Expected number of random draws to collect all n items.
+        
+        E[total draws] = n × H_n ≈ n ln n
+        where H_n is the nth harmonic number
+        """
+        # Expected draws for each new coupon
+        expected = 0
+        for i in range(n):
+            # Probability of getting new coupon: (n-i)/n
+            # Expected draws: n/(n-i)
+            expected += n / (n - i)
+        
+        import math
+        approximation = n * math.log(n)
+        
+        return {
+            'exact': expected,
+            'approximation': approximation,
+            'harmonic': expected / n  # This is H_n
+        }
+```
+
+### Amplification: Reducing Error Probability
+
+```python
+class ErrorAmplification:
+    """
+    Techniques to reduce error probability in Monte Carlo algorithms.
+    """
+    
+    @staticmethod
+    def repetition_majority(algorithm, input_data, k=10):
+        """
+        Run algorithm k times, take majority vote.
+        If single run has error probability p < 1/2,
+        k runs have error probability ≤ exp(-2k(1/2-p)²)
+        """
+        results = []
+        for _ in range(k):
+            results.append(algorithm(input_data))
+        
+        # Return most common result
+        from collections import Counter
+        return Counter(results).most_common(1)[0][0]
+    
+    @staticmethod
+    def confidence_boosting(algorithm, input_data, target_confidence=0.99):
+        """
+        Boost confidence to target level.
+        """
+        import math
+        
+        # If algorithm has error probability p
+        # After k runs: error ≤ p^k
+        # Want p^k ≤ 1 - target_confidence
+        # k ≥ log(1 - target_confidence) / log(p)
+        
+        single_error_prob = 0.25  # Example: 1/4 error probability
+        k = math.ceil(math.log(1 - target_confidence) / math.log(single_error_prob))
+        
+        return repetition_majority(algorithm, input_data, k)
+    
+    @staticmethod
+    def median_trick(algorithm, input_data, k=10):
+        """
+        For algorithms that return numerical estimates.
+        Take median of k runs - robust to outliers.
+        """
+        results = []
+        for _ in range(k):
+            results.append(algorithm(input_data))
+        
+        results.sort()
+        return results[k // 2]
+```
+
+---
+
+## Section 6.2: Randomized Sorting and Selection
+
+### Randomized QuickSort - Deep Dive
+
+```python
+import random
+import time
+
+class RandomizedQuickSort:
+    """
+    Comprehensive implementation with analysis tools.
+    """
+    
+    def __init__(self):
+        self.comparisons = 0
+        self.recursion_depth = 0
+        self.partition_sizes = []
+    
+    def sort(self, arr, analyze=False):
+        """
+        Main sorting interface with optional analysis.
+        """
+        self.comparisons = 0
+        self.recursion_depth = 0
+        self.partition_sizes = []
+        
+        if analyze:
+            return self._sort_with_analysis(arr.copy(), 0)
+        else:
+            return self._sort_optimized(arr.copy())
+    
+    def _sort_optimized(self, arr):
+        """
+        Optimized implementation with practical improvements.
+        """
+        def quicksort(arr, left, right):
+            while left < right:
+                # Use insertion sort for small arrays
+                if right - left < 10:
+                    self._insertion_sort(arr, left, right)
+                    break
+                
+                # Three-way partition for duplicates
+                pivot_idx = random.randint(left, right)
+                pivot = arr[pivot_idx]
+                
+                # Dutch National Flag partitioning
+                i, j, k = left, left, right
+                while j <= k:
+                    if arr[j] < pivot:
+                        arr[i], arr[j] = arr[j], arr[i]
+                        i += 1
+                        j += 1
+                    elif arr[j] > pivot:
+                        arr[j], arr[k] = arr[k], arr[j]
+                        k -= 1
+                    else:
+                        j += 1
+                
+                # Recursively sort smaller partition, iterate on larger
+                if i - left < right - k:
+                    quicksort(arr, left, i - 1)
+                    left = k + 1  # Tail call optimization
+                else:
+                    quicksort(arr, k + 1, right)
+                    right = i - 1
+        
+        quicksort(arr, 0, len(arr) - 1)
+        return arr
+    
+    def _insertion_sort(self, arr, left, right):
+        """Helper for small subarrays."""
+        for i in range(left + 1, right + 1):
+            key = arr[i]
+            j = i - 1
+            while j >= left and arr[j] > key:
+                arr[j + 1] = arr[j]
+                j -= 1
+            arr[j + 1] = key
+    
+    def _sort_with_analysis(self, arr, depth):
+        """Version that collects statistics."""
+        self.recursion_depth = max(self.recursion_depth, depth)
+        
+        if len(arr) <= 1:
+            return arr
+        
+        pivot = arr[random.randint(0, len(arr) - 1)]
+        
+        left = []
+        middle = []
+        right = []
+        
+        for x in arr:
+            self.comparisons += 1
+            if x < pivot:
+                left.append(x)
+            elif x > pivot:
+                right.append(x)
+            else:
+                middle.append(x)
+        
+        self.partition_sizes.append((len(left), len(middle), len(right)))
+        
+        sorted_left = self._sort_with_analysis(left, depth + 1)
+        sorted_right = self._sort_with_analysis(right, depth + 1)
+        
+        return sorted_left + middle + sorted_right
+    
+    def expected_comparisons(self, n):
+        """
+        Theoretical expected number of comparisons.
+        E[C(n)] = 2n ln n ≈ 1.39n log₂ n
+        """
+        import math
+        return 2 * n * math.log(n)
+    
+    def analyze_performance(self, sizes=[100, 500, 1000, 5000]):
+        """
+        Empirical analysis of randomized QuickSort.
+        """
+        results = []
+        
+        for n in sizes:
+            arr = list(range(n))
+            random.shuffle(arr)
+            
+            trials = 100
+            comparisons = []
+            depths = []
+            times = []
+            
+            for _ in range(trials):
+                self.comparisons = 0
+                self.recursion_depth = 0
+                
+                start = time.perf_counter()
+                self.sort(arr.copy(), analyze=True)
+                elapsed = time.perf_counter() - start
+                
+                comparisons.append(self.comparisons)
+                depths.append(self.recursion_depth)
+                times.append(elapsed)
+            
+            import statistics
+            results.append({
+                'n': n,
+                'avg_comparisons': statistics.mean(comparisons),
+                'expected_comparisons': self.expected_comparisons(n),
+                'avg_depth': statistics.mean(depths),
+                'expected_depth': math.log2(n),
+                'avg_time': statistics.mean(times),
+                'stdev_time': statistics.stdev(times)
+            })
+        
+        return results
+```
+
+### Randomized Selection (QuickSelect)
+
+```python
+class RandomizedSelect:
+    """
+    Find kth smallest element in expected O(n) time.
+    """
+    
+    def __init__(self):
+        self.comparisons = 0
+    
+    def select(self, arr, k):
+        """
+        Find kth smallest element (0-indexed).
+        Las Vegas algorithm - always correct.
+        Expected O(n), worst case O(n²).
+        """
+        if k < 0 or k >= len(arr):
+            raise ValueError("k out of range")
+        
+        self.comparisons = 0
+        return self._select_recursive(arr.copy(), 0, len(arr) - 1, k)
+    
+    def _select_recursive(self, arr, left, right, k):
+        """Recursive selection with random pivot."""
+        if left == right:
+            return arr[left]
+        
+        # Random pivot
+        pivot_idx = random.randint(left, right)
+        pivot_idx = self._partition(arr, left, right, pivot_idx)
+        
+        # Decide which side to recurse on
+        if k == pivot_idx:
+            return arr[k]
+        elif k < pivot_idx:
+            return self._select_recursive(arr, left, pivot_idx - 1, k)
+        else:
+            return self._select_recursive(arr, pivot_idx + 1, right, k)
+    
+    def _partition(self, arr, left, right, pivot_idx):
+        """Lomuto partition scheme."""
+        pivot_value = arr[pivot_idx]
+        
+        # Move pivot to end
+        arr[pivot_idx], arr[right] = arr[right], arr[pivot_idx]
+        
+        store_idx = left
+        for i in range(left, right):
+            self.comparisons += 1
+            if arr[i] < pivot_value:
+                arr[i], arr[store_idx] = arr[store_idx], arr[i]
+                store_idx += 1
+        
+        # Move pivot to final position
+        arr[store_idx], arr[right] = arr[right], arr[store_idx]
+        return store_idx
+    
+    def select_with_guarantee(self, arr, k, max_iterations=None):
+        """
+        Selection with iteration limit.
+        Falls back to deterministic algorithm if needed.
+        """
+        if max_iterations is None:
+            max_iterations = 10 * len(arr)
+        
+        original_arr = arr.copy()
+        
+        for _ in range(max_iterations):
+            try:
+                return self.select(original_arr.copy(), k)
+            except RecursionError:
+                continue
+        
+        # Fall back to sorting
+        return sorted(original_arr)[k]
+    
+    def median(self, arr):
+        """Find median element."""
+        n = len(arr)
+        if n % 2 == 1:
+            return self.select(arr, n // 2)
+        else:
+            # Return average of two middle elements
+            a = self.select(arr.copy(), n // 2 - 1)
+            b = self.select(arr.copy(), n // 2)
+            return (a + b) / 2
+    
+    def quantiles(self, arr, q=4):
+        """
+        Find q-quantiles (e.g., quartiles for q=4).
+        """
+        n = len(arr)
+        quantiles = []
+        
+        for i in range(1, q):
+            k = (i * n) // q
+            quantiles.append(self.select(arr.copy(), k))
+        
+        return quantiles
+```
+
+### Analysis: Why Randomization Helps
+
+```python
+class RandomizationAnalysis:
+    """
+    Demonstrate why randomization improves worst-case scenarios.
+    """
+    
+    @staticmethod
+    def adversarial_input_demo():
+        """
+        Show how randomization defeats adversarial inputs.
+        """
+        n = 1000
+        
+        # Worst-case input for deterministic QuickSort (first element as pivot)
+        worst_case = list(range(n))  # Already sorted
+        
+        # Deterministic QuickSort simulation
+        def deterministic_quicksort_comparisons(arr):
+            if len(arr) <= 1:
+                return 0
+            
+            pivot = arr[0]  # Always first element
+            left = [x for x in arr[1:] if x < pivot]
+            right = [x for x in arr[1:] if x > pivot]
+            
+            comparisons = len(arr) - 1
+            comparisons += deterministic_quicksort_comparisons(left)
+            comparisons += deterministic_quicksort_comparisons(right)
+            
+            return comparisons
+        
+        # Randomized QuickSort simulation
+        def randomized_quicksort_comparisons(arr):
+            if len(arr) <= 1:
+                return 0
+            
+            pivot = arr[random.randint(0, len(arr) - 1)]
+            left = [x for x in arr if x < pivot]
+            right = [x for x in arr if x > pivot]
+            
+            comparisons = len(arr) - 1
+            comparisons += randomized_quicksort_comparisons(left)
+            comparisons += randomized_quicksort_comparisons(right)
+            
+            return comparisons
+        
+        det_comps = deterministic_quicksort_comparisons(worst_case)
+        
+        # Run randomized version multiple times
+        rand_comps = []
+        for _ in range(100):
+            rand_comps.append(randomized_quicksort_comparisons(worst_case))
+        
+        import statistics
+        return {
+            'deterministic_worst': det_comps,  # O(n²)
+            'randomized_average': statistics.mean(rand_comps),  # O(n log n)
+            'randomized_stdev': statistics.stdev(rand_comps),
+            'improvement_factor': det_comps / statistics.mean(rand_comps)
+        }
+    
+    @staticmethod
+    def pivot_quality_distribution():
+        """
+        Analyze distribution of pivot quality in randomized QuickSort.
+        """
+        def pivot_rank(arr):
+            """Return rank of random pivot (0 = smallest, 1 = largest)."""
+            if len(arr) <= 1:
+                return 0.5
+            
+            pivot = arr[random.randint(0, len(arr) - 1)]
+            rank = sum(1 for x in arr if x < pivot)
+            return rank / len(arr)
+        
+        # Simulate many pivot selections
+        n = 1000
+        arr = list(range(n))
+        
+        ranks = []
+        for _ in range(10000):
+            ranks.append(pivot_rank(arr))
+        
+        # Good pivot = rank between 25% and 75%
+        good_pivots = sum(1 for r in ranks if 0.25 <= r <= 0.75)
+        
+        return {
+            'probability_good_pivot': good_pivots / len(ranks),  # Should be ~0.5
+            'expected_value': statistics.mean(ranks),  # Should be ~0.5
+            'standard_deviation': statistics.stdev(ranks)
+        }
+```
+
+---
+
+## Section 6.3: Probabilistic Analysis and Concentration
+
+### Concentration Inequalities
+
+```python
+import math
+import numpy as np
+
+class ConcentrationBounds:
+    """
+    Fundamental inequalities for analyzing randomized algorithms.
+    """
+    
+    @staticmethod
+    def markov_inequality(expectation, a):
+        """
+        Markov's Inequality: For non-negative X,
+        P(X ≥ a) ≤ E[X] / a
+        
+        Weak but universal - requires only expectation.
+        """
+        if a <= 0:
+            raise ValueError("a must be positive")
+        
+        return min(1.0, expectation / a)
+    
+    @staticmethod
+    def chebyshev_inequality(mean, variance, k):
+        """
+        Chebyshev's Inequality:
+        P(|X - μ| ≥ k·σ) ≤ 1/k²
+        
+        Uses variance for tighter bound than Markov.
+        """
+        if k <= 0:
+            raise ValueError("k must be positive")
+        
+        std_dev = math.sqrt(variance)
+        # Probability of being k standard deviations away
+        return min(1.0, 1 / (k ** 2))
+    
+    @staticmethod
+    def chernoff_bound(n, p, delta):
+        """
+        Chernoff Bound for sum of independent Bernoulli trials.
+        X = X₁ + ... + Xₙ, E[X] = np
+        
+        P(X ≥ (1+δ)np) ≤ e^(-δ²np/3) for δ ∈ (0,1)
+        P(X ≤ (1-δ)np) ≤ e^(-δ²np/2) for δ ∈ (0,1)
+        """
+        mu = n * p
+        
+        if delta < 0 or delta > 1:
+            raise ValueError("delta must be in (0,1)")
+        
+        upper_bound = math.exp(-delta * delta * mu / 3)
+        lower_bound = math.exp(-delta * delta * mu / 2)
+        
+        return {
+            'upper_tail': upper_bound,  # P(X ≥ (1+δ)μ)
+            'lower_tail': lower_bound,  # P(X ≤ (1-δ)μ)
+            'two_sided': 2 * max(upper_bound, lower_bound)
+        }
+    
+    @staticmethod
+    def hoeffding_bound(n, range_size, epsilon):
+        """
+        Hoeffding's Inequality for bounded random variables.
+        If X₁,...,Xₙ ∈ [0, range_size] are independent,
+        
+        P(|mean(X) - E[mean(X)]| ≥ ε) ≤ 2·exp(-2nε²/range_size²)
+        """
+        if epsilon <= 0 or range_size <= 0:
+            raise ValueError("epsilon and range_size must be positive")
+        
+        return 2 * math.exp(-2 * n * epsilon**2 / range_size**2)
+    
+    @staticmethod
+    def azuma_hoeffding(n, c, epsilon):
+        """
+        Azuma-Hoeffding for martingales with bounded differences.
+        Used for analyzing algorithms with limited independence.
+        
+        If |X_i - X_{i-1}| ≤ c_i, then
+        P(|X_n - X_0| ≥ ε) ≤ 2·exp(-ε²/(2Σc_i²))
+        """
+        c_squared_sum = n * c * c  # Assuming uniform bound c
+        return 2 * math.exp(-epsilon**2 / (2 * c_squared_sum))
+
+
+class ConcentrationExamples:
+    """
+    Applications of concentration inequalities to algorithms.
+    """
+    
+    @staticmethod
+    def quicksort_high_probability_bound():
+        """
+        Show QuickSort runs in O(n log n) with high probability.
+        """
+        def analyze_quicksort_depth(n, trials=1000):
+            """
+            Analyze recursion depth of randomized QuickSort.
+            Theory: depth ≤ c·log n with probability ≥ 1 - n^(-k)
+            """
+            depths = []
+            
+            def quicksort_depth(arr):
+                if len(arr) <= 1:
+                    return 0
+                
+                pivot = arr[random.randint(0, len(arr) - 1)]
+                left = [x for x in arr if x < pivot]
+                right = [x for x in arr if x > pivot]
+                
+                return 1 + max(
+                    quicksort_depth(left) if left else 0,
+                    quicksort_depth(right) if right else 0
+                )
+            
+            for _ in range(trials):
+                arr = list(range(n))
+                random.shuffle(arr)
+                depths.append(quicksort_depth(arr))
+            
+            import statistics
+            
+            # Check concentration around c·log n
+            c = 4  # Conservative constant
+            threshold = c * math.log2(n)
+            bad_cases = sum(1 for d in depths if d > threshold)
+            
+            return {
+                'n': n,
+                'mean_depth': statistics.mean(depths),
+                'max_depth': max(depths),
+                'threshold': threshold,
+                'probability_exceeds': bad_cases / trials,
+                'theoretical_bound': 1 / n  # Should be ≤ 1/n
+            }
+        
+        results = []
+        for n in [100, 500, 1000, 5000]:
+            results.append(analyze_quicksort_depth(n))
+        
+        return results
+    
+    @staticmethod
+    def balls_and_bins():
+        """
+        Classic problem: n balls thrown into n bins.
+        Analyze maximum load using concentration bounds.
+        """
+        def simulate_balls_bins(n, trials=1000):
+            max_loads = []
+            
+            for _ in range(trials):
+                bins = [0] * n
+                for _ in range(n):
+                    bins[random.randint(0, n - 1)] += 1
+                max_loads.append(max(bins))
+            
+            import statistics
+            
+            # Theoretical bound: max load = O(log n / log log n) w.h.p.
+            theoretical = math.log(n) / math.log(math.log(n) + 1)
+            
+            return {
+                'n': n,
+                'average_max_load': statistics.mean(max_loads),
+                'theoretical_bound': theoretical,
+                'empirical_bound': max(max_loads),
+                '99th_percentile': sorted(max_loads)[int(0.99 * trials)]
+            }
+        
+        results = []
+        for n in [100, 1000, 10000]:
+            results.append(simulate_balls_bins(n))
+        
+        return results
+    
+    @staticmethod
+    def reservoir_sampling_uniformity():
+        """
+        Verify reservoir sampling maintains uniform distribution.
+        Uses Chernoff bound to verify concentration.
+        """
+        def reservoir_sample(stream, k):
+            """Select k items uniformly from stream of unknown size."""
+            reservoir = []
+            
+            for i, item in enumerate(stream):
+                if i < k:
+                    reservoir.append(item)
+                else:
+                    j = random.randint(0, i)
+                    if j < k:
+                        reservoir[j] = item
+            
+            return reservoir
+        
+        # Test uniformity
+        n = 10000  # Stream size
+        k = 10     # Reservoir size
+        trials = 10000
+        
+        counts = [0] * n
+        for _ in range(trials):
+            stream = list(range(n))
+            sample = reservoir_sample(stream, k)
+            for item in sample:
+                counts[item] += 1
+        
+        expected_count = trials * k / n
+        
+        # Use Chernoff bound
+        cb = ConcentrationBounds()
+        delta = 0.1  # Within 10% of expected
+        
+        # Each count is sum of Bernoulli trials
+        chernoff = cb.chernoff_bound(trials, k/n, delta)
+        
+        # Count deviations
+        deviations = sum(1 for c in counts 
+                        if abs(c - expected_count) > delta * expected_count)
+        
+        return {
+            'expected_count': expected_count,
+            'min_count': min(counts),
+            'max_count': max(counts),
+            'deviations': deviations,
+            'deviation_rate': deviations / n,
+            'chernoff_bound': chernoff['two_sided'],
+            'uniform': deviations / n < 0.01  # Less than 1% deviation
+        }
+```
+
+---
+
+## Section 6.4: Hashing and Fingerprinting
+
+### Universal Hashing
+
+```python
+class UniversalHashFamily:
+    """
+    Universal hash functions with theoretical guarantees.
+    """
+    
+    def __init__(self, universe_size, table_size):
+        """
+        Initialize universal hash family.
+        
+        Args:
+            universe_size: Size of key universe
+            table_size: Size of hash table (preferably prime)
+        """
+        self.universe_size = universe_size
+        self.table_size = self._next_prime(table_size)
+        self.prime = self._next_prime(universe_size)
+    
+    def _next_prime(self, n):
+        """Find next prime ≥ n."""
+        def is_prime(num):
+            if num < 2:
+                return False
+            for i in range(2, int(math.sqrt(num)) + 1):
+                if num % i == 0:
+                    return False
+            return True
+        
+        while not is_prime(n):
+            n += 1
+        return n
+    
+    def carter_wegman_hash(self):
+        """
+        Carter-Wegman construction: h(x) = ((ax + b) mod p) mod m
+        Universal: P(h(x) = h(y)) ≤ 1/m for x ≠ y
+        """
+        a = random.randint(1, self.prime - 1)
+        b = random.randint(0, self.prime - 1)
+        
+        def hash_function(x):
+            return ((a * x + b) % self.prime) % self.table_size
+        
+        hash_function.family = "Carter-Wegman"
+        hash_function.params = {'a': a, 'b': b, 'p': self.prime}
+        return hash_function
+    
+    def matrix_hash(self, key_bits=32):
+        """
+        Random matrix multiplication in GF(2).
+        Strongly universal for bit strings.
+        """
+        import numpy as np
+        
+        # Random binary matrix
+        log_m = int(math.log2(self.table_size)) + 1
+        matrix = np.random.randint(0, 2, size=(log_m, key_bits))
+        
+        def hash_function(x):
+            # Convert to bit vector
+            bits = [(x >> i) & 1 for i in range(key_bits)]
+            # Matrix multiplication in GF(2)
+            result = np.dot(matrix, bits) % 2
+            # Convert back to integer
+            hash_val = sum(bit << i for i, bit in enumerate(result))
+            return hash_val % self.table_size
+        
+        hash_function.family = "Matrix"
+        return hash_function
+    
+    def tabulation_hash(self, key_bytes=4):
+        """
+        Tabulation hashing: XOR of random table lookups.
+        3-independent, simple, and fast.
+        """
+        # Random tables for each byte position
+        tables = []
+        for _ in range(key_bytes):
+            table = [random.randint(0, self.table_size - 1) 
+                    for _ in range(256)]
+            tables.append(table)
+        
+        def hash_function(x):
+            result = 0
+            for i in range(key_bytes):
+                byte = (x >> (8 * i)) & 0xFF
+                result ^= tables[i][byte]
+            return result % self.table_size
+        
+        hash_function.family = "Tabulation"
+        return hash_function
+    
+    def test_universality(self, hash_func, samples=10000):
+        """
+        Empirically test if hash function is universal.
+        """
+        collisions = 0
+        
+        for _ in range(samples):
+            x = random.randint(0, self.universe_size - 1)
+            y = random.randint(0, self.universe_size - 1)
+            
+            if x != y and hash_func(x) == hash_func(y):
+                collisions += 1
+        
+        empirical_prob = collisions / samples
+        theoretical_bound = 1 / self.table_size
+        
+        return {
+            'empirical_collision_prob': empirical_prob,
+            'theoretical_bound': theoretical_bound,
+            'ratio': empirical_prob / theoretical_bound if theoretical_bound > 0 else float('inf'),
+            'is_universal': empirical_prob <= 2 * theoretical_bound
+        }
+```
+
+### Fingerprinting and Sketching
+
+```python
+class ProbabilisticDataStructures:
+    """
+    Randomized data structures for massive datasets.
+    """
+    
+    class BloomFilter:
+        """
+        Space-efficient probabilistic membership testing.
+        """
+        
+        def __init__(self, expected_items, false_positive_rate=0.01):
+            """
+            Initialize Bloom filter with optimal parameters.
+            
+            Optimal: m = -n·ln(p) / (ln(2)²) bits
+                    k = m/n · ln(2) hash functions
+            """
+            import math
+            
+            self.n = expected_items
+            self.p = false_positive_rate
+            
+            # Optimal parameters
+            self.m = int(-self.n * math.log(self.p) / (math.log(2) ** 2))
+            self.k = int(self.m / self.n * math.log(2))
+            
+            self.bits = [False] * self.m
+            self.items_added = 0
+            
+            # Create k independent hash functions
+            self.hash_functions = []
+            for i in range(self.k):
+                # Simple double hashing scheme
+                a = random.randint(1, self.m - 1)
+                b = random.randint(0, self.m - 1)
+                self.hash_functions.append(
+                    lambda x, a=a, b=b, i=i: (hash(x) * a + b * i) % self.m
+                )
+        
+        def add(self, item):
+            """Add item to filter."""
+            for hash_func in self.hash_functions:
+                self.bits[hash_func(item)] = True
+            self.items_added += 1
+        
+        def contains(self, item):
+            """Check if item might be in set."""
+            return all(self.bits[hash_func(item)] 
+                      for hash_func in self.hash_functions)
+        
+        def false_positive_probability(self):
+            """Current false positive probability."""
+            # (1 - e^(-kn/m))^k
+            import math
+            if self.items_added == 0:
+                return 0
+            
+            return (1 - math.exp(-self.k * self.items_added / self.m)) ** self.k
+    
+    class CountMinSketch:
+        """
+        Frequency estimation in streams with bounded error.
+        """
+        
+        def __init__(self, epsilon=0.01, delta=0.01):
+            """
+            Initialize Count-Min Sketch.
+            
+            Args:
+                epsilon: Error bound (relative)
+                delta: Failure probability
+            
+            Guarantees: estimate ≤ true_count + ε·||a||₁ with prob 1-δ
+            """
+            import math
+            
+            self.width = int(math.ceil(math.e / epsilon))
+            self.depth = int(math.ceil(math.log(1 / delta)))
+            
+            self.counts = [[0] * self.width for _ in range(self.depth)]
+            
+            # Universal hash functions
+            self.hash_functions = []
+            for i in range(self.depth):
+                a = random.randint(1, 2**31 - 1)
+                b = random.randint(0, 2**31 - 1)
+                self.hash_functions.append(
+                    lambda x, a=a, b=b: ((a * hash(x) + b) % (2**31 - 1)) % self.width
+                )
+        
+        def update(self, item, count=1):
+            """Increment count for item."""
+            for i, hash_func in enumerate(self.hash_functions):
+                self.counts[i][hash_func(item)] += count
+        
+        def estimate(self, item):
+            """Estimate count for item."""
+            return min(self.counts[i][hash_func(item)]
+                      for i, hash_func in enumerate(self.hash_functions))
+        
+        def merge(self, other):
+            """Merge two sketches."""
+            if self.width != other.width or self.depth != other.depth:
+                raise ValueError("Sketches must have same dimensions")
+            
+            for i in range(self.depth):
+                for j in range(self.width):
+                    self.counts[i][j] += other.counts[i][j]
+    
+    class MinHash:
+        """
+        Estimate Jaccard similarity between sets.
+        """
+        
+        def __init__(self, num_hashes=128):
+            """
+            Initialize MinHash.
+            
+            Args:
+                num_hashes: Number of hash functions (higher = more accurate)
+            """
+            self.num_hashes = num_hashes
+            self.hash_functions = []
+            
+            # Create k independent hash functions
+            for _ in range(num_hashes):
+                a = random.randint(1, 2**31 - 1)
+                b = random.randint(0, 2**31 - 1)
+                self.hash_functions.append(
+                    lambda x, a=a, b=b: (a * hash(x) + b) % (2**31 - 1)
+                )
+        
+        def compute_signature(self, items):
+            """Compute MinHash signature for set."""
+            signature = [float('inf')] * self.num_hashes
+            
+            for item in items:
+                for i, hash_func in enumerate(self.hash_functions):
+                    signature[i] = min(signature[i], hash_func(item))
+            
+            return signature
+        
+        def jaccard_similarity(self, sig1, sig2):
+            """
+            Estimate Jaccard similarity from signatures.
+            
+            E[estimate] = |A ∩ B| / |A ∪ B|
+            """
+            matches = sum(1 for a, b in zip(sig1, sig2) if a == b)
+            return matches / self.num_hashes
+        
+        def lsh_buckets(self, signature, bands=16):
+            """
+            Locality-Sensitive Hashing for finding similar sets.
+            """
+            rows_per_band = self.num_hashes // bands
+            buckets = []
+            
+            for band in range(bands):
+                start = band * rows_per_band
+                end = start + rows_per_band
+                band_sig = tuple(signature[start:end])
+                bucket = hash(band_sig) % (2**31 - 1)
+                buckets.append(bucket)
+            
+            return buckets
+```
+
+---
+
+## Section 6.5: Advanced Randomized Algorithms
+
+### Randomized Min-Cut (Karger's Algorithm)
+
+```python
+class KargerMinCut:
+    """
+    Randomized algorithm for finding minimum cut in a graph.
+    """
+    
+    def __init__(self, graph):
+        """
+        Initialize with graph.
+        
+        Args:
+            graph: Dictionary of adjacency lists
+        """
+        self.original_graph = graph
+    
+    def contract_edge(self, graph, u, v):
+        """Contract edge (u,v) into single vertex."""
+        # Merge v into u
+        for neighbor in graph[v]:
+            if neighbor != u:  # Avoid self-loops
+                graph[u].append(neighbor)
+                # Update neighbor's references
+                graph[neighbor] = [u if x == v else x for x in graph[neighbor]]
+        
+        # Remove v from graph
+        del graph[v]
+        
+        # Remove self-loops
+        graph[u] = [x for x in graph[u] if x != u]
+    
+    def min_cut_single_run(self):
+        """
+        Single run of Karger's algorithm.
+        Returns size of cut found.
+        """
+        import copy
+        graph = copy.deepcopy(self.original_graph)
+        
+        vertices = list(graph.keys())
+        
+        while len(vertices) > 2:
+            # Pick random edge
+            u = random.choice(vertices)
+            if not graph[u]:  # No edges from u
+                vertices.remove(u)
+                continue
+            
+            v = random.choice(graph[u])
+            
+            # Contract edge
+            self.contract_edge(graph, u, v)
+            vertices.remove(v)
+        
+        # Count edges between remaining two vertices
+        remaining = list(graph.keys())
+        if len(remaining) == 2:
+            return len(graph[remaining[0]])
+        return 0
+    
+    def min_cut(self, iterations=None):
+        """
+        Find minimum cut with high probability.
+        
+        Success probability after k iterations: 1 - (1 - 2/n²)^k
+        For k = n² ln n, probability ≥ 1 - 1/n
+        """
+        if iterations is None:
+            n = len(self.original_graph)
+            iterations = int(n * n * math.log(n))
+        
+        min_cut_size = float('inf')
+        min_cut_runs = []
+        
+        for i in range(iterations):
+            cut_size = self.min_cut_single_run()
+            min_cut_runs.append(cut_size)
+            
+            if cut_size < min_cut_size:
+                min_cut_size = cut_size
+        
+        return {
+            'min_cut': min_cut_size,
+            'iterations': iterations,
+            'success_probability': self.success_probability(iterations),
+            'cut_distribution': self.analyze_distribution(min_cut_runs)
+        }
+    
+    def success_probability(self, k):
+        """Calculate probability of finding min cut in k iterations."""
+        n = len(self.original_graph)
+        single_success = 2 / (n * (n - 1))
+        return 1 - (1 - single_success) ** k
+    
+    def analyze_distribution(self, cuts):
+        """Analyze distribution of cuts found."""
+        from collections import Counter
+        import statistics
+        
+        counter = Counter(cuts)
+        
+        return {
+            'min': min(cuts),
+            'max': max(cuts),
+            'mean': statistics.mean(cuts),
+            'mode': counter.most_common(1)[0][0],
+            'unique_cuts': len(counter)
+        }
+
+
+class KargerStein:
+    """
+    Improved min-cut algorithm with better success probability.
+    """
+    
+    def __init__(self, graph):
+        self.graph = graph
+    
+    def recursive_contract(self, graph, t):
+        """
+        Recursive contraction with early termination.
+        """
+        n = len(graph)
+        
+        if n <= t:
+            # Run basic Karger's algorithm
+            karger = KargerMinCut(graph)
+            return karger.min_cut_single_run()
+        
+        # Contract to n/√2 vertices
+        target = int(math.ceil(n / math.sqrt(2)))
+        
+        # Two independent runs
+        graph1 = self.contract_to_size(copy.deepcopy(graph), target)
+        graph2 = self.contract_to_size(copy.deepcopy(graph), target)
+        
+        # Recursive calls
+        cut1 = self.recursive_contract(graph1, t)
+        cut2 = self.recursive_contract(graph2, t)
+        
+        return min(cut1, cut2)
+    
+    def contract_to_size(self, graph, target_size):
+        """Contract graph to target size."""
+        karger = KargerMinCut(graph)
+        
+        while len(graph) > target_size:
+            vertices = list(graph.keys())
+            u = random.choice(vertices)
+            
+            if graph[u]:
+                v = random.choice(graph[u])
+                karger.contract_edge(graph, u, v)
+        
+        return graph
+```
+
+### Randomized Primality Testing
+
+```python
+class PrimalityTesting:
+    """
+    Randomized algorithms for primality testing.
+    """
+    
+    @staticmethod
+    def fermat_test(n, k=10):
+        """
+        Fermat primality test.
+        
+        If n is prime, a^(n-1) ≡ 1 (mod n) for all a coprime to n.
+        
+        Note: Can be fooled by Carmichael numbers!
+        """
+        if n <= 1:
+            return False
+        if n <= 3:
+            return True
+        if n % 2 == 0:
+            return False
+        
+        for _ in range(k):
+            a = random.randint(2, n - 2)
+            if pow(a, n - 1, n) != 1:
+                return False  # Definitely composite
+        
+        return True  # Probably prime
+    
+    @staticmethod
+    def miller_rabin(n, k=10):
+        """
+        Miller-Rabin primality test.
+        
+        Error probability ≤ 1/4^k
+        No false negatives (Las Vegas for compositeness).
+        """
+        if n <= 1:
+            return False
+        if n <= 3:
+            return True
+        if n % 2 == 0:
+            return False
+        
+        # Write n-1 as 2^r * d
+        r, d = 0, n - 1
+        while d % 2 == 0:
+            r += 1
+            d //= 2
+        
+        def is_composite_witness(a):
+            """Check if a is a witness for compositeness."""
+            x = pow(a, d, n)
+            
+            if x == 1 or x == n - 1:
+                return False
+            
+            for _ in range(r - 1):
+                x = pow(x, 2, n)
+                if x == n - 1:
+                    return False
+            
+            return True
+        
+        # Test k random witnesses
+        for _ in range(k):
+            a = random.randint(2, n - 2)
+            if is_composite_witness(a):
+                return False  # Definitely composite
+        
+        return True  # Probably prime
+    
+    @staticmethod
+    def solovay_strassen(n, k=10):
+        """
+        Solovay-Strassen primality test using Jacobi symbol.
+        
+        Error probability ≤ 1/2^k
+        """
+        def jacobi_symbol(a, n):
+            """Compute Jacobi symbol (a/n)."""
+            if a == 0:
+                return 0 if n == 1 else None
+            if a == 1:
+                return 1
+            
+            result = 1
+            
+            while a != 0:
+                while a % 2 == 0:
+                    a //= 2
+                    if n % 8 in [3, 5]:
+                        result = -result
+                
+                a, n = n, a
+                if a % 4 == 3 and n % 4 == 3:
+                    result = -result
+                
+                a %= n
+            
+            return result if n == 1 else 0
+        
+        if n <= 1:
+            return False
+        if n <= 3:
+            return True
+        if n % 2 == 0:
+            return False
+        
+        for _ in range(k):
+            a = random.randint(2, n - 1)
+            jacobi = jacobi_symbol(a, n) % n
+            
+            if jacobi == 0 or pow(a, (n - 1) // 2, n) != jacobi:
+                return False  # Definitely composite
+        
+        return True  # Probably prime
+    
+    @staticmethod
+    def generate_prime(bits, test_function=None):
+        """
+        Generate random prime with specified number of bits.
+        """
+        if test_function is None:
+            test_function = PrimalityTesting.miller_rabin
+        
+        while True:
+            # Generate random odd number
+            n = random.getrandbits(bits)
+            n |= (1 << (bits - 1)) | 1  # Set MSB and LSB
+            
+            if test_function(n):
+                return n
+    
+    @staticmethod
+    def compare_tests(test_range=1000):
+        """
+        Compare different primality tests.
+        """
+        import time
+        
+        # Generate test cases
+        primes = []
+        composites = []
+        
+        for n in range(2, test_range):
+            is_prime = all(n % i != 0 for i in range(2, int(math.sqrt(n)) + 1))
+            if is_prime:
+                primes.append(n)
+            else:
+                composites.append(n)
+        
+        tests = {
+            'fermat': PrimalityTesting.fermat_test,
+            'miller_rabin': PrimalityTesting.miller_rabin,
+            'solovay_strassen': PrimalityTesting.solovay_strassen
+        }
+        
+        results = {}
+        
+        for name, test_func in tests.items():
+            start = time.perf_counter()
+            
+            # Test on known primes (should all return True)
+            false_negatives = sum(1 for p in primes if not test_func(p))
+            
+            # Test on known composites (should all return False)
+            false_positives = sum(1 for c in composites if test_func(c))
+            
+            elapsed = time.perf_counter() - start
+            
+            results[name] = {
+                'false_negatives': false_negatives,
+                'false_positives': false_positives,
+                'accuracy': 1 - (false_negatives + false_positives) / (len(primes) + len(composites)),
+                'time': elapsed
+            }
+        
+        return results
+```
+
+---
+
+## Section 6.6: Streaming Algorithms
+
+### Algorithms for Massive Data Streams
+
+```python
+class StreamingAlgorithms:
+    """
+    Algorithms for processing data streams with limited memory.
+    """
+    
+    class FrequentElements:
+        """
+        Find frequent elements in stream (heavy hitters).
+        """
+        
+        def __init__(self, k):
+            """
+            Misra-Gries algorithm for finding elements with frequency > n/k.
+            
+            Space: O(k)
+            Guarantee: All elements with freq > n/k are found
+            """
+            self.k = k
+            self.counters = {}
+            self.total_items = 0
+        
+        def process(self, item):
+            """Process single item from stream."""
+            self.total_items += 1
+            
+            if item in self.counters:
+                self.counters[item] += 1
+            elif len(self.counters) < self.k - 1:
+                self.counters[item] = 1
+            else:
+                # Decrease all counters
+                to_remove = []
+                for key in self.counters:
+                    self.counters[key] -= 1
+                    if self.counters[key] == 0:
+                        to_remove.append(key)
+                
+                for key in to_remove:
+                    del self.counters[key]
+        
+        def get_frequent(self):
+            """
+            Return elements that might be frequent.
+            
+            Guarantees:
+            - All elements with freq > n/k are returned
+            - Returned elements have freq ≥ (true_freq - n/k)
+            """
+            threshold = self.total_items / self.k
+            return {item: count for item, count in self.counters.items()
+                   if count > 0}
+    
+    class ReservoirSampling:
+        """
+        Maintain uniform random sample from stream.
+        """
+        
+        def __init__(self, k):
+            """
+            Initialize reservoir of size k.
+            """
+            self.k = k
+            self.reservoir = []
+            self.items_seen = 0
+        
+        def process(self, item):
+            """
+            Process item maintaining uniform distribution.
+            """
+            self.items_seen += 1
+            
+            if len(self.reservoir) < self.k:
+                self.reservoir.append(item)
+            else:
+                # With probability k/n, replace random element
+                j = random.randint(1, self.items_seen)
+                if j <= self.k:
+                    self.reservoir[j - 1] = item
+        
+        def get_sample(self):
+            """Return current sample."""
+            return self.reservoir.copy()
+    
+    class DistinctElements:
+        """
+        Estimate number of distinct elements (HyperLogLog).
+        """
+        
+        def __init__(self, precision=14):
+            """
+            Initialize HyperLogLog.
+            
+            Args:
+                precision: Number of bits for buckets (4-16 typical)
+            
+            Standard error: 1.04 / √m where m = 2^precision
+            """
+            self.precision = precision
+            self.m = 2 ** precision
+            self.registers = [0] * self.m
+            self.alpha = self._get_alpha(self.m)
+        
+        def _get_alpha(self, m):
+            """Get bias correction constant."""
+            if m == 16:
+                return 0.673
+            elif m == 32:
+                return 0.697
+            elif m == 64:
+                return 0.709
+            else:
+                return 0.7213 / (1 + 1.079 / m)
+        
+        def _hash(self, item):
+            """Hash item to 64-bit value."""
+            return hash(item) & ((1 << 64) - 1)
+        
+        def _leading_zeros(self, bits):
+            """Count leading zeros in bit string."""
+            if bits == 0:
+                return 64
+            
+            count = 0
+            mask = 1 << 63
+            
+            while (bits & mask) == 0 and count < 64:
+                count += 1
+                mask >>= 1
+            
+            return count
+        
+        def process(self, item):
+            """Process item."""
+            hash_val = self._hash(item)
+            
+            # Use first p bits for bucket
+            bucket = hash_val >> (64 - self.precision)
+            
+            # Count leading zeros in remaining bits
+            remaining = hash_val & ((1 << (64 - self.precision)) - 1)
+            zeros = self._leading_zeros(remaining) + 1
+            
+            # Update register
+            self.registers[bucket] = max(self.registers[bucket], zeros)
+        
+        def estimate(self):
+            """
+            Estimate number of distinct elements.
+            """
+            # Harmonic mean of 2^register values
+            raw_estimate = self.alpha * self.m * self.m / sum(
+                2 ** (-reg) for reg in self.registers
+            )
+            
+            # Small range correction
+            if raw_estimate <= 2.5 * self.m:
+                zeros = self.registers.count(0)
+                if zeros != 0:
+                    return self.m * math.log(self.m / zeros)
+            
+            # Large range correction
+            if raw_estimate <= (1/30) * (1 << 32):
+                return raw_estimate
+            else:
+                return -(1 << 32) * math.log(1 - raw_estimate / (1 << 32))
+    
+    @staticmethod
+    def test_streaming_algorithms():
+        """
+        Test various streaming algorithms.
+        """
+        import string
+        
+        # Generate stream with known properties
+        stream = []
+        
+        # Add frequent elements
+        for _ in range(1000):
+            stream.append('A')
+        for _ in range(500):
+            stream.append('B')
+        for _ in range(200):
+            stream.append('C')
+        
+        # Add random elements
+        for _ in range(5000):
+            stream.append(random.choice(string.ascii_uppercase))
+        
+        random.shuffle(stream)
+        
+        # Test frequent elements
+        freq = StreamingAlgorithms.FrequentElements(k=5)
+        for item in stream:
+            freq.process(item)
+        
+        frequent_items = freq.get_frequent()
+        
+        # Test reservoir sampling
+        reservoir = StreamingAlgorithms.ReservoirSampling(k=100)
+        for item in stream:
+            reservoir.process(item)
+        
+        sample = reservoir.get_sample()
+        
+        # Test distinct elements
+        distinct = StreamingAlgorithms.DistinctElements()
+        for item in stream:
+            distinct.process(item)
+        
+        estimate = distinct.estimate()
+        actual = len(set(stream))
+        
+        return {
+            'frequent_elements': frequent_items,
+            'sample_size': len(sample),
+            'distinct_estimate': estimate,
+            'distinct_actual': actual,
+            'distinct_error': abs(estimate - actual) / actual
+        }
+```
+
+---
+
+## Section 6.7: Project - Randomized Algorithm Library
+
+### Comprehensive Implementation
+
+```python
+# src/randomized_algorithms/__init__.py
+"""
+Production-ready randomized algorithm implementations.
+"""
+
+from .sorting import RandomizedQuickSort, RandomizedSelect
+from .hashing import UniversalHashFamily, PerfectHashing
+from .streaming import StreamProcessor, HyperLogLog, CountMinSketch
+from .graph import KargerMinCut, RandomWalk, PageRank
+from .cryptography import MillerRabin, RSAKeyGeneration
+from .optimization import SimulatedAnnealing, GeneticAlgorithm
+from .benchmarks import RandomizedBenchmarks
+
+
+# src/randomized_algorithms/core.py
+import random
+import math
+import time
+from typing import Any, List, Tuple, Callable, Optional
+import numpy as np
+
+
+class RandomizedAlgorithm:
+    """
+    Base class for randomized algorithms with analysis tools.
+    """
+    
+    def __init__(self, seed: Optional[int] = None):
+        """
+        Initialize with optional random seed for reproducibility.
+        """
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+        
+        self.execution_stats = {
+            'runs': 0,
+            'total_time': 0,
+            'failures': 0,
+            'success_rate': 0
+        }
+    
+    def run_with_probability_analysis(self, 
+                                     algorithm: Callable,
+                                     input_data: Any,
+                                     trials: int = 1000) -> dict:
+        """
+        Run algorithm multiple times and analyze probability distribution.
+        """
+        results = []
+        times = []
+        
+        for _ in range(trials):
+            start = time.perf_counter()
+            result = algorithm(input_data)
+            elapsed = time.perf_counter() - start
+            
+            results.append(result)
+            times.append(elapsed)
+        
+        # Analyze results
+        from collections import Counter
+        result_counts = Counter(results)
+        
+        return {
+            'most_common': result_counts.most_common(1)[0],
+            'unique_results': len(result_counts),
+            'distribution': dict(result_counts),
+            'mean_time': np.mean(times),
+            'std_time': np.std(times),
+            'min_time': min(times),
+            'max_time': max(times)
+        }
+    
+    def verify_concentration(self,
+                           algorithm: Callable,
+                           input_data: Any,
+                           expected: Any,
+                           confidence: float = 0.95,
+                           trials: int = 1000) -> dict:
+        """
+        Verify that algorithm concentrates around expected value.
+        """
+        results = []
+        
+        for _ in range(trials):
+            results.append(algorithm(input_data))
+        
+        # Check concentration
+        successes = sum(1 for r in results if r == expected)
+        success_rate = successes / trials
+        
+        # Confidence interval using normal approximation
+        z_score = 1.96 if confidence == 0.95 else 2.58  # 95% or 99%
+        margin = z_score * math.sqrt(success_rate * (1 - success_rate) / trials)
+        
+        return {
+            'success_rate': success_rate,
+            'confidence_interval': (success_rate - margin, success_rate + margin),
+            'concentrated': success_rate > confidence,
+            'trials': trials
+        }
+
+
+class MonteCarloIntegration:
+    """
+    Monte Carlo methods for numerical integration.
+    """
+    
+    @staticmethod
+    def integrate_1d(f: Callable, a: float, b: float, samples: int = 10000) -> dict:
+        """
+        Estimate integral of f from a to b using Monte Carlo.
+        """
+        points = np.random.uniform(a, b, samples)
+        values = [f(x) for x in points]
+        
+        estimate = (b - a) * np.mean(values)
+        variance = (b - a) ** 2 * np.var(values) / samples
+        
+        return {
+            'estimate': estimate,
+            'standard_error': math.sqrt(variance),
+            'confidence_95': (estimate - 1.96 * math.sqrt(variance),
+                            estimate + 1.96 * math.sqrt(variance))
+        }
+    
+    @staticmethod
+    def estimate_pi(samples: int = 100000) -> dict:
+        """
+        Estimate π using Monte Carlo simulation.
+        """
+        inside_circle = 0
+        
+        for _ in range(samples):
+            x = random.uniform(-1, 1)
+            y = random.uniform(-1, 1)
+            
+            if x*x + y*y <= 1:
+                inside_circle += 1
+        
+        pi_estimate = 4 * inside_circle / samples
+        
+        # Theoretical standard error
+        p = math.pi / 4  # True probability
+        theoretical_se = 4 * math.sqrt(p * (1 - p) / samples)
+        
+        return {
+            'estimate': pi_estimate,
+            'actual': math.pi,
+            'error': abs(pi_estimate - math.pi),
+            'relative_error': abs(pi_estimate - math.pi) / math.pi,
+            'theoretical_se': theoretical_se,
+            'samples': samples
+        }
+
+
+# src/randomized_algorithms/applications.py
+class RandomizedApplications:
+    """
+    Real-world applications of randomized algorithms.
+    """
+    
+    class LoadBalancer:
+        """
+        Randomized load balancing for distributed systems.
+        """
+        
+        def __init__(self, servers: List[str]):
+            self.servers = servers
+            self.loads = {server: 0 for server in servers}
+            self.response_times = {server: [] for server in servers}
+        
+        def power_of_two_choices(self, request_size: int = 1) -> str:
+            """
+            Randomly sample two servers, choose less loaded.
+            Achieves O(log log n) maximum load w.h.p.
+            """
+            if len(self.servers) == 1:
+                return self.servers[0]
+            
+            # Sample two random servers
+            choices = random.sample(self.servers, min(2, len(self.servers)))
+            
+            # Choose less loaded
+            best = min(choices, key=lambda s: self.loads[s])
+            self.loads[best] += request_size
+            
+            return best
+        
+        def weighted_random(self) -> str:
+            """
+            Choose server with probability inversely proportional to load.
+            """
+            total_inverse_load = sum(1 / (load + 1) for load in self.loads.values())
+            
+            r = random.uniform(0, total_inverse_load)
+            cumulative = 0
+            
+            for server, load in self.loads.items():
+                cumulative += 1 / (load + 1)
+                if cumulative >= r:
+                    self.loads[server] += 1
+                    return server
+            
+            return self.servers[-1]
+    
+    class ABTesting:
+        """
+        Randomized experimentation for A/B testing.
+        """
+        
+        def __init__(self, variants: List[str], 
+                    allocation: Optional[List[float]] = None):
+            """
+            Initialize A/B test.
+            
+            Args:
+                variants: List of variant names
+                allocation: Traffic allocation (default: equal split)
+            """
+            self.variants = variants
+            
+            if allocation is None:
+                allocation = [1.0 / len(variants)] * len(variants)
+            
+            self.allocation = allocation
+            self.results = {v: {'conversions': 0, 'visitors': 0} 
+                          for v in variants}
+        
+        def assign_variant(self, user_id: str) -> str:
+            """
+            Assign user to variant using consistent hashing.
+            """
+            # Hash user ID for consistent assignment
+            hash_val = hash(user_id) / (2**31 - 1)  # Normalize to [0,1]
+            
+            cumulative = 0
+            for variant, prob in zip(self.variants, self.allocation):
+                cumulative += prob
+                if hash_val < cumulative:
+                    self.results[variant]['visitors'] += 1
+                    return variant
+            
+            return self.variants[-1]
+        
+        def record_conversion(self, variant: str):
+            """Record conversion for variant."""
+            self.results[variant]['conversions'] += 1
+        
+        def statistical_significance(self, variant_a: str, variant_b: str,
+                                   confidence: float = 0.95) -> dict:
+            """
+            Test statistical significance between two variants.
+            Uses normal approximation to binomial.
+            """
+            import scipy.stats as stats
+            
+            # Get conversion rates
+            n_a = self.results[variant_a]['visitors']
+            c_a = self.results[variant_a]['conversions']
+            p_a = c_a / n_a if n_a > 0 else 0
+            
+            n_b = self.results[variant_b]['visitors']
+            c_b = self.results[variant_b]['conversions']
+            p_b = c_b / n_b if n_b > 0 else 0
+            
+            # Pooled proportion
+            p_pool = (c_a + c_b) / (n_a + n_b) if n_a + n_b > 0 else 0
+            
+            # Standard error
+            se = math.sqrt(p_pool * (1 - p_pool) * (1/n_a + 1/n_b))
+            
+            # Z-score
+            z = (p_a - p_b) / se if se > 0 else 0
+            
+            # P-value (two-tailed)
+            p_value = 2 * (1 - stats.norm.cdf(abs(z)))
+            
+            return {
+                'variant_a_rate': p_a,
+                'variant_b_rate': p_b,
+                'relative_improvement': (p_b - p_a) / p_a if p_a > 0 else 0,
+                'z_score': z,
+                'p_value': p_value,
+                'significant': p_value < (1 - confidence),
+                'confidence': confidence
+            }
+
+
+# src/randomized_algorithms/benchmarks.py
+class RandomizedBenchmarks:
+    """
+    Comprehensive benchmarking suite for randomized algorithms.
+    """
+    
+    def __init__(self):
+        self.results = {}
+    
+    def benchmark_sorting(self, sizes: List[int] = [100, 1000, 10000]):
+        """
+        Compare randomized vs deterministic sorting.
+        """
+        import time
+        results = []
+        
+        for n in sizes:
+            # Generate test data
+            random_data = [random.random() for _ in range(n)]
+            sorted_data = list(range(n))
+            reverse_data = list(range(n, 0, -1))
+            
+            datasets = {
+                'random': random_data,
+                'sorted': sorted_data,
+                'reverse': reverse_data
+            }
+            
+            for name, data in datasets.items():
+                # Randomized QuickSort
+                rq = RandomizedQuickSort()
+                start = time.perf_counter()
+                rq.sort(data.copy())
+                rand_time = time.perf_counter() - start
+                
+                # Built-in sort (Timsort - deterministic)
+                start = time.perf_counter()
+                sorted(data.copy())
+                det_time = time.perf_counter() - start
+                
+                results.append({
+                    'n': n,
+                    'data_type': name,
+                    'randomized_time': rand_time,
+                    'deterministic_time': det_time,
+                    'ratio': rand_time / det_time if det_time > 0 else float('inf')
+                })
+        
+        return results
+    
+    def benchmark_primality(self, bit_sizes: List[int] = [32, 64, 128, 256]):
+        """
+        Benchmark primality testing algorithms.
+        """
+        results = []
+        
+        for bits in bit_sizes:
+            # Generate random odd number
+            n = random.getrandbits(bits) | 1
+            
+            tests = {
+                'fermat': PrimalityTesting.fermat_test,
+                'miller_rabin': PrimalityTesting.miller_rabin,
+                'solovay_strassen': PrimalityTesting.solovay_strassen
+            }
+            
+            for name, test_func in tests.items():
+                start = time.perf_counter()
+                result = test_func(n, k=20)
+                elapsed = time.perf_counter() - start
+                
+                results.append({
+                    'bits': bits,
+                    'algorithm': name,
+                    'time': elapsed,
+                    'result': result
+                })
+        
+        return results
+    
+    def benchmark_streaming(self, stream_size: int = 1000000):
+        """
+        Benchmark streaming algorithms.
+        """
+        # Generate stream with known properties
+        stream = []
+        distinct_count = 10000
+        
+        # Zipf distribution for realistic frequency
+        for i in range(distinct_count):
+            freq = int(stream_size / ((i + 1) ** 1.5))
+            stream.extend([f"item_{i}"] * freq)
+        
+        random.shuffle(stream)
+        stream = stream[:stream_size]
+        
+        # HyperLogLog
+        hll = StreamingAlgorithms.DistinctElements()
+        start = time.perf_counter()
+        for item in stream:
+            hll.process(item)
+        estimate = hll.estimate()
+        hll_time = time.perf_counter() - start
+        
+        # Exact count (for comparison)
+        start = time.perf_counter()
+        exact = len(set(stream))
+        exact_time = time.perf_counter() - start
+        
+        return {
+            'stream_size': stream_size,
+            'hyperloglog': {
+                'estimate': estimate,
+                'time': hll_time,
+                'memory': 2**14 * 4  # bytes (assuming 4 bytes per register)
+            },
+            'exact': {
+                'count': exact,
+                'time': exact_time,
+                'memory': exact * 50  # Approximate bytes per unique item
+            },
+            'error': abs(estimate - exact) / exact,
+            'speedup': exact_time / hll_time,
+            'memory_ratio': (exact * 50) / (2**14 * 4)
+        }
+```
+
+---
+
+## Chapter 6 Exercises
+
+### Theoretical Problems
+
+**6.1 Probability Analysis**
+a) Prove that randomized QuickSort has expected O(n log n) comparisons
+b) Show that the probability of randomized QuickSort taking Ω(n²) time is at most 1/n²
+c) Analyze the expected number of iterations in randomized min-cut
+d) Prove the correctness of reservoir sampling
+
+**6.2 Concentration Inequalities**
+Apply appropriate concentration bounds:
+a) Balls and bins: Show max load is O(log n / log log n) w.h.p.
+b) Random graphs: Edge count concentrates around expected value
+c) Hash tables: Chain lengths concentrate around mean
+d) Random walks: Return time concentrates around expected
+
+**6.3 Algorithm Design**
+Design randomized algorithms for:
+a) Finding the median in O(n) expected time
+b) Checking matrix multiplication: verify AB = C
+c) Polynomial identity testing
+d) Set similarity estimation
+
+### Implementation Problems
+
+**6.4 Randomized Data Structures**
+```python
+def implement_treap():
+    """
+    Implement a treap (randomized BST).
+    Maintain both BST and heap properties.
+    """
+    pass
+
+def implement_skip_list():
+    """
+    Implement a skip list with O(log n) expected operations.
+    """
+    pass
+
+def implement_cuckoo_filter():
+    """
+    Implement cuckoo filter - alternative to Bloom filter.
+    Supports deletion.
+    """
+    pass
+```
+
+**6.5 Streaming Algorithms**
+```python
+def implement_count_sketch():
+    """
+    Implement Count Sketch for frequency estimation.
+    Better than Count-Min for skewed distributions.
+    """
+    pass
+
+def implement_alon_matias_szegedy():
+    """
+    AMS sketch for second moment estimation.
+    """
+    pass
+```
+
+**6.6 Graph Algorithms**
+```python
+def random_walk_cover_time(graph):
+    """
+    Estimate cover time of random walk on graph.
+    """
+    pass
+
+def randomized_matching(bipartite_graph):
+    """
+    Find perfect matching using randomization.
+    """
+    pass
+```
+
+### Analysis Problems
+
+**6.7 Empirical Verification**
+Experimentally verify:
+a) Birthday paradox for various parameters
+b) Coupon collector problem convergence
+c) Power of two choices in load balancing
+d) Min-cut algorithm success probability
+
+**6.8 Comparative Analysis**
+Compare and analyze:
+a) Different primality tests on Carmichael numbers
+b) Las Vegas vs Monte Carlo versions of the same problem
+c) Deterministic vs randomized algorithms for selection
+d) Various hash families for universal hashing
+
+**6.9 Real-World Applications**
+Implement and evaluate:
+a) Randomized cache replacement policy
+b) Stochastic gradient descent variant
+c) Random sampling for database query optimization
+d) Randomized consensus protocol
+
+---
+
+## Chapter 6 Summary
+
+### Key Takeaways
+
+1. **Types of Randomized Algorithms:**
+   - **Las Vegas**: Always correct, random time
+   - **Monte Carlo**: Fixed time, probably correct
+   - Can often convert between types
+
+2. **Why Randomization Works:**
+   - Breaks worst-case inputs
+   - Simplifies algorithms
+   - Enables impossible tasks
+   - Natural load balancing
+
+3. **Analysis Tools:**
+   - Expectation and linearity
+   - Concentration inequalities
+   - Probabilistic method
+   - Amortization with randomization
+
+4. **Key Algorithms Mastered:**
+   - Randomized QuickSort/Select
+   - Universal hashing
+   - Primality testing
+   - Min-cut
+   - Streaming algorithms
+
+5. **Design Principles:**
+   - Random sampling
+   - Random partitioning  
+   - Fingerprinting
+   - Sketching
+   - Amplification
+
+### When to Use Randomization
+
+✅ **Use When:**
+- Worst-case is much worse than average
+- Need simple, practical algorithm
+- Dealing with adversarial input
+- Processing massive data
+- Small error probability acceptable
+
+❌ **Avoid When:**
+- Absolute correctness required
+- Reproducibility essential
+- Random bits expensive
+- Debugging is critical
+- Real-time guarantees needed
+
+### The Power of Probability
+
+Randomization transforms intractable problems into elegant solutions:
+
+- **Before**: O(n²) worst case, complex to avoid
+- **After**: O(n log n) expected, simple algorithm
+
+This chapter showed that **embracing uncertainty can lead to more certain outcomes**—a paradox that makes randomized algorithms one of the most powerful tools in computer science.
+
+### Next Chapter Preview
+
+Chapter 7 explores **Computational Complexity and NP-Completeness**, where we'll understand the fundamental limits of computation and why some problems seem inherently difficult—even with randomization!
+
+### Final Thought
+
+*"In the face of uncertainty, a random choice is often the best choice."*
+
+Randomized algorithms remind us that perfection isn't always necessary. Sometimes, being right 99.9999% of the time with a simple, fast algorithm beats being right 100% of the time with a complex, slow one. Master the art of controlled randomness, and you'll have solutions to problems that deterministic algorithms can't touch.
