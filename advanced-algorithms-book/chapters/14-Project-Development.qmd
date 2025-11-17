@@ -1,0 +1,1301 @@
+# Chapter 14: Project Development & Presentation Prep - Bringing It All Together
+
+**From Code to Masterpiece: The Final Push**
+
+*"The last 10% of the project takes 90% of the time."* - Ancient programmer wisdom
+
+*"But that last 10% is what separates a good project from a great one."* - Everyone who's shipped something amazing
+
+## 14.1 Introduction: The Art of Finishing
+
+You've learned dozens of algorithms. You've implemented data structures. You've solved complex problems. But here's what separates students from professionals: **finishing and presenting your work.**
+
+Anyone can start a project. The hard parts are:
+- **Integration**: Making all the pieces work together seamlessly
+- **Optimization**: Making it fast enough for real use
+- **Documentation**: Making it understandable to others (and future you)
+- **Testing**: Ensuring it actually works correctly
+- **Presentation**: Communicating what you built and why it matters
+
+This chapter is about that final push—taking your project from "it works on my machine" to "it's ready for the world."
+
+**What makes a great project?**
+
+Not just clever algorithms. Great projects have:
+- **Clear purpose**: Solves a real problem
+- **Solid implementation**: Works reliably
+- **Good performance**: Fast enough for intended use
+- **Excellent documentation**: Others can use and extend it
+- **Compelling presentation**: Communicates value effectively
+
+Let's learn how to transform your Advanced Algorithms project into something you'll be proud to show employers, professors, and peers.
+
+## 14.2 System Integration: Making the Pieces Fit
+
+You've probably built your project in pieces: a segment tree here, a string matching algorithm there, maybe a visualization module. Now comes the tricky part: **making them work together as a unified system.**
+
+### 14.2.1 The Integration Challenge
+
+**Why integration is hard**:
+
+**Different assumptions**: Your segment tree assumes 0-indexed arrays, but your GUI uses 1-indexed. Your FFT implementation expects power-of-2 sizes, but your audio module sends arbitrary lengths.
+
+**Interface mismatches**: One module returns NumPy arrays, another returns Python lists, a third returns custom objects. Converting between them adds complexity.
+
+**Hidden dependencies**: Your wavelet tree depends on the suffix array module, which depends on the sorting module. Change one thing, break three others.
+
+**Performance bottlenecks**: Individual algorithms are fast, but the glue code between them is slow. Unnecessary data copying, redundant conversions, inefficient I/O.
+
+**State management**: Who owns the data? When is it modified? Multiple components trying to update the same state leads to bugs.
+
+### 14.2.2 Design Patterns for Integration
+
+#### **The Adapter Pattern**
+
+**Problem**: You have two incompatible interfaces.
+
+**Example**: Your segment tree works with Python lists, but you want to use it with NumPy arrays.
+
+**Solution**: Create an adapter
+```python
+class SegmentTreeAdapter:
+    """
+    Adapts segment tree to work with NumPy arrays.
+    Converts inputs/outputs transparently.
+    """
+    def __init__(self, numpy_array):
+        self.internal_tree = SegmentTree(numpy_array.tolist())
+        self.original_type = type(numpy_array)
+    
+    def query(self, left, right):
+        result = self.internal_tree.query(left, right)
+        return result  # Convert back to numpy if needed
+    
+    def update(self, index, value):
+        self.internal_tree.update(index, value)
+```
+
+**Key insight**: Hide conversions in a single place. Rest of your code doesn't need to know about the incompatibility.
+
+#### **The Facade Pattern**
+
+**Problem**: Your system has many complex components. Users shouldn't need to understand all of them.
+
+**Example**: Your string processing library has KMP, Rabin-Karp, suffix arrays, etc. Users just want to search.
+
+**Solution**: Create a simple facade
+```python
+class StringSearcher:
+    """
+    Simple interface for complex string algorithms.
+    Automatically chooses best algorithm.
+    """
+    def __init__(self):
+        self.algorithms = {
+            'kmp': KMPMatcher,
+            'rabin_karp': RabinKarpMatcher,
+            'suffix_array': SuffixArray
+        }
+    
+    def search(self, text, pattern, method='auto'):
+        """
+        Search for pattern in text.
+        Automatically selects best algorithm if method='auto'.
+        """
+        if method == 'auto':
+            # Choose based on characteristics
+            if len(text) > 1000000:
+                method = 'suffix_array'  # Best for long text
+            elif len(pattern) < 10:
+                method = 'kmp'  # Best for short patterns
+            else:
+                method = 'rabin_karp'
+        
+        searcher = self.algorithms[method](pattern)
+        return searcher.search(text)
+```
+
+**Key insight**: Simple interface for common cases, advanced options for power users.
+
+#### **The Builder Pattern**
+
+**Problem**: Constructing complex objects requires many steps.
+
+**Example**: Building a complete data analysis pipeline.
+
+**Solution**: Use a builder
+```python
+class AnalysisPipelineBuilder:
+    """
+    Fluent interface for building analysis pipelines.
+    """
+    def __init__(self):
+        self.steps = []
+    
+    def load_data(self, filename):
+        self.steps.append(('load', filename))
+        return self  # Return self for chaining
+    
+    def filter_outliers(self, threshold=3.0):
+        self.steps.append(('filter', threshold))
+        return self
+    
+    def compute_statistics(self):
+        self.steps.append(('stats', None))
+        return self
+    
+    def visualize(self, chart_type='line'):
+        self.steps.append(('viz', chart_type))
+        return self
+    
+    def build(self):
+        """Execute the pipeline."""
+        return AnalysisPipeline(self.steps)
+
+# Usage:
+pipeline = (AnalysisPipelineBuilder()
+    .load_data('data.csv')
+    .filter_outliers(threshold=2.5)
+    .compute_statistics()
+    .visualize(chart_type='histogram')
+    .build())
+```
+
+**Key insight**: Make complex construction readable and maintainable.
+
+### 14.2.3 Dependency Management
+
+**The dependency graph problem**: Your modules depend on each other. How do you avoid circular dependencies and maintain sanity?
+
+**Best practices**:
+
+**1. Layered Architecture**:
+```
+Presentation Layer (GUI, CLI)
+        ↓
+Application Layer (Use cases, workflows)
+        ↓
+Domain Layer (Core algorithms, data structures)
+        ↓
+Infrastructure Layer (File I/O, databases, external APIs)
+```
+
+**Rule**: Upper layers can depend on lower layers, never vice versa.
+
+**2. Dependency Inversion**:
+
+Instead of:
+```python
+class DataProcessor:
+    def __init__(self):
+        self.storage = FileStorage()  # Concrete dependency
+```
+
+Do this:
+```python
+class DataProcessor:
+    def __init__(self, storage: StorageInterface):
+        self.storage = storage  # Abstract dependency
+```
+
+**Benefit**: Can swap FileStorage for DatabaseStorage or S3Storage without changing DataProcessor.
+
+**3. Configuration Files**:
+
+Don't hardcode dependencies. Use configuration:
+```yaml
+# config.yaml
+algorithms:
+  string_search: kmp
+  sorting: quicksort
+  caching: lru
+
+performance:
+  cache_size: 10000
+  max_threads: 4
+
+output:
+  format: json
+  verbose: true
+```
+
+**Benefit**: Change behavior without changing code.
+
+### 14.2.4 Integration Testing
+
+**Unit tests** verify individual components work. **Integration tests** verify they work together.
+
+**Example integration test**:
+```python
+def test_complete_pipeline():
+    """
+    Test entire data processing pipeline end-to-end.
+    """
+    # Setup
+    data_generator = SyntheticDataGenerator(seed=42)
+    processor = DataProcessor()
+    visualizer = Visualizer()
+    
+    # Generate test data
+    raw_data = data_generator.create_time_series(length=1000)
+    
+    # Process
+    processed = processor.transform(raw_data)
+    assert len(processed) == 1000
+    assert processed.is_valid()
+    
+    # Analyze
+    stats = processor.compute_statistics(processed)
+    assert 'mean' in stats
+    assert 'std' in stats
+    
+    # Visualize (just verify it doesn't crash)
+    viz = visualizer.create_plot(processed)
+    assert viz is not None
+    
+    # End-to-end check
+    assert stats['mean'] > 0  # Based on how we generated data
+```
+
+**What to test**:
+- Data flows correctly through pipeline
+- No data loss or corruption
+- Error handling works across components
+- Performance meets requirements
+
+### 14.2.5 The Integration Checklist
+
+Before you consider integration complete:
+
+**✓ Interface consistency**: All modules use consistent data types, naming conventions, and error handling.
+
+**✓ Configuration management**: All parameters are configurable, with sensible defaults.
+
+**✓ Error propagation**: Errors from lower layers are caught and handled appropriately at higher layers.
+
+**✓ Logging**: Key operations are logged for debugging.
+
+**✓ Resource management**: Files, network connections, memory are properly cleaned up.
+
+**✓ Documentation**: API documentation shows how components work together.
+
+**✓ Examples**: Working examples demonstrate common integration patterns.
+
+## 14.3 Performance Optimization: Making It Fast
+
+Your algorithms have good time complexity. But does your code actually run fast? Let's bridge theory and practice.
+
+### 14.3.1 The Performance Mindset
+
+**First rule**: Don't optimize prematurely.
+
+**Second rule**: But do measure early.
+
+**Third rule**: Optimize the bottleneck, not everything.
+
+**The 90/10 rule**: 90% of execution time is spent in 10% of the code. Find that 10%.
+
+### 14.3.2 Profiling: Finding the Bottlenecks
+
+**Before optimizing, profile**. Don't guess what's slow—measure.
+
+#### **Python's cProfile**
+
+```python
+import cProfile
+import pstats
+
+def profile_function():
+    """Profile your code."""
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    # Your code here
+    result = your_slow_function()
+    
+    profiler.disable()
+    
+    # Print stats
+    stats = pstats.Stats(profiler)
+    stats.sort_stats('cumulative')
+    stats.print_stats(20)  # Top 20 functions
+```
+
+**What to look for**:
+- **tottime**: Time spent in function itself (not callees)
+- **cumtime**: Total time including callees
+- **ncalls**: Number of times called
+
+**Red flags**:
+- Function called millions of times (maybe cache it?)
+- Unexpectedly high cumtime (investigate what it's calling)
+- Lots of time in Python internals (might need C extension)
+
+#### **Line-by-Line Profiling**
+
+```python
+from line_profiler import LineProfiler
+
+def profile_line_by_line():
+    profiler = LineProfiler()
+    profiler.add_function(your_function)
+    profiler.enable()
+    
+    your_function()
+    
+    profiler.disable()
+    profiler.print_stats()
+```
+
+**Benefit**: See exactly which lines are slow.
+
+#### **Memory Profiling**
+
+```python
+from memory_profiler import profile
+
+@profile
+def memory_intensive_function():
+    # Your code here
+    pass
+```
+
+**What to look for**:
+- Unexpected memory growth
+- Large temporary allocations
+- Memory not being freed
+
+### 14.3.3 Common Optimization Techniques
+
+#### **1. Avoid Redundant Work**
+
+**Bad**:
+```python
+def process_data(items):
+    for item in items:
+        # Recomputes expensive value every iteration!
+        threshold = compute_threshold(items)
+        if item > threshold:
+            process(item)
+```
+
+**Good**:
+```python
+def process_data(items):
+    threshold = compute_threshold(items)  # Once
+    for item in items:
+        if item > threshold:
+            process(item)
+```
+
+#### **2. Use Appropriate Data Structures**
+
+**Bad** (for frequent membership tests):
+```python
+allowed_items = [...]  # List
+if item in allowed_items:  # O(n) lookup
+    ...
+```
+
+**Good**:
+```python
+allowed_items = set([...])  # Set
+if item in allowed_items:  # O(1) lookup
+    ...
+```
+
+**Impact**: For 10,000 items, 10,000 lookups: list = 100M operations, set = 10K operations. That's 10,000x faster!
+
+#### **3. Vectorize with NumPy**
+
+**Bad** (Python loops):
+```python
+result = []
+for i in range(len(arr)):
+    result.append(arr[i] ** 2 + 2 * arr[i] + 1)
+```
+
+**Good** (NumPy vectorization):
+```python
+result = arr**2 + 2*arr + 1
+```
+
+**Why faster**: NumPy uses optimized C code, processes data in batches, uses SIMD instructions.
+
+**Impact**: Often 10-100x speedup.
+
+#### **4. Cache Expensive Computations**
+
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def expensive_function(n):
+    # Complex computation
+    return result
+```
+
+**When to use**: Function called repeatedly with same inputs.
+
+**Trade-off**: Memory for speed.
+
+#### **5. Use Generators for Large Data**
+
+**Bad** (loads everything into memory):
+```python
+def read_file(filename):
+    with open(filename) as f:
+        return [line.strip() for line in f]
+
+data = read_file('huge_file.txt')  # Out of memory!
+```
+
+**Good** (streams data):
+```python
+def read_file(filename):
+    with open(filename) as f:
+        for line in f:
+            yield line.strip()
+
+for line in read_file('huge_file.txt'):  # Memory efficient
+    process(line)
+```
+
+#### **6. Parallelize Independent Work**
+
+```python
+from concurrent.futures import ProcessPoolExecutor
+
+def process_chunk(chunk):
+    return [expensive_operation(item) for item in chunk]
+
+def parallel_process(items, num_workers=4):
+    chunks = split_into_chunks(items, num_workers)
+    
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        results = executor.map(process_chunk, chunks)
+    
+    return [item for chunk in results for item in chunk]
+```
+
+**When to use**: CPU-bound tasks, independent computations.
+
+**Caveat**: Overhead of creating processes. Only worth it for expensive operations.
+
+### 14.3.4 Algorithm-Specific Optimizations
+
+#### **For String Algorithms**
+
+**Optimization**: Use rolling hash for pattern matching instead of recomputing from scratch.
+
+**Impact**: Reduces constants significantly.
+
+#### **For Graph Algorithms**
+
+**Optimization**: Use adjacency lists for sparse graphs, adjacency matrices for dense graphs.
+
+**Impact**: Can change complexity class (e.g., O(V²) → O(V+E) for sparse graphs).
+
+#### **For Dynamic Programming**
+
+**Optimization**: Use space-optimized versions when you only need the last row/column.
+
+**Impact**: O(n²) space → O(n) space, enables solving larger instances.
+
+### 14.3.5 When to Stop Optimizing
+
+**Optimization is done when**:
+1. **Performance meets requirements**: If your target is 100ms and you're at 50ms, you're done.
+2. **Bottleneck is elsewhere**: If 95% of time is in a library call you can't optimize, stop.
+3. **Diminishing returns**: If you've spent 8 hours for 1% improvement, stop.
+4. **Code becoming unmaintainable**: If optimizations make code unreadable, reconsider.
+
+**Remember**: Premature optimization is the root of all evil. But timely optimization is the path to success.
+
+## 14.4 Documentation: Making Your Work Understandable
+
+Good documentation is the difference between code that others can use and code that languishes unused on GitHub.
+
+### 14.4.1 The Documentation Pyramid
+
+**Level 1: Code Comments** (for understanding implementation)
+```python
+def segment_tree_query(node, start, end, L, R):
+    """Recursive query helper."""
+    # No overlap: this segment irrelevant to query
+    if R < start or end < L:
+        return 0
+    
+    # Complete overlap: return entire segment
+    if L <= start and end <= R:
+        return tree[node]
+    
+    # Partial overlap: recurse on children
+    mid = (start + end) // 2
+    left_sum = segment_tree_query(2*node+1, start, mid, L, R)
+    right_sum = segment_tree_query(2*node+2, mid+1, end, L, R)
+    return left_sum + right_sum
+```
+
+**Level 2: Docstrings** (for API users)
+```python
+def segment_tree_query(node, start, end, L, R):
+    """
+    Query sum of elements in range [L, R].
+    
+    Args:
+        node: Current node in segment tree
+        start: Start of segment this node represents
+        end: End of segment this node represents
+        L: Left boundary of query range
+        R: Right boundary of query range
+    
+    Returns:
+        Sum of elements in range [L, R]
+    
+    Time Complexity:
+        O(log n) where n is size of array
+    
+    Example:
+        >>> st = SegmentTree([1, 3, 5, 7, 9])
+        >>> st.query(1, 3)
+        15  # Sum of elements at indices 1-3: 3+5+7
+    """
+```
+
+**Level 3: README** (for getting started)
+```markdown
+# Advanced Data Structures Library
+
+Efficient implementations of advanced data structures for competitive programming and real-world applications.
+
+## Features
+
+- **Segment Trees**: Range queries in O(log n)
+- **Fenwick Trees**: Prefix sums with better constants
+- **Persistent Structures**: Time-travel with O(log n) space per version
+- **Succinct Structures**: n + o(n) space representations
+
+## Quick Start
+
+```python
+from advds import SegmentTree
+
+# Create segment tree
+arr = [1, 3, 5, 7, 9, 11]
+st = SegmentTree(arr, operation='sum')
+
+# Range query
+total = st.query(1, 4)  # Sum of indices 1-4
+print(total)  # Output: 24
+
+# Point update
+st.update(2, 10)  # Change arr[2] from 5 to 10
+```
+
+## Installation
+
+```bash
+pip install advds
+```
+
+## Documentation
+
+Full documentation: https://advds.readthedocs.io
+```
+
+**Level 4: Tutorials** (for learning)
+```markdown
+# Tutorial: Understanding Segment Trees
+
+## What is a Segment Tree?
+
+A segment tree is a data structure that allows you to:
+- Answer range queries in O(log n) time
+- Update single elements in O(log n) time
+
+This is much better than the naive O(n) approach!
+
+## When Should You Use It?
+
+Use segment trees when you have:
+- An array that changes (updates)
+- Need to query ranges frequently
+- Operations are associative (sum, min, max, GCD)
+
+## How Does It Work?
+
+[Include diagrams, step-by-step examples, intuitive explanations]
+
+## Common Pitfalls
+
+1. **Off-by-one errors**: Remember, queries are inclusive [L, R]
+2. **Integer overflow**: For large sums, use appropriate data types
+3. **Non-associative operations**: Segment trees don't work for median!
+```
+
+**Level 5: API Reference** (for looking up details)
+```markdown
+## SegmentTree
+
+### Constructor
+
+`SegmentTree(arr, operation='sum')`
+
+**Parameters:**
+- `arr` (list): Initial array
+- `operation` (str): One of 'sum', 'min', 'max', 'gcd'
+
+**Raises:**
+- `ValueError`: If operation is not supported
+
+**Example:**
+```python
+st = SegmentTree([1, 2, 3, 4, 5], operation='min')
+```
+
+### Methods
+
+#### query(left, right)
+
+Query range [left, right] (inclusive).
+
+**Parameters:**
+- `left` (int): Left boundary (0-indexed)
+- `right` (int): Right boundary (0-indexed)
+
+**Returns:**
+- Result of operation over range
+
+**Time Complexity:** O(log n)
+
+**Example:**
+```python
+result = st.query(1, 3)  # Query indices 1-3
+```
+```
+
+### 14.4.2 Documentation Best Practices
+
+**1. Write documentation as you code**
+- Don't wait until the end
+- Document your design decisions while they're fresh
+
+**2. Include examples everywhere**
+- Every public function should have an example
+- Examples are the fastest way to understand API
+
+**3. Explain the "why," not just the "what"**
+- Bad: "This function sorts the array"
+- Good: "We sort the array to enable binary search, reducing lookup from O(n) to O(log n)"
+
+**4. Document edge cases**
+```python
+def binary_search(arr, target):
+    """
+    Binary search in sorted array.
+    
+    Edge cases handled:
+    - Empty array: returns -1
+    - Target not found: returns -1
+    - Multiple occurrences: returns first occurrence
+    - Target at boundaries: handles correctly
+    """
+```
+
+**5. Keep documentation synchronized with code**
+- When you change code, update docs
+- Use tools that generate docs from docstrings (Sphinx, MkDocs)
+- Set up CI to verify docs build successfully
+
+**6. Use diagrams for complex concepts**
+- ASCII art for simple visualizations
+- Tools like GraphViz for graphs
+- Draw.io or Excalidraw for architecture diagrams
+
+**Example ASCII diagram**:
+```python
+def build_segment_tree(arr):
+    """
+    Build segment tree from array.
+    
+    Tree structure:
+                    [0-5: 36]
+                   /           \
+            [0-2: 9]            [3-5: 27]
+            /      \            /        \
+        [0-1: 4]  [2:5]    [3-4: 16]   [5:11]
+        /    \              /     \
+    [0:1]   [1:3]       [3:7]    [4:9]
+    
+    Each node stores the sum of its range.
+    """
+```
+
+### 14.4.3 README Template
+
+Here's a battle-tested README template:
+
+```markdown
+# Project Name
+
+Brief description (one sentence)
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Performance](#performance)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- Feature 1
+- Feature 2
+- Feature 3
+
+## Installation
+
+```bash
+# Installation command
+```
+
+## Quick Start
+
+```python
+# Minimal working example
+```
+
+## Usage
+
+### Basic Usage
+[Most common use case]
+
+### Advanced Usage
+[More complex scenarios]
+
+## API Reference
+
+[Link to full documentation]
+
+## Examples
+
+### Example 1: [Name]
+[Description and code]
+
+### Example 2: [Name]
+[Description and code]
+
+## Performance
+
+| Operation | Time Complexity | Space Complexity |
+|-----------|-----------------|------------------|
+| Build     | O(n)           | O(n)            |
+| Query     | O(log n)       | O(1)            |
+| Update    | O(log n)       | O(1)            |
+
+Benchmarks:
+[Include actual performance numbers]
+
+## Contributing
+
+Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## License
+
+MIT License - see [LICENSE](LICENSE)
+
+## Acknowledgments
+
+- Thanks to [person/project] for [contribution]
+
+## Citation
+
+If you use this in research, please cite:
+```bibtex
+@software{yourproject,
+  author = {Your Name},
+  title = {Project Name},
+  year = {2024},
+  url = {https://github.com/username/project}
+}
+```
+```
+
+## 14.5 Testing and Code Review: Ensuring Quality
+
+### 14.5.1 The Testing Pyramid
+
+**Level 1: Unit Tests** (70% of tests)
+- Test individual functions in isolation
+- Fast to run, fast to write
+- Catch bugs early
+
+**Level 2: Integration Tests** (20% of tests)
+- Test components working together
+- Slower but find interface problems
+- Catch bugs in interactions
+
+**Level 3: End-to-End Tests** (10% of tests)
+- Test entire system from user perspective
+- Slowest but most realistic
+- Catch bugs in workflows
+
+### 14.5.2 Writing Good Tests
+
+**Characteristics of good tests**:
+
+**1. Independent**: Each test should run in isolation
+```python
+# Bad: Tests depend on order
+def test_first():
+    global_state = setup()
+    
+def test_second():
+    # Assumes global_state from test_first exists!
+    use(global_state)
+
+# Good: Each test stands alone
+def test_first():
+    state = setup()
+    # Test with state
+    
+def test_second():
+    state = setup()  # Own setup
+    # Test with state
+```
+
+**2. Repeatable**: Same input → same output
+```python
+# Bad: Random failures
+def test_random_algorithm():
+    result = random_algorithm()
+    assert result > 0  # Might fail randomly
+
+# Good: Control randomness
+def test_random_algorithm():
+    random.seed(42)  # Reproducible
+    result = random_algorithm()
+    assert result > 0
+```
+
+**3. Self-validating**: Pass or fail, no human judgment needed
+```python
+# Bad: Requires human to check
+def test_output():
+    result = generate_report()
+    print(result)  # Human must verify correctness
+
+# Good: Automatic verification
+def test_output():
+    result = generate_report()
+    assert 'Summary' in result
+    assert result.count('Section') == 5
+```
+
+**4. Timely**: Fast enough to run frequently
+```python
+# Bad: Takes minutes
+def test_slow():
+    large_data = generate_huge_dataset()
+    process(large_data)
+
+# Good: Use smaller data or mocks
+def test_fast():
+    small_data = generate_small_dataset()
+    process(small_data)
+```
+
+**5. Thorough**: Cover edge cases
+```python
+def test_binary_search():
+    # Normal case
+    assert binary_search([1,2,3,4,5], 3) == 2
+    
+    # Edge cases
+    assert binary_search([], 1) == -1  # Empty array
+    assert binary_search([1], 1) == 0  # Single element
+    assert binary_search([1,2,3], 1) == 0  # First element
+    assert binary_search([1,2,3], 3) == 2  # Last element
+    assert binary_search([1,2,3], 4) == -1  # Not found
+    assert binary_search([1,1,1], 1) == 0  # Duplicates
+```
+
+### 14.5.3 Test-Driven Development (TDD)
+
+**The TDD cycle**:
+1. **Red**: Write a failing test
+2. **Green**: Write minimal code to pass test
+3. **Refactor**: Improve code while keeping tests green
+
+**Example**:
+```python
+# Step 1: Write failing test
+def test_segment_tree_query():
+    st = SegmentTree([1, 3, 5, 7, 9])
+    assert st.query(1, 3) == 15  # Fails: SegmentTree doesn't exist
+
+# Step 2: Implement minimal code
+class SegmentTree:
+    def __init__(self, arr):
+        self.arr = arr
+    
+    def query(self, left, right):
+        return sum(self.arr[left:right+1])  # Naive but works
+
+# Step 3: Refactor to efficient implementation
+class SegmentTree:
+    # ... (proper segment tree implementation)
+```
+
+**Benefits of TDD**:
+- Ensures code is testable
+- Documents expected behavior
+- Catches regressions immediately
+- Gives confidence to refactor
+
+### 14.5.4 Code Review Best Practices
+
+**For authors (submitting code for review)**:
+
+**1. Make small, focused changes**
+- One logical change per review
+- Easier to understand and review
+- Faster feedback cycle
+
+**2. Write good commit messages**
+```
+Bad:  "Fixed bug"
+Good: "Fix off-by-one error in segment tree query
+
+The query function was using <= instead of < for the right boundary,
+causing it to include one extra element. Updated and added test case."
+```
+
+**3. Self-review before submitting**
+- Read your own diff
+- Check for debug code, commented code, TODOs
+- Run tests locally
+
+**4. Provide context**
+- Why this change?
+- What alternatives did you consider?
+- Any concerns or open questions?
+
+**For reviewers (reviewing others' code)**:
+
+**1. Be constructive, not destructive**
+```
+Bad:  "This is terrible code"
+Good: "Consider using a dictionary here for O(1) lookup instead of 
+       scanning the list (O(n)). For large inputs, this could be a 
+       significant performance improvement."
+```
+
+**2. Ask questions**
+```
+"I'm not familiar with this algorithm. Could you add a comment 
+ explaining how it works?"
+"What happens if the input array is empty?"
+```
+
+**3. Focus on important issues**
+- Correctness issues: Critical
+- Performance problems: Important
+- Style issues: Nice to have
+- Personal preferences: Skip
+
+**4. Praise good code**
+```
+"Nice use of the builder pattern here! Makes the API much cleaner."
+"I like how you handled this edge case. Good defensive programming."
+```
+
+**Code review checklist**:
+
+**Correctness**:
+- ☐ Does it work correctly?
+- ☐ Are edge cases handled?
+- ☐ Are there tests?
+- ☐ Do tests pass?
+
+**Design**:
+- ☐ Is the design clear and logical?
+- ☐ Is it consistent with existing code?
+- ☐ Are abstractions appropriate?
+
+**Readability**:
+- ☐ Is code self-explanatory?
+- ☐ Are names descriptive?
+- ☐ Is complexity justified?
+- ☐ Are there comments where needed?
+
+**Performance**:
+- ☐ Are algorithms efficient?
+- ☐ Are data structures appropriate?
+- ☐ Are there obvious optimizations?
+
+**Security**:
+- ☐ Is input validated?
+- ☐ Are errors handled safely?
+- ☐ Are there security implications?
+
+## 14.6 Presentation Skills: Communicating Your Work
+
+You've built something amazing. Now you need to convince others it's amazing.
+
+### 14.6.1 Know Your Audience
+
+**For professors/academics**: Emphasize:
+- Theoretical foundations
+- Novel insights
+- Rigorous analysis
+- Connections to existing research
+
+**For industry professionals**: Emphasize:
+- Real-world applications
+- Performance benchmarks
+- Practical benefits
+- Ease of integration
+
+**For general technical audience**: Emphasize:
+- Clear problem statement
+- Intuitive explanations
+- Concrete examples
+- Live demonstrations
+
+### 14.6.2 Presentation Structure
+
+**The Three-Act Structure**:
+
+**Act 1: Hook (2-3 minutes)**
+- Start with a problem everyone relates to
+- Show why existing solutions fall short
+- Preview your solution
+
+**Example opening**:
+> "Imagine you're analyzing DNA sequences—3 billion letters long. You need to find patterns, but traditional string matching would take hours. What if I told you we could do it in seconds? That's what suffix arrays enable, and today I'll show you how."
+
+**Act 2: Journey (10-15 minutes)**
+- Explain your approach
+- Show key innovations
+- Demonstrate with examples
+- Present results
+
+**Example structure**:
+1. **Background** (2 min): What are suffix arrays?
+2. **Challenge** (2 min): Why are they hard to build efficiently?
+3. **Solution** (4 min): Our DC3 algorithm (with visualization)
+4. **Results** (3 min): Performance benchmarks
+5. **Applications** (2 min): Real use cases
+
+**Act 3: Impact (2-3 minutes)**
+- Summarize contributions
+- Discuss broader implications
+- Suggest future directions
+- Call to action (try the library, read the paper, collaborate)
+
+### 14.6.3 Slide Design Principles
+
+**The 10-20-30 Rule** (Guy Kawasaki):
+- **10 slides**: No more (forces focus)
+- **20 minutes**: Leave time for questions
+- **30 point font**: If it's smaller, it's too detailed for a slide
+
+**One idea per slide**:
+```
+Bad slide:
+Title: "Our Approach"
+- Algorithm design
+- Implementation details
+- Optimization techniques
+- Performance analysis
+- Comparison with baselines
+- Statistical significance
+- Future work
+
+Good approach: Split into 7 slides, each with one focus
+```
+
+**More text ≠ better**:
+```
+Bad:
+"We implemented a segment tree data structure that allows 
+for efficient range queries and point updates with logarithmic 
+time complexity for both operations using a complete binary 
+tree representation stored in an array."
+
+Good:
+"Segment Tree: O(log n) range queries + updates"
+[Show visualization]
+```
+
+**Visualize, don't tell**:
+
+Instead of text, use:
+- Diagrams showing algorithm steps
+- Graphs showing performance comparisons
+- Animations demonstrating concepts
+- Live demos of your tool
+
+**Code on slides**:
+- **Maximum 10 lines**
+- **Syntax highlighting**
+- **Large font** (30pt minimum)
+- **Focus on key lines** (gray out boilerplate)
+
+### 14.6.4 Presentation Delivery
+
+**Practice, practice, practice**:
+- **Rehearse out loud** (different from mental practice)
+- **Time yourself** (always takes longer than you think)
+- **Record yourself** (painful but effective)
+- **Present to friends** (get feedback)
+
+**The day of presentation**:
+
+**30 minutes before**:
+- Test equipment (HDMI works? Slides load?)
+- Open backup (PDF in case software fails)
+- Have demo ready (if live coding/demo)
+- Breathe (you've got this!)
+
+**During presentation**:
+
+**Body language**:
+- Stand confidently (feet shoulder-width)
+- Make eye contact (3-second rule per person)
+- Use gestures (but don't pace excessively)
+- Face the audience (not the screen)
+
+**Voice**:
+- Speak clearly and slowly (nervous = fast)
+- Vary pace and volume (monotone = boring)
+- Pause for emphasis (silence is powerful)
+- Project (back row should hear)
+
+**Handling questions**:
+
+**The good question**:
+```
+"Great question! Let me show you..."
+[Answer confidently]
+```
+
+**The question you don't know**:
+```
+"That's an interesting point I haven't explored yet. I'd 
+ love to discuss it with you after the talk."
+[Don't fake knowledge]
+```
+
+**The hostile question**:
+```
+"I appreciate your concern. Let me clarify..."
+[Stay calm and professional]
+```
+
+**The off-topic question**:
+```
+"That's a bit outside the scope of today's talk, but I'd 
+ be happy to chat about it afterward."
+[Politely redirect]
+```
+
+### 14.6.5 Demo Best Practices
+
+**Live demos are risky but impactful**. Here's how to minimize risk:
+
+**1. Have a backup**: Pre-recorded video of the demo if live fails
+
+**2. Use realistic but reliable inputs**: 
+```
+Bad: Random data (might expose bug you haven't seen)
+Good: Carefully prepared test cases
+```
+
+**3. Narrate as you go**:
+```
+"Now I'm loading a DNA sequence with 1 million base pairs...
+ [wait for load]
+ And searching for this motif...
+ [click search]
+ Notice how fast that was—less than 100ms for the entire search!"
+```
+
+**4. Have checkpoints**:
+```
+"If the live demo fails, I have these pre-generated results..."
+[Show screenshot]
+```
+
+**5. Keep it short**: 2-3 minutes maximum for demo
+
+## 14.7 Final Project Integration Checklist
+
+Before you present, ensure you've addressed:
+
+**✅ Functionality**:
+- Core features work correctly
+- Edge cases handled
+- Error messages are helpful
+- Performance is acceptable
+
+**✅ Code Quality**:
+- Code is readable and well-organized
+- Algorithms are correctly implemented
+- No obvious bugs or security issues
+- Follows consistent style
+
+**✅ Testing**:
+- Unit tests for core functions
+- Integration tests for workflows
+- Tests actually pass
+- Edge cases covered
+
+**✅ Documentation**:
+- README with installation and usage
+- Docstrings for public APIs
+- Examples demonstrate key features
+- Architecture is explained
+
+**✅ Performance**:
+- Profiled to find bottlenecks
+- Optimized critical paths
+- Benchmarks show improvement over baselines
+- Scales to target data sizes
+
+**✅ Presentation**:
+- Slides are clear and visual
+- Story flows logically
+- Demo is prepared and tested
+- Practiced multiple times
+
+**✅ Submission**:
+- All files in repository
+- Repository is public (or shared with instructor)
+- README includes link to presentation
+- License file included
+
+## 14.8 Summary: The Home Stretch
+
+Congratulations! You've reached the final push. This chapter covered the skills that transform projects from "working on my laptop" to "ready for the world":
+
+- **System integration**: Making components work together seamlessly
+- **Performance optimization**: Finding and fixing bottlenecks
+- **Documentation**: Making your work understandable and usable
+- **Testing and review**: Ensuring quality and correctness
+- **Presentation**: Communicating your work effectively
+
+**Remember**: The best algorithm is one that actually gets used. Integration, documentation, and presentation are what make that happen.
+
+Next chapter: We'll bring it all together with your final presentations, peer review, and reflection on your journey through advanced algorithms.
+
+You're almost there. Time to show the world what you've built! 🚀
+
+---
+

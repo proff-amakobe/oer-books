@@ -1,0 +1,2109 @@
+# Chapter 10: String Algorithms - Finding Needles in Haystacks at Light Speed
+
+**When Ctrl+F Meets Computer Science**
+
+*"There are only two hard problems in computer science: cache invalidation, naming things, and off-by-one errors."* - Traditional programmer joke
+
+*"And finding all occurrences of 'ACGT' in 3 billion base pairs of DNA in under a second."* - Modern bioinformatics
+
+## 10.1 Introduction: The Search for Patterns
+
+Here's something you probably do dozens of times a day without thinking: press Ctrl+F and search for text. Finding "pizza" in a restaurant menu. Searching your email for "flight confirmation." Looking for your name in a document.
+
+Seems simple, right? Just look at each position and check if the pattern matches!
+
+But here's the thing: if you're Google, you're searching through *trillions* of web pages. If you're doing DNA analysis, you're searching through 3 *billion* letters of genetic code. If you're building an antivirus, you're checking files against millions of malware signatures. The naive approach—checking every single position—becomes painfully slow.
+
+**The beautiful surprise**: There are algorithms that can search text *without looking at every character*. They can skip ahead, eliminating huge chunks of text in single jumps. They can search for thousands of patterns simultaneously. They can even tell you about *all possible substrings* in a text by building a single magical data structure.
+
+String algorithms are behind:
+- **Text editors**: Every Ctrl+F you've ever done
+- **DNA sequencing**: Finding genes, detecting mutations
+- **Plagiarism detection**: Comparing documents
+- **Data compression**: Finding repeated patterns (ZIP, gzip)
+- **Network security**: Deep packet inspection, malware detection
+- **Biometric matching**: Fingerprints, DNA forensics
+
+In this chapter, we'll go from the naive O(nm) approach to algorithms that run in O(n+m) time—a massive improvement. We'll build suffix trees that answer complex queries in milliseconds. And we'll see how these algorithms are literally helping cure diseases and catch criminals.
+
+Ready to become a string algorithm wizard? Let's dive in!
+
+## 10.2 The Pattern Matching Problem
+
+### 10.2.1 The Setup
+
+You have:
+- A **text** T of length n (the haystack)
+- A **pattern** P of length m (the needle)
+
+**Goal**: Find all positions in T where P occurs.
+
+**Example**:
+```
+Text:    "ABABCABABA"
+Pattern: "ABA"
+
+Answer: Positions 0, 5, 7
+         ABA           (position 0)
+              ABA      (position 5)
+                ABA    (position 7)
+```
+
+### 10.2.2 The Naive Approach
+
+The obvious solution: try every position!
+
+```python
+def naive_search(text, pattern):
+    """The obvious way to search. Works, but slow!"""
+    n = len(text)
+    m = len(pattern)
+    positions = []
+    
+    # Try starting at each position
+    for i in range(n - m + 1):
+        # Check if pattern matches at position i
+        match = True
+        for j in range(m):
+            if text[i + j] != pattern[j]:
+                match = False
+                break
+        
+        if match:
+            positions.append(i)
+    
+    return positions
+```
+
+**Time complexity**: O(nm)
+- We check n positions
+- Each check takes O(m) comparisons in the worst case
+
+**When is this bad?**
+
+```python
+# Worst case: almost matches everywhere
+text = "AAAAAAAAAA"  # n = 10,000
+pattern = "AAAAB"     # m = 5
+
+# We'll compare 4 characters at EVERY position!
+# Total comparisons: nearly 10,000 × 5 = 50,000
+```
+
+For short patterns and texts, naive search is fine. But we can do *much* better!
+
+### 10.2.3 The Key Insight
+
+When a mismatch occurs, **we've learned something about the text**. Can we use this information to skip ahead smartly instead of just moving one position forward?
+
+That's the key idea behind both KMP and Boyer-Moore algorithms!
+
+## 10.3 The KMP Algorithm: Never Look Back
+
+### 10.3.1 The Big Idea
+
+The **Knuth-Morris-Pratt (KMP)** algorithm is based on a brilliant observation:
+
+**When a mismatch occurs, we already know some characters in the text (the ones that matched). We can use this information to skip ahead without re-examining those characters!**
+
+Let's see this in action:
+
+```
+Text:    "ABABCABABA"
+Pattern: "ABABD"
+
+Position 0:
+  ABABC...
+  ABABD
+      ^--- Mismatch at position 4
+
+Naive approach: Move pattern one position right, start checking from the beginning again.
+
+KMP insight: We just matched "ABAB". We know "AB" appears at both the start 
+and end of what we matched. So we can skip ahead!
+
+  ABABC...
+    ABABD
+    ^--- Resume checking here! We already know "AB" matches.
+```
+
+The KMP algorithm never moves backward in the text. It only moves forward, using information about the pattern itself to make smart jumps.
+
+### 10.3.2 The Failure Function (Longest Proper Prefix-Suffix)
+
+The magic of KMP is in preprocessing the pattern to build a **failure function** (also called the LPS array: Longest Proper Prefix which is also Suffix).
+
+For each position j in the pattern, the failure function tells us: *"If we mismatch at position j+1, where should we continue matching?"*
+
+**Definition**: failure[j] = length of the longest proper prefix of pattern[0..j] that is also a suffix.
+
+Let's compute this for pattern "ABABD":
+
+```
+Position:  0 1 2 3 4
+Pattern:   A B A B D
+Failure:   0 0 1 2 0
+
+Position 0 ('A'): No proper prefix/suffix. failure[0] = 0
+Position 1 ('AB'): No match. failure[1] = 0
+Position 2 ('ABA'): 'A' is both prefix and suffix. failure[2] = 1
+Position 3 ('ABAB'): 'AB' is both prefix and suffix. failure[3] = 2
+Position 4 ('ABABD'): No match. failure[4] = 0
+```
+
+**Another example**: Pattern "AABAAB"
+
+```
+Position:  0 1 2 3 4 5
+Pattern:   A A B A A B
+Failure:   0 1 0 1 2 3
+
+Position 0: failure[0] = 0
+Position 1 ('AA'): 'A' matches. failure[1] = 1
+Position 2 ('AAB'): No match. failure[2] = 0
+Position 3 ('AABA'): 'A' matches. failure[3] = 1
+Position 4 ('AABAA'): 'AA' matches. failure[4] = 2
+Position 5 ('AABAAB'): 'AAB' matches. failure[5] = 3
+```
+
+### 10.3.3 Computing the Failure Function
+
+Here's where KMP gets really clever: we use KMP to build the failure function!
+
+```python
+def compute_failure_function(pattern):
+    """
+    Compute the failure function (LPS array) for KMP.
+    
+    failure[i] = length of longest proper prefix of pattern[0..i]
+                 that is also a suffix of pattern[0..i]
+    """
+    m = len(pattern)
+    failure = [0] * m
+    
+    # Length of previous longest prefix suffix
+    length = 0
+    i = 1
+    
+    while i < m:
+        if pattern[i] == pattern[length]:
+            # Characters match! Extend the current prefix-suffix
+            length += 1
+            failure[i] = length
+            i += 1
+        else:
+            # Mismatch!
+            if length != 0:
+                # Try a shorter prefix-suffix
+                # This is the KMP trick applied to building the table!
+                length = failure[length - 1]
+            else:
+                # No prefix-suffix exists
+                failure[i] = 0
+                i += 1
+    
+    return failure
+```
+
+**Let's trace this for pattern "AABAAB"**:
+
+```
+Initial: failure = [0, 0, 0, 0, 0, 0], length = 0, i = 1
+
+i=1: pattern[1]='A' == pattern[0]='A'
+     length = 1, failure[1] = 1
+     → failure = [0, 1, 0, 0, 0, 0]
+
+i=2: pattern[2]='B' != pattern[1]='A'
+     length becomes 0
+     failure[2] = 0
+     → failure = [0, 1, 0, 0, 0, 0]
+
+i=3: pattern[3]='A' == pattern[0]='A'
+     length = 1, failure[3] = 1
+     → failure = [0, 1, 0, 1, 0, 0]
+
+i=4: pattern[4]='A' == pattern[1]='A'
+     length = 2, failure[4] = 2
+     → failure = [0, 1, 0, 1, 2, 0]
+
+i=5: pattern[5]='B' == pattern[2]='B'
+     length = 3, failure[5] = 3
+     → failure = [0, 1, 0, 1, 2, 3]
+```
+
+**Time complexity**: O(m) - we process each character at most twice!
+
+### 10.3.4 The KMP Search Algorithm
+
+Now that we have the failure function, searching is straightforward:
+
+```python
+def kmp_search(text, pattern):
+    """
+    Find all occurrences of pattern in text using KMP algorithm.
+    
+    Time: O(n + m) where n = len(text), m = len(pattern)
+    Space: O(m) for the failure function
+    """
+    n = len(text)
+    m = len(pattern)
+    
+    if m == 0:
+        return []
+    
+    # Preprocess: compute failure function
+    failure = compute_failure_function(pattern)
+    
+    positions = []
+    i = 0  # Index in text
+    j = 0  # Index in pattern
+    
+    while i < n:
+        if pattern[j] == text[i]:
+            # Characters match!
+            i += 1
+            j += 1
+        
+        if j == m:
+            # Found complete match!
+            positions.append(i - j)
+            j = failure[j - 1]  # Look for next match
+        
+        elif i < n and pattern[j] != text[i]:
+            # Mismatch after j matches
+            if j != 0:
+                # Use failure function to skip
+                j = failure[j - 1]
+            else:
+                # No matches at all, move forward in text
+                i += 1
+    
+    return positions
+```
+
+### 10.3.5 Complete KMP Example Trace
+
+Let's trace through a complete example:
+
+```
+Text:    "ABABDABACDABABCABABA"
+Pattern: "ABABCABABA"
+
+Step 1: Compute failure function for "ABABCABABA"
+Position:  0 1 2 3 4 5 6 7 8 9
+Pattern:   A B A B C A B A B A
+Failure:   0 0 1 2 0 1 2 3 4 3
+
+Step 2: Search
+
+Text:    A B A B D A B A C D A B A B C A B A B A
+Pattern: A B A B C A B A B A
+         0 1 2 3 4
+         i i i i i
+         ^^^^^^^--- Match: A B A B
+                 ^--- Mismatch: D != C
+
+j = 4, failure[3] = 2, so j becomes 2
+(We know "AB" at start matches "AB" before the mismatch)
+
+Text:    A B A B D A B A C D A B A B C A B A B A
+Pattern:     A B A B C A B A B A
+               2 3 4 5 6 7 8 9
+               ^^^--- Already know these match!
+                   ^--- Mismatch: D != C
+
+j = 4, failure[3] = 2, so j becomes 2
+
+Text:    A B A B D A B A C D A B A B C A B A B A
+Pattern:         A B A B C A B A B A
+                 2 3 4 5 6 7
+                     ^--- Mismatch: C != C... wait, continue
+                         ^--- Mismatch: D != A
+
+j = 2, failure[1] = 0, so j becomes 0
+
+Text:    A B A B D A B A C D A B A B C A B A B A
+Pattern:                   A B A B C A B A B A
+                           0 1 2 3 4 5 6 7 8 9
+                           ^^^^^^^^^^^^^^^^^^^--- FULL MATCH!
+
+Found at position 10!
+```
+
+**Why KMP is Fast**:
+- Each character in the text is examined at most once
+- The pattern pointer j only moves forward or jumps back via the failure function
+- Total time: O(n + m)
+
+### 10.3.6 Full Implementation with Examples
+
+```python
+class KMPMatcher:
+    """
+    Knuth-Morris-Pratt string matching algorithm.
+    Provides O(n+m) time pattern matching.
+    """
+    
+    def __init__(self, pattern):
+        """Initialize with a pattern to search for."""
+        self.pattern = pattern
+        self.m = len(pattern)
+        self.failure = self._compute_failure_function()
+    
+    def _compute_failure_function(self):
+        """Compute failure function (LPS array)."""
+        m = self.m
+        failure = [0] * m
+        length = 0
+        i = 1
+        
+        while i < m:
+            if self.pattern[i] == self.pattern[length]:
+                length += 1
+                failure[i] = length
+                i += 1
+            else:
+                if length != 0:
+                    length = failure[length - 1]
+                else:
+                    failure[i] = 0
+                    i += 1
+        
+        return failure
+    
+    def search(self, text):
+        """
+        Find all occurrences of pattern in text.
+        Returns list of starting positions.
+        """
+        n = len(text)
+        positions = []
+        
+        i = 0  # text index
+        j = 0  # pattern index
+        
+        while i < n:
+            if self.pattern[j] == text[i]:
+                i += 1
+                j += 1
+            
+            if j == self.m:
+                # Found match
+                positions.append(i - j)
+                j = self.failure[j - 1]
+            elif i < n and self.pattern[j] != text[i]:
+                if j != 0:
+                    j = self.failure[j - 1]
+                else:
+                    i += 1
+        
+        return positions
+    
+    def search_first(self, text):
+        """Find first occurrence only (faster if you only need one)."""
+        n = len(text)
+        i = 0
+        j = 0
+        
+        while i < n:
+            if self.pattern[j] == text[i]:
+                i += 1
+                j += 1
+            
+            if j == self.m:
+                return i - j
+            elif i < n and self.pattern[j] != text[i]:
+                if j != 0:
+                    j = self.failure[j - 1]
+                else:
+                    i += 1
+        
+        return -1  # Not found
+    
+    def count(self, text):
+        """Count occurrences (faster than len(search()))."""
+        return len(self.search(text))
+    
+    def get_failure_function(self):
+        """Return the failure function for educational purposes."""
+        return self.failure.copy()
+    
+    def visualize_failure_function(self):
+        """Print a nice visualization of the failure function."""
+        print(f"Pattern: {self.pattern}")
+        print(f"Index:   {' '.join(str(i) for i in range(self.m))}")
+        print(f"Failure: {' '.join(str(f) for f in self.failure)}")
+        print()
+        for i, f in enumerate(self.failure):
+            if f > 0:
+                prefix = self.pattern[:f]
+                suffix = self.pattern[i-f+1:i+1]
+                print(f"  Position {i}: '{prefix}' == '{suffix}' (length {f})")
+
+# Examples
+def example_basic_search():
+    """Basic pattern matching example."""
+    text = "ABABDABACDABABCABABA"
+    pattern = "ABAB"
+    
+    matcher = KMPMatcher(pattern)
+    positions = matcher.search(text)
+    
+    print(f"Text: {text}")
+    print(f"Pattern: {pattern}")
+    print(f"Found at positions: {positions}")
+    print()
+    
+    # Visualize matches
+    for pos in positions:
+        print(" " * pos + pattern + f" (position {pos})")
+
+def example_dna_search():
+    """DNA sequence matching."""
+    # Sample DNA sequence
+    dna = "ACGTACGTTAGCTAGCTAGCTAGCTACGTACGTT"
+    motif = "TAGC"
+    
+    matcher = KMPMatcher(motif)
+    positions = matcher.search(dna)
+    
+    print(f"DNA Sequence: {dna}")
+    print(f"Motif: {motif}")
+    print(f"Found {len(positions)} occurrences at positions: {positions}")
+
+def example_failure_function():
+    """Demonstrate failure function."""
+    patterns = ["ABABC", "AABAAB", "ABCABC", "AAAAA"]
+    
+    for pattern in patterns:
+        print(f"\nPattern: {pattern}")
+        matcher = KMPMatcher(pattern)
+        matcher.visualize_failure_function()
+
+def benchmark_comparison():
+    """Compare KMP with naive search."""
+    import time
+    
+    # Create worst-case scenario
+    text = "A" * 100000 + "B"
+    pattern = "A" * 100 + "B"
+    
+    # Naive search
+    start = time.time()
+    naive_positions = naive_search(text, pattern)
+    naive_time = time.time() - start
+    
+    # KMP search
+    start = time.time()
+    matcher = KMPMatcher(pattern)
+    kmp_positions = matcher.search(text)
+    kmp_time = time.time() - start
+    
+    print(f"Text length: {len(text)}")
+    print(f"Pattern length: {len(pattern)}")
+    print(f"Matches found: {len(kmp_positions)}")
+    print(f"\nNaive search: {naive_time:.4f} seconds")
+    print(f"KMP search: {kmp_time:.4f} seconds")
+    print(f"Speedup: {naive_time/kmp_time:.2f}x")
+
+if __name__ == "__main__":
+    print("=== Basic Search ===")
+    example_basic_search()
+    
+    print("\n=== DNA Search ===")
+    example_dna_search()
+    
+    print("\n=== Failure Function Examples ===")
+    example_failure_function()
+    
+    print("\n=== Benchmark ===")
+    benchmark_comparison()
+```
+
+## 10.4 Rabin-Karp: Hashing to the Rescue
+
+### 10.4.1 The Hashing Idea
+
+The **Rabin-Karp algorithm** takes a completely different approach: treat strings as numbers!
+
+**Main idea**:
+1. Convert the pattern to a hash value
+2. Compute hash values for all substrings of text
+3. When hashes match, verify with direct comparison
+
+**Why is this clever?** 
+
+If we can compute hashes efficiently, we can compare a pattern against a text position in O(1) time!
+
+### 10.4.2 Rolling Hash Function
+
+The magic is in the **rolling hash**: we can compute the hash of the next substring from the previous hash in O(1) time!
+
+Think of the string as a number in base d (where d = alphabet size):
+
+```
+For string "ABC" with A=1, B=2, C=3, base d=10:
+hash("ABC") = 1×10² + 2×10¹ + 3×10⁰ = 123
+
+For string "BCD" with B=2, C=3, D=4:
+hash("BCD") = 2×10² + 3×10¹ + 4×10⁰ = 234
+```
+
+**Rolling property**:
+```
+If we know hash("ABC") = 123, we can compute hash("BCD"):
+
+1. Subtract contribution of 'A': 123 - 1×10² = 23
+2. Shift left (multiply by base): 23 × 10 = 230
+3. Add new character 'D': 230 + 4 = 234
+```
+
+In one formula:
+```
+hash(s[1..m]) = (hash(s[0..m-1]) - s[0]×d^(m-1)) × d + s[m]
+```
+
+### 10.4.3 Dealing with Large Numbers
+
+For long strings, hashes become huge numbers. Solution: **modular arithmetic**!
+
+```
+hash(s) = (Σ s[i] × d^(m-1-i)) mod q
+```
+
+Where q is a large prime number (e.g., 10^9 + 7).
+
+**Important caveat**: With modular hashing, collisions can occur (different strings with same hash). So we must verify matches!
+
+### 10.4.4 Implementation
+
+```python
+class RabinKarp:
+    """
+    Rabin-Karp string matching using rolling hash.
+    Expected time: O(n+m), Worst case: O(nm) due to hash collisions.
+    """
+    
+    def __init__(self, d=256, q=101):
+        """
+        Initialize Rabin-Karp matcher.
+        
+        Args:
+            d: Base for hash (alphabet size, default 256 for ASCII)
+            q: Prime modulus for hash (use large prime to reduce collisions)
+        """
+        self.d = d
+        self.q = q
+    
+    def search(self, text, pattern):
+        """
+        Find all occurrences of pattern in text.
+        Returns list of starting positions.
+        """
+        n = len(text)
+        m = len(pattern)
+        
+        if m > n:
+            return []
+        
+        positions = []
+        
+        # Calculate d^(m-1) % q for rolling hash
+        h = pow(self.d, m - 1, self.q)
+        
+        # Calculate hash values for pattern and first window of text
+        pattern_hash = 0
+        text_hash = 0
+        
+        for i in range(m):
+            pattern_hash = (self.d * pattern_hash + ord(pattern[i])) % self.q
+            text_hash = (self.d * text_hash + ord(text[i])) % self.q
+        
+        # Slide the pattern over text
+        for i in range(n - m + 1):
+            # Check if hash values match
+            if pattern_hash == text_hash:
+                # Hash match! Verify character by character
+                if text[i:i+m] == pattern:
+                    positions.append(i)
+            
+            # Calculate hash for next window (if not at end)
+            if i < n - m:
+                # Remove leading character, add trailing character
+                text_hash = (self.d * (text_hash - ord(text[i]) * h) + 
+                           ord(text[i + m])) % self.q
+                
+                # Make sure hash is positive
+                if text_hash < 0:
+                    text_hash += self.q
+        
+        return positions
+    
+    def search_multiple(self, text, patterns):
+        """
+        Search for multiple patterns simultaneously.
+        This is where Rabin-Karp really shines!
+        
+        Returns dict mapping pattern to list of positions.
+        """
+        if not patterns:
+            return {}
+        
+        n = len(text)
+        m = len(patterns[0])  # Assume all patterns same length
+        
+        # Verify all patterns have same length
+        if not all(len(p) == m for p in patterns):
+            raise ValueError("All patterns must have same length")
+        
+        results = {pattern: [] for pattern in patterns}
+        
+        # Calculate pattern hashes
+        pattern_hashes = {}
+        for pattern in patterns:
+            h = 0
+            for char in pattern:
+                h = (self.d * h + ord(char)) % self.q
+            pattern_hashes[h] = pattern
+        
+        # Calculate d^(m-1) % q
+        h = pow(self.d, m - 1, self.q)
+        
+        # Calculate hash for first window
+        text_hash = 0
+        for i in range(m):
+            text_hash = (self.d * text_hash + ord(text[i])) % self.q
+        
+        # Slide over text
+        for i in range(n - m + 1):
+            # Check if this hash matches any pattern
+            if text_hash in pattern_hashes:
+                pattern = pattern_hashes[text_hash]
+                # Verify match
+                if text[i:i+m] == pattern:
+                    results[pattern].append(i)
+            
+            # Roll hash forward
+            if i < n - m:
+                text_hash = (self.d * (text_hash - ord(text[i]) * h) + 
+                           ord(text[i + m])) % self.q
+                if text_hash < 0:
+                    text_hash += self.q
+        
+        return results
+
+def visualize_rolling_hash(text, pattern):
+    """Show how rolling hash works step by step."""
+    d = 256
+    q = 101
+    n = len(text)
+    m = len(pattern)
+    
+    print(f"Text: {text}")
+    print(f"Pattern: {pattern}")
+    print(f"Base (d): {d}, Modulus (q): {q}\n")
+    
+    # Calculate pattern hash
+    pattern_hash = 0
+    for char in pattern:
+        pattern_hash = (d * pattern_hash + ord(char)) % q
+    print(f"Pattern hash: {pattern_hash}\n")
+    
+    # Show first few windows
+    h = pow(d, m - 1, q)
+    text_hash = 0
+    
+    for i in range(m):
+        text_hash = (d * text_hash + ord(text[i])) % q
+    
+    print("Rolling through text:")
+    for i in range(min(n - m + 1, 10)):  # Show first 10 positions
+        window = text[i:i+m]
+        match = "✓ MATCH!" if text_hash == pattern_hash else ""
+        print(f"  Position {i}: '{window}' → hash = {text_hash} {match}")
+        
+        # Roll forward
+        if i < n - m:
+            text_hash = (d * (text_hash - ord(text[i]) * h) + 
+                        ord(text[i + m])) % q
+            if text_hash < 0:
+                text_hash += self.q
+
+# Examples
+def example_basic_rabin_karp():
+    """Basic Rabin-Karp example."""
+    text = "ABABDABACDABABCABABA"
+    pattern = "ABAB"
+    
+    rk = RabinKarp()
+    positions = rk.search(text, pattern)
+    
+    print(f"Text: {text}")
+    print(f"Pattern: {pattern}")
+    print(f"Found at positions: {positions}\n")
+    
+    for pos in positions:
+        print(" " * pos + pattern + f" (position {pos})")
+
+def example_multiple_patterns():
+    """Search for multiple patterns at once - RK's superpower!"""
+    text = "The quick brown fox jumps over the lazy dog"
+    patterns = ["quick", "brown", "jumps", "lazy ", "cat  "]  # Same length
+    
+    rk = RabinKarp()
+    results = rk.search_multiple(text, patterns)
+    
+    print(f"Text: {text}\n")
+    print("Searching for multiple 5-character patterns:")
+    for pattern, positions in results.items():
+        if positions:
+            print(f"  '{pattern}': found at {positions}")
+        else:
+            print(f"  '{pattern}': not found")
+
+def example_plagiarism_detection():
+    """Simulate plagiarism detection using Rabin-Karp."""
+    original = """
+    The quick brown fox jumps over the lazy dog.
+    Pack my box with five dozen liquor jugs.
+    How vexingly quick daft zebras jump!
+    """
+    
+    suspicious = """
+    The quick brown fox jumps over the lazy cat.
+    Pack my box with five dozen liquor jugs.
+    Amazingly, zebras can jump quite far!
+    """
+    
+    # Look for common phrases (6+ word sequences)
+    window_size = 30
+    
+    rk = RabinKarp()
+    
+    # Extract all windows from original
+    original_clean = original.replace('\n', ' ')
+    suspicious_clean = suspicious.replace('\n', ' ')
+    
+    original_phrases = set()
+    for i in range(len(original_clean) - window_size + 1):
+        phrase = original_clean[i:i+window_size]
+        if phrase.strip():  # Skip whitespace-only
+            original_phrases.add(phrase)
+    
+    # Find matches in suspicious text
+    matches = 0
+    for phrase in original_phrases:
+        positions = rk.search(suspicious_clean, phrase)
+        if positions:
+            matches += 1
+            print(f"Matching phrase: '{phrase.strip()}'")
+    
+    similarity = (matches / len(original_phrases)) * 100 if original_phrases else 0
+    print(f"\nSimilarity: {similarity:.1f}%")
+
+if __name__ == "__main__":
+    print("=== Basic Rabin-Karp ===")
+    example_basic_rabin_karp()
+    
+    print("\n=== Multiple Pattern Search ===")
+    example_multiple_patterns()
+    
+    print("\n=== Plagiarism Detection ===")
+    example_plagiarism_detection()
+```
+
+### 10.4.5 When to Use Rabin-Karp
+
+**Advantages**:
+- ✅ Great for multiple pattern matching
+- ✅ Easy to implement
+- ✅ Works well in practice with good hash functions
+- ✅ Can be extended to 2D pattern matching (images!)
+
+**Disadvantages**:
+- ❌ Worst case still O(nm) due to hash collisions
+- ❌ Requires good prime number selection
+- ❌ Verification step needed for matches
+
+**Best use cases**:
+- Plagiarism detection (many patterns)
+- Virus scanning (thousands of signatures)
+- Finding duplicate files
+- 2D pattern matching in images
+
+## 10.5 Suffix Arrays: The Swiss Army Knife
+
+### 10.5.1 What's a Suffix?
+
+A **suffix** of a string is any substring that starts at some position and goes to the end.
+
+```
+String: "banana"
+
+Suffixes:
+0: banana
+1: anana
+2: nana
+3: ana
+4: na
+5: a
+```
+
+### 10.5.2 The Suffix Array
+
+A **suffix array** is simply an array of integers representing the starting positions of all suffixes, sorted in lexicographical order.
+
+```
+String: "banana$"  ($ = end marker, lexicographically smallest)
+
+Sorted suffixes:
+$           → position 6
+a$          → position 5
+ana$        → position 3
+anana$      → position 1
+banana$     → position 0
+na$         → position 4
+nana$       → position 2
+
+Suffix array: [6, 5, 3, 1, 0, 4, 2]
+```
+
+**Why is this useful?**
+
+Once you have a suffix array, you can:
+- Find any pattern in O(m log n) time using binary search!
+- Find longest repeated substring
+- Find longest common substring between two strings
+- Build compressed text indices
+
+### 10.5.3 Building a Suffix Array (Naive)
+
+The simplest approach: generate all suffixes, sort them.
+
+```python
+def build_suffix_array_naive(text):
+    """
+    Build suffix array by sorting all suffixes.
+    Time: O(n² log n) due to string comparisons
+    """
+    n = len(text)
+    
+    # Create list of (suffix, starting_position) pairs
+    suffixes = [(text[i:], i) for i in range(n)]
+    
+    # Sort by suffix
+    suffixes.sort()
+    
+    # Extract positions
+    suffix_array = [pos for suffix, pos in suffixes]
+    
+    return suffix_array
+```
+
+**Problem**: Comparing strings takes O(n) time, so sorting takes O(n² log n). Too slow for large texts!
+
+### 10.5.4 Building a Suffix Array Efficiently
+
+Modern algorithms build suffix arrays in O(n log n) or even O(n) time! The key: don't compare full suffixes, use integer comparisons instead.
+
+**DC3/Skew Algorithm** (simplified version):
+
+```python
+class SuffixArray:
+    """
+    Efficient suffix array construction and queries.
+    Uses prefix doubling for O(n log² n) construction.
+    """
+    
+    def __init__(self, text):
+        """Build suffix array for text."""
+        self.text = text
+        self.n = len(text)
+        self.suffix_array = self._build()
+        self.lcp = self._build_lcp()
+    
+    def _build(self):
+        """
+        Build suffix array using prefix doubling.
+        Time: O(n log² n)
+        """
+        n = self.n
+        
+        # Initialize: rank by first character
+        rank = [ord(self.text[i]) for i in range(n)]
+        suffix_array = list(range(n))
+        
+        k = 1
+        while k < n:
+            # Sort by (rank[i], rank[i+k]) pairs
+            # This ranks based on first 2k characters
+            
+            def compare_key(i):
+                return (rank[i], rank[i + k] if i + k < n else -1)
+            
+            suffix_array.sort(key=compare_key)
+            
+            # Recompute ranks
+            new_rank = [0] * n
+            for i in range(1, n):
+                prev = suffix_array[i - 1]
+                curr = suffix_array[i]
+                
+                # Same rank if both pairs are equal
+                if (rank[prev], rank[prev + k] if prev + k < n else -1) == \
+                   (rank[curr], rank[curr + k] if curr + k < n else -1):
+                    new_rank[curr] = new_rank[prev]
+                else:
+                    new_rank[curr] = new_rank[prev] + 1
+            
+            rank = new_rank
+            k *= 2
+        
+        return suffix_array
+    
+    def _build_lcp(self):
+        """
+        Build LCP (Longest Common Prefix) array.
+        lcp[i] = length of longest common prefix between 
+                 suffix_array[i] and suffix_array[i-1]
+        
+        Time: O(n)
+        """
+        n = self.n
+        lcp = [0] * n
+        
+        # Inverse suffix array: rank[i] = position of suffix i in sorted order
+        rank = [0] * n
+        for i in range(n):
+            rank[self.suffix_array[i]] = i
+        
+        h = 0
+        for i in range(n):
+            if rank[i] > 0:
+                j = self.suffix_array[rank[i] - 1]
+                
+                # Calculate LCP between suffix i and suffix j
+                while (i + h < n and j + h < n and 
+                       self.text[i + h] == self.text[j + h]):
+                    h += 1
+                
+                lcp[rank[i]] = h
+                
+                if h > 0:
+                    h -= 1
+        
+        return lcp
+    
+    def search(self, pattern):
+        """
+        Find all occurrences of pattern using binary search.
+        Time: O(m log n)  where m = len(pattern)
+        """
+        # Binary search for lower bound
+        left = self._lower_bound(pattern)
+        
+        # Binary search for upper bound
+        right = self._upper_bound(pattern)
+        
+        if left == right:
+            return []  # Not found
+        
+        return [self.suffix_array[i] for i in range(left, right)]
+    
+    def _lower_bound(self, pattern):
+        """Find first position where pattern could be inserted."""
+        left, right = 0, self.n
+        
+        while left < right:
+            mid = (left + right) // 2
+            suffix_pos = self.suffix_array[mid]
+            suffix = self.text[suffix_pos:]
+            
+            if suffix < pattern:
+                left = mid + 1
+            else:
+                right = mid
+        
+        return left
+    
+    def _upper_bound(self, pattern):
+        """Find position after last match of pattern."""
+        left, right = 0, self.n
+        
+        while left < right:
+            mid = (left + right) // 2
+            suffix_pos = self.suffix_array[mid]
+            suffix = self.text[suffix_pos:]
+            
+            if suffix.startswith(pattern) or suffix < pattern:
+                left = mid + 1
+            else:
+                right = mid
+        
+        return left
+    
+    def longest_repeated_substring(self):
+        """
+        Find the longest substring that appears at least twice.
+        Uses LCP array.
+        
+        Time: O(n)
+        """
+        max_lcp = 0
+        max_pos = 0
+        
+        for i in range(1, self.n):
+            if self.lcp[i] > max_lcp:
+                max_lcp = self.lcp[i]
+                max_pos = self.suffix_array[i]
+        
+        if max_lcp == 0:
+            return ""
+        
+        return self.text[max_pos:max_pos + max_lcp]
+    
+    def count_distinct_substrings(self):
+        """
+        Count number of distinct substrings.
+        
+        Formula: n(n+1)/2 - sum(lcp)
+        (Total possible substrings minus duplicates)
+        """
+        n = self.n
+        total = n * (n + 1) // 2
+        duplicates = sum(self.lcp)
+        return total - duplicates
+    
+    def visualize(self, max_display=15):
+        """Print suffix array and LCP array for visualization."""
+        print(f"Text: {self.text}\n")
+        print("Suffix Array:")
+        print("Index | Pos | LCP | Suffix")
+        print("------|-----|-----|" + "-" * 30)
+        
+        for i in range(min(len(self.suffix_array), max_display)):
+            pos = self.suffix_array[i]
+            suffix = self.text[pos:]
+            lcp_val = self.lcp[i] if i < len(self.lcp) else 0
+            
+            # Truncate long suffixes
+            if len(suffix) > 25:
+                suffix = suffix[:25] + "..."
+            
+            print(f"{i:5} | {pos:3} | {lcp_val:3} | {suffix}")
+        
+        if len(self.suffix_array) > max_display:
+            print(f"... ({len(self.suffix_array) - max_display} more)")
+
+# Examples
+def example_basic_suffix_array():
+    """Basic suffix array construction and search."""
+    text = "banana$"
+    
+    sa = SuffixArray(text)
+    sa.visualize()
+    
+    # Search for pattern
+    pattern = "ana"
+    positions = sa.search(pattern)
+    print(f"\nSearching for '{pattern}':")
+    print(f"Found at positions: {positions}")
+
+def example_repeated_substrings():
+    """Find longest repeated substring."""
+    text = "to be or not to be$"
+    
+    sa = SuffixArray(text)
+    lrs = sa.longest_repeated_substring()
+    
+    print(f"Text: {text}")
+    print(f"Longest repeated substring: '{lrs}'")
+    
+    # Count distinct substrings
+    count = sa.count_distinct_substrings()
+    print(f"Number of distinct substrings: {count}")
+
+def example_dna_analysis():
+    """DNA sequence analysis with suffix arrays."""
+    dna = "ACGTACGTTAGCTAGCTAGCT$"
+    
+    sa = SuffixArray(dna)
+    
+    print(f"DNA Sequence: {dna[:-1]}")  # Don't print $
+    
+    # Find repeated sequences
+    lrs = sa.longest_repeated_substring()
+    print(f"Longest repeated sequence: {lrs}")
+    
+    # Search for specific motifs
+    motifs = ["ACGT", "TAGC", "GCT"]
+    print("\nMotif occurrences:")
+    for motif in motifs:
+        positions = sa.search(motif)
+        print(f"  {motif}: {len(positions)} times at positions {positions}")
+
+if __name__ == "__main__":
+    print("=== Basic Suffix Array ===")
+    example_basic_suffix_array()
+    
+    print("\n=== Repeated Substrings ===")
+    example_repeated_substrings()
+    
+    print("\n=== DNA Analysis ===")
+    example_dna_analysis()
+```
+
+### 10.5.5 Applications of Suffix Arrays
+
+**Text compression** (BWT - Burrows-Wheeler Transform):
+```python
+def bwt_encode(text):
+    """Burrows-Wheeler Transform using suffix array."""
+    sa = SuffixArray(text + '$')
+    # BWT is the last column of the sorted rotations
+    return ''.join(text[(pos - 1) % len(text)] for pos in sa.suffix_array)
+```
+
+**Longest common substring of two strings**:
+```python
+def longest_common_substring(s1, s2):
+    """Find longest substring common to both s1 and s2."""
+    combined = s1 + '#' + s2 + '$'
+    sa = SuffixArray(combined)
+    
+    max_lcp = 0
+    max_pos = 0
+    
+    for i in range(1, len(combined)):
+        # Check if adjacent suffixes are from different strings
+        pos1 = sa.suffix_array[i-1]
+        pos2 = sa.suffix_array[i]
+        
+        if (pos1 < len(s1)) != (pos2 < len(s1)):  # From different strings
+            if sa.lcp[i] > max_lcp:
+                max_lcp = sa.lcp[i]
+                max_pos = pos1
+    
+    return combined[max_pos:max_pos + max_lcp]
+```
+
+## 10.6 Suffix Trees: Suffix Arrays on Steroids
+
+### 10.6.1 What's a Suffix Tree?
+
+A **suffix tree** is like a suffix array, but in tree form. It's a compressed trie of all suffixes.
+
+**Key properties**:
+- All suffixes of the text are paths from root to leaves
+- Each edge is labeled with a substring
+- Can be built in O(n) time!
+- Answers many queries in O(m) time (where m = pattern length)
+
+**Example for "banana$"**:
+
+```
+                    root
+               /     |      \
+            $      a        na
+                 / | \        |
+               $  na$ na$    $
+                   |   |
+                  $   na$
+                       |
+                      $
+```
+
+### 10.6.2 When to Use Suffix Trees vs Arrays
+
+**Suffix Trees**:
+- ✅ Fastest queries: O(m) pattern matching
+- ✅ Supports many complex queries
+- ❌ More memory: O(n) space but with large constants
+- ❌ More complex to implement
+
+**Suffix Arrays**:
+- ✅ Less memory: just an array of integers
+- ✅ Simpler to implement and understand
+- ✅ Cache-friendly
+- ❌ Slower queries: O(m log n)
+
+**Rule of thumb**: Use suffix arrays unless you need the absolute fastest queries or very complex string operations.
+
+(For brevity, we'll focus on suffix arrays in our project, but know that suffix trees exist for when you need that extra speed!)
+
+## 10.7 Applications to Genomics
+
+### 10.7.1 DNA Sequence Matching
+
+DNA is just a string over the alphabet {A, C, G, T}. String algorithms are perfect for:
+
+**Finding genes**:
+```python
+def find_gene_markers(genome, start_codon="ATG", stop_codons=["TAA", "TAG", "TGA"]):
+    """Find potential genes (regions between start and stop codons)."""
+    sa = SuffixArray(genome)
+    
+    # Find all start positions
+    start_positions = sa.search(start_codon)
+    
+    genes = []
+    for start in start_positions:
+        # Look for nearest stop codon
+        for stop_codon in stop_codons:
+            positions = sa.search(stop_codon)
+            # Find first stop after start
+            valid_stops = [p for p in positions if p > start and (p - start) % 3 == 0]
+            if valid_stops:
+                stop = min(valid_stops)
+                if stop - start >= 30:  # Minimum gene length
+                    genes.append((start, stop, genome[start:stop+3]))
+                break
+    
+    return genes
+```
+
+**Detecting mutations**:
+```python
+def find_mutations(reference, sample, min_length=10):
+    """Find differences between reference and sample genomes."""
+    # Build suffix array for combined sequence
+    lcs = longest_common_substring(reference, sample)
+    
+    # Regions not in LCS are potential mutations
+    # (This is simplified - real mutation detection is more complex)
+    return lcs
+```
+
+### 10.7.2 Read Alignment
+
+When sequencing DNA, you get millions of short "reads" (fragments). You need to align them to a reference genome.
+
+```python
+class ReadAligner:
+    """Align short DNA reads to a reference genome."""
+    
+    def __init__(self, reference):
+        """Build index of reference genome."""
+        self.reference = reference
+        self.sa = SuffixArray(reference + '$')
+    
+    def align_read(self, read, max_mismatches=2):
+        """
+        Find best alignment of read to reference.
+        Allows up to max_mismatches differences.
+        """
+        # Try exact match first
+        positions = self.sa.search(read)
+        if positions:
+            return [(pos, 0) for pos in positions]  # (position, mismatches)
+        
+        # Try with mismatches (simplified - real tools use more sophisticated methods)
+        results = []
+        n = len(self.reference)
+        m = len(read)
+        
+        for i in range(n - m + 1):
+            mismatches = sum(1 for j in range(m) 
+                           if self.reference[i+j] != read[j])
+            if mismatches <= max_mismatches:
+                results.append((i, mismatches))
+        
+        return sorted(results, key=lambda x: x[1])[:10]  # Best 10 alignments
+```
+
+### 10.7.3 Detecting Tandem Repeats
+
+Tandem repeats are patterns that repeat consecutively in DNA (like "CAGCAGCAG").
+
+```python
+def find_tandem_repeats(genome, min_period=2, min_copies=3):
+    """Find tandem repeats in genome."""
+    repeats = []
+    n = len(genome)
+    
+    for period in range(min_period, n // min_copies):
+        i = 0
+        while i < n - period * min_copies:
+            # Check if pattern repeats
+            pattern = genome[i:i+period]
+            copies = 1
+            j = i + period
+            
+            while j + period <= n and genome[j:j+period] == pattern:
+                copies += 1
+                j += period
+            
+            if copies >= min_copies:
+                repeats.append({
+                    'position': i,
+                    'pattern': pattern,
+                    'copies': copies,
+                    'length': copies * period
+                })
+                i = j
+            else:
+                i += 1
+    
+    return repeats
+```
+
+## 10.8 Chapter Project: Professional String Processing Library
+
+Let's build a comprehensive, production-ready string algorithm library!
+
+### 10.8.1 Project Structure
+
+```
+StringAlgorithms/
+├── stringalgo/
+│   ├── __init__.py
+│   ├── matchers/
+│   │   ├── __init__.py
+│   │   ├── kmp.py              # KMP implementation
+│   │   ├── rabin_karp.py       # Rabin-Karp implementation
+│   │   └── boyer_moore.py      # Bonus: Boyer-Moore
+│   ├── suffix/
+│   │   ├── __init__.py
+│   │   ├── suffix_array.py     # Suffix array
+│   │   └── lcp.py              # LCP array utilities
+│   ├── applications/
+│   │   ├── __init__.py
+│   │   ├── genomics.py         # DNA/protein analysis
+│   │   ├── compression.py      # BWT, LZ77
+│   │   └── plagiarism.py       # Document comparison
+│   └── utils/
+│       ├── __init__.py
+│       ├── alphabet.py         # Alphabet handling
+│       └── visualization.py    # Pretty printing
+├── tests/
+│   ├── test_matchers.py
+│   ├── test_suffix_array.py
+│   └── test_applications.py
+├── benchmarks/
+│   ├── benchmark_search.py
+│   └── generate_data.py
+├── examples/
+│   ├── dna_analysis.py
+│   ├── text_search.py
+│   └── compression_demo.py
+├── docs/
+│   ├── API.md
+│   └── tutorial.md
+├── setup.py
+└── README.md
+```
+
+### 10.8.2 Core Library Implementation
+
+```python
+# stringalgo/__init__.py
+"""
+StringAlgo: A comprehensive string algorithm library.
+
+Provides efficient implementations of:
+- Pattern matching (KMP, Rabin-Karp, Boyer-Moore)
+- Suffix arrays and LCP arrays
+- Applications (genomics, compression, plagiarism detection)
+"""
+
+__version__ = "1.0.0"
+
+from .matchers import KMPMatcher, RabinKarpMatcher
+from .suffix import SuffixArray
+from .applications import DNAAnalyzer, TextCompressor, PlagiarismDetector
+
+__all__ = [
+    'KMPMatcher',
+    'RabinKarpMatcher',
+    'SuffixArray',
+    'DNAAnalyzer',
+    'TextCompressor',
+    'PlagiarismDetector',
+]
+```
+
+```python
+# stringalgo/applications/genomics.py
+"""
+DNA and protein sequence analysis tools.
+"""
+
+from ..suffix import SuffixArray
+from ..matchers import KMPMatcher
+from typing import List, Tuple, Dict
+
+class DNAAnalyzer:
+    """Comprehensive DNA sequence analysis."""
+    
+    # Standard genetic code
+    CODON_TABLE = {
+        'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
+        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
+        'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
+        'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
+        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
+        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
+        'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
+        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
+        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
+        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
+        'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
+        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
+        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
+        'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
+        'TAC':'Y', 'TAT':'Y', 'TAA':'*', 'TAG':'*',
+        'TGC':'C', 'TGT':'C', 'TGA':'*', 'TGG':'W',
+    }
+    
+    def __init__(self, sequence: str):
+        """
+        Initialize with DNA sequence.
+        
+        Args:
+            sequence: DNA sequence (A, C, G, T)
+        """
+        self.sequence = sequence.upper()
+        self._validate_sequence()
+        self.suffix_array = None
+    
+    def _validate_sequence(self):
+        """Ensure sequence contains only valid DNA bases."""
+        valid = set('ACGT')
+        if not all(c in valid for c in self.sequence):
+            raise ValueError("Invalid DNA sequence. Use only A, C, G, T")
+    
+    def build_index(self):
+        """Build suffix array index for fast queries."""
+        if self.suffix_array is None:
+            self.suffix_array = SuffixArray(self.sequence + '$')
+        return self
+    
+    def translate(self, start_pos=0) -> str:
+        """
+        Translate DNA to protein sequence.
+        
+        Args:
+            start_pos: Starting position (0-indexed)
+            
+        Returns:
+            Protein sequence as string of amino acids
+        """
+        protein = []
+        for i in range(start_pos, len(self.sequence) - 2, 3):
+            codon = self.sequence[i:i+3]
+            if len(codon) == 3:
+                amino_acid = self.CODON_TABLE.get(codon, 'X')
+                if amino_acid == '*':  # Stop codon
+                    break
+                protein.append(amino_acid)
+        return ''.join(protein)
+    
+    def find_orfs(self, min_length=30) -> List[Dict]:
+        """
+        Find Open Reading Frames (potential genes).
+        
+        An ORF is a sequence between start codon (ATG) and stop codon.
+        
+        Args:
+            min_length: Minimum ORF length in nucleotides
+            
+        Returns:
+            List of ORFs with position, length, and protein sequence
+        """
+        start_codon = "ATG"
+        stop_codons = {"TAA", "TAG", "TGA"}
+        
+        orfs = []
+        
+        # Search in all three reading frames
+        for frame in range(3):
+            i = frame
+            while i < len(self.sequence) - 2:
+                codon = self.sequence[i:i+3]
+                
+                if codon == start_codon:
+                    # Found start, look for stop
+                    start = i
+                    j = i + 3
+                    
+                    while j < len(self.sequence) - 2:
+                        codon = self.sequence[j:j+3]
+                        if codon in stop_codons:
+                            # Found complete ORF
+                            length = j - start + 3
+                            if length >= min_length:
+                                protein = self.translate(start)
+                                orfs.append({
+                                    'start': start,
+                                    'end': j + 3,
+                                    'frame': frame,
+                                    'length': length,
+                                    'dna': self.sequence[start:j+3],
+                                    'protein': protein
+                                })
+                            break
+                        j += 3
+                    
+                    i = j + 3
+                else:
+                    i += 3
+        
+        return sorted(orfs, key=lambda x: x['length'], reverse=True)
+    
+    def gc_content(self, window_size=None) -> float or List[float]:
+        """
+        Calculate GC content (percentage of G and C bases).
+        
+        Args:
+            window_size: If specified, return sliding window GC content
+            
+        Returns:
+            Overall GC% or list of windowed GC%
+        """
+        if window_size is None:
+            gc_count = self.sequence.count('G') + self.sequence.count('C')
+            return (gc_count / len(self.sequence)) * 100
+        
+        # Sliding window
+        gc_values = []
+        for i in range(len(self.sequence) - window_size + 1):
+            window = self.sequence[i:i+window_size]
+            gc = (window.count('G') + window.count('C')) / window_size * 100
+            gc_values.append(gc)
+        
+        return gc_values
+    
+    def find_motif(self, motif: str) -> List[int]:
+        """
+        Find all occurrences of a DNA motif.
+        
+        Args:
+            motif: DNA sequence to search for
+            
+        Returns:
+            List of starting positions
+        """
+        if self.suffix_array is None:
+            # Use KMP for one-time searches
+            matcher = KMPMatcher(motif.upper())
+            return matcher.search(self.sequence)
+        else:
+            # Use suffix array for indexed searches
+            return self.suffix_array.search(motif.upper())
+    
+    def find_repeats(self, min_length=10) -> List[Tuple[str, int]]:
+        """
+        Find repeated sequences.
+        
+        Args:
+            min_length: Minimum repeat length
+            
+        Returns:
+            List of (sequence, count) tuples
+        """
+        if self.suffix_array is None:
+            self.build_index()
+        
+        repeats = {}
+        
+        # Use LCP array to find repeats efficiently
+        for i in range(1, len(self.suffix_array.lcp)):
+            lcp_len = self.suffix_array.lcp[i]
+            if lcp_len >= min_length:
+                pos = self.suffix_array.suffix_array[i]
+                repeat = self.sequence[pos:pos+lcp_len]
+                repeats[repeat] = repeats.get(repeat, 0) + 1
+        
+        return sorted(repeats.items(), key=lambda x: x[1], reverse=True)
+    
+    def complement(self) -> str:
+        """Return complement strand."""
+        comp = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+        return ''.join(comp[base] for base in self.sequence)
+    
+    def reverse_complement(self) -> str:
+        """Return reverse complement (other DNA strand)."""
+        return self.complement()[::-1]
+    
+    def find_palindromes(self, min_length=6) -> List[Tuple[int, int, str]]:
+        """
+        Find palindromic sequences (restriction sites).
+        
+        Returns:
+            List of (start, end, sequence) tuples
+        """
+        palindromes = []
+        rc = self.reverse_complement()
+        
+        # A palindrome in DNA means sequence equals its reverse complement
+        for length in range(min_length, min(50, len(self.sequence) // 2)):
+            for i in range(len(self.sequence) - length + 1):
+                seq = self.sequence[i:i+length]
+                if seq == rc[-(i+length):-i if i > 0 else None]:
+                    palindromes.append((i, i+length, seq))
+        
+        return palindromes
+
+# Example usage
+def example_dna_analysis():
+    """Comprehensive DNA analysis example."""
+    
+    # Sample DNA sequence (part of human beta-globin gene)
+    dna = """
+    ATGGTGCACCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG
+    TTGGTATCAAGGTTACAAGACAGGTTTAAGGAGACCAATAGAAACTGGGCATGTGGAGACAGAGAAGACTCTTGGGTTTCTGATAGGCACTGACTCTCTCTGCCTATTGGTCTATTTTCCCACCCTTAGG
+    """
+    dna = ''.join(dna.split())  # Remove whitespace
+    
+    analyzer = DNAAnalyzer(dna)
+    analyzer.build_index()
+    
+    print("=== DNA Analysis ===\n")
+    print(f"Sequence length: {len(dna)} bp")
+    print(f"GC content: {analyzer.gc_content():.1f}%\n")
+    
+    # Find ORFs
+    print("Open Reading Frames:")
+    orfs = analyzer.find_orfs(min_length=30)
+    for i, orf in enumerate(orfs[:3], 1):
+        print(f"\nORF {i}:")
+        print(f"  Position: {orf['start']}-{orf['end']}")
+        print(f"  Length: {orf['length']} bp")
+        print(f"  Protein: {orf['protein'][:50]}...")
+    
+    # Find motifs
+    print("\n\nMotif Search:")
+    motifs = ["ATG", "TAA", "GCC"]
+    for motif in motifs:
+        positions = analyzer.find_motif(motif)
+        print(f"  {motif}: {len(positions)} occurrences")
+    
+    # Find repeats
+    print("\n\nRepeated Sequences:")
+    repeats = analyzer.find_repeats(min_length=10)
+    for seq, count in repeats[:5]:
+        print(f"  {seq}: {count} times")
+
+if __name__ == "__main__":
+    example_dna_analysis()
+```
+
+### 10.8.3 Text Compression Application
+
+```python
+# stringalgo/applications/compression.py
+"""
+Text compression using string algorithms.
+"""
+
+from ..suffix import SuffixArray
+from typing import Tuple, List
+
+class TextCompressor:
+    """Text compression using Burrows-Wheeler Transform and Move-To-Front."""
+    
+    @staticmethod
+    def bwt_encode(text: str) -> Tuple[str, int]:
+        """
+        Burrows-Wheeler Transform encoding.
+        
+        Returns:
+            (transformed_text, original_index)
+        """
+        if not text or text[-1] != '$':
+            text = text + '$'
+        
+        sa = SuffixArray(text)
+        
+        # BWT is last column of sorted rotations
+        bwt = ''.join(text[(pos - 1) % len(text)] 
+                     for pos in sa.suffix_array)
+        
+        # Find position of original string
+        original_idx = sa.suffix_array.index(0)
+        
+        return bwt, original_idx
+    
+    @staticmethod
+    def bwt_decode(bwt: str, original_idx: int) -> str:
+        """Decode Burrows-Wheeler Transform."""
+        n = len(bwt)
+        
+        # Create table of (char, original_index) pairs
+        table = sorted((bwt[i], i) for i in range(n))
+        
+        # Follow the links
+        result = []
+        idx = original_idx
+        for _ in range(n):
+            char, idx = table[idx]
+            result.append(char)
+        
+        return ''.join(result).rstrip('$')
+    
+    @staticmethod
+    def mtf_encode(text: str) -> List[int]:
+        """
+        Move-To-Front encoding.
+        Works well after BWT as it clusters repeated characters.
+        """
+        # Initialize alphabet in order
+        alphabet = list(set(text))
+        alphabet.sort()
+        
+        encoded = []
+        for char in text:
+            idx = alphabet.index(char)
+            encoded.append(idx)
+            
+            # Move character to front
+            alphabet.pop(idx)
+            alphabet.insert(0, char)
+        
+        return encoded
+    
+    @staticmethod
+    def mtf_decode(encoded: List[int], alphabet: List[str]) -> str:
+        """Decode Move-To-Front encoding."""
+        alphabet = alphabet.copy()
+        decoded = []
+        
+        for idx in encoded:
+            char = alphabet[idx]
+            decoded.append(char)
+            
+            # Move to front
+            alphabet.pop(idx)
+            alphabet.insert(0, char)
+        
+        return ''.join(decoded)
+    
+    @classmethod
+    def compress(cls, text: str) -> dict:
+        """
+        Full compression pipeline: BWT + MTF + RLE.
+        
+        Returns:
+            Dictionary with compressed data and metadata
+        """
+        # Step 1: BWT
+        bwt, orig_idx = cls.bwt_encode(text)
+        
+        # Step 2: MTF
+        alphabet = sorted(set(text + '$'))
+        mtf = cls.mtf_encode(bwt)
+        
+        # Step 3: Run-Length Encoding of MTF output
+        rle = []
+        i = 0
+        while i < len(mtf):
+            count = 1
+            while i + count < len(mtf) and mtf[i + count] == mtf[i]:
+                count += 1
+            rle.append((mtf[i], count))
+            i += count
+        
+        return {
+            'rle': rle,
+            'alphabet': alphabet,
+            'original_idx': orig_idx,
+            'original_length': len(text)
+        }
+    
+    @classmethod
+    def decompress(cls, compressed: dict) -> str:
+        """Decompress data."""
+        # Decode RLE
+        mtf = []
+        for value, count in compressed['rle']:
+            mtf.extend([value] * count)
+        
+        # Decode MTF
+        bwt = cls.mtf_decode(mtf, compressed['alphabet'])
+        
+        # Decode BWT
+        text = cls.bwt_decode(bwt, compressed['original_idx'])
+        
+        return text
+
+# Example
+def example_compression():
+    """Demonstrate text compression."""
+    text = "banana" * 100  # Highly repetitive
+    
+    compressor = TextCompressor()
+    
+    print(f"Original text: {len(text)} characters")
+    print(f"Sample: {text[:50]}...\n")
+    
+    # Compress
+    compressed = compressor.compress(text)
+    
+    # Estimate compressed size (rough)
+    compressed_size = len(compressed['rle']) * 2  # (value, count) pairs
+    
+    print(f"Compressed: ~{compressed_size} units")
+    print(f"Compression ratio: {len(text) / compressed_size:.2f}x\n")
+    
+    # Decompress
+    decompressed = compressor.decompress(compressed)
+    
+    # Verify
+    assert decompressed == text, "Compression/decompression failed!"
+    print("✓ Compression successful and reversible")
+
+if __name__ == "__main__":
+    example_compression()
+```
+
+### 10.8.4 Command-Line Tool
+
+```python
+# stringalgo/cli.py
+"""
+Command-line interface for StringAlgo library.
+"""
+
+import argparse
+import sys
+from pathlib import Path
+
+from . import KMPMatcher, RabinKarpMatcher, SuffixArray
+from .applications import DNAAnalyzer, TextCompressor, PlagiarismDetector
+
+def cmd_search(args):
+    """Search for pattern in text file."""
+    with open(args.text, 'r') as f:
+        text = f.read()
+    
+    if args.algorithm == 'kmp':
+        matcher = KMPMatcher(args.pattern)
+        positions = matcher.search(text)
+    elif args.algorithm == 'rk':
+        matcher = RabinKarpMatcher()
+        positions = matcher.search(text, args.pattern)
+    else:  # suffix array
+        sa = SuffixArray(text)
+        positions = sa.search(args.pattern)
+    
+    print(f"Found {len(positions)} occurrences:")
+    for pos in positions[:args.max_results]:
+        # Show context
+        start = max(0, pos - 20)
+        end = min(len(text), pos + len(args.pattern) + 20)
+        context = text[start:end]
+        print(f"  Position {pos}: ...{context}...")
+
+def cmd_dna(args):
+    """Analyze DNA sequence."""
+    with open(args.input, 'r') as f:
+        sequence = ''.join(line.strip() for line in f if not line.startswith('>'))
+    
+    analyzer = DNAAnalyzer(sequence)
+    analyzer.build_index()
+    
+    print(f"Sequence length: {len(sequence)} bp")
+    print(f"GC content: {analyzer.gc_content():.1f}%")
+    
+    if args.orfs:
+        print("\nOpen Reading Frames:")
+        orfs = analyzer.find_orfs()
+        for i, orf in enumerate(orfs[:10], 1):
+            print(f"  {i}. Position {orf['start']}-{orf['end']}, "
+                  f"Length: {orf['length']} bp")
+    
+    if args.motif:
+        positions = analyzer.find_motif(args.motif)
+        print(f"\nMotif '{args.motif}': {len(positions)} occurrences")
+
+def cmd_compress(args):
+    """Compress text file."""
+    with open(args.input, 'r') as f:
+        text = f.read()
+    
+    compressor = TextCompressor()
+    compressed = compressor.compress(text)
+    
+    # Save compressed data
+    import pickle
+    with open(args.output, 'wb') as f:
+        pickle.dump(compressed, f)
+    
+    print(f"Compressed {len(text)} bytes")
+    print(f"Output: {args.output}")
+
+def cmd_decompress(args):
+    """Decompress file."""
+    import pickle
+    with open(args.input, 'rb') as f:
+        compressed = pickle.load(f)
+    
+    compressor = TextCompressor()
+    text = compressor.decompress(compressed)
+    
+    with open(args.output, 'w') as f:
+        f.write(text)
+    
+    print(f"Decompressed to {args.output}")
+
+def main():
+    """Main CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description='StringAlgo: Advanced string algorithms toolkit'
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Command to run')
+    
+    # Search command
+    search_parser = subparsers.add_parser('search', help='Search for pattern')
+    search_parser.add_argument('text', help='Text file')
+    search_parser.add_argument('pattern', help='Pattern to search')
+    search_parser.add_argument('-a', '--algorithm', 
+                              choices=['kmp', 'rk', 'sa'],
+                              default='kmp',
+                              help='Algorithm to use')
+    search_parser.add_argument('-n', '--max-results', type=int, default=10,
+                              help='Maximum results to show')
+    search_parser.set_defaults(func=cmd_search)
+    
+    # DNA command
+    dna_parser = subparsers.add_parser('dna', help='Analyze DNA sequence')
+    dna_parser.add_argument('input', help='FASTA file')
+    dna_parser.add_argument('--orfs', action='store_true',
+                           help='Find open reading frames')
+    dna_parser.add_argument('--motif', help='Search for motif')
+    dna_parser.set_defaults(func=cmd_dna)
+    
+    # Compress command
+    comp_parser = subparsers.add_parser('compress', help='Compress text')
+    comp_parser.add_argument('input', help='Input file')
+    comp_parser.add_argument('output', help='Output file')
+    comp_parser.set_defaults(func=cmd_compress)
+    
+    # Decompress command
+    decomp_parser = subparsers.add_parser('decompress', help='Decompress text')
+    decomp_parser.add_argument('input', help='Compressed file')
+    decomp_parser.add_argument('output', help='Output file')
+    decomp_parser.set_defaults(func=cmd_decompress)
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return 1
+    
+    try:
+        args.func(args)
+        return 0
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+if __name__ == '__main__':
+    sys.exit(main())
+```
+
+## 10.9 Summary and Key Takeaways
+
+**Core Algorithms**:
+1. **Naive search**: O(nm) - simple but slow
+2. **KMP**: O(n+m) - never backs up in text, uses failure function
+3. **Rabin-Karp**: O(n+m) expected - rolling hash, great for multiple patterns
+4. **Suffix arrays**: O(n log n) build, O(m log n) search - versatile and powerful
+
+**When to Use What**:
+- **One-time search, short pattern**: Naive is fine
+- **Repeated searches, same pattern**: KMP
+- **Multiple patterns**: Rabin-Karp
+- **Complex queries, many searches**: Suffix array
+- **Need absolute fastest**: Suffix tree (not covered in depth)
+
+**Real-World Impact**:
+- **Genomics**: Finding genes, aligning reads, detecting mutations
+- **Security**: Malware detection, intrusion detection
+- **Data compression**: BWT, LZ77, gzip
+- **Plagiarism detection**: Document comparison
+- **Text editors**: Your Ctrl+F!
+
+**The Big Picture**:
+
+String algorithms show us that sometimes the "obvious" solution (check every position) can be dramatically improved with clever preprocessing and mathematical insights. The KMP failure function, the Rabin-Karp rolling hash, and suffix arrays all use different techniques to achieve the same goal: avoid redundant work.
+
+These aren't just academic exercises—they're the backbone of tools you use every day, from Google Search to genome sequencing to your text editor. String algorithms have literally helped sequence the human genome, catch criminals through DNA evidence, and make the internet searchable.
+
+## 10.10 Exercises
+
+### Basic Understanding
+
+1. **Failure Function**: Compute the KMP failure function by hand for:
+   - "ABCABC"
+   - "AAAA"
+   - "ABCDABD"
+
+2. **Hash Collision**: Find two different 3-character strings that have the same Rabin-Karp hash (mod 101).
+
+3. **Suffix Array**: Build the suffix array by hand for "BANANA$".
+
+### Implementation Challenges
+
+4. **Boyer-Moore**: Implement the Boyer-Moore algorithm (uses "bad character" and "good suffix" rules).
+
+5. **Aho-Corasick**: Implement the Aho-Corasick algorithm for matching multiple patterns simultaneously in O(n + m + z) time.
+
+6. **Longest Palindrome**: Use a suffix array to find the longest palindromic substring.
+
+### Application Problems
+
+7. **Fuzzy Matching**: Extend KMP to allow k mismatches.
+
+8. **DNA Compression**: Build a specialized DNA compressor that exploits:
+   - Only 4-character alphabet
+   - Common motifs
+   - Palindromic sequences
+
+9. **Code Clone Detection**: Build a tool to detect copy-pasted code (allowing variable renaming).
+
+### Advanced Topics
+
+10. **Suffix Tree Construction**: Implement Ukkonen's online suffix tree algorithm.
+
+11. **Longest Common Extension**: Use suffix arrays with RMQ to answer "longest common prefix starting at positions i and j" in O(1).
+
+12. **All-Pairs Suffix-Prefix**: For a set of strings, find all pairs where a suffix of one matches a prefix of another (useful for genome assembly).
+
+### Research Extensions
+
+13. **Approximate Matching**: Implement an algorithm for finding patterns with edit distance ≤ k.
+
+14. **Bidirectional Search**: Implement bidirectional pattern matching (search from both ends).
+
+15. **Compressed Pattern Matching**: Search directly on BWT-compressed text without decompression.
+
+## 10.11 Further Reading
+
+**Classic Papers**:
+- Knuth, Morris, Pratt (1977): "Fast Pattern Matching in Strings"
+- Karp, Rabin (1987): "Efficient Randomized Pattern-Matching Algorithms"
+- Manber, Myers (1993): "Suffix Arrays: A New Method for On-Line String Searches"
+
+**Books**:
+- Gusfield: "Algorithms on Strings, Trees, and Sequences" (the Bible of string algorithms)
+- Crochemore, Rytter: "Text Algorithms"
+- Ohlebusch: "Bioinformatics Algorithms: Sequence Analysis, Genome Rearrangements, and Phylogenetic Reconstruction"
+
+**Online Resources**:
+- Rosalind: Bioinformatics problems (great practice!)
+- CP-Algorithms: String algorithms tutorials
+- Stanford CS166: Advanced string structures lectures
+
+**Software**:
+- BWA: DNA read aligner (uses BWT and FM-index)
+- grep: Uses Boyer-Moore variants
+- gzip: Uses LZ77 with suffix-based matching
+
+---
+
+You've now mastered the algorithms behind text search, DNA sequencing, and data compression! String algorithms are everywhere, from the code you write to search your emails, to the tools scientists use to understand our genetic code.
+
+Next up: we'll explore matrix algorithms and the Fast Fourier Transform—where string-like thinking meets continuous mathematics!
