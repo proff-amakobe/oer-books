@@ -1,5 +1,6 @@
 project:
   type: book
+  output-dir: _book
 
 book:
   title: "Advanced Computational Algorithms"
@@ -8,42 +9,83 @@ book:
   license: "CC BY 4.0"
   date: today
   cover-image: images/cover.png
+  
   chapters:
-    - part: "Preface"
-      chapters: 
-        - index.qmd
-    - part: "Part 1: Foundations"
+    - title.qmd
+    - edition.qmd
+    - copyright.qmd
+    - dedication.qmd
+    - about-author.qmd
+    - about-gdsi.qmd
+    - how-to-use.qmd
+    - index.qmd        # Preface
+  
+    # Numbered chapters start here (Chapter 1)
+    - part: "Part I: Foundations"
       chapters:
         - chapters/01-introduction.qmd
         - chapters/02-Divide-and-Conquer.qmd
+
     - part: "Part II: Core Techniques"
       chapters:
         - chapters/03-Data-Structures-for-Efficiency.qmd
         - chapters/04-Greedy-Algorithms.qmd
         - chapters/05-Dynamic-Programming.qmd
         - chapters/06-Randomized-Algorithms.qmd
+
     - part: "Part III: Complexity and Hard Problems"
       chapters:
         - chapters/07-Computational-Complexity.qmd
         - chapters/08-Approximation-Algorithms.qmd
+
     - part: "Part IV: Advanced Topics"
       chapters:
         - chapters/09-Advanced-Graph-Algorithms.qmd
         - chapters/10-String-Processing-Algorithms.qmd
         - chapters/11-Numerical-Algorithms.qmd
         - chapters/12-Advanced-Data-Structures.qmd
+
     - part: "Part V: Applications and Professional Practice"
       chapters:
         - chapters/13-Research-Industry-Applications.qmd
         - chapters/14-Project-Development.qmd
         - chapters/15-Final-Presentations.qmd
-    
 
 format:
   html:
     theme: cosmo
     toc: true
     code-copy: true
+    number-sections: true
+
   pdf:
-    documentclass: scrreprt
-  epub: default
+    documentclass: scrbook
+    papersize: "7in,10in"
+    fontsize: 11pt
+    geometry:
+      - top=0.75in
+      - bottom=0.75in
+      - inner=0.9in      # extra space for binding
+      - outer=0.6in
+    linestretch: 1.15
+    mainfont: "Times New Roman"
+    monofont: "Courier New"
+    monofontoptions:
+      - Scale=0.9
+    include-in-header:
+      text: |
+        % Better code block spacing
+        \usepackage{setspace}
+        \AtBeginEnvironment{verbatim}{\singlespacing}
+        % Algorithm environments
+        \usepackage{algorithm}
+        \usepackage{algpseudocode}
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    linkcolor: blue
+    urlcolor: blue
+
+  epub:
+    number-sections: true
