@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Chapter 2: Requirements Engineering – The Complete Software Engineering Lifecycle</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/03-systems-modeling.html" rel="next">
+<link href="../chapters/01-introduction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles/custom.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/02-requirements-engineering.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Chapter 2: Requirements Engineering</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">The Complete Software Engineering Lifecycle</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">The Complete Software Engineering Lifecycle</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preface.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">preface.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../acknowledgments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">acknowledgments.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Chapter 1: Introduction to Software Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-requirements-engineering.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Chapter 2: Requirements Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-systems-modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Chapter 3: Systems Modeling and UML</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-software-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Chapter 4: Software Architecture and Design Patterns</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-ui-ux.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 5: UI/UX Design and Prototyping</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-agile-methodologies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Chapter 6: Agile Methodologies and Project Management</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-version-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Chapter 7: Version Control Workflows</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-prototype-implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">09-prototype-implementation.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">10-testing.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-quality-assurance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">11-quality-assurance.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-data-management-apis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">12-data-management-apis.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-devops-deployment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">13-devops-deployment.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">14-security.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-maintenance-evolution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">15-maintenance-evolution.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-final-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">16-final-integration.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-project-guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">appendix-project-guide.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">glossary.html</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives"><span class="header-section-number">5.1</span> Learning Objectives</a></li>
+  <li><a href="#the-foundation-of-software-projects" id="toc-the-foundation-of-software-projects" class="nav-link" data-scroll-target="#the-foundation-of-software-projects"><span class="header-section-number">5.2</span> 2.1 The Foundation of Software Projects</a>
+  <ul class="collapse">
+  <li><a href="#why-requirements-matter" id="toc-why-requirements-matter" class="nav-link" data-scroll-target="#why-requirements-matter">2.1.1 Why Requirements Matter</a></li>
+  <li><a href="#the-requirements-engineering-process" id="toc-the-requirements-engineering-process" class="nav-link" data-scroll-target="#the-requirements-engineering-process">2.1.2 The Requirements Engineering Process</a></li>
+  </ul></li>
+  <li><a href="#types-of-requirements" id="toc-types-of-requirements" class="nav-link" data-scroll-target="#types-of-requirements"><span class="header-section-number">5.3</span> 2.2 Types of Requirements</a>
+  <ul class="collapse">
+  <li><a href="#functional-requirements" id="toc-functional-requirements" class="nav-link" data-scroll-target="#functional-requirements">2.2.1 Functional Requirements</a></li>
+  <li><a href="#non-functional-requirements" id="toc-non-functional-requirements" class="nav-link" data-scroll-target="#non-functional-requirements">2.2.2 Non-Functional Requirements</a></li>
+  <li><a href="#the-relationship-between-functional-and-non-functional-requirements" id="toc-the-relationship-between-functional-and-non-functional-requirements" class="nav-link" data-scroll-target="#the-relationship-between-functional-and-non-functional-requirements">2.2.3 The Relationship Between Functional and Non-Functional Requirements</a></li>
+  <li><a href="#constraints-and-assumptions" id="toc-constraints-and-assumptions" class="nav-link" data-scroll-target="#constraints-and-assumptions">2.2.4 Constraints and Assumptions</a></li>
+  </ul></li>
+  <li><a href="#requirements-elicitation-techniques" id="toc-requirements-elicitation-techniques" class="nav-link" data-scroll-target="#requirements-elicitation-techniques"><span class="header-section-number">5.4</span> 2.3 Requirements Elicitation Techniques</a>
+  <ul class="collapse">
+  <li><a href="#stakeholder-interviews" id="toc-stakeholder-interviews" class="nav-link" data-scroll-target="#stakeholder-interviews">2.3.1 Stakeholder Interviews</a></li>
+  <li><a href="#questionnaires-and-surveys" id="toc-questionnaires-and-surveys" class="nav-link" data-scroll-target="#questionnaires-and-surveys">2.3.2 Questionnaires and Surveys</a></li>
+  <li><a href="#observation-and-ethnography" id="toc-observation-and-ethnography" class="nav-link" data-scroll-target="#observation-and-ethnography">2.3.3 Observation and Ethnography</a></li>
+  <li><a href="#workshops-and-focus-groups" id="toc-workshops-and-focus-groups" class="nav-link" data-scroll-target="#workshops-and-focus-groups">2.3.4 Workshops and Focus Groups</a></li>
+  <li><a href="#document-analysis" id="toc-document-analysis" class="nav-link" data-scroll-target="#document-analysis">2.3.5 Document Analysis</a></li>
+  <li><a href="#prototyping" id="toc-prototyping" class="nav-link" data-scroll-target="#prototyping">2.3.6 Prototyping</a></li>
+  <li><a href="#analyzing-existing-systems" id="toc-analyzing-existing-systems" class="nav-link" data-scroll-target="#analyzing-existing-systems">2.3.7 Analyzing Existing Systems</a></li>
+  </ul></li>
+  <li><a href="#user-stories-and-acceptance-criteria" id="toc-user-stories-and-acceptance-criteria" class="nav-link" data-scroll-target="#user-stories-and-acceptance-criteria"><span class="header-section-number">5.5</span> 2.4 User Stories and Acceptance Criteria</a>
+  <ul class="collapse">
+  <li><a href="#the-user-story-format" id="toc-the-user-story-format" class="nav-link" data-scroll-target="#the-user-story-format">2.4.1 The User Story Format</a></li>
+  <li><a href="#writing-effective-user-stories" id="toc-writing-effective-user-stories" class="nav-link" data-scroll-target="#writing-effective-user-stories">2.4.2 Writing Effective User Stories</a></li>
+  <li><a href="#acceptance-criteria" id="toc-acceptance-criteria" class="nav-link" data-scroll-target="#acceptance-criteria">2.4.3 Acceptance Criteria</a></li>
+  <li><a href="#epics-stories-and-tasks" id="toc-epics-stories-and-tasks" class="nav-link" data-scroll-target="#epics-stories-and-tasks">2.4.4 Epics, Stories, and Tasks</a></li>
+  <li><a href="#story-mapping" id="toc-story-mapping" class="nav-link" data-scroll-target="#story-mapping">2.4.5 Story Mapping</a></li>
+  </ul></li>
+  <li><a href="#the-software-requirements-specification-srs" id="toc-the-software-requirements-specification-srs" class="nav-link" data-scroll-target="#the-software-requirements-specification-srs"><span class="header-section-number">5.6</span> 2.5 The Software Requirements Specification (SRS)</a>
+  <ul class="collapse">
+  <li><a href="#purpose-of-the-srs" id="toc-purpose-of-the-srs" class="nav-link" data-scroll-target="#purpose-of-the-srs">2.5.1 Purpose of the SRS</a></li>
+  <li><a href="#srs-structure-ieee-830" id="toc-srs-structure-ieee-830" class="nav-link" data-scroll-target="#srs-structure-ieee-830">2.5.2 SRS Structure (IEEE 830)</a></li>
+  <li><a href="#writing-an-srs-section-by-section" id="toc-writing-an-srs-section-by-section" class="nav-link" data-scroll-target="#writing-an-srs-section-by-section">2.5.3 Writing an SRS: Section by Section</a></li>
+  <li><a href="#characteristics-of-good-requirements" id="toc-characteristics-of-good-requirements" class="nav-link" data-scroll-target="#characteristics-of-good-requirements">2.5.4 Characteristics of Good Requirements</a></li>
+  </ul></li>
+  <li><a href="#requirements-traceability" id="toc-requirements-traceability" class="nav-link" data-scroll-target="#requirements-traceability"><span class="header-section-number">5.7</span> 2.6 Requirements Traceability</a>
+  <ul class="collapse">
+  <li><a href="#why-traceability-matters" id="toc-why-traceability-matters" class="nav-link" data-scroll-target="#why-traceability-matters">2.6.1 Why Traceability Matters</a></li>
+  <li><a href="#the-requirements-traceability-matrix-rtm" id="toc-the-requirements-traceability-matrix-rtm" class="nav-link" data-scroll-target="#the-requirements-traceability-matrix-rtm">2.6.2 The Requirements Traceability Matrix (RTM)</a></li>
+  <li><a href="#types-of-traceability" id="toc-types-of-traceability" class="nav-link" data-scroll-target="#types-of-traceability">2.6.3 Types of Traceability</a></li>
+  <li><a href="#maintaining-the-rtm" id="toc-maintaining-the-rtm" class="nav-link" data-scroll-target="#maintaining-the-rtm">2.6.4 Maintaining the RTM</a></li>
+  <li><a href="#traceability-in-agile-projects" id="toc-traceability-in-agile-projects" class="nav-link" data-scroll-target="#traceability-in-agile-projects">2.6.5 Traceability in Agile Projects</a></li>
+  </ul></li>
+  <li><a href="#managing-requirements-challenges" id="toc-managing-requirements-challenges" class="nav-link" data-scroll-target="#managing-requirements-challenges"><span class="header-section-number">5.8</span> 2.7 Managing Requirements Challenges</a>
+  <ul class="collapse">
+  <li><a href="#scope-creep" id="toc-scope-creep" class="nav-link" data-scroll-target="#scope-creep">2.7.1 Scope Creep</a></li>
+  <li><a href="#ambiguous-requirements" id="toc-ambiguous-requirements" class="nav-link" data-scroll-target="#ambiguous-requirements">2.7.2 Ambiguous Requirements</a></li>
+  <li><a href="#conflicting-requirements" id="toc-conflicting-requirements" class="nav-link" data-scroll-target="#conflicting-requirements">2.7.3 Conflicting Requirements</a></li>
+  <li><a href="#changing-requirements" id="toc-changing-requirements" class="nav-link" data-scroll-target="#changing-requirements">2.7.4 Changing Requirements</a></li>
+  </ul></li>
+  <li><a href="#requirements-in-practice-tools-and-techniques" id="toc-requirements-in-practice-tools-and-techniques" class="nav-link" data-scroll-target="#requirements-in-practice-tools-and-techniques"><span class="header-section-number">5.9</span> 2.8 Requirements in Practice: Tools and Techniques</a>
+  <ul class="collapse">
+  <li><a href="#requirements-management-tools" id="toc-requirements-management-tools" class="nav-link" data-scroll-target="#requirements-management-tools">2.8.1 Requirements Management Tools</a></li>
+  <li><a href="#using-github-for-requirements" id="toc-using-github-for-requirements" class="nav-link" data-scroll-target="#using-github-for-requirements">2.8.2 Using GitHub for Requirements</a></li>
+  </ul></li>
+  <li><a href="#chapter-summary" id="toc-chapter-summary" class="nav-link" data-scroll-target="#chapter-summary"><span class="header-section-number">5.10</span> 2.9 Chapter Summary</a></li>
+  <li><a href="#key-terms" id="toc-key-terms" class="nav-link" data-scroll-target="#key-terms"><span class="header-section-number">5.11</span> 2.10 Key Terms</a></li>
+  <li><a href="#review-questions" id="toc-review-questions" class="nav-link" data-scroll-target="#review-questions"><span class="header-section-number">5.12</span> 2.11 Review Questions</a></li>
+  <li><a href="#hands-on-exercises" id="toc-hands-on-exercises" class="nav-link" data-scroll-target="#hands-on-exercises"><span class="header-section-number">5.13</span> 2.12 Hands-On Exercises</a>
+  <ul class="collapse">
+  <li><a href="#exercise-2.1-elicitation-practice" id="toc-exercise-2.1-elicitation-practice" class="nav-link" data-scroll-target="#exercise-2.1-elicitation-practice">Exercise 2.1: Elicitation Practice</a></li>
+  <li><a href="#exercise-2.2-writing-user-stories" id="toc-exercise-2.2-writing-user-stories" class="nav-link" data-scroll-target="#exercise-2.2-writing-user-stories">Exercise 2.2: Writing User Stories</a></li>
+  <li><a href="#exercise-2.3-requirement-analysis" id="toc-exercise-2.3-requirement-analysis" class="nav-link" data-scroll-target="#exercise-2.3-requirement-analysis">Exercise 2.3: Requirement Analysis</a></li>
+  <li><a href="#exercise-2.4-software-requirements-specification" id="toc-exercise-2.4-software-requirements-specification" class="nav-link" data-scroll-target="#exercise-2.4-software-requirements-specification">Exercise 2.4: Software Requirements Specification</a></li>
+  <li><a href="#exercise-2.5-requirements-traceability-matrix" id="toc-exercise-2.5-requirements-traceability-matrix" class="nav-link" data-scroll-target="#exercise-2.5-requirements-traceability-matrix">Exercise 2.5: Requirements Traceability Matrix</a></li>
+  <li><a href="#exercise-2.6-github-project-setup" id="toc-exercise-2.6-github-project-setup" class="nav-link" data-scroll-target="#exercise-2.6-github-project-setup">Exercise 2.6: GitHub Project Setup</a></li>
+  </ul></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">5.14</span> 2.13 Further Reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5.15</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Chapter 2: Requirements Engineering</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="learning-objectives" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">5.1</span> Learning Objectives</h2>
+<p>By the end of this chapter, you will be able to:</p>
+<ul>
+<li>Explain the importance of requirements engineering in software projects</li>
+<li>Distinguish between functional and non-functional requirements</li>
+<li>Apply various requirements elicitation techniques to gather stakeholder needs</li>
+<li>Write effective user stories with clear acceptance criteria</li>
+<li>Create a comprehensive Software Requirements Specification (SRS) document</li>
+<li>Develop and maintain a Requirements Traceability Matrix (RTM)</li>
+<li>Identify and manage common requirements engineering challenges</li>
+</ul>
+<hr>
+</section>
+<section id="the-foundation-of-software-projects" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="the-foundation-of-software-projects"><span class="header-section-number">5.2</span> 2.1 The Foundation of Software Projects</h2>
+<p>Picture this scenario: A client approaches your development team with an exciting idea. “I want an app,” they say, “that helps people manage their tasks. You know, like a to-do list, but better.” Your team gets to work immediately, spending three months building what you believe is an excellent task management application. You present the finished product, and the client’s face falls. “This isn’t what I meant at all. I needed something for teams to collaborate on projects, not a personal to-do list. And where’s the integration with our existing calendar system?”</p>
+<p>This scenario plays out in software projects far more often than anyone would like to admit. Studies consistently show that a significant percentage of software project failures can be traced back to poor requirements—requirements that were incomplete, ambiguous, misunderstood, or simply wrong.</p>
+<p><strong>Requirements engineering</strong> is the systematic process of discovering, documenting, validating, and managing the requirements for a software system. It answers the fundamental question: <em>What should this system do?</em></p>
+<section id="why-requirements-matter" class="level3">
+<h3 class="anchored" data-anchor-id="why-requirements-matter">2.1.1 Why Requirements Matter</h3>
+<p>Requirements engineering might seem like overhead—time spent not writing code. But consider the economics of software defects. The cost of fixing a bug increases dramatically depending on when it’s discovered:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Phase Discovered</th>
+<th>Relative Cost to Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Requirements</td>
+<td>1x</td>
+</tr>
+<tr class="even">
+<td>Design</td>
+<td>5x</td>
+</tr>
+<tr class="odd">
+<td>Implementation</td>
+<td>10x</td>
+</tr>
+<tr class="even">
+<td>Testing</td>
+<td>20x</td>
+</tr>
+<tr class="odd">
+<td>After Release</td>
+<td>50-200x</td>
+</tr>
+</tbody>
+</table>
+<p>A requirement error caught during the requirements phase might take an hour to fix—a conversation to clarify what the customer actually needs. That same error, if it survives into production code, might require redesigning components, rewriting thousands of lines of code, updating tests, redeploying, and dealing with unhappy users.</p>
+<p>The Standish Group’s research on software projects has consistently found that the top factors in project success include:</p>
+<ul>
+<li>Clear statement of requirements</li>
+<li>User involvement throughout the project</li>
+<li>Realistic expectations</li>
+<li>Clear vision and objectives</li>
+</ul>
+<p>Notice that three of these four factors relate directly to requirements engineering.</p>
+</section>
+<section id="the-requirements-engineering-process" class="level3">
+<h3 class="anchored" data-anchor-id="the-requirements-engineering-process">2.1.2 The Requirements Engineering Process</h3>
+<p>Requirements engineering is not a one-time activity but an ongoing process throughout the project lifecycle. It typically involves four main activities:</p>
+<p><strong>1. Elicitation</strong>: Discovering requirements from stakeholders, documents, existing systems, and domain knowledge. This is often the most challenging phase because stakeholders may not know what they want, may disagree with each other, or may have difficulty articulating their needs.</p>
+<p><strong>2. Analysis</strong>: Examining requirements for conflicts, ambiguities, and incompleteness. This phase involves prioritization, negotiation between stakeholders, and feasibility assessment.</p>
+<p><strong>3. Specification</strong>: Documenting requirements in a clear, precise, and verifiable form. The output is typically a Software Requirements Specification (SRS) document.</p>
+<p><strong>4. Validation</strong>: Ensuring that the documented requirements actually reflect stakeholder needs and that they are achievable within project constraints.</p>
+<pre><code>┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ Elicitation │────►│  Analysis   │────►│Specification│────►│ Validation  │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+       ▲                   │                   │                   │
+       │                   │                   │                   │
+       └───────────────────┴───────────────────┴───────────────────┘
+                         (Iterative Process)</code></pre>
+<p>These activities are iterative and often overlap. As you document requirements (specification), you’ll discover gaps that require more elicitation. Validation might reveal conflicts that require additional analysis. Requirements engineering continues throughout the project as understanding deepens and circumstances change.</p>
+<hr>
+</section>
+</section>
+<section id="types-of-requirements" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="types-of-requirements"><span class="header-section-number">5.3</span> 2.2 Types of Requirements</h2>
+<p>Requirements come in different forms, each serving a different purpose. Understanding these categories helps ensure comprehensive coverage of what a system must do and how well it must do it.</p>
+<section id="functional-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="functional-requirements">2.2.1 Functional Requirements</h3>
+<p><strong>Functional requirements</strong> describe what the system should <em>do</em>—the specific behaviors, features, and functions it must provide. They define the system’s capabilities and how it should respond to particular inputs or situations.</p>
+<p>Functional requirements typically follow this pattern: <em>The system shall [perform some action] when [some condition occurs].</em></p>
+<p><strong>Examples of Functional Requirements:</strong></p>
+<p>For an e-commerce system:</p>
+<ul>
+<li>The system shall allow users to search for products by name, category, or price range</li>
+<li>The system shall calculate shipping costs based on destination and package weight</li>
+<li>The system shall send an email confirmation when an order is placed</li>
+<li>The system shall allow users to save items to a wishlist</li>
+<li>The system shall process payments through credit cards, debit cards, and PayPal</li>
+</ul>
+<p>For a library management system:</p>
+<ul>
+<li>The system shall allow librarians to add new books to the catalog</li>
+<li>The system shall track which member has borrowed each book</li>
+<li>The system shall calculate and display overdue fines</li>
+<li>The system shall send reminder notifications three days before a book is due</li>
+<li>The system shall allow members to reserve books that are currently checked out</li>
+</ul>
+<p><strong>Characteristics of Good Functional Requirements:</strong></p>
+<ul>
+<li><strong>Specific</strong>: Precisely defines behavior without ambiguity</li>
+<li><strong>Measurable</strong>: Can be objectively verified through testing</li>
+<li><strong>Achievable</strong>: Technically feasible within project constraints</li>
+<li><strong>Relevant</strong>: Directly supports user or business needs</li>
+<li><strong>Traceable</strong>: Can be linked to business objectives and test cases</li>
+</ul>
+</section>
+<section id="non-functional-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="non-functional-requirements">2.2.2 Non-Functional Requirements</h3>
+<p><strong>Non-functional requirements</strong> (NFRs) describe <em>how well</em> the system performs its functions—the quality attributes, constraints, and characteristics that define the system’s operational qualities. They’re sometimes called “quality requirements” or “-ilities” (because many end in “-ility”: reliability, scalability, usability, etc.).</p>
+<p>Non-functional requirements often have more impact on system architecture than functional requirements. You can add a search feature to an existing architecture, but retrofitting a system to handle millions of concurrent users requires fundamental architectural decisions.</p>
+<p><strong>Categories of Non-Functional Requirements:</strong></p>
+<p><strong>Performance Requirements</strong> specify response times, throughput, and capacity:</p>
+<ul>
+<li>The system shall respond to search queries within 2 seconds</li>
+<li>The system shall support 10,000 concurrent users</li>
+<li>The system shall process at least 100 transactions per second</li>
+<li>Page load time shall not exceed 3 seconds on a 4G mobile connection</li>
+</ul>
+<p><strong>Reliability Requirements</strong> specify uptime, availability, and fault tolerance:</p>
+<ul>
+<li>The system shall maintain 99.9% uptime (less than 8.76 hours downtime per year)</li>
+<li>The system shall recover from failures within 5 minutes</li>
+<li>No data loss shall occur during system crashes</li>
+<li>The system shall maintain full functionality when one database server fails</li>
+</ul>
+<p><strong>Security Requirements</strong> specify protection against threats:</p>
+<ul>
+<li>All passwords shall be stored using bcrypt with a minimum cost factor of 12</li>
+<li>The system shall lock accounts after 5 failed login attempts</li>
+<li>All data transmission shall use TLS 1.3 or higher</li>
+<li>User sessions shall expire after 30 minutes of inactivity</li>
+<li>The system shall log all access to sensitive data</li>
+</ul>
+<p><strong>Usability Requirements</strong> specify ease of use and user experience:</p>
+<ul>
+<li>New users shall be able to complete a purchase within 5 minutes without training</li>
+<li>The system shall be accessible according to WCAG 2.1 Level AA guidelines</li>
+<li>Error messages shall clearly explain what went wrong and how to fix it</li>
+<li>The system shall work on screens from 320px to 4K resolution</li>
+</ul>
+<p><strong>Scalability Requirements</strong> specify growth capacity:</p>
+<ul>
+<li>The system architecture shall support horizontal scaling to 10x current load</li>
+<li>Database design shall accommodate 100 million records without performance degradation</li>
+<li>The system shall support adding new geographic regions within 2 weeks</li>
+</ul>
+<p><strong>Maintainability Requirements</strong> specify ease of modification:</p>
+<ul>
+<li>Code shall achieve a minimum of 80% test coverage</li>
+<li>All public APIs shall include documentation</li>
+<li>The system shall support zero-downtime deployments</li>
+<li>Configuration changes shall not require code redeployment</li>
+</ul>
+<p><strong>Compliance Requirements</strong> specify regulatory and legal constraints:</p>
+<ul>
+<li>The system shall comply with GDPR data protection requirements</li>
+<li>Payment processing shall comply with PCI DSS Level 1</li>
+<li>Medical records handling shall comply with HIPAA regulations</li>
+<li>The system shall maintain audit logs for 7 years</li>
+</ul>
+</section>
+<section id="the-relationship-between-functional-and-non-functional-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="the-relationship-between-functional-and-non-functional-requirements">2.2.3 The Relationship Between Functional and Non-Functional Requirements</h3>
+<p>Functional and non-functional requirements are deeply intertwined. Consider a simple requirement: “The system shall allow users to search for products.”</p>
+<p>This functional requirement raises many non-functional questions:</p>
+<ul>
+<li>How fast should search results appear? (Performance)</li>
+<li>How many products should the search handle? (Scalability)</li>
+<li>What happens if the search service fails? (Reliability)</li>
+<li>How intuitive should the search interface be? (Usability)</li>
+<li>Should search queries be logged? For how long? (Compliance)</li>
+</ul>
+<p>A complete specification addresses both what the system does and how well it does it.</p>
+</section>
+<section id="constraints-and-assumptions" class="level3">
+<h3 class="anchored" data-anchor-id="constraints-and-assumptions">2.2.4 Constraints and Assumptions</h3>
+<p>Beyond functional and non-functional requirements, specifications often include:</p>
+<p><strong>Constraints</strong> are restrictions on how the system can be built:</p>
+<ul>
+<li>The system must be developed using Java 17</li>
+<li>The database must be PostgreSQL (existing enterprise license)</li>
+<li>Development must be completed within 6 months</li>
+<li>The budget cannot exceed $500,000</li>
+<li>The system must integrate with the existing SAP installation</li>
+</ul>
+<p><strong>Assumptions</strong> are conditions believed to be true but not verified:</p>
+<ul>
+<li>Users will have modern web browsers (released within the last 2 years)</li>
+<li>Network connectivity between offices is reliable</li>
+<li>The client will provide access to subject matter experts during development</li>
+<li>Current server infrastructure has capacity for the new system</li>
+</ul>
+<p>Documenting constraints and assumptions is crucial because they can significantly impact design decisions, and invalid assumptions are a common source of project problems.</p>
+<hr>
+</section>
+</section>
+<section id="requirements-elicitation-techniques" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="requirements-elicitation-techniques"><span class="header-section-number">5.4</span> 2.3 Requirements Elicitation Techniques</h2>
+<p>Elicitation—discovering what stakeholders actually need—is often the most challenging aspect of requirements engineering. Stakeholders may not know what they want, may have conflicting needs, or may have difficulty expressing their requirements in terms developers can use.</p>
+<p>Effective elicitation requires multiple techniques, as different approaches work better for different types of requirements and different stakeholders.</p>
+<section id="stakeholder-interviews" class="level3">
+<h3 class="anchored" data-anchor-id="stakeholder-interviews">2.3.1 Stakeholder Interviews</h3>
+<p><strong>Interviews</strong> are one-on-one or small group conversations with stakeholders to understand their needs, expectations, and concerns. They’re particularly useful for understanding the context, goals, and priorities behind requirements.</p>
+<p><strong>Types of Interviews:</strong></p>
+<p><strong>Structured interviews</strong> follow a predetermined set of questions asked in a specific order. They ensure consistency across multiple interviews and are useful when you need to compare responses from different stakeholders.</p>
+<p><strong>Unstructured interviews</strong> are open-ended conversations that follow wherever the discussion leads. They’re useful early in the project when you’re still discovering the problem domain.</p>
+<p><strong>Semi-structured interviews</strong> combine elements of both: a prepared set of questions with flexibility to explore interesting tangents.</p>
+<p><strong>Interview Best Practices:</strong></p>
+<p><em>Before the interview:</em></p>
+<ul>
+<li>Research the stakeholder’s role and background</li>
+<li>Prepare questions but be ready to deviate</li>
+<li>Schedule appropriate time (typically 45-60 minutes)</li>
+<li>Clarify the interview’s purpose with the stakeholder</li>
+</ul>
+<p><em>During the interview:</em></p>
+<ul>
+<li>Start with open-ended questions (“Tell me about your current workflow…”)</li>
+<li>Listen more than you talk (aim for 80/20)</li>
+<li>Ask follow-up questions to dig deeper</li>
+<li>Avoid leading questions that suggest answers</li>
+<li>Take notes, but maintain eye contact</li>
+<li>Use active listening techniques (paraphrasing, summarizing)</li>
+</ul>
+<p><em>After the interview:</em></p>
+<ul>
+<li>Write up notes immediately while details are fresh</li>
+<li>Identify follow-up questions for future sessions</li>
+<li>Share notes with the stakeholder for validation</li>
+<li>Look for patterns across multiple interviews</li>
+</ul>
+<p><strong>Sample Interview Questions:</strong></p>
+<ul>
+<li>What are your main responsibilities related to this system?</li>
+<li>Walk me through a typical day using the current system/process.</li>
+<li>What are the biggest challenges you face?</li>
+<li>If you could change one thing about the current system, what would it be?</li>
+<li>What would make your job easier?</li>
+<li>What absolutely must the new system do?</li>
+<li>What would be nice to have but isn’t essential?</li>
+<li>What concerns do you have about the new system?</li>
+<li>Who else should I talk to about this?</li>
+</ul>
+</section>
+<section id="questionnaires-and-surveys" class="level3">
+<h3 class="anchored" data-anchor-id="questionnaires-and-surveys">2.3.2 Questionnaires and Surveys</h3>
+<p><strong>Questionnaires</strong> allow you to gather information from many stakeholders efficiently. They’re useful when you need quantitative data or when stakeholders are geographically distributed.</p>
+<p><strong>When to Use Questionnaires:</strong></p>
+<ul>
+<li>Large number of stakeholders</li>
+<li>Need for statistical analysis</li>
+<li>Follow-up to validate interview findings</li>
+<li>Distributed or remote stakeholders</li>
+<li>Standardized information needed across groups</li>
+</ul>
+<p><strong>Questionnaire Design Tips:</strong></p>
+<ul>
+<li>Keep it short (15-20 minutes maximum)</li>
+<li>Use clear, unambiguous language</li>
+<li>Mix question types (multiple choice, rating scales, open-ended)</li>
+<li>Order questions logically</li>
+<li>Pilot test with a small group first</li>
+<li>Provide context for why you’re asking</li>
+</ul>
+<p><strong>Example Questions:</strong></p>
+<p><em>Rating scale:</em> How satisfied are you with the current system’s performance? [ ] Very Dissatisfied [ ] Dissatisfied [ ] Neutral [ ] Satisfied [ ] Very Satisfied</p>
+<p><em>Multiple choice:</em> How often do you use the reporting feature? [ ] Daily [ ] Weekly [ ] Monthly [ ] Rarely [ ] Never</p>
+<p><em>Open-ended:</em> What features would you most like to see in the new system?</p>
+</section>
+<section id="observation-and-ethnography" class="level3">
+<h3 class="anchored" data-anchor-id="observation-and-ethnography">2.3.3 Observation and Ethnography</h3>
+<p>Sometimes the best way to understand requirements is to watch users in their natural environment. <strong>Observation</strong> involves watching stakeholders perform their actual work to understand workflows, pain points, and unspoken needs.</p>
+<p><strong>Benefits of Observation:</strong></p>
+<ul>
+<li>Reveals tacit knowledge users can’t articulate</li>
+<li>Uncovers workarounds and unofficial processes</li>
+<li>Shows actual behavior vs.&nbsp;reported behavior</li>
+<li>Provides context for requirements</li>
+<li>Identifies environmental factors</li>
+</ul>
+<p><strong>Observation Techniques:</strong></p>
+<p><strong>Passive observation</strong>: Watch without interfering, taking notes on what you see. Users may behave differently when watched (the Hawthorne effect), but this diminishes over time.</p>
+<p><strong>Active observation (contextual inquiry)</strong>: Ask questions while observing. “I noticed you copied that data into a spreadsheet—can you tell me why?”</p>
+<p><strong>Apprenticing</strong>: Have the user teach you their job. This builds rapport and surfaces knowledge that might not emerge otherwise.</p>
+<p><strong>A Day in the Life</strong>: Shadow a user through an entire workday to understand the full context of their activities.</p>
+<p><strong>What to Look For:</strong></p>
+<ul>
+<li>Steps in workflows that seem cumbersome</li>
+<li>Workarounds users have developed</li>
+<li>Frequent interruptions or context switches</li>
+<li>Information users need but don’t have easy access to</li>
+<li>Paper notes, sticky notes, or personal tracking systems</li>
+<li>Frustration points</li>
+<li>Collaboration patterns</li>
+</ul>
+</section>
+<section id="workshops-and-focus-groups" class="level3">
+<h3 class="anchored" data-anchor-id="workshops-and-focus-groups">2.3.4 Workshops and Focus Groups</h3>
+<p><strong>Workshops</strong> bring multiple stakeholders together to collaboratively explore requirements. They’re particularly useful for building consensus, identifying conflicts, and generating ideas.</p>
+<p><strong>Types of Workshops:</strong></p>
+<p><strong>Requirements workshops</strong> gather stakeholders to jointly define requirements. A facilitator guides the group through structured activities.</p>
+<p><strong>Joint Application Development (JAD)</strong> is a specific workshop methodology that brings together users, managers, and developers for intensive collaborative sessions.</p>
+<p><strong>Focus groups</strong> explore attitudes, opinions, and preferences with a group of representative users.</p>
+<p><strong>Workshop Best Practices:</strong></p>
+<ul>
+<li>Limit group size (6-12 participants)</li>
+<li>Include diverse stakeholder perspectives</li>
+<li>Use a skilled facilitator (often external)</li>
+<li>Set clear objectives and agenda</li>
+<li>Use visual aids and collaborative tools</li>
+<li>Document outcomes in real-time</li>
+<li>Manage dominant personalities</li>
+<li>Allow for individual input before group discussion</li>
+</ul>
+<p><strong>Workshop Activities:</strong></p>
+<p><strong>Brainstorming</strong>: Generate ideas without criticism, then consolidate and prioritize.</p>
+<p><strong>Affinity diagrams</strong>: Write ideas on sticky notes, then group related items to identify themes.</p>
+<p><strong>Dot voting</strong>: Give participants dots to vote on priorities; reveals group preferences quickly.</p>
+<p><strong>Use case walkthrough</strong>: Walk through scenarios step by step, identifying required functionality.</p>
+<p><strong>Card sorting</strong>: Have participants organize features or concepts into categories to understand mental models.</p>
+</section>
+<section id="document-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="document-analysis">2.3.5 Document Analysis</h3>
+<p><strong>Document analysis</strong> involves reviewing existing documentation to understand the current system, business rules, and context. It’s particularly useful when working with established organizations or regulated industries.</p>
+<p><strong>Documents to Review:</strong></p>
+<ul>
+<li>Current system documentation and user manuals</li>
+<li>Business process documentation</li>
+<li>Organizational charts</li>
+<li>Policy and procedure manuals</li>
+<li>Regulatory and compliance documents</li>
+<li>Previous project documentation</li>
+<li>Training materials</li>
+<li>Reports and forms currently in use</li>
+<li>Industry standards and benchmarks</li>
+</ul>
+<p><strong>What to Extract:</strong></p>
+<ul>
+<li>Business rules and logic</li>
+<li>Data definitions and relationships</li>
+<li>Workflow steps</li>
+<li>Roles and responsibilities</li>
+<li>Compliance requirements</li>
+<li>Terminology and vocabulary</li>
+</ul>
+</section>
+<section id="prototyping" class="level3">
+<h3 class="anchored" data-anchor-id="prototyping">2.3.6 Prototyping</h3>
+<p><strong>Prototyping</strong> involves building preliminary versions of the system to explore requirements. Users often find it easier to react to something concrete than to describe abstract needs.</p>
+<p><strong>Types of Prototypes:</strong></p>
+<p><strong>Paper prototypes</strong>: Hand-drawn sketches of screens and interfaces. Quick to create, easy to modify, and effective for early exploration.</p>
+<p><strong>Wireframes</strong>: Low-fidelity digital mockups showing layout and navigation without visual design.</p>
+<p><strong>Clickable prototypes</strong>: Interactive mockups that simulate user flows without real functionality.</p>
+<p><strong>Proof of concept</strong>: Technical prototypes that test feasibility of specific features.</p>
+<p><strong>Evolutionary prototypes</strong>: Prototypes that evolve into the final system (requires disciplined development).</p>
+<p><strong>Throwaway prototypes</strong>: Built solely for learning, then discarded. Allows for quick, dirty experimentation.</p>
+<p><strong>When to Use Prototyping:</strong></p>
+<ul>
+<li>Requirements are unclear or hard to articulate</li>
+<li>User interface is critical</li>
+<li>Stakeholders need to “see it to believe it”</li>
+<li>Technical feasibility is uncertain</li>
+<li>Novel or innovative features</li>
+</ul>
+<p><strong>Prototyping Risks:</strong></p>
+<ul>
+<li>Users may expect the prototype to be the final product</li>
+<li>Pressure to ship the prototype as-is</li>
+<li>Time invested in throwaway prototypes</li>
+<li>Can focus too heavily on UI at expense of other requirements</li>
+</ul>
+</section>
+<section id="analyzing-existing-systems" class="level3">
+<h3 class="anchored" data-anchor-id="analyzing-existing-systems">2.3.7 Analyzing Existing Systems</h3>
+<p>If replacing or enhancing an existing system, that system is a valuable source of requirements. Understanding current functionality provides a baseline for the new system.</p>
+<p><strong>Analysis Approaches:</strong></p>
+<ul>
+<li>Use the existing system yourself</li>
+<li>Review system documentation</li>
+<li>Study the database schema</li>
+<li>Examine reports and outputs</li>
+<li>Interview users about what works and what doesn’t</li>
+<li>Analyze support tickets and bug reports</li>
+<li>Review change request history</li>
+</ul>
+<p><strong>Important Considerations:</strong></p>
+<p>Not everything in the current system needs to be in the new system. Some features may be unused, obsolete, or present only due to historical accidents. Ask users which features they actually use and value.</p>
+<hr>
+</section>
+</section>
+<section id="user-stories-and-acceptance-criteria" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="user-stories-and-acceptance-criteria"><span class="header-section-number">5.5</span> 2.4 User Stories and Acceptance Criteria</h2>
+<p><strong>User stories</strong> are a popular format for expressing requirements in Agile development. They capture requirements from the user’s perspective, focusing on value delivered rather than technical implementation.</p>
+<section id="the-user-story-format" class="level3">
+<h3 class="anchored" data-anchor-id="the-user-story-format">2.4.1 The User Story Format</h3>
+<p>The classic user story format is:</p>
+<blockquote class="blockquote">
+<p><strong>As a</strong> [type of user], <strong>I want</strong> [some capability] <strong>so that</strong> [some benefit].</p>
+</blockquote>
+<p>This format emphasizes three key elements:</p>
+<ul>
+<li><strong>Who</strong> wants the capability (the persona or role)</li>
+<li><strong>What</strong> they want to accomplish</li>
+<li><strong>Why</strong> it matters to them (the value or benefit)</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<blockquote class="blockquote">
+<p>As a <strong>customer</strong>, I want to <strong>save my shopping cart</strong> so that I can <strong>continue shopping later from a different device</strong>.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>As a <strong>librarian</strong>, I want to <strong>see overdue books for a specific member</strong> so that I can <strong>contact them about returns</strong>.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>As a <strong>sales manager</strong>, I want to <strong>view my team’s performance dashboard</strong> so that I can <strong>identify who needs coaching</strong>.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>As a <strong>visually impaired user</strong>, I want to <strong>navigate the site using only my keyboard</strong> so that I can <strong>use the application without a mouse</strong>.</p>
+</blockquote>
+</section>
+<section id="writing-effective-user-stories" class="level3">
+<h3 class="anchored" data-anchor-id="writing-effective-user-stories">2.4.2 Writing Effective User Stories</h3>
+<p><strong>The INVEST Criteria:</strong></p>
+<p>Good user stories follow the INVEST principles:</p>
+<p><strong>I - Independent</strong>: Stories should be self-contained, without inherent dependencies on other stories. This allows them to be prioritized and scheduled flexibly.</p>
+<p><strong>N - Negotiable</strong>: Stories are not contracts. They’re placeholders for conversations about requirements. Details emerge through discussion.</p>
+<p><strong>V - Valuable</strong>: Each story should deliver value to users or the business. Technical tasks that don’t directly deliver value (like “refactor the database”) aren’t user stories.</p>
+<p><strong>E - Estimable</strong>: The team should be able to estimate the effort required. If a story is too vague to estimate, it needs clarification or splitting.</p>
+<p><strong>S - Small</strong>: Stories should be completable within a single sprint. Large stories (epics) should be broken down into smaller stories.</p>
+<p><strong>T - Testable</strong>: It must be possible to write tests that verify the story is complete. If you can’t test it, you can’t confirm it’s done.</p>
+<p><strong>Common Mistakes:</strong></p>
+<p><em>Too vague:</em></p>
+<blockquote class="blockquote">
+<p>As a user, I want the system to be fast. ❌</p>
+</blockquote>
+<p><em>Better:</em></p>
+<blockquote class="blockquote">
+<p>As a customer, I want search results to appear within 2 seconds so that I can quickly find products. ✓</p>
+</blockquote>
+<p><em>Too technical:</em></p>
+<blockquote class="blockquote">
+<p>As a developer, I want to implement caching using Redis. ❌</p>
+</blockquote>
+<p><em>Better:</em></p>
+<blockquote class="blockquote">
+<p>As a customer, I want previously viewed products to load instantly so that I can quickly review items I’ve already seen. ✓</p>
+</blockquote>
+<p><em>Missing the “why”:</em></p>
+<blockquote class="blockquote">
+<p>As an admin, I want to export data to CSV. ❌</p>
+</blockquote>
+<p><em>Better:</em></p>
+<blockquote class="blockquote">
+<p>As an admin, I want to export user data to CSV so that I can analyze trends in spreadsheet software I’m familiar with. ✓</p>
+</blockquote>
+</section>
+<section id="acceptance-criteria" class="level3">
+<h3 class="anchored" data-anchor-id="acceptance-criteria">2.4.3 Acceptance Criteria</h3>
+<p><strong>Acceptance criteria</strong> define the conditions that must be met for a user story to be considered complete. They provide clarity about scope and serve as the basis for testing.</p>
+<p><strong>Format Options:</strong></p>
+<p><strong>Scenario format (Given-When-Then):</strong></p>
+<pre><code>Given [precondition/context]
+When [action occurs]
+Then [expected outcome]</code></pre>
+<p><strong>Example:</strong></p>
+<pre><code>Story: As a customer, I want to reset my password so that I can 
+       regain access to my account if I forget it.
+
+Acceptance Criteria:
+
+Scenario 1: Requesting password reset
+Given I am on the login page
+When I click "Forgot Password" and enter my email address
+Then I should receive a password reset email within 5 minutes
+
+Scenario 2: Valid reset link
+Given I have received a password reset email
+When I click the reset link within 24 hours
+Then I should see a form to enter a new password
+
+Scenario 3: Expired reset link
+Given I have received a password reset email
+When I click the reset link after 24 hours
+Then I should see a message that the link has expired
+And I should see an option to request a new reset link
+
+Scenario 4: Password requirements
+Given I am on the password reset form
+When I enter a new password
+Then the password must be at least 8 characters
+And contain at least one uppercase letter
+And contain at least one number
+And contain at least one special character</code></pre>
+<p><strong>Checklist format:</strong></p>
+<pre><code>Story: As a customer, I want to filter search results so that I can 
+       find products that match my specific needs.
+
+Acceptance Criteria:
+□ Users can filter by price range (min and max)
+□ Users can filter by category
+□ Users can filter by customer rating (1-5 stars)
+□ Users can apply multiple filters simultaneously
+□ Filters update results without page reload
+□ Active filters are clearly displayed
+□ Users can remove individual filters or clear all
+□ Filter state is preserved when navigating back to results</code></pre>
+</section>
+<section id="epics-stories-and-tasks" class="level3">
+<h3 class="anchored" data-anchor-id="epics-stories-and-tasks">2.4.4 Epics, Stories, and Tasks</h3>
+<p>User stories exist within a hierarchy:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                           EPIC                                  │
+│  Large body of work that can be broken into smaller pieces      │
+│  Example: "User Account Management"                             │
+│                                                                 │
+│  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ │
+│  │   USER STORY 1   │ │   USER STORY 2   │ │   USER STORY 3   │ │
+│  │  User registration│ │  Password reset  │ │ Profile editing  │ │
+│  │                  │ │                  │ │                  │ │
+│  │  ┌────┐ ┌────┐   │ │  ┌────┐ ┌────┐   │ │  ┌────┐ ┌────┐   │ │
+│  │  │Task│ │Task│   │ │  │Task│ │Task│   │ │  │Task│ │Task│   │ │
+│  │  └────┘ └────┘   │ │  └────┘ └────┘   │ │  └────┘ └────┘   │ │
+│  └──────────────────┘ └──────────────────┘ └──────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>Epics</strong> are large bodies of work that span multiple sprints. They represent major features or capabilities but are too big to complete in one iteration.</p>
+<p><strong>User Stories</strong> are the primary unit of work in Agile. Each story delivers a specific piece of value and can be completed within a sprint.</p>
+<p><strong>Tasks</strong> are the technical activities required to complete a story. Unlike stories, tasks describe implementation details.</p>
+<p><strong>Example Breakdown:</strong></p>
+<pre><code>EPIC: Shopping Cart
+
+User Story 1: Add items to cart
+  Task: Create cart database schema
+  Task: Implement add-to-cart API endpoint
+  Task: Build cart UI component
+  Task: Write unit tests for cart service
+  Task: Write integration tests for cart API
+
+User Story 2: Update cart quantities
+  Task: Implement quantity update API
+  Task: Add quantity controls to cart UI
+  Task: Handle inventory validation
+  Task: Write tests
+
+User Story 3: Remove items from cart
+  ...
+
+User Story 4: Apply discount codes
+  ...</code></pre>
+</section>
+<section id="story-mapping" class="level3">
+<h3 class="anchored" data-anchor-id="story-mapping">2.4.5 Story Mapping</h3>
+<p><strong>User story mapping</strong> is a technique for organizing user stories to understand the full picture of user experience. Created by Jeff Patton, it arranges stories in a two-dimensional map.</p>
+<pre><code>User Activities (left to right = user journey)
+─────────────────────────────────────────────────────────────►
+
+│    Browse      Search      View         Add to      Checkout
+│   Products    Products    Product        Cart
+│
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+│  │ View    │ │ Search  │ │ View    │ │ Add     │ │ Enter   │
+│  │ catalog │ │ by name │ │ details │ │ item    │ │shipping │  ◄── MVP
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘     Release 1
+P  ─────────────────────────────────────────────────────────────
+r  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+i  │ Filter  │ │ Search  │ │ View    │ │ Update  │ │ Choose  │
+o  │ by      │ │ by      │ │ reviews │ │quantity │ │ payment │  ◄── Release 2
+r  │ category│ │ category│ │         │ │         │ │         │
+i  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘
+t  ─────────────────────────────────────────────────────────────
+y  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+│  │ View    │ │ Save    │ │ Zoom    │ │ Save    │ │ Apply   │
+│  │ featured│ │ search  │ │ images  │ │ for     │ │ coupon  │  ◄── Release 3
+│  │ items   │ │         │ │         │ │ later   │ │         │
+▼  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘</code></pre>
+<p>The horizontal axis shows the user’s journey through the system—the activities they perform from left to right. The vertical axis shows priority, with the most essential stories at the top.</p>
+<p>Story mapping helps teams:</p>
+<ul>
+<li>See the big picture of user experience</li>
+<li>Identify gaps in functionality</li>
+<li>Plan releases by drawing horizontal lines</li>
+<li>Understand dependencies between stories</li>
+<li>Communicate the product vision</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="the-software-requirements-specification-srs" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="the-software-requirements-specification-srs"><span class="header-section-number">5.6</span> 2.5 The Software Requirements Specification (SRS)</h2>
+<p>The <strong>Software Requirements Specification</strong> (SRS) is the primary document produced by requirements engineering. It serves as a contract between stakeholders about what the system will do and as a reference for designers, developers, and testers.</p>
+<section id="purpose-of-the-srs" class="level3">
+<h3 class="anchored" data-anchor-id="purpose-of-the-srs">2.5.1 Purpose of the SRS</h3>
+<p>The SRS serves multiple audiences and purposes:</p>
+<p><strong>For customers and stakeholders:</strong></p>
+<ul>
+<li>Confirms understanding of their needs</li>
+<li>Serves as basis for acceptance testing</li>
+<li>Documents agreed-upon scope</li>
+</ul>
+<p><strong>For project managers:</strong></p>
+<ul>
+<li>Basis for estimating effort and cost</li>
+<li>Defines project scope</li>
+<li>Reference for change management</li>
+</ul>
+<p><strong>For designers and developers:</strong></p>
+<ul>
+<li>Input for system design</li>
+<li>Reference during implementation</li>
+<li>Clarifies expected behavior</li>
+</ul>
+<p><strong>For testers:</strong></p>
+<ul>
+<li>Basis for test planning</li>
+<li>Defines what to test</li>
+<li>Specifies expected results</li>
+</ul>
+</section>
+<section id="srs-structure-ieee-830" class="level3">
+<h3 class="anchored" data-anchor-id="srs-structure-ieee-830">2.5.2 SRS Structure (IEEE 830)</h3>
+<p>While formats vary, the IEEE 830 standard provides a widely-used template. Here’s a typical structure:</p>
+<pre><code>1. Introduction
+   1.1 Purpose
+   1.2 Scope
+   1.3 Definitions, Acronyms, and Abbreviations
+   1.4 References
+   1.5 Overview
+
+2. Overall Description
+   2.1 Product Perspective
+   2.2 Product Functions
+   2.3 User Classes and Characteristics
+   2.4 Operating Environment
+   2.5 Design and Implementation Constraints
+   2.6 Assumptions and Dependencies
+
+3. Specific Requirements
+   3.1 Functional Requirements
+   3.2 External Interface Requirements
+       3.2.1 User Interfaces
+       3.2.2 Hardware Interfaces
+       3.2.3 Software Interfaces
+       3.2.4 Communication Interfaces
+   3.3 Non-Functional Requirements
+       3.3.1 Performance Requirements
+       3.3.2 Security Requirements
+       3.3.3 Reliability Requirements
+       3.3.4 Availability Requirements
+   3.4 System Features
+
+4. Appendices
+   4.1 Glossary
+   4.2 Analysis Models
+   4.3 To Be Determined List</code></pre>
+</section>
+<section id="writing-an-srs-section-by-section" class="level3">
+<h3 class="anchored" data-anchor-id="writing-an-srs-section-by-section">2.5.3 Writing an SRS: Section by Section</h3>
+<p>Let’s walk through each section with guidance and examples.</p>
+<p><strong>1. Introduction</strong></p>
+<p><em>1.1 Purpose</em></p>
+<p>Describe the purpose of this SRS document and its intended audience.</p>
+<blockquote class="blockquote">
+<p>This document specifies the software requirements for TaskFlow, a team task management application. It is intended for the development team, project stakeholders, and quality assurance personnel.</p>
+</blockquote>
+<p><em>1.2 Scope</em></p>
+<p>Describe the software being specified, its purpose, benefits, and objectives.</p>
+<blockquote class="blockquote">
+<p>TaskFlow is a web-based application that enables teams to create, assign, track, and collaborate on tasks and projects. The system will improve team productivity by centralizing task management, providing visibility into project progress, and facilitating collaboration through comments and notifications.</p>
+<p>The system will NOT include: time tracking functionality, billing/invoicing, or integration with version control systems. These features are planned for future releases.</p>
+</blockquote>
+<p><em>1.3 Definitions, Acronyms, and Abbreviations</em></p>
+<p>Define terms used throughout the document.</p>
+<blockquote class="blockquote">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Task</td>
+<td>A single unit of work with a title, description, assignee, and due date</td>
+</tr>
+<tr class="even">
+<td>Project</td>
+<td>A collection of related tasks</td>
+</tr>
+<tr class="odd">
+<td>Sprint</td>
+<td>A fixed time period (typically 2 weeks) for completing tasks</td>
+</tr>
+<tr class="even">
+<td>Board</td>
+<td>A visual representation of tasks organized by status</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p><em>1.4 References</em></p>
+<p>List any documents referenced in the SRS.</p>
+<p><em>1.5 Overview</em></p>
+<p>Describe how the rest of the SRS is organized.</p>
+<p><strong>2. Overall Description</strong></p>
+<p><em>2.1 Product Perspective</em></p>
+<p>Describe how the system fits into the broader environment. Is it standalone? Does it replace an existing system? What external systems does it interact with?</p>
+<blockquote class="blockquote">
+<p>TaskFlow is a new, standalone system that will replace the team’s current use of spreadsheets and email for task tracking. The system will integrate with:</p>
+<ul>
+<li>Google Workspace for user authentication</li>
+<li>Slack for notifications</li>
+<li>Email services for user communications</li>
+</ul>
+</blockquote>
+<p>Include a context diagram showing the system and its external interfaces:</p>
+<pre><code>                    ┌─────────────────┐
+                    │  Google OAuth   │
+                    └────────┬────────┘
+                             │
+┌─────────────┐    ┌─────────▼─────────┐    ┌─────────────┐
+│    User     │◄───►│                   │◄───►│    Slack    │
+│  (Browser)  │    │     TaskFlow      │    │             │
+└─────────────┘    │                   │    └─────────────┘
+                   └─────────┬─────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Email Service  │
+                    └─────────────────┘</code></pre>
+<p><em>2.2 Product Functions</em></p>
+<p>Provide a summary of major functions (detailed in Section 3).</p>
+<blockquote class="blockquote">
+<p>Major functions include:</p>
+<ul>
+<li>User management: Registration, authentication, profile management</li>
+<li>Project management: Create, configure, and archive projects</li>
+<li>Task management: Create, assign, update, and complete tasks</li>
+<li>Collaboration: Comments, mentions, and activity feeds</li>
+<li>Notifications: Email and Slack notifications for relevant events</li>
+<li>Reporting: Project progress, team velocity, overdue tasks</li>
+</ul>
+</blockquote>
+<p><em>2.3 User Classes and Characteristics</em></p>
+<p>Describe the different types of users and their characteristics.</p>
+<blockquote class="blockquote">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>User Class</th>
+<th>Description</th>
+<th>Technical Expertise</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Team Member</td>
+<td>Creates and completes tasks</td>
+<td>Basic</td>
+</tr>
+<tr class="even">
+<td>Project Manager</td>
+<td>Creates projects, assigns tasks, monitors progress</td>
+<td>Basic</td>
+</tr>
+<tr class="odd">
+<td>Team Admin</td>
+<td>Manages team membership and permissions</td>
+<td>Intermediate</td>
+</tr>
+<tr class="even">
+<td>System Admin</td>
+<td>Configures system settings, manages integrations</td>
+<td>Advanced</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p><em>2.4 Operating Environment</em></p>
+<p>Describe the environment in which the software will operate.</p>
+<blockquote class="blockquote">
+<ul>
+<li>Server: Linux (Ubuntu 22.04 LTS), Docker containers</li>
+<li>Database: PostgreSQL 15</li>
+<li>Web Server: Nginx</li>
+<li>Client browsers: Chrome, Firefox, Safari, Edge (latest 2 versions)</li>
+<li>Mobile: Responsive design supporting iOS and Android devices</li>
+</ul>
+</blockquote>
+<p><em>2.5 Design and Implementation Constraints</em></p>
+<p>List any constraints that limit developer options.</p>
+<blockquote class="blockquote">
+<ul>
+<li>The system must be developed using React for the frontend and Node.js for the backend</li>
+<li>All data must be stored in the United States to comply with data residency requirements</li>
+<li>The system must use the existing corporate design system for UI components</li>
+<li>Development must be complete by [date] to coincide with team restructuring</li>
+</ul>
+</blockquote>
+<p><em>2.6 Assumptions and Dependencies</em></p>
+<p>Document assumptions that, if wrong, could affect requirements.</p>
+<blockquote class="blockquote">
+<p>Assumptions:</p>
+<ul>
+<li>Users have reliable internet connectivity</li>
+<li>Users have accounts in Google Workspace for authentication</li>
+<li>Team sizes will not exceed 500 members</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Google OAuth service availability</li>
+<li>Slack API stability</li>
+<li>Corporate design system components</li>
+</ul>
+</blockquote>
+<p><strong>3. Specific Requirements</strong></p>
+<p>This is the core of the SRS, containing detailed, testable requirements.</p>
+<p><em>3.1 Functional Requirements</em></p>
+<p>Organize by feature area or use case. Each requirement should have a unique identifier.</p>
+<pre><code>3.1.1 User Management
+
+FR-UM-001: User Registration
+The system shall allow new users to register using their Google Workspace account.
+
+FR-UM-002: User Profile
+The system shall allow users to view and edit their profile information, including:
+- Display name
+- Profile photo
+- Notification preferences
+
+FR-UM-003: Role Assignment
+The system shall allow Team Admins to assign roles (Team Member, Project Manager, 
+Team Admin) to users.
+
+3.1.2 Project Management
+
+FR-PM-001: Project Creation
+The system shall allow Project Managers to create new projects with the following 
+attributes:
+- Project name (required, max 100 characters)
+- Description (optional, max 500 characters)
+- Start date (optional)
+- Target completion date (optional)
+- Team members (at least one required)
+
+FR-PM-002: Project Status
+The system shall allow projects to have one of the following statuses:
+- Active (default)
+- On Hold
+- Completed
+- Archived
+
+FR-PM-003: Project Templates
+The system shall allow Project Managers to create projects from templates that 
+pre-populate tasks and settings.</code></pre>
+<p><em>3.2 External Interface Requirements</em></p>
+<p><strong>3.2.1 User Interfaces</strong></p>
+<blockquote class="blockquote">
+<p>UI-001: The system shall provide a web-based interface accessible via modern browsers.</p>
+<p>UI-002: The interface shall be responsive, supporting screen widths from 320px to 2560px.</p>
+<p>UI-003: The system shall conform to WCAG 2.1 Level AA accessibility guidelines.</p>
+<p>UI-004: The primary navigation shall include access to: Dashboard, Projects, My Tasks, Team, and Settings.</p>
+</blockquote>
+<p><strong>3.2.2 Software Interfaces</strong></p>
+<blockquote class="blockquote">
+<p>SI-001: The system shall authenticate users via Google OAuth 2.0.</p>
+<p>SI-002: The system shall send notifications to Slack using the Slack Web API.</p>
+<p>SI-003: The system shall expose a REST API for potential future integrations.</p>
+</blockquote>
+<p><em>3.3 Non-Functional Requirements</em></p>
+<p><strong>3.3.1 Performance Requirements</strong></p>
+<blockquote class="blockquote">
+<p>NFR-PERF-001: Page load time shall not exceed 3 seconds on a 4G connection.</p>
+<p>NFR-PERF-002: API responses shall return within 500ms for 95% of requests.</p>
+<p>NFR-PERF-003: The system shall support 100 concurrent users without degradation.</p>
+</blockquote>
+<p><strong>3.3.2 Security Requirements</strong></p>
+<blockquote class="blockquote">
+<p>NFR-SEC-001: All data transmission shall use TLS 1.3.</p>
+<p>NFR-SEC-002: User sessions shall expire after 8 hours of inactivity.</p>
+<p>NFR-SEC-003: The system shall log all authentication events.</p>
+<p>NFR-SEC-004: Passwords shall never be stored; only Google OAuth shall be used.</p>
+</blockquote>
+<p><strong>3.3.3 Reliability Requirements</strong></p>
+<blockquote class="blockquote">
+<p>NFR-REL-001: The system shall maintain 99.5% uptime, excluding scheduled maintenance.</p>
+<p>NFR-REL-002: In the event of server failure, the system shall recover within 10 minutes.</p>
+<p>NFR-REL-003: No user data shall be lost due to system failures.</p>
+</blockquote>
+</section>
+<section id="characteristics-of-good-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="characteristics-of-good-requirements">2.5.4 Characteristics of Good Requirements</h3>
+<p>Individual requirements should be:</p>
+<p><strong>Clear</strong>: Unambiguous, meaning the same thing to all readers. Avoid vague terms like “user-friendly,” “fast,” or “intuitive” without specific definitions.</p>
+<p><strong>Complete</strong>: Contains all necessary information. A reader should be able to understand and implement the requirement without asking for clarification.</p>
+<p><strong>Consistent</strong>: Doesn’t contradict other requirements in the document.</p>
+<p><strong>Verifiable</strong>: Can be tested or measured. If you can’t write a test for a requirement, it’s not verifiable.</p>
+<p><strong>Traceable</strong>: Has a unique identifier and can be linked to its source and to downstream artifacts (design, code, tests).</p>
+<p><strong>Feasible</strong>: Technically achievable within project constraints.</p>
+<p><strong>Necessary</strong>: Supports a documented need. Requirements without clear justification should be questioned.</p>
+<p><strong>Prioritized</strong>: Stakeholders understand relative importance.</p>
+<p><strong>Bad Examples and Improvements:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Poor Requirement</th>
+<th>Problem</th>
+<th>Improved Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The system shall be fast</td>
+<td>Vague, not measurable</td>
+<td>The system shall respond to user actions within 2 seconds</td>
+</tr>
+<tr class="even">
+<td>The system shall handle many users</td>
+<td>“Many” is undefined</td>
+<td>The system shall support 1,000 concurrent users</td>
+</tr>
+<tr class="odd">
+<td>The system shall be easy to use</td>
+<td>Subjective</td>
+<td>New users shall complete the registration process in under 3 minutes without assistance</td>
+</tr>
+<tr class="even">
+<td>The system should have a login feature</td>
+<td>Ambiguous (“should” vs “shall”)</td>
+<td>The system shall require users to authenticate before accessing any features</td>
+</tr>
+<tr class="odd">
+<td>The interface shall be attractive</td>
+<td>Subjective, not testable</td>
+<td>The interface shall conform to the corporate style guide (reference: design-system.company.com)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="requirements-traceability" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="requirements-traceability"><span class="header-section-number">5.7</span> 2.6 Requirements Traceability</h2>
+<p><strong>Requirements traceability</strong> is the ability to follow a requirement from its origin through design, implementation, and testing. It ensures that every requirement is addressed and that all development work serves a documented need.</p>
+<section id="why-traceability-matters" class="level3">
+<h3 class="anchored" data-anchor-id="why-traceability-matters">2.6.1 Why Traceability Matters</h3>
+<p>Traceability helps answer critical questions:</p>
+<ul>
+<li><strong>Completeness</strong>: Is every requirement implemented and tested?</li>
+<li><strong>Impact Analysis</strong>: If a requirement changes, what’s affected?</li>
+<li><strong>Coverage</strong>: Are there any gaps in testing?</li>
+<li><strong>Justification</strong>: Why does this code exist? What requirement does it satisfy?</li>
+<li><strong>Compliance</strong>: Can we prove that regulatory requirements are met?</li>
+</ul>
+<p>Without traceability, teams face significant risks:</p>
+<ul>
+<li>Requirements silently dropped during development</li>
+<li>Features implemented that nobody asked for</li>
+<li>Changes made without understanding full impact</li>
+<li>Testing gaps leading to defects</li>
+<li>Compliance audit failures</li>
+</ul>
+</section>
+<section id="the-requirements-traceability-matrix-rtm" class="level3">
+<h3 class="anchored" data-anchor-id="the-requirements-traceability-matrix-rtm">2.6.2 The Requirements Traceability Matrix (RTM)</h3>
+<p>A <strong>Requirements Traceability Matrix</strong> (RTM) is a document that maps requirements to other project artifacts. It creates explicit links between requirements and their downstream implementations.</p>
+<p><strong>Basic RTM Structure:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Req ID</th>
+<th>Requirement Description</th>
+<th>Design Reference</th>
+<th>Code Module</th>
+<th>Test Case ID</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>FR-UM-001</td>
+<td>User registration via Google OAuth</td>
+<td>DES-AUTH-001</td>
+<td>auth/google.js</td>
+<td>TC-AUTH-001, TC-AUTH-002</td>
+<td>Complete</td>
+</tr>
+<tr class="even">
+<td>FR-UM-002</td>
+<td>User profile management</td>
+<td>DES-USER-001</td>
+<td>users/profile.js</td>
+<td>TC-USER-001</td>
+<td>In Progress</td>
+</tr>
+<tr class="odd">
+<td>FR-PM-001</td>
+<td>Project creation</td>
+<td>DES-PROJ-001</td>
+<td>projects/create.js</td>
+<td>TC-PROJ-001</td>
+<td>Complete</td>
+</tr>
+<tr class="even">
+<td>NFR-PERF-001</td>
+<td>Page load &lt; 3 seconds</td>
+<td>DES-PERF-001</td>
+<td>N/A</td>
+<td>TC-PERF-001</td>
+<td>Testing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Extended RTM with Additional Fields:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Req ID</th>
+<th>Source</th>
+<th>Priority</th>
+<th>Risk</th>
+<th>Stakeholder</th>
+<th>Sprint</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>FR-UM-001</td>
+<td>Interview-012</td>
+<td>High</td>
+<td>Low</td>
+<td>Product Owner</td>
+<td>Sprint 1</td>
+<td>Core feature</td>
+</tr>
+<tr class="even">
+<td>FR-UM-002</td>
+<td>Workshop-003</td>
+<td>Medium</td>
+<td>Low</td>
+<td>Users</td>
+<td>Sprint 2</td>
+<td>May defer some fields</td>
+</tr>
+<tr class="odd">
+<td>FR-PM-001</td>
+<td>SRS v1.0</td>
+<td>High</td>
+<td>Medium</td>
+<td>PM Team</td>
+<td>Sprint 1</td>
+<td>Complex validation</td>
+</tr>
+<tr class="even">
+<td>NFR-PERF-001</td>
+<td>NFR Workshop</td>
+<td>High</td>
+<td>High</td>
+<td>All Users</td>
+<td>Sprint 3</td>
+<td>Requires perf testing</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="types-of-traceability" class="level3">
+<h3 class="anchored" data-anchor-id="types-of-traceability">2.6.3 Types of Traceability</h3>
+<p><strong>Forward Traceability</strong>: From requirements to implementation</p>
+<ul>
+<li>Requirement → Design</li>
+<li>Requirement → Code</li>
+<li>Requirement → Test Cases</li>
+</ul>
+<p>Forward traceability ensures every requirement is implemented and tested.</p>
+<p><strong>Backward Traceability</strong>: From implementation back to requirements</p>
+<ul>
+<li>Code → Requirement</li>
+<li>Test Case → Requirement</li>
+<li>Design → Requirement</li>
+</ul>
+<p>Backward traceability ensures all development work serves a documented need—no “gold plating” or undocumented features.</p>
+<p><strong>Bi-directional Traceability</strong>: Both directions combined, providing complete coverage.</p>
+<pre><code>                Forward Traceability
+        ────────────────────────────────────►
+
+┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐
+│Business │     │Software │     │  Design │     │  Test   │
+│  Needs  │────►│   Req   │────►│         │────►│  Cases  │
+└─────────┘     └─────────┘     └─────────┘     └─────────┘
+
+        ◄────────────────────────────────────
+                Backward Traceability</code></pre>
+</section>
+<section id="maintaining-the-rtm" class="level3">
+<h3 class="anchored" data-anchor-id="maintaining-the-rtm">2.6.4 Maintaining the RTM</h3>
+<p>The RTM is a living document that must be updated throughout the project. Best practices include:</p>
+<p><strong>Update triggers:</strong></p>
+<ul>
+<li>New requirement added</li>
+<li>Requirement modified or deleted</li>
+<li>Design decision made</li>
+<li>Code module completed</li>
+<li>Test case created or executed</li>
+<li>Status changes</li>
+</ul>
+<p><strong>Review cadence:</strong></p>
+<ul>
+<li>Weekly reviews during development</li>
+<li>Milestone reviews before releases</li>
+<li>Full audit before final delivery</li>
+</ul>
+<p><strong>Tooling options:</strong></p>
+<ul>
+<li>Spreadsheets (simple projects)</li>
+<li>Requirements management tools (Jama, DOORS, Helix RM)</li>
+<li>Issue trackers with linking (Jira, GitHub Issues)</li>
+<li>Custom databases</li>
+</ul>
+</section>
+<section id="traceability-in-agile-projects" class="level3">
+<h3 class="anchored" data-anchor-id="traceability-in-agile-projects">2.6.5 Traceability in Agile Projects</h3>
+<p>In Agile environments, formal RTMs may seem heavyweight. However, traceability remains important. Agile approaches include:</p>
+<p><strong>Linking in issue trackers</strong>: User stories linked to epics (backward to business need), linked to tasks (forward to implementation), linked to test cases.</p>
+<p><strong>Definition of Done</strong>: Including “acceptance criteria verified” and “tests written” in the definition of done ensures traceability.</p>
+<p><strong>Living documentation</strong>: Tools like Cucumber connect executable specifications directly to tests, creating automatic traceability.</p>
+<pre><code>Epic: E-001 User Authentication
+├── Story: US-001 User Login
+│   ├── Task: T-001 Implement login API
+│   ├── Task: T-002 Build login form component
+│   └── Test: TC-001 Verify successful login
+│   └── Test: TC-002 Verify invalid credentials
+├── Story: US-002 Password Reset
+│   └── ...</code></pre>
+<hr>
+</section>
+</section>
+<section id="managing-requirements-challenges" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="managing-requirements-challenges"><span class="header-section-number">5.8</span> 2.7 Managing Requirements Challenges</h2>
+<p>Requirements engineering faces several common challenges. Recognizing and addressing these challenges is key to project success.</p>
+<section id="scope-creep" class="level3">
+<h3 class="anchored" data-anchor-id="scope-creep">2.7.1 Scope Creep</h3>
+<p><strong>Scope creep</strong> is the uncontrolled expansion of project scope—new requirements added without corresponding increases in time or budget. It’s one of the most common causes of project overruns.</p>
+<p><strong>Causes:</strong></p>
+<ul>
+<li>Unclear or incomplete initial requirements</li>
+<li>Stakeholders adding “just one more feature”</li>
+<li>Gold plating by developers</li>
+<li>Poor change management</li>
+<li>Lack of clear project boundaries</li>
+</ul>
+<p><strong>Prevention and Management:</strong></p>
+<p><strong>Clear scope statements</strong>: Document what’s in scope AND what’s out of scope explicitly.</p>
+<p><strong>Change control process</strong>: All changes go through a formal review:</p>
+<ol type="1">
+<li>Document the change request</li>
+<li>Assess impact on schedule, budget, and other requirements</li>
+<li>Decide: approve, reject, or defer</li>
+<li>Update documentation if approved</li>
+</ol>
+<p><strong>Baseline requirements</strong>: Freeze requirements at a specific point; changes after baseline require formal approval.</p>
+<p><strong>MoSCoW prioritization</strong>: Categorize requirements as:</p>
+<ul>
+<li><strong>Must have</strong>: Essential, non-negotiable</li>
+<li><strong>Should have</strong>: Important but not critical</li>
+<li><strong>Could have</strong>: Nice to have if time permits</li>
+<li><strong>Won’t have</strong>: Explicitly out of scope (this time)</li>
+</ul>
+</section>
+<section id="ambiguous-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="ambiguous-requirements">2.7.2 Ambiguous Requirements</h3>
+<p>Ambiguous requirements mean different things to different readers, leading to incorrect implementations and costly rework.</p>
+<p><strong>Common Sources of Ambiguity:</strong></p>
+<p><strong>Vague adjectives</strong>: “fast,” “user-friendly,” “secure,” “reliable”</p>
+<p><strong>Unbounded lists</strong>: “including but not limited to,” “such as,” “etc.”</p>
+<p><strong>Ambiguous pronouns</strong>: “The system sends a notification to the user when they submit the form. It should be formatted as HTML.” (What does “it” refer to?)</p>
+<p><strong>Missing conditions</strong>: “The system displays an error message.” (When? Under what conditions?)</p>
+<p><strong>Unclear quantities</strong>: “The system supports multiple users.” (How many? 10? 10,000?)</p>
+<p><strong>Strategies for Clarity:</strong></p>
+<p><strong>Specific numbers</strong>: Replace “fast” with “within 2 seconds”</p>
+<p><strong>Complete lists</strong>: If the list is exhaustive, say so: “The system shall support exactly these payment methods: credit card, debit card, and PayPal”</p>
+<p><strong>Examples</strong>: Include concrete examples to illustrate requirements</p>
+<p><strong>Glossary</strong>: Define terms precisely in a glossary</p>
+<p><strong>Reviews</strong>: Multiple reviewers from different backgrounds catch different ambiguities</p>
+</section>
+<section id="conflicting-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="conflicting-requirements">2.7.3 Conflicting Requirements</h3>
+<p>Different stakeholders often have different—sometimes contradictory—needs.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Marketing wants maximum features; development wants a sustainable pace</li>
+<li>Security wants strong authentication; UX wants minimal friction</li>
+<li>Sales wants customization for each client; architecture wants standardization</li>
+</ul>
+<p><strong>Resolution Strategies:</strong></p>
+<p><strong>Identify conflicts early</strong>: Requirements analysis should explicitly look for conflicts.</p>
+<p><strong>Understand underlying needs</strong>: Often conflicts arise from different solutions to the same underlying need. Find the root cause.</p>
+<p><strong>Negotiate and prioritize</strong>: Bring stakeholders together to discuss trade-offs and agree on priorities.</p>
+<p><strong>Document decisions</strong>: Record what was decided and why, so the decision isn’t relitigated later.</p>
+<p><strong>Escalate when necessary</strong>: Some conflicts require executive decision-making.</p>
+</section>
+<section id="changing-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="changing-requirements">2.7.4 Changing Requirements</h3>
+<p>Requirements will change. Users learn what they actually need by seeing early versions. Market conditions shift. Technology evolves. Regulations change.</p>
+<p>The question isn’t whether requirements will change, but how you’ll manage change.</p>
+<p><strong>Agile Approach</strong>: Embrace change. Short iterations deliver working software frequently. Requirements emerge and evolve based on feedback. The backlog is continuously refined.</p>
+<p><strong>Plan-Driven Approach</strong>: Manage change formally. Establish baselines. Evaluate change requests for impact. Maintain version control of requirements documents.</p>
+<p><strong>Hybrid Approach</strong>: Most real projects use a combination. Core requirements are stable (plan-driven), while details emerge iteratively (Agile).</p>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li>Accept that change is inevitable</li>
+<li>Build processes to handle change efficiently</li>
+<li>Communicate the cost of late changes (not to prevent change, but to inform decisions)</li>
+<li>Keep requirements documentation up to date</li>
+<li>Maintain traceability so impacts are visible</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="requirements-in-practice-tools-and-techniques" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="requirements-in-practice-tools-and-techniques"><span class="header-section-number">5.9</span> 2.8 Requirements in Practice: Tools and Techniques</h2>
+<section id="requirements-management-tools" class="level3">
+<h3 class="anchored" data-anchor-id="requirements-management-tools">2.8.1 Requirements Management Tools</h3>
+<p>Various tools support requirements engineering:</p>
+<p><strong>Document-based tools:</strong></p>
+<ul>
+<li>Microsoft Word/Google Docs with templates</li>
+<li>Confluence</li>
+<li>Notion</li>
+</ul>
+<p><strong>Dedicated requirements tools:</strong></p>
+<ul>
+<li>Jama Connect</li>
+<li>IBM DOORS</li>
+<li>Helix RM</li>
+<li>Modern Requirements</li>
+</ul>
+<p><strong>Agile tools with requirements support:</strong></p>
+<ul>
+<li>Jira</li>
+<li>Azure DevOps</li>
+<li>GitHub Issues + Projects</li>
+<li>Linear</li>
+<li>Shortcut</li>
+</ul>
+<p><strong>Choosing a tool:</strong></p>
+<ul>
+<li>Team size and distribution</li>
+<li>Project complexity</li>
+<li>Regulatory requirements</li>
+<li>Budget</li>
+<li>Integration with other tools</li>
+<li>Learning curve</li>
+</ul>
+<p>For your course project, GitHub Issues and Projects provide adequate requirements management while learning fundamental concepts.</p>
+</section>
+<section id="using-github-for-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="using-github-for-requirements">2.8.2 Using GitHub for Requirements</h3>
+<p>GitHub provides several features useful for requirements management:</p>
+<p><strong>Issues</strong> for user stories and requirements:</p>
+<pre><code>Title: As a customer, I want to reset my password
+
+Description:
+**User Story:**
+As a customer, I want to reset my password so that I can 
+regain access if I forget it.
+
+**Acceptance Criteria:**
+- [ ] Reset link sent via email within 5 minutes
+- [ ] Link expires after 24 hours
+- [ ] New password must meet security requirements
+- [ ] Confirmation shown after successful reset
+
+**Priority:** High
+**Sprint:** Sprint 2</code></pre>
+<p><strong>Labels</strong> for categorization:</p>
+<ul>
+<li><code>type: feature</code></li>
+<li><code>type: bug</code></li>
+<li><code>priority: high</code></li>
+<li><code>status: in-progress</code></li>
+<li><code>area: authentication</code></li>
+</ul>
+<p><strong>Milestones</strong> for releases or sprints</p>
+<p><strong>Projects</strong> for Kanban boards and tracking</p>
+<p><strong>Linking</strong> issues to pull requests for traceability</p>
+<hr>
+</section>
+</section>
+<section id="chapter-summary" class="level2" data-number="5.10">
+<h2 data-number="5.10" class="anchored" data-anchor-id="chapter-summary"><span class="header-section-number">5.10</span> 2.9 Chapter Summary</h2>
+<p>Requirements engineering is the foundation of successful software projects. Investing time in understanding and documenting what the system should do—before writing code—dramatically reduces the risk of building the wrong thing.</p>
+<p>Key takeaways from this chapter:</p>
+<ul>
+<li><p><strong>Requirements engineering</strong> is the systematic process of discovering, documenting, validating, and managing requirements. It’s iterative and continues throughout the project.</p></li>
+<li><p><strong>Functional requirements</strong> describe what the system should do; <strong>non-functional requirements</strong> describe how well it should do it (performance, security, usability, etc.).</p></li>
+<li><p><strong>Multiple elicitation techniques</strong> are needed: interviews, questionnaires, observation, workshops, document analysis, and prototyping each reveal different types of requirements.</p></li>
+<li><p><strong>User stories</strong> capture requirements from the user’s perspective (“As a… I want… so that…”) and include acceptance criteria that define when the story is complete.</p></li>
+<li><p><strong>The SRS document</strong> serves as a contract and reference for all project stakeholders. Good requirements are clear, complete, consistent, verifiable, traceable, feasible, and necessary.</p></li>
+<li><p><strong>Requirements traceability</strong> links requirements to their sources and to downstream artifacts (design, code, tests), ensuring nothing falls through the cracks.</p></li>
+<li><p><strong>Common challenges</strong> include scope creep, ambiguity, conflicts, and change. Each requires specific management strategies.</p></li>
+</ul>
+<hr>
+</section>
+<section id="key-terms" class="level2" data-number="5.11">
+<h2 data-number="5.11" class="anchored" data-anchor-id="key-terms"><span class="header-section-number">5.11</span> 2.10 Key Terms</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Requirements Engineering</strong></td>
+<td>The process of discovering, documenting, validating, and managing software requirements</td>
+</tr>
+<tr class="even">
+<td><strong>Functional Requirement</strong></td>
+<td>A specification of what the system should do</td>
+</tr>
+<tr class="odd">
+<td><strong>Non-Functional Requirement</strong></td>
+<td>A specification of how well the system should perform (quality attributes)</td>
+</tr>
+<tr class="even">
+<td><strong>Elicitation</strong></td>
+<td>The process of gathering requirements from stakeholders and other sources</td>
+</tr>
+<tr class="odd">
+<td><strong>User Story</strong></td>
+<td>A brief description of a feature from the perspective of a user</td>
+</tr>
+<tr class="even">
+<td><strong>Acceptance Criteria</strong></td>
+<td>Conditions that must be met for a user story to be considered complete</td>
+</tr>
+<tr class="odd">
+<td><strong>Epic</strong></td>
+<td>A large body of work that can be broken down into smaller user stories</td>
+</tr>
+<tr class="even">
+<td><strong>SRS</strong></td>
+<td>Software Requirements Specification; the primary requirements document</td>
+</tr>
+<tr class="odd">
+<td><strong>RTM</strong></td>
+<td>Requirements Traceability Matrix; a document linking requirements to other artifacts</td>
+</tr>
+<tr class="even">
+<td><strong>Scope Creep</strong></td>
+<td>Uncontrolled expansion of project scope</td>
+</tr>
+<tr class="odd">
+<td><strong>MoSCoW</strong></td>
+<td>Prioritization method: Must have, Should have, Could have, Won’t have</td>
+</tr>
+<tr class="even">
+<td><strong>INVEST</strong></td>
+<td>Criteria for good user stories: Independent, Negotiable, Valuable, Estimable, Small, Testable</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="review-questions" class="level2" data-number="5.12">
+<h2 data-number="5.12" class="anchored" data-anchor-id="review-questions"><span class="header-section-number">5.12</span> 2.11 Review Questions</h2>
+<ol type="1">
+<li><p>Explain the difference between functional and non-functional requirements. Why are both important? Give two examples of each for a mobile banking application.</p></li>
+<li><p>Describe three different requirements elicitation techniques. For each, explain when it would be most appropriate and what types of requirements it’s best suited to discover.</p></li>
+<li><p>What makes a good user story according to the INVEST criteria? Write a user story for an online food ordering system and evaluate it against INVEST.</p></li>
+<li><p>Why is the “so that” clause important in user stories? What happens when it’s omitted?</p></li>
+<li><p>Compare acceptance criteria written in Given-When-Then format versus checklist format. What are the advantages of each?</p></li>
+<li><p>What are the key sections of an SRS document? Who are the different audiences for the SRS, and how does each use it?</p></li>
+<li><p>Explain forward and backward traceability. Why is bi-directional traceability valuable?</p></li>
+<li><p>What is scope creep? Describe three strategies for preventing or managing it.</p></li>
+<li><p>You’re reviewing a requirements document and find this requirement: “The system shall be secure.” What’s wrong with this requirement? How would you improve it?</p></li>
+<li><p>A stakeholder says, “We don’t have time for all this requirements documentation. Just start coding and we’ll figure it out as we go.” How would you respond?</p></li>
+</ol>
+<hr>
+</section>
+<section id="hands-on-exercises" class="level2" data-number="5.13">
+<h2 data-number="5.13" class="anchored" data-anchor-id="hands-on-exercises"><span class="header-section-number">5.13</span> 2.12 Hands-On Exercises</h2>
+<section id="exercise-2.1-elicitation-practice" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-2.1-elicitation-practice">Exercise 2.1: Elicitation Practice</h3>
+<p>Select a system you use regularly (a mobile app, website, or desktop application). Imagine you’re replacing it with a new system.</p>
+<ol type="1">
+<li>Write 10 interview questions you would ask users of the current system.</li>
+<li>Identify 5 things you would look for if you were observing users.</li>
+<li>List 5 documents you would want to review.</li>
+</ol>
+</section>
+<section id="exercise-2.2-writing-user-stories" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-2.2-writing-user-stories">Exercise 2.2: Writing User Stories</h3>
+<p>For your semester project, write 10 user stories following the “As a… I want… so that…” format. For each story:</p>
+<ol type="1">
+<li>Identify the user role</li>
+<li>Write the story</li>
+<li>Add 3-5 acceptance criteria</li>
+<li>Evaluate against INVEST criteria</li>
+</ol>
+</section>
+<section id="exercise-2.3-requirement-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-2.3-requirement-analysis">Exercise 2.3: Requirement Analysis</h3>
+<p>Review the following requirements and identify problems (ambiguity, incompleteness, conflicts, etc.). Rewrite each to improve it.</p>
+<ol type="1">
+<li>“The system should load quickly.”</li>
+<li>“Users can search for products.”</li>
+<li>“The system shall support all major browsers.”</li>
+<li>“The interface shall be intuitive.”</li>
+<li>“Reports should be generated daily, weekly, or on-demand.”</li>
+<li>“The system must be reliable.”</li>
+</ol>
+</section>
+<section id="exercise-2.4-software-requirements-specification" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-2.4-software-requirements-specification">Exercise 2.4: Software Requirements Specification</h3>
+<p>Create an SRS document for your semester project using the IEEE 830 structure as a guide. Include:</p>
+<ol type="1">
+<li>Introduction (purpose, scope, definitions)</li>
+<li>Overall description (product perspective, user classes, constraints)</li>
+<li>At least 15 functional requirements with unique IDs</li>
+<li>At least 5 non-functional requirements covering different categories</li>
+<li>Initial traceability to user stories</li>
+</ol>
+</section>
+<section id="exercise-2.5-requirements-traceability-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-2.5-requirements-traceability-matrix">Exercise 2.5: Requirements Traceability Matrix</h3>
+<p>Create an RTM for your project that includes:</p>
+<ol type="1">
+<li>Requirement ID and description</li>
+<li>Priority (MoSCoW)</li>
+<li>Source (which elicitation activity or stakeholder)</li>
+<li>Status (Not Started, In Progress, Complete)</li>
+<li>Placeholder columns for Design, Code Module, and Test Case (to be filled in later)</li>
+</ol>
+</section>
+<section id="exercise-2.6-github-project-setup" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-2.6-github-project-setup">Exercise 2.6: GitHub Project Setup</h3>
+<p>Set up requirements management for your project in GitHub:</p>
+<ol type="1">
+<li>Create issues for at least 10 user stories</li>
+<li>Add appropriate labels (priority, type, area)</li>
+<li>Create a milestone for your first release</li>
+<li>Set up a project board with columns: Backlog, Ready, In Progress, Review, Done</li>
+<li>Add acceptance criteria as checkboxes in each issue</li>
+</ol>
+<hr>
+</section>
+</section>
+<section id="further-reading" class="level2" data-number="5.14">
+<h2 data-number="5.14" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">5.14</span> 2.13 Further Reading</h2>
+<p><strong>Books:</strong></p>
+<ul>
+<li>Wiegers, K. &amp; Beatty, J. (2013). <em>Software Requirements</em> (3rd Edition). Microsoft Press.</li>
+<li>Robertson, S. &amp; Robertson, J. (2012). <em>Mastering the Requirements Process</em> (3rd Edition). Addison-Wesley.</li>
+<li>Cohn, M. (2004). <em>User Stories Applied</em>. Addison-Wesley.</li>
+<li>Patton, J. (2014). <em>User Story Mapping</em>. O’Reilly Media.</li>
+</ul>
+<p><strong>Standards:</strong></p>
+<ul>
+<li>IEEE 830-1998: Recommended Practice for Software Requirements Specifications</li>
+<li>ISO/IEC/IEEE 29148:2018: Systems and software engineering — Life cycle processes — Requirements engineering</li>
+</ul>
+<p><strong>Online Resources:</strong></p>
+<ul>
+<li>Atlassian Agile Coach: User Stories (https://www.atlassian.com/agile/project-management/user-stories)</li>
+<li>Mountain Goat Software: User Stories (https://www.mountaingoatsoftware.com/agile/user-stories)</li>
+<li>Requirements Engineering Magazine (https://re-magazine.ireb.org/)</li>
+</ul>
+<hr>
+</section>
+<section id="references" class="level2" data-number="5.15">
+<h2 data-number="5.15" class="anchored" data-anchor-id="references"><span class="header-section-number">5.15</span> References</h2>
+<p>Cohn, M. (2004). <em>User Stories Applied: For Agile Software Development</em>. Addison-Wesley.</p>
+<p>IEEE. (1998). IEEE Recommended Practice for Software Requirements Specifications (IEEE Std 830-1998).</p>
+<p>Patton, J. (2014). <em>User Story Mapping: Discover the Whole Story, Build the Right Product</em>. O’Reilly Media.</p>
+<p>Pohl, K. (2010). <em>Requirements Engineering: Fundamentals, Principles, and Techniques</em>. Springer.</p>
+<p>Robertson, S., &amp; Robertson, J. (2012). <em>Mastering the Requirements Process: Getting Requirements Right</em> (3rd Edition). Addison-Wesley.</p>
+<p>Standish Group. (2020). <em>CHAOS Report 2020</em>. The Standish Group International.</p>
+<p>Wake, B. (2003). INVEST in Good Stories, and SMART Tasks. Retrieved from https://xp123.com/articles/invest-in-good-stories-and-smart-tasks/</p>
+<p>Wiegers, K., &amp; Beatty, J. (2013). <em>Software Requirements</em> (3rd Edition). Microsoft Press.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/01-introduction.html" class="pagination-link" aria-label="Chapter 1: Introduction to Software Engineering">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Chapter 1: Introduction to Software Engineering</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/03-systems-modeling.html" class="pagination-link" aria-label="Chapter 3: Systems Modeling and UML">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Chapter 3: Systems Modeling and UML</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

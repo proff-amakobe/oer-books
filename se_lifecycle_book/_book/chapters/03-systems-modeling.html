@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Chapter 3: Systems Modeling and UML – The Complete Software Engineering Lifecycle</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/04-software-architecture.html" rel="next">
+<link href="../chapters/02-requirements-engineering.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles/custom.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/03-systems-modeling.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Chapter 3: Systems Modeling and UML</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">The Complete Software Engineering Lifecycle</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">The Complete Software Engineering Lifecycle</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preface.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">preface.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../acknowledgments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">acknowledgments.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Chapter 1: Introduction to Software Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-requirements-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Chapter 2: Requirements Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-systems-modeling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Chapter 3: Systems Modeling and UML</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-software-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Chapter 4: Software Architecture and Design Patterns</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-ui-ux.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 5: UI/UX Design and Prototyping</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-agile-methodologies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Chapter 6: Agile Methodologies and Project Management</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-version-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Chapter 7: Version Control Workflows</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-prototype-implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">09-prototype-implementation.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">10-testing.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-quality-assurance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">11-quality-assurance.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-data-management-apis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">12-data-management-apis.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-devops-deployment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">13-devops-deployment.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">14-security.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-maintenance-evolution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">15-maintenance-evolution.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-final-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">16-final-integration.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-project-guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">appendix-project-guide.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">glossary.html</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives"><span class="header-section-number">6.1</span> Learning Objectives</a></li>
+  <li><a href="#why-model-software-systems" id="toc-why-model-software-systems" class="nav-link" data-scroll-target="#why-model-software-systems"><span class="header-section-number">6.2</span> 3.1 Why Model Software Systems?</a>
+  <ul class="collapse">
+  <li><a href="#the-purpose-of-models" id="toc-the-purpose-of-models" class="nav-link" data-scroll-target="#the-purpose-of-models">3.1.1 The Purpose of Models</a></li>
+  <li><a href="#benefits-of-modeling" id="toc-benefits-of-modeling" class="nav-link" data-scroll-target="#benefits-of-modeling">3.1.2 Benefits of Modeling</a></li>
+  <li><a href="#modeling-in-different-contexts" id="toc-modeling-in-different-contexts" class="nav-link" data-scroll-target="#modeling-in-different-contexts">3.1.3 Modeling in Different Contexts</a></li>
+  </ul></li>
+  <li><a href="#introduction-to-uml" id="toc-introduction-to-uml" class="nav-link" data-scroll-target="#introduction-to-uml"><span class="header-section-number">6.3</span> 3.2 Introduction to UML</a>
+  <ul class="collapse">
+  <li><a href="#uml-diagram-types" id="toc-uml-diagram-types" class="nav-link" data-scroll-target="#uml-diagram-types">3.2.1 UML Diagram Types</a></li>
+  <li><a href="#uml-notation-basics" id="toc-uml-notation-basics" class="nav-link" data-scroll-target="#uml-notation-basics">3.2.2 UML Notation Basics</a></li>
+  </ul></li>
+  <li><a href="#use-case-diagrams" id="toc-use-case-diagrams" class="nav-link" data-scroll-target="#use-case-diagrams"><span class="header-section-number">6.4</span> 3.3 Use Case Diagrams</a>
+  <ul class="collapse">
+  <li><a href="#use-case-diagram-elements" id="toc-use-case-diagram-elements" class="nav-link" data-scroll-target="#use-case-diagram-elements">3.3.1 Use Case Diagram Elements</a></li>
+  <li><a href="#use-case-relationships" id="toc-use-case-relationships" class="nav-link" data-scroll-target="#use-case-relationships">3.3.2 Use Case Relationships</a></li>
+  <li><a href="#complete-use-case-diagram-example" id="toc-complete-use-case-diagram-example" class="nav-link" data-scroll-target="#complete-use-case-diagram-example">3.3.3 Complete Use Case Diagram Example</a></li>
+  <li><a href="#use-case-descriptions" id="toc-use-case-descriptions" class="nav-link" data-scroll-target="#use-case-descriptions">3.3.4 Use Case Descriptions</a></li>
+  <li><a href="#best-practices-for-use-case-diagrams" id="toc-best-practices-for-use-case-diagrams" class="nav-link" data-scroll-target="#best-practices-for-use-case-diagrams">3.3.5 Best Practices for Use Case Diagrams</a></li>
+  </ul></li>
+  <li><a href="#activity-diagrams" id="toc-activity-diagrams" class="nav-link" data-scroll-target="#activity-diagrams"><span class="header-section-number">6.5</span> 3.4 Activity Diagrams</a>
+  <ul class="collapse">
+  <li><a href="#activity-diagram-elements" id="toc-activity-diagram-elements" class="nav-link" data-scroll-target="#activity-diagram-elements">3.4.1 Activity Diagram Elements</a></li>
+  <li><a href="#control-flow-vs.-object-flow" id="toc-control-flow-vs.-object-flow" class="nav-link" data-scroll-target="#control-flow-vs.-object-flow">3.4.2 Control Flow vs.&nbsp;Object Flow</a></li>
+  <li><a href="#complete-activity-diagram-example" id="toc-complete-activity-diagram-example" class="nav-link" data-scroll-target="#complete-activity-diagram-example">3.4.3 Complete Activity Diagram Example</a></li>
+  <li><a href="#activity-diagram-for-algorithm-logic" id="toc-activity-diagram-for-algorithm-logic" class="nav-link" data-scroll-target="#activity-diagram-for-algorithm-logic">3.4.4 Activity Diagram for Algorithm Logic</a></li>
+  <li><a href="#best-practices-for-activity-diagrams" id="toc-best-practices-for-activity-diagrams" class="nav-link" data-scroll-target="#best-practices-for-activity-diagrams">3.4.5 Best Practices for Activity Diagrams</a></li>
+  </ul></li>
+  <li><a href="#sequence-diagrams" id="toc-sequence-diagrams" class="nav-link" data-scroll-target="#sequence-diagrams"><span class="header-section-number">6.6</span> 3.5 Sequence Diagrams</a>
+  <ul class="collapse">
+  <li><a href="#sequence-diagram-elements" id="toc-sequence-diagram-elements" class="nav-link" data-scroll-target="#sequence-diagram-elements">3.5.1 Sequence Diagram Elements</a></li>
+  <li><a href="#combined-fragments" id="toc-combined-fragments" class="nav-link" data-scroll-target="#combined-fragments">3.5.2 Combined Fragments</a></li>
+  <li><a href="#complete-sequence-diagram-example" id="toc-complete-sequence-diagram-example" class="nav-link" data-scroll-target="#complete-sequence-diagram-example">3.5.3 Complete Sequence Diagram Example</a></li>
+  <li><a href="#object-creation-and-destruction" id="toc-object-creation-and-destruction" class="nav-link" data-scroll-target="#object-creation-and-destruction">3.5.4 Object Creation and Destruction</a></li>
+  <li><a href="#best-practices-for-sequence-diagrams" id="toc-best-practices-for-sequence-diagrams" class="nav-link" data-scroll-target="#best-practices-for-sequence-diagrams">3.5.5 Best Practices for Sequence Diagrams</a></li>
+  </ul></li>
+  <li><a href="#class-diagrams" id="toc-class-diagrams" class="nav-link" data-scroll-target="#class-diagrams"><span class="header-section-number">6.7</span> 3.6 Class Diagrams</a>
+  <ul class="collapse">
+  <li><a href="#class-notation" id="toc-class-notation" class="nav-link" data-scroll-target="#class-notation">3.6.1 Class Notation</a></li>
+  <li><a href="#relationships-between-classes" id="toc-relationships-between-classes" class="nav-link" data-scroll-target="#relationships-between-classes">3.6.2 Relationships Between Classes</a></li>
+  <li><a href="#association-classes" id="toc-association-classes" class="nav-link" data-scroll-target="#association-classes">3.6.3 Association Classes</a></li>
+  <li><a href="#complete-class-diagram-example" id="toc-complete-class-diagram-example" class="nav-link" data-scroll-target="#complete-class-diagram-example">3.6.4 Complete Class Diagram Example</a></li>
+  <li><a href="#domain-models-vs.-design-class-diagrams" id="toc-domain-models-vs.-design-class-diagrams" class="nav-link" data-scroll-target="#domain-models-vs.-design-class-diagrams">3.6.5 Domain Models vs.&nbsp;Design Class Diagrams</a></li>
+  <li><a href="#best-practices-for-class-diagrams" id="toc-best-practices-for-class-diagrams" class="nav-link" data-scroll-target="#best-practices-for-class-diagrams">3.6.6 Best Practices for Class Diagrams</a></li>
+  </ul></li>
+  <li><a href="#choosing-the-right-diagram" id="toc-choosing-the-right-diagram" class="nav-link" data-scroll-target="#choosing-the-right-diagram"><span class="header-section-number">6.8</span> 3.7 Choosing the Right Diagram</a>
+  <ul class="collapse">
+  <li><a href="#matching-diagrams-to-questions" id="toc-matching-diagrams-to-questions" class="nav-link" data-scroll-target="#matching-diagrams-to-questions">3.7.1 Matching Diagrams to Questions</a></li>
+  <li><a href="#diagrams-through-the-development-lifecycle" id="toc-diagrams-through-the-development-lifecycle" class="nav-link" data-scroll-target="#diagrams-through-the-development-lifecycle">3.7.2 Diagrams Through the Development Lifecycle</a></li>
+  <li><a href="#diagram-selection-guide" id="toc-diagram-selection-guide" class="nav-link" data-scroll-target="#diagram-selection-guide">3.7.3 Diagram Selection Guide</a></li>
+  </ul></li>
+  <li><a href="#modeling-tools" id="toc-modeling-tools" class="nav-link" data-scroll-target="#modeling-tools"><span class="header-section-number">6.9</span> 3.8 Modeling Tools</a>
+  <ul class="collapse">
+  <li><a href="#categories-of-tools" id="toc-categories-of-tools" class="nav-link" data-scroll-target="#categories-of-tools">3.8.1 Categories of Tools</a></li>
+  <li><a href="#plantuml-example" id="toc-plantuml-example" class="nav-link" data-scroll-target="#plantuml-example">3.8.2 PlantUML Example</a></li>
+  <li><a href="#mermaid-example" id="toc-mermaid-example" class="nav-link" data-scroll-target="#mermaid-example">3.8.3 Mermaid Example</a></li>
+  <li><a href="#tool-selection-considerations" id="toc-tool-selection-considerations" class="nav-link" data-scroll-target="#tool-selection-considerations">3.8.4 Tool Selection Considerations</a></li>
+  </ul></li>
+  <li><a href="#chapter-summary" id="toc-chapter-summary" class="nav-link" data-scroll-target="#chapter-summary"><span class="header-section-number">6.10</span> 3.9 Chapter Summary</a></li>
+  <li><a href="#key-terms" id="toc-key-terms" class="nav-link" data-scroll-target="#key-terms"><span class="header-section-number">6.11</span> 3.10 Key Terms</a></li>
+  <li><a href="#review-questions" id="toc-review-questions" class="nav-link" data-scroll-target="#review-questions"><span class="header-section-number">6.12</span> 3.11 Review Questions</a></li>
+  <li><a href="#hands-on-exercises" id="toc-hands-on-exercises" class="nav-link" data-scroll-target="#hands-on-exercises"><span class="header-section-number">6.13</span> 3.12 Hands-On Exercises</a>
+  <ul class="collapse">
+  <li><a href="#exercise-3.1-use-case-diagram" id="toc-exercise-3.1-use-case-diagram" class="nav-link" data-scroll-target="#exercise-3.1-use-case-diagram">Exercise 3.1: Use Case Diagram</a></li>
+  <li><a href="#exercise-3.2-activity-diagram" id="toc-exercise-3.2-activity-diagram" class="nav-link" data-scroll-target="#exercise-3.2-activity-diagram">Exercise 3.2: Activity Diagram</a></li>
+  <li><a href="#exercise-3.3-sequence-diagram" id="toc-exercise-3.3-sequence-diagram" class="nav-link" data-scroll-target="#exercise-3.3-sequence-diagram">Exercise 3.3: Sequence Diagram</a></li>
+  <li><a href="#exercise-3.4-class-diagram" id="toc-exercise-3.4-class-diagram" class="nav-link" data-scroll-target="#exercise-3.4-class-diagram">Exercise 3.4: Class Diagram</a></li>
+  <li><a href="#exercise-3.5-project-uml-package" id="toc-exercise-3.5-project-uml-package" class="nav-link" data-scroll-target="#exercise-3.5-project-uml-package">Exercise 3.5: Project UML Package</a></li>
+  <li><a href="#exercise-3.6-tool-exploration" id="toc-exercise-3.6-tool-exploration" class="nav-link" data-scroll-target="#exercise-3.6-tool-exploration">Exercise 3.6: Tool Exploration</a></li>
+  </ul></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">6.14</span> 3.13 Further Reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6.15</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Chapter 3: Systems Modeling and UML</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="learning-objectives" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">6.1</span> Learning Objectives</h2>
+<p>By the end of this chapter, you will be able to:</p>
+<ul>
+<li>Explain the purpose and value of systems modeling in software engineering</li>
+<li>Read and create Use Case diagrams to capture system functionality</li>
+<li>Model workflows and processes using Activity diagrams</li>
+<li>Represent object interactions over time with Sequence diagrams</li>
+<li>Design system structure using Class diagrams and domain models</li>
+<li>Select appropriate diagram types for different modeling needs</li>
+<li>Apply UML notation correctly and consistently</li>
+<li>Use modeling tools to create professional diagrams</li>
+</ul>
+<hr>
+</section>
+<section id="why-model-software-systems" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="why-model-software-systems"><span class="header-section-number">6.2</span> 3.1 Why Model Software Systems?</h2>
+<p>Imagine trying to build a house by describing it only in words. “There’s a living room connected to a kitchen, and upstairs there are three bedrooms…” You could write pages of description, but a single floor plan communicates the layout instantly and unambiguously. Architects don’t just describe buildings—they draw them.</p>
+<p>Software systems are far more complex than houses, yet we often try to describe them using only text: requirements documents, code comments, and verbal explanations. <strong>Systems modeling</strong> provides the visual blueprints that help us understand, communicate, and reason about software before and during its construction.</p>
+<section id="the-purpose-of-models" class="level3">
+<h3 class="anchored" data-anchor-id="the-purpose-of-models">3.1.1 The Purpose of Models</h3>
+<p>A <strong>model</strong> is a simplified representation of reality that helps us understand complex systems. Models deliberately omit details to focus on what matters for a particular purpose.</p>
+<p>Consider a map. A road map shows highways and cities but omits elevation, vegetation, and building footprints. A topographic map shows terrain but omits road numbers. A subway map distorts geography entirely to emphasize connections between stations. Each map serves a different purpose by including different information and making different simplifications.</p>
+<p>Software models work the same way. Different diagrams serve different purposes:</p>
+<ul>
+<li><strong>Use Case diagrams</strong> show what the system does from the user’s perspective</li>
+<li><strong>Activity diagrams</strong> show how processes flow through steps and decisions</li>
+<li><strong>Sequence diagrams</strong> show how objects interact over time</li>
+<li><strong>Class diagrams</strong> show the structure of the system’s code</li>
+</ul>
+<p>No single diagram captures everything. A complete understanding requires multiple views, each revealing different aspects of the system.</p>
+</section>
+<section id="benefits-of-modeling" class="level3">
+<h3 class="anchored" data-anchor-id="benefits-of-modeling">3.1.2 Benefits of Modeling</h3>
+<p><strong>Communication</strong>: Models provide a common language between stakeholders. A business analyst, a developer, and a tester can all look at the same diagram and understand what the system should do. Visual representations often communicate more effectively than pages of text.</p>
+<p><strong>Understanding</strong>: The act of creating a model forces you to think through the system carefully. You can’t draw a sequence diagram without understanding which objects interact and in what order. Modeling reveals gaps in your understanding early, when they’re cheap to address.</p>
+<p><strong>Documentation</strong>: Models serve as documentation that remains useful throughout the project lifecycle. Unlike code comments that often become outdated, well-maintained models provide a high-level view that helps new team members understand the system.</p>
+<p><strong>Analysis</strong>: Models allow you to analyze designs before implementation. You can identify potential problems, evaluate alternatives, and make architectural decisions when changes are still inexpensive.</p>
+<p><strong>Abstraction</strong>: Models let you work at the right level of detail. When discussing system architecture with executives, you don’t need to show individual methods and parameters. When designing a specific component, you don’t need the entire system context.</p>
+</section>
+<section id="modeling-in-different-contexts" class="level3">
+<h3 class="anchored" data-anchor-id="modeling-in-different-contexts">3.1.3 Modeling in Different Contexts</h3>
+<p>The role of modeling varies across development methodologies:</p>
+<p><strong>Traditional/Waterfall approaches</strong> often emphasize extensive upfront modeling. Detailed models are created during the design phase before coding begins. Changes to models require formal reviews.</p>
+<p><strong>Agile approaches</strong> favor “just enough” modeling. Models are created as needed, often informally on whiteboards. The emphasis is on models as communication tools rather than formal documentation. “Working software over comprehensive documentation” doesn’t mean no documentation—it means documentation that adds value.</p>
+<p><strong>The right balance</strong> depends on your context:</p>
+<ul>
+<li>Regulated industries may require formal models for compliance</li>
+<li>Distributed teams benefit from documented models for asynchronous communication</li>
+<li>Complex systems need more modeling than simple ones</li>
+<li>Novel designs require more exploration than familiar patterns</li>
+</ul>
+<p>For most projects, a pragmatic middle ground works best: model enough to understand and communicate the design, but don’t over-invest in documentation that won’t be maintained.</p>
+<hr>
+</section>
+</section>
+<section id="introduction-to-uml" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="introduction-to-uml"><span class="header-section-number">6.3</span> 3.2 Introduction to UML</h2>
+<p>The <strong>Unified Modeling Language (UML)</strong> is a standardized visual language for specifying, constructing, and documenting software systems. Developed in the 1990s by Grady Booch, James Rumbaugh, and Ivar Jacobson (the “Three Amigos”), UML unified several competing notations into a single standard, now maintained by the Object Management Group (OMG).</p>
+<section id="uml-diagram-types" class="level3">
+<h3 class="anchored" data-anchor-id="uml-diagram-types">3.2.1 UML Diagram Types</h3>
+<p>UML 2.5 defines 14 diagram types, organized into two main categories:</p>
+<p><strong>Structural Diagrams</strong> show the static structure of the system—what exists and how it’s organized:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Diagram</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Class Diagram</td>
+<td>Classes, attributes, methods, and relationships</td>
+</tr>
+<tr class="even">
+<td>Object Diagram</td>
+<td>Instances of classes at a specific moment</td>
+</tr>
+<tr class="odd">
+<td>Component Diagram</td>
+<td>High-level software components and dependencies</td>
+</tr>
+<tr class="even">
+<td>Deployment Diagram</td>
+<td>Physical deployment of software to hardware</td>
+</tr>
+<tr class="odd">
+<td>Package Diagram</td>
+<td>Organization of model elements into packages</td>
+</tr>
+<tr class="even">
+<td>Composite Structure Diagram</td>
+<td>Internal structure of a class</td>
+</tr>
+<tr class="odd">
+<td>Profile Diagram</td>
+<td>Extensions to UML itself</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Behavioral Diagrams</strong> show the dynamic behavior of the system—what happens over time:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Diagram</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Use Case Diagram</td>
+<td>System functionality from user perspective</td>
+</tr>
+<tr class="even">
+<td>Activity Diagram</td>
+<td>Workflows and process flows</td>
+</tr>
+<tr class="odd">
+<td>Sequence Diagram</td>
+<td>Object interactions over time</td>
+</tr>
+<tr class="even">
+<td>Communication Diagram</td>
+<td>Object interactions emphasizing structure</td>
+</tr>
+<tr class="odd">
+<td>State Machine Diagram</td>
+<td>States and transitions of an object</td>
+</tr>
+<tr class="even">
+<td>Timing Diagram</td>
+<td>Timing constraints on behavior</td>
+</tr>
+<tr class="odd">
+<td>Interaction Overview Diagram</td>
+<td>High-level view of interaction flows</td>
+</tr>
+</tbody>
+</table>
+<p>In practice, four diagrams cover most modeling needs:</p>
+<ul>
+<li><strong>Use Case diagrams</strong> for requirements</li>
+<li><strong>Activity diagrams</strong> for processes</li>
+<li><strong>Sequence diagrams</strong> for interactions</li>
+<li><strong>Class diagrams</strong> for structure</li>
+</ul>
+<p>This chapter focuses on these four essential diagram types.</p>
+</section>
+<section id="uml-notation-basics" class="level3">
+<h3 class="anchored" data-anchor-id="uml-notation-basics">3.2.2 UML Notation Basics</h3>
+<p>Before diving into specific diagrams, let’s understand some notation conventions that apply across UML:</p>
+<p><strong>Naming conventions:</strong></p>
+<ul>
+<li>Class names: PascalCase (e.g., <code>ShoppingCart</code>, <code>UserAccount</code>)</li>
+<li>Attributes and operations: camelCase (e.g., <code>firstName</code>, <code>calculateTotal()</code>)</li>
+<li>Constants: UPPER_CASE (e.g., <code>MAX_ITEMS</code>)</li>
+</ul>
+<p><strong>Visibility markers:</strong></p>
+<ul>
+<li><code>+</code> Public: accessible from anywhere</li>
+<li><code>-</code> Private: accessible only within the class</li>
+<li><code>#</code> Protected: accessible within class and subclasses</li>
+<li><code>~</code> Package: accessible within the same package</li>
+</ul>
+<p><strong>Multiplicity</strong> indicates how many instances participate in a relationship:</p>
+<ul>
+<li><code>1</code> Exactly one</li>
+<li><code>0..1</code> Zero or one (optional)</li>
+<li><code>*</code> or <code>0..*</code> Zero or more</li>
+<li><code>1..*</code> One or more</li>
+<li><code>n..m</code> Between n and m</li>
+</ul>
+<p><strong>Stereotypes</strong> extend UML with additional meaning, shown in guillemets:</p>
+<ul>
+<li><code>«interface»</code> An interface rather than a class</li>
+<li><code>«abstract»</code> An abstract class</li>
+<li><code>«enumeration»</code> An enumeration type</li>
+<li><code>«actor»</code> A user or external system</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="use-case-diagrams" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="use-case-diagrams"><span class="header-section-number">6.4</span> 3.3 Use Case Diagrams</h2>
+<p><strong>Use Case diagrams</strong> capture the functional requirements of a system from the user’s perspective. They show what the system does (use cases) and who interacts with it (actors), without detailing how the functionality is implemented.</p>
+<section id="use-case-diagram-elements" class="level3">
+<h3 class="anchored" data-anchor-id="use-case-diagram-elements">3.3.1 Use Case Diagram Elements</h3>
+<p><strong>Actors</strong> represent anyone or anything that interacts with the system from outside. Actors can be:</p>
+<ul>
+<li>Human users (Customer, Administrator, Manager)</li>
+<li>External systems (Payment Gateway, Email Service)</li>
+<li>Hardware devices (Barcode Scanner, Printer)</li>
+<li>Time-based triggers (Scheduled Task, Nightly Batch)</li>
+</ul>
+<p>Actors are drawn as stick figures with their role name below:</p>
+<pre><code>    O
+   /|\     Customer
+   / \</code></pre>
+<p><strong>Use Cases</strong> represent discrete pieces of functionality that provide value to an actor. They’re drawn as ovals with the use case name inside:</p>
+<pre><code>    ╭─────────────────────╮
+    │   Place Order       │
+    ╰─────────────────────╯</code></pre>
+<p><strong>System Boundary</strong> is a rectangle that defines what’s inside the system versus outside. Actors are outside; use cases are inside.</p>
+<pre><code>┌─────────────────────────────────────────┐
+│           Online Store System           │
+│                                         │
+│   ╭───────────────╮  ╭───────────────╮  │
+│   │ Browse Catalog │  │  Place Order  │  │
+│   ╰───────────────╯  ╰───────────────╯  │
+│                                         │
+│   ╭───────────────╮  ╭───────────────╮  │
+│   │ Track Order   │  │ Manage Account│  │
+│   ╰───────────────╯  ╰───────────────╯  │
+│                                         │
+└─────────────────────────────────────────┘</code></pre>
+<p><strong>Associations</strong> connect actors to the use cases they participate in, shown as solid lines:</p>
+<pre><code>    O
+   /|\─────────────╭───────────────╮
+   / \             │  Place Order  │
+ Customer          ╰───────────────╯</code></pre>
+</section>
+<section id="use-case-relationships" class="level3">
+<h3 class="anchored" data-anchor-id="use-case-relationships">3.3.2 Use Case Relationships</h3>
+<p>Use cases can relate to each other in several ways:</p>
+<p><strong>Include Relationship</strong> (<code>«include»</code>)</p>
+<p>When one use case always includes the behavior of another. The included use case is mandatory. This is useful for extracting common behavior shared by multiple use cases.</p>
+<pre><code>╭─────────────────╮         ╭─────────────────╮
+│   Place Order   │─────────│  Verify Payment │
+╰─────────────────╯«include»╰─────────────────╯
+
+╭─────────────────╮         ╭─────────────────╮
+│   Renew Sub     │─────────│  Verify Payment │
+╰─────────────────╯«include»╰─────────────────╯</code></pre>
+<p>Both “Place Order” and “Renew Subscription” always include payment verification.</p>
+<p><strong>Extend Relationship</strong> (<code>«extend»</code>)</p>
+<p>When one use case optionally adds behavior to another under certain conditions. The extension is not always executed.</p>
+<pre><code>╭─────────────────╮         ╭─────────────────╮
+│  Apply Coupon   │─────────│   Place Order   │
+╰─────────────────╯«extend» ╰─────────────────╯</code></pre>
+<p>“Apply Coupon” extends “Place Order” but only when the customer has a coupon.</p>
+<p><strong>Generalization</strong> (inheritance arrow)</p>
+<p>When one actor or use case is a specialized version of another.</p>
+<pre><code>      O
+     /|\
+     / \
+   Customer
+       △
+      ╱ ╲
+     ╱   ╲
+    O     O
+   /|\   /|\
+   / \   / \
+Guest   Registered
+Customer Customer</code></pre>
+</section>
+<section id="complete-use-case-diagram-example" class="level3">
+<h3 class="anchored" data-anchor-id="complete-use-case-diagram-example">3.3.3 Complete Use Case Diagram Example</h3>
+<p>Here’s a use case diagram for a library management system:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                    Library Management System                        │
+│                                                                     │
+│    ╭──────────────╮      ╭──────────────╮      ╭──────────────╮    │
+│    │Search Catalog│      │ View Book    │      │ Reserve Book │    │
+│    ╰──────────────╯      │   Details    │      ╰──────────────╯    │
+│           │              ╰──────────────╯             │            │
+│           │                     │                     │            │
+│    O      └─────────────────────┼─────────────────────┘            │
+│   /|\─────────────────────────────────────────────────────────╮    │
+│   / \                           │                             │    │
+│ Member                          │                             │    │
+│    │      ╭──────────────╮      │      ╭──────────────╮       │    │
+│    │      │ Borrow Book  │──────┘      │ Return Book  │       │    │
+│    │      ╰──────────────╯             ╰──────────────╯       │    │
+│    │             │                            │               │    │
+│    │             │    ╭──────────────╮        │               │    │
+│    │             └────│Update Account│────────┘               │    │
+│    │          «include»╰──────────────╯                       │    │
+│    │                                                          │    │
+│    │      ╭──────────────╮                                    │    │
+│    └──────│  Pay Fine    │                                    │    │
+│           ╰──────────────╯                                    │    │
+│                  │                                            │    │
+│                  │«extend»╭──────────────╮                    │    │
+│                  └────────│ Renew Book   │                    │    │
+│                           ╰──────────────╯                    │    │
+│                                  │                            │    │
+│    O                             │                            │    │
+│   /|\────────────────────────────┼────────────────────────────┘    │
+│   / \                            │                                 │
+│Librarian                         │                                 │
+│    │      ╭──────────────╮       │       ╭──────────────╮          │
+│    ├──────│  Add Book    │       │       │ Remove Book  │──────────┤
+│    │      ╰──────────────╯       │       ╰──────────────╯          │
+│    │                             │                                 │
+│    │      ╭──────────────╮       │       ╭──────────────╮          │
+│    ├──────│Manage Members│       │       │Generate Report│─────────┤
+│    │      ╰──────────────╯       │       ╰──────────────╯          │
+│    │                             │                                 │
+└────┼─────────────────────────────┼─────────────────────────────────┘
+     │                             │
+     │                    ╭────────┴────────╮
+     │                    │  Email Service  │
+     │                    │    «system»     │
+     │                    ╰─────────────────╯
+     │
+╭────┴────────╮
+│   Payment   │
+│   Gateway   │
+│  «system»   │
+╰─────────────╯</code></pre>
+</section>
+<section id="use-case-descriptions" class="level3">
+<h3 class="anchored" data-anchor-id="use-case-descriptions">3.3.4 Use Case Descriptions</h3>
+<p>While the diagram provides an overview, each use case needs detailed documentation. A <strong>Use Case Description</strong> (or Use Case Specification) expands on what happens within a use case.</p>
+<p><strong>Use Case Description Template:</strong></p>
+<pre><code>USE CASE: Borrow Book
+
+ID: UC-003
+Actor(s): Member, Librarian
+Preconditions: 
+  - Member is logged in
+  - Member has no overdue books
+  - Member has not exceeded borrowing limit
+
+Main Success Scenario (Basic Flow):
+  1. Member searches for a book
+  2. System displays book details and availability
+  3. Member selects "Borrow"
+  4. System verifies member's borrowing eligibility
+  5. System records the loan with due date (14 days)
+  6. System updates book status to "On Loan"
+  7. System sends confirmation email to member
+  8. System displays loan confirmation with due date
+
+Alternative Flows:
+  3a. Book is not available:
+      3a1. System displays "Book unavailable" message
+      3a2. System offers reservation option
+      3a3. Return to step 1 or end
+
+  4a. Member has overdue books:
+      4a1. System displays message about overdue books
+      4a2. Use case ends
+
+  4b. Member at borrowing limit:
+      4b1. System displays borrowing limit message
+      4b2. Use case ends
+
+Postconditions:
+  - Book is assigned to member
+  - Due date is set
+  - Book availability is updated
+  - Transaction is logged
+
+Business Rules:
+  - Maximum 5 books per member
+  - Loan period is 14 days
+  - Members with overdue books cannot borrow
+
+Frequency: ~200 times per day</code></pre>
+</section>
+<section id="best-practices-for-use-case-diagrams" class="level3">
+<h3 class="anchored" data-anchor-id="best-practices-for-use-case-diagrams">3.3.5 Best Practices for Use Case Diagrams</h3>
+<p><strong>Naming Use Cases:</strong></p>
+<ul>
+<li>Use verb-noun format: “Place Order,” not “Order” or “Ordering”</li>
+<li>Focus on user goals, not system actions: “Register Account,” not “Store User Data”</li>
+<li>Keep names concise but descriptive</li>
+</ul>
+<p><strong>Choosing Actors:</strong></p>
+<ul>
+<li>Name actors by their role, not their identity: “Customer,” not “John”</li>
+<li>If different user types have different access, make them separate actors</li>
+<li>Don’t forget non-human actors (external systems, scheduled jobs)</li>
+</ul>
+<p><strong>Scope:</strong></p>
+<ul>
+<li>Keep diagrams focused; split into multiple diagrams if needed</li>
+<li>Show 5-15 use cases per diagram</li>
+<li>Each use case should deliver value to an actor</li>
+</ul>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>Don’t overuse «include» and «extend»; simple is often better</li>
+<li>«include» for mandatory common behavior</li>
+<li>«extend» for optional behavior</li>
+<li>If unsure, just use simple associations</li>
+</ul>
+<p><strong>Common Mistakes:</strong></p>
+<ul>
+<li>Drawing implementation details (login, database operations)</li>
+<li>Too many use cases (every button click is not a use case)</li>
+<li>Actors that don’t interact with any use case</li>
+<li>Use cases with no associated actor</li>
+<li>Confusing use cases with features or functions</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="activity-diagrams" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="activity-diagrams"><span class="header-section-number">6.5</span> 3.4 Activity Diagrams</h2>
+<p><strong>Activity diagrams</strong> model the flow of activities in a process. They’re excellent for visualizing workflows, business processes, algorithms, and use case scenarios. Think of them as enhanced flowcharts with support for parallel activities.</p>
+<section id="activity-diagram-elements" class="level3">
+<h3 class="anchored" data-anchor-id="activity-diagram-elements">3.4.1 Activity Diagram Elements</h3>
+<p><strong>Initial Node</strong> (filled circle): Where the flow begins.</p>
+<pre><code>  ●</code></pre>
+<p><strong>Final Node</strong> (circle with inner filled circle): Where the flow ends.</p>
+<pre><code>  ◉</code></pre>
+<p><strong>Action/Activity</strong> (rounded rectangle): A single step or task.</p>
+<pre><code>╭─────────────────────╮
+│   Verify Payment    │
+╰─────────────────────╯</code></pre>
+<p><strong>Decision Node</strong> (diamond): A branch point where flow takes one of several paths based on a condition. Guards (conditions) are shown in brackets.</p>
+<pre><code>        │
+        ▼
+       ◇
+      ╱ ╲
+[yes]╱   ╲[no]
+    ╱     ╲
+   ▼       ▼</code></pre>
+<p><strong>Merge Node</strong> (diamond): Where multiple paths come back together.</p>
+<pre><code>   ╲     ╱
+    ╲   ╱
+     ◇
+     │
+     ▼</code></pre>
+<p><strong>Fork</strong> (thick horizontal bar): Splits flow into parallel paths.</p>
+<pre><code>        │
+   ─────┼─────
+   │    │    │
+   ▼    ▼    ▼</code></pre>
+<p><strong>Join</strong> (thick horizontal bar): Synchronizes parallel paths; waits for all to complete.</p>
+<pre><code>   │    │    │
+   ─────┼─────
+        │
+        ▼</code></pre>
+<p><strong>Swimlanes</strong> (vertical or horizontal partitions): Show who or what performs each activity.</p>
+</section>
+<section id="control-flow-vs.-object-flow" class="level3">
+<h3 class="anchored" data-anchor-id="control-flow-vs.-object-flow">3.4.2 Control Flow vs.&nbsp;Object Flow</h3>
+<p><strong>Control flow</strong> (solid arrows) shows the sequence of activities:</p>
+<pre><code>╭─────────────╮     ╭─────────────╮
+│  Activity A │────►│  Activity B │
+╰─────────────╯     ╰─────────────╯</code></pre>
+<p><strong>Object flow</strong> (solid arrows with object nodes) shows data passing between activities:</p>
+<pre><code>╭─────────────╮     ┌─────────┐     ╭─────────────╮
+│Create Order │────►│ [Order] │────►│Process Order│
+╰─────────────╯     └─────────┘     ╰─────────────╯</code></pre>
+</section>
+<section id="complete-activity-diagram-example" class="level3">
+<h3 class="anchored" data-anchor-id="complete-activity-diagram-example">3.4.3 Complete Activity Diagram Example</h3>
+<p>Here’s an activity diagram for an online order process with swimlanes:</p>
+<pre><code>│        Customer        │         System          │       Warehouse        │
+│                        │                         │                        │
+│           ●            │                         │                        │
+│           │            │                         │                        │
+│           ▼            │                         │                        │
+│  ╭─────────────────╮   │                         │                        │
+│  │  Browse Catalog │   │                         │                        │
+│  ╰────────┬────────╯   │                         │                        │
+│           │            │                         │                        │
+│           ▼            │                         │                        │
+│  ╭─────────────────╮   │                         │                        │
+│  │ Add Items to    │   │                         │                        │
+│  │    Cart         │◄──┼──────────────┐          │                        │
+│  ╰────────┬────────╯   │              │          │                        │
+│           │            │              │          │                        │
+│           ▼            │              │          │                        │
+│          ◇             │              │          │                        │
+│         ╱ ╲            │              │          │                        │
+│ [more] ╱   ╲ [done]    │              │          │                        │
+│       ╱     ╲          │              │          │                        │
+│       │      │         │              │          │                        │
+│       │      ▼         │              │          │                        │
+│       │ ╭───────────╮  │              │          │                        │
+│       │ │  Checkout │  │              │          │                        │
+│       │ ╰─────┬─────╯  │              │          │                        │
+│       │       │        │              │          │                        │
+│       │       ▼        │              │          │                        │
+│       │ ╭───────────╮  │              │          │                        │
+│       │ │Enter Ship │  │              │          │                        │
+│       │ │  Info     │  │              │          │                        │
+│       │ ╰─────┬─────╯  │              │          │                        │
+│       │       │        │              │          │                        │
+│       │       ▼        │              │          │                        │
+│       │ ╭───────────╮  │              │          │                        │
+│       │ │Enter Pay  │  │              │          │                        │
+│       │ │  Info     │──┼─────────►    │          │                        │
+│       │ ╰───────────╯  │ ╭───────────────────╮   │                        │
+│       │                │ │  Validate Payment │   │                        │
+│       │                │ ╰─────────┬─────────╯   │                        │
+│       │                │           │             │                        │
+│       │                │           ▼             │                        │
+│       │                │          ◇              │                        │
+│       │                │         ╱ ╲             │                        │
+│       │                │[invalid]╱   ╲[valid]    │                        │
+│       │                │        ╱     ╲          │                        │
+│       └────────────────┼───────┘       │         │                        │
+│                        │               ▼         │                        │
+│                        │      ════════════════   │                        │
+│                        │      │      │      │    │                        │
+│                        │      ▼      │      ▼    │                        │
+│                        │ ╭────────╮  │ ╭────────╮│                        │
+│                        │ │ Create │  │ │ Send   ││                        │
+│                        │ │ Order  │  │ │ Email  ││                        │
+│                        │ ╰────┬───╯  │ ╰───┬────╯│                        │
+│                        │      │      │     │     │                        │
+│                        │      │      │     │     │                        │
+│                        │      ════════════════   │                        │
+│                        │             │           │                        │
+│                        │             │───────────┼──────────►             │
+│                        │             │           │  ╭─────────────────╮   │
+│                        │             │           │  │  Pick Items     │   │
+│                        │             │           │  ╰────────┬────────╯   │
+│                        │             │           │           │            │
+│                        │             │           │           ▼            │
+│                        │             │           │  ╭─────────────────╮   │
+│                        │             │           │  │  Pack Order     │   │
+│                        │             │           │  ╰────────┬────────╯   │
+│                        │             │           │           │            │
+│                        │             │           │           ▼            │
+│                        │             │           │  ╭─────────────────╮   │
+│                        │             │           │  │  Ship Order     │   │
+│                        │             │           │  ╰────────┬────────╯   │
+│                        │             │           │           │            │
+│                        │  ╭──────────┼───────────┼───────────┘            │
+│                        │  │          │           │                        │
+│                        │  ▼          │           │                        │
+│                        │╭──────────╮ │           │                        │
+│                        ││Update    │ │           │                        │
+│                        ││Tracking  │ │           │                        │
+│                        │╰────┬─────╯ │           │                        │
+│                        │     │       │           │                        │
+│                        │     ▼       │           │                        │
+│                        │     ◉       │           │                        │
+│                        │             │           │                        │</code></pre>
+</section>
+<section id="activity-diagram-for-algorithm-logic" class="level3">
+<h3 class="anchored" data-anchor-id="activity-diagram-for-algorithm-logic">3.4.4 Activity Diagram for Algorithm Logic</h3>
+<p>Activity diagrams can also model algorithms. Here’s a diagram for a simple login process:</p>
+<pre><code>                    ●
+                    │
+                    ▼
+          ╭─────────────────╮
+          │  Display Login  │
+          │      Form       │
+          ╰────────┬────────╯
+                   │
+                   ▼
+          ╭─────────────────╮
+          │  Enter Username │
+          │   &amp; Password    │
+          ╰────────┬────────╯
+                   │
+                   ▼
+          ╭─────────────────╮
+          │    Validate     │
+          │   Credentials   │
+          ╰────────┬────────╯
+                   │
+                   ▼
+                  ◇
+                 ╱ ╲
+        [valid] ╱   ╲ [invalid]
+               ╱     ╲
+              │       │
+              │       ▼
+              │  ╭─────────────────╮
+              │  │   Increment     │
+              │  │ Failed Attempts │
+              │  ╰────────┬────────╯
+              │           │
+              │           ▼
+              │          ◇
+              │         ╱ ╲
+              │[&lt; 3]   ╱   ╲ [≥ 3]
+              │       ╱     ╲
+              │      │       │
+              │      │       ▼
+              │      │  ╭─────────────────╮
+              │      │  │  Lock Account   │
+              │      │  │  (30 minutes)   │
+              │      │  ╰────────┬────────╯
+              │      │           │
+              │      │           ▼
+              │      │  ╭─────────────────╮
+              │      │  │  Display Lock   │
+              │      │  │    Message      │
+              │      │  ╰────────┬────────╯
+              │      │           │
+              │      │           │
+              │      └─────┬─────┘
+              │            │
+              │            ▼
+              │   ╭─────────────────╮
+              │   │  Display Error  │
+              │   │    Message      │
+              │   ╰────────┬────────╯
+              │            │
+              │            │ (loop back to form)
+              │            │
+              ▼            │
+     ╭─────────────────╮   │
+     │  Create Session │   │
+     ╰────────┬────────╯   │
+              │            │
+              ▼            │
+     ╭─────────────────╮   │
+     │   Redirect to   │   │
+     │    Dashboard    │   │
+     ╰────────┬────────╯   │
+              │            │
+              ▼            │
+              ◉            │</code></pre>
+</section>
+<section id="best-practices-for-activity-diagrams" class="level3">
+<h3 class="anchored" data-anchor-id="best-practices-for-activity-diagrams">3.4.5 Best Practices for Activity Diagrams</h3>
+<p><strong>Structure:</strong></p>
+<ul>
+<li>Start with a single initial node</li>
+<li>End with one or more final nodes (or flow nodes for ongoing processes)</li>
+<li>Every path from the initial node should eventually reach a final node or loop</li>
+</ul>
+<p><strong>Decisions and Merges:</strong></p>
+<ul>
+<li>Every decision needs at least two outgoing flows</li>
+<li>Guard conditions should be mutually exclusive and complete</li>
+<li>Use merges to rejoin split paths (optional but clarifies the diagram)</li>
+</ul>
+<p><strong>Parallelism:</strong></p>
+<ul>
+<li>Use forks when activities can happen simultaneously</li>
+<li>Use joins to synchronize parallel paths</li>
+<li>All forked paths must eventually join (or reach a final node)</li>
+</ul>
+<p><strong>Swimlanes:</strong></p>
+<ul>
+<li>Use when multiple actors or systems are involved</li>
+<li>Helps clarify responsibility for each activity</li>
+<li>Swimlanes can be vertical or horizontal</li>
+</ul>
+<p><strong>Level of Detail:</strong></p>
+<ul>
+<li>Match detail level to the diagram’s purpose</li>
+<li>High-level process diagrams: fewer, larger activities</li>
+<li>Detailed workflow diagrams: more granular steps</li>
+<li>Avoid mixing abstraction levels in one diagram</li>
+</ul>
+<p><strong>Common Mistakes:</strong></p>
+<ul>
+<li>Missing guard conditions on decision branches</li>
+<li>Unbalanced forks and joins</li>
+<li>No path to final node</li>
+<li>Activities that are too vague (“Process stuff”) or too detailed (“Set variable x to 5”)</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="sequence-diagrams" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="sequence-diagrams"><span class="header-section-number">6.6</span> 3.5 Sequence Diagrams</h2>
+<p><strong>Sequence diagrams</strong> show how objects interact with each other over time. They’re particularly useful for modeling the behavior of use cases, showing the messages exchanged between objects to accomplish a task.</p>
+<section id="sequence-diagram-elements" class="level3">
+<h3 class="anchored" data-anchor-id="sequence-diagram-elements">3.5.1 Sequence Diagram Elements</h3>
+<p><strong>Lifelines</strong> represent participants in the interaction. Each lifeline has a name and optionally a type, with a dashed line extending downward representing the participant’s existence over time.</p>
+<pre><code>┌────────────────┐
+│   :Customer    │
+└───────┬────────┘
+        │
+        │ (lifeline)
+        │
+        │</code></pre>
+<p><strong>Messages</strong> are communications between lifelines, shown as arrows:</p>
+<p><strong>Synchronous message</strong> (solid arrow, filled head): Sender waits for response</p>
+<pre><code>────────────────────►</code></pre>
+<p><strong>Asynchronous message</strong> (solid arrow, open head): Sender continues without waiting</p>
+<pre><code>────────────────────▷</code></pre>
+<p><strong>Return message</strong> (dashed arrow): Response to a synchronous call</p>
+<pre><code>- - - - - - - - - - ►</code></pre>
+<p><strong>Self-message</strong> (arrow back to same lifeline): Object calls itself</p>
+<pre><code>    ┌───┐
+────┤   │
+    │   │
+◄───┘   │
+        │</code></pre>
+<p><strong>Activation bars</strong> (rectangles on lifelines) show when an object is active (executing):</p>
+<pre><code>┌────────────┐                    ┌────────────┐
+│  :Client   │                    │  :Server   │
+└─────┬──────┘                    └──────┬─────┘
+      │                                  │
+      │      request()                   │
+      │─────────────────────────────────►│
+      │                                  ┃
+      │                                  ┃ (processing)
+      │                                  ┃
+      │      response                    ┃
+      │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┃
+      │                                  │</code></pre>
+</section>
+<section id="combined-fragments" class="level3">
+<h3 class="anchored" data-anchor-id="combined-fragments">3.5.2 Combined Fragments</h3>
+<p><strong>Combined fragments</strong> represent control structures like loops, conditions, and alternatives:</p>
+<p><strong>alt (alternatives)</strong>: Conditional logic (if-else)</p>
+<pre><code>    ┌──────────────────────────────────────┐
+    │ alt  [condition]                     │
+    │      ├───────────────────────────────┤
+    │      │  (messages if true)           │
+    │      ├───────────────────────────────┤
+    │      │  [else]                       │
+    │      │  (messages if false)          │
+    └──────────────────────────────────────┘</code></pre>
+<p><strong>opt (optional)</strong>: Conditional execution (if without else)</p>
+<pre><code>    ┌──────────────────────────────────────┐
+    │ opt  [condition]                     │
+    │      │                               │
+    │      │  (messages if condition true) │
+    │      │                               │
+    └──────────────────────────────────────┘</code></pre>
+<p><strong>loop</strong>: Repeated execution</p>
+<pre><code>    ┌──────────────────────────────────────┐
+    │ loop [condition or count]            │
+    │      │                               │
+    │      │  (repeated messages)          │
+    │      │                               │
+    └──────────────────────────────────────┘</code></pre>
+<p><strong>par (parallel)</strong>: Concurrent execution</p>
+<pre><code>    ┌──────────────────────────────────────┐
+    │ par                                  │
+    │      │  (parallel region 1)          │
+    │      ├───────────────────────────────┤
+    │      │  (parallel region 2)          │
+    └──────────────────────────────────────┘</code></pre>
+</section>
+<section id="complete-sequence-diagram-example" class="level3">
+<h3 class="anchored" data-anchor-id="complete-sequence-diagram-example">3.5.3 Complete Sequence Diagram Example</h3>
+<p>Here’s a sequence diagram for a user login process:</p>
+<pre><code>┌──────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  :User   │     │:LoginController│    │:AuthService  │     │  :Database   │
+└────┬─────┘     └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+     │                  │                    │                    │
+     │  enterCredentials(username, password) │                    │
+     │─────────────────►│                    │                    │
+     │                  │                    │                    │
+     │                  │  authenticate(username, password)       │
+     │                  │───────────────────►│                    │
+     │                  │                    │                    │
+     │                  │                    │  findUser(username)│
+     │                  │                    │───────────────────►│
+     │                  │                    │                    │
+     │                  │                    │    user            │
+     │                  │                    │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ┤
+     │                  │                    │                    │
+     │                  │                    │                    │
+     │    ┌─────────────────────────────────────────────────────────────┐
+     │    │ alt  [user exists]                                         │
+     │    │             │                    │                         │
+     │    │             │                    │  verifyPassword(        │
+     │    │             │                    │    password,            │
+     │    │             │                    │    user.hashedPassword) │
+     │    │             │                    │────┐                    │
+     │    │             │                    │    │                    │
+     │    │             │                    │◄───┘                    │
+     │    │             │                    │                         │
+     │    │   ┌────────────────────────────────────────────────────┐   │
+     │    │   │ alt  [password valid]                              │   │
+     │    │   │         │                    │                     │   │
+     │    │   │         │                    │  createSession(user)│   │
+     │    │   │         │                    │────┐                │   │
+     │    │   │         │                    │    │                │   │
+     │    │   │         │                    │◄───┘                │   │
+     │    │   │         │                    │                     │   │
+     │    │   │         │   sessionToken     │                     │   │
+     │    │   │         │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                     │   │
+     │    │   │         │                    │                     │   │
+     │    │   │  loginSuccess(token)         │                     │   │
+     │    │   │◄─ ─ ─ ─ │                    │                     │   │
+     │    │   │         │                    │                     │   │
+     │    │   ├─────────────────────────────────────────────────────   │
+     │    │   │ [else]  │                    │                     │   │
+     │    │   │         │                    │                     │   │
+     │    │   │         │  AuthException     │                     │   │
+     │    │   │         │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                     │   │
+     │    │   │         │                    │                     │   │
+     │    │   │  loginFailed("Invalid password")                   │   │
+     │    │   │◄─ ─ ─ ─ │                    │                     │   │
+     │    │   │         │                    │                     │   │
+     │    │   └────────────────────────────────────────────────────┘   │
+     │    │             │                    │                         │
+     │    ├─────────────────────────────────────────────────────────────
+     │    │ [else]      │                    │                         │
+     │    │             │                    │                         │
+     │    │             │  AuthException     │                         │
+     │    │             │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                         │
+     │    │             │                    │                         │
+     │    │  loginFailed("User not found")   │                         │
+     │    │◄─ ─ ─ ─ ─ ─ │                    │                         │
+     │    │             │                    │                         │
+     │    └─────────────────────────────────────────────────────────────┘
+     │                  │                    │                    │
+     │  displayResult() │                    │                    │
+     │◄─ ─ ─ ─ ─ ─ ─ ─ ─│                    │                    │
+     │                  │                    │                    │</code></pre>
+</section>
+<section id="object-creation-and-destruction" class="level3">
+<h3 class="anchored" data-anchor-id="object-creation-and-destruction">3.5.4 Object Creation and Destruction</h3>
+<p>Objects can be created during the interaction:</p>
+<pre><code>┌──────────┐                              
+│ :Factory │                              
+└────┬─────┘                              
+     │                                    
+     │         create()                   ┌──────────────┐
+     │───────────────────────────────────►│  :Product    │
+     │                                    └──────┬───────┘
+     │                                           │
+     │                                           │</code></pre>
+<p>Objects can be destroyed (shown with an X):</p>
+<pre><code>     │                                           │
+     │                                           │
+     │         destroy()                         │
+     │──────────────────────────────────────────►X
+     │                                           </code></pre>
+</section>
+<section id="best-practices-for-sequence-diagrams" class="level3">
+<h3 class="anchored" data-anchor-id="best-practices-for-sequence-diagrams">3.5.5 Best Practices for Sequence Diagrams</h3>
+<p><strong>Focus:</strong></p>
+<ul>
+<li>One diagram per scenario or use case</li>
+<li>Show the main success path; use separate diagrams for alternatives</li>
+<li>Include enough detail to understand the interaction, but not implementation minutiae</li>
+</ul>
+<p><strong>Naming:</strong></p>
+<ul>
+<li>Name lifelines with role:Type format (e.g., <code>:Customer</code>, <code>cart:ShoppingCart</code>)</li>
+<li>Use descriptive message names that indicate what happens</li>
+<li>Include parameters when they add clarity</li>
+</ul>
+<p><strong>Layout:</strong></p>
+<ul>
+<li>Arrange lifelines left-to-right in order of first involvement</li>
+<li>Place the initiating actor on the left</li>
+<li>Keep crossing message lines to a minimum</li>
+</ul>
+<p><strong>Level of Detail:</strong></p>
+<ul>
+<li>High-level diagrams: show major components and their interactions</li>
+<li>Detailed diagrams: show individual method calls and returns</li>
+<li>Match detail level to your audience and purpose</li>
+</ul>
+<p><strong>Common Mistakes:</strong></p>
+<ul>
+<li>Too many lifelines (hard to read; consider splitting the diagram)</li>
+<li>Missing return messages for synchronous calls</li>
+<li>Unclear message sequencing</li>
+<li>Mixing abstraction levels (business actions and technical implementation)</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="class-diagrams" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="class-diagrams"><span class="header-section-number">6.7</span> 3.6 Class Diagrams</h2>
+<p><strong>Class diagrams</strong> show the static structure of a system: the classes, their attributes and methods, and the relationships between them. They’re the most commonly used UML diagram for designing object-oriented systems.</p>
+<section id="class-notation" class="level3">
+<h3 class="anchored" data-anchor-id="class-notation">3.6.1 Class Notation</h3>
+<p>A class is shown as a rectangle divided into three compartments:</p>
+<pre><code>┌─────────────────────────────────┐
+│          ClassName              │  ← Name compartment
+├─────────────────────────────────┤
+│ - privateAttribute: Type        │  ← Attributes compartment
+│ # protectedAttribute: Type      │
+│ + publicAttribute: Type         │
+├─────────────────────────────────┤
+│ + publicMethod(): ReturnType    │  ← Operations compartment
+│ - privateMethod(param: Type)    │
+│ # protectedMethod(): void       │
+└─────────────────────────────────┘</code></pre>
+<p><strong>Visibility markers:</strong></p>
+<ul>
+<li><code>+</code> Public</li>
+<li><code>-</code> Private</li>
+<li><code>#</code> Protected</li>
+<li><code>~</code> Package</li>
+</ul>
+<p><strong>Attribute syntax:</strong></p>
+<pre><code>visibility name: type [multiplicity] = defaultValue</code></pre>
+<p>Examples:</p>
+<pre><code>- id: int
++ name: String
+- items: Product [0..*]
++ status: OrderStatus = PENDING</code></pre>
+<p><strong>Operation syntax:</strong></p>
+<pre><code>visibility name(parameters): returnType</code></pre>
+<p>Examples:</p>
+<pre><code>+ calculateTotal(): Decimal
+- validateInput(data: String): Boolean
++ addItem(product: Product, quantity: int): void</code></pre>
+</section>
+<section id="relationships-between-classes" class="level3">
+<h3 class="anchored" data-anchor-id="relationships-between-classes">3.6.2 Relationships Between Classes</h3>
+<p><strong>Association</strong>: A general relationship between classes. Objects of one class know about objects of the other.</p>
+<pre><code>┌─────────────┐                    ┌─────────────┐
+│   Student   │────────────────────│   Course    │
+└─────────────┘                    └─────────────┘</code></pre>
+<p>With role names and multiplicity:</p>
+<pre><code>┌─────────────┐     enrolledIn     ┌─────────────┐
+│   Student   │──────────────────►│   Course    │
+└─────────────┘  1..*        0..*  └─────────────┘</code></pre>
+<p>A student is enrolled in zero or more courses; a course has one or more students.</p>
+<p><strong>Navigability</strong>: Arrows indicate which class knows about which:</p>
+<pre><code>┌─────────────┐                    ┌─────────────┐
+│    Order    │───────────────────►│  Customer   │
+└─────────────┘                    └─────────────┘</code></pre>
+<p>Order knows about Customer, but Customer doesn’t have a direct reference to Order.</p>
+<p><strong>Aggregation</strong> (hollow diamond): “Has-a” relationship where parts can exist independently of the whole.</p>
+<pre><code>┌─────────────┐                    ┌─────────────┐
+│  Department │◇───────────────────│  Employee   │
+└─────────────┘                    └─────────────┘</code></pre>
+<p>A department has employees, but employees can exist without the department.</p>
+<p><strong>Composition</strong> (filled diamond): “Has-a” relationship where parts cannot exist without the whole.</p>
+<pre><code>┌─────────────┐                    ┌─────────────┐
+│    Order    │◆───────────────────│  OrderLine  │
+└─────────────┘                    └─────────────┘</code></pre>
+<p>An order contains order lines; order lines cannot exist without an order.</p>
+<p><strong>Inheritance/Generalization</strong> (hollow triangle): “Is-a” relationship; one class is a specialized version of another.</p>
+<pre><code>         ┌─────────────┐
+         │   Vehicle   │
+         └──────△──────┘
+                │
+       ┌────────┼────────┐
+       │        │        │
+┌──────┴──────┐ │ ┌──────┴──────┐
+│     Car     │ │ │    Truck    │
+└─────────────┘ │ └─────────────┘
+         ┌──────┴──────┐
+         │ Motorcycle  │
+         └─────────────┘</code></pre>
+<p><strong>Realization/Implementation</strong> (dashed line, hollow triangle): A class implements an interface.</p>
+<pre><code>┌─────────────────────┐
+│   «interface»       │
+│    Comparable       │
+├─────────────────────┤
+│                     │
+├─────────────────────┤
+│ + compareTo(): int  │
+└──────────△──────────┘
+           ┊
+           ┊
+┌──────────┴──────────┐
+│      Product        │
+├─────────────────────┤
+│ - name: String      │
+│ - price: Decimal    │
+├─────────────────────┤
+│ + compareTo(): int  │
+└─────────────────────┘</code></pre>
+<p><strong>Dependency</strong> (dashed arrow): A weaker relationship; one class uses another temporarily.</p>
+<pre><code>┌─────────────┐                    ┌─────────────┐
+│   Report    │- - - - - - - - - -►│  Formatter  │
+└─────────────┘                    └─────────────┘</code></pre>
+<p>Report depends on Formatter (perhaps uses it as a parameter or local variable) but doesn’t hold a long-term reference.</p>
+</section>
+<section id="association-classes" class="level3">
+<h3 class="anchored" data-anchor-id="association-classes">3.6.3 Association Classes</h3>
+<p>Sometimes a relationship itself has attributes. An <strong>association class</strong> captures this:</p>
+<pre><code>┌─────────────┐                    ┌─────────────┐
+│   Student   │────────────────────│   Course    │
+└─────────────┘          │         └─────────────┘
+                         │
+                    ┌────┴────┐
+                    │Enrollment│
+                    ├─────────┤
+                    │- grade  │
+                    │- date   │
+                    └─────────┘</code></pre>
+<p>The Enrollment class captures attributes of the student-course relationship (grade, enrollment date).</p>
+</section>
+<section id="complete-class-diagram-example" class="level3">
+<h3 class="anchored" data-anchor-id="complete-class-diagram-example">3.6.4 Complete Class Diagram Example</h3>
+<p>Here’s a class diagram for a simplified e-commerce system:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│    ┌─────────────────────┐              ┌─────────────────────┐             │
+│    │     «interface»     │              │     «abstract»      │             │
+│    │      Payable        │              │       User          │             │
+│    ├─────────────────────┤              ├─────────────────────┤             │
+│    │                     │              │ - id: int           │             │
+│    ├─────────────────────┤              │ - email: String     │             │
+│    │ + pay(): Boolean    │              │ - password: String  │             │
+│    │ + getAmount(): Dec  │              │ - createdAt: Date   │             │
+│    └──────────△──────────┘              ├─────────────────────┤             │
+│               ┊                         │ + login(): Boolean  │             │
+│               ┊                         │ + logout(): void    │             │
+│               ┊                         └──────────△──────────┘             │
+│               ┊                                    │                        │
+│               ┊                    ┌───────────────┼───────────────┐        │
+│               ┊                    │               │               │        │
+│    ┌──────────┴──────────┐  ┌──────┴──────┐ ┌──────┴──────┐ ┌──────┴──────┐ │
+│    │       Order         │  │  Customer   │ │    Admin    │ │   Vendor    │ │
+│    ├─────────────────────┤  ├─────────────┤ ├─────────────┤ ├─────────────┤ │
+│    │ - id: int           │  │- firstName  │ │- department │ │- companyName│ │
+│    │ - orderDate: Date   │  │- lastName   │ │- role       │ │- rating     │ │
+│    │ - status: Status    │  │- address    │ ├─────────────┤ ├─────────────┤ │
+│    │ - total: Decimal    │  ├─────────────┤ │+manageUsers │ │+addProduct  │ │
+│    ├─────────────────────┤  │+placeOrder()│ │+viewReports │ │+viewSales   │ │
+│    │ + pay(): Boolean    │  │+getOrders() │ └─────────────┘ └─────────────┘ │
+│    │ + getAmount(): Dec  │  └──────┬──────┘                                 │
+│    │ + cancel(): void    │         │ places                                 │
+│    │ + ship(): void      │         │ 1                                      │
+│    └─────────┬───────────┘         │                                        │
+│              │◆                    │                                        │
+│              │ contains            │                                        │
+│              │ 1..*         ┌──────┴──────────────────┐                     │
+│    ┌─────────┴───────────┐  │                         │                     │
+│    │     OrderLine       │  │                         │ 0..*                │
+│    ├─────────────────────┤  │                         │                     │
+│    │ - quantity: int     │  │  ┌─────────────────────────────────────┐      │
+│    │ - unitPrice: Decimal│  │  │              Product                │      │
+│    ├─────────────────────┤  │  ├─────────────────────────────────────┤      │
+│    │ + getSubtotal(): Dec│  │  │ - id: int                           │      │
+│    └─────────┬───────────┘  │  │ - name: String                      │      │
+│              │              │  │ - description: String               │      │
+│              │ 1            │  │ - price: Decimal                    │      │
+│              │              │  │ - stock: int                        │      │
+│              └──────────────┼─►├─────────────────────────────────────┤      │
+│                             │  │ + updateStock(qty: int): void       │      │
+│                             │  │ + isAvailable(): Boolean            │      │
+│                             │  └─────────────────┬───────────────────┘      │
+│                             │                    │                          │
+│                             │                    │ belongsTo                │
+│                             │                    │ *                        │
+│                             │         ┌──────────┴──────────┐               │
+│                             │         │      Category       │               │
+│                             │         ├─────────────────────┤               │
+│                             │         │ - id: int           │               │
+│                             │         │ - name: String      │               │
+│                             │         │ - parent: Category  │               │
+│                             │         ├─────────────────────┤               │
+│                             │         │ + getProducts(): [] │               │
+│                             │         └─────────────────────┘               │
+│                             │                                               │
+└─────────────────────────────┴───────────────────────────────────────────────┘</code></pre>
+</section>
+<section id="domain-models-vs.-design-class-diagrams" class="level3">
+<h3 class="anchored" data-anchor-id="domain-models-vs.-design-class-diagrams">3.6.5 Domain Models vs.&nbsp;Design Class Diagrams</h3>
+<p>Class diagrams serve different purposes at different project stages:</p>
+<p><strong>Domain Model</strong> (conceptual class diagram):</p>
+<ul>
+<li>Created during requirements/analysis</li>
+<li>Shows concepts in the problem domain</li>
+<li>Focuses on what exists, not implementation</li>
+<li>Uses business terminology</li>
+<li>Minimal or no methods</li>
+<li>No implementation-specific types</li>
+</ul>
+<p><strong>Design Class Diagram</strong>:</p>
+<ul>
+<li>Created during design</li>
+<li>Shows software classes</li>
+<li>Includes implementation details</li>
+<li>Uses programming terminology</li>
+<li>Complete methods with signatures</li>
+<li>Specific types (String, int, List<product>)</product></li>
+</ul>
+<p><strong>Example: Domain Model</strong></p>
+<pre><code>┌─────────────┐        places         ┌─────────────┐
+│  Customer   │───────────────────────│    Order    │
+├─────────────┤ 1                0..* ├─────────────┤
+│ name        │                       │ date        │
+│ address     │                       │ total       │
+└─────────────┘                       │ status      │
+                                      └─────────────┘</code></pre>
+<p><strong>Example: Design Class Diagram</strong></p>
+<pre><code>┌─────────────────────────────┐        ┌─────────────────────────────┐
+│         Customer            │        │           Order             │
+├─────────────────────────────┤        ├─────────────────────────────┤
+│ - id: Long                  │        │ - id: Long                  │
+│ - firstName: String         │ 1    * │ - orderDate: LocalDate      │
+│ - lastName: String          │◄───────│ - total: BigDecimal         │
+│ - email: String             │        │ - status: OrderStatus       │
+│ - addresses: List&lt;Address&gt;  │        │ - customerId: Long          │
+├─────────────────────────────┤        ├─────────────────────────────┤
+│ + getFullName(): String     │        │ + calculateTotal(): void    │
+│ + addAddress(a: Address)    │        │ + cancel(): Boolean         │
+│ + getOrders(): List&lt;Order&gt;  │        │ + ship(): Boolean           │
+└─────────────────────────────┘        └─────────────────────────────┘</code></pre>
+</section>
+<section id="best-practices-for-class-diagrams" class="level3">
+<h3 class="anchored" data-anchor-id="best-practices-for-class-diagrams">3.6.6 Best Practices for Class Diagrams</h3>
+<p><strong>Organization:</strong></p>
+<ul>
+<li>Group related classes together</li>
+<li>Use packages for larger diagrams</li>
+<li>Consider multiple diagrams for different views or subsystems</li>
+</ul>
+<p><strong>Detail Level:</strong></p>
+<ul>
+<li>Domain models: concepts and relationships only</li>
+<li>Design diagrams: full detail for implementation</li>
+<li>Overview diagrams: key classes and relationships, minimal detail</li>
+</ul>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>Choose the right relationship type (association vs.&nbsp;dependency)</li>
+<li>Include multiplicities for associations</li>
+<li>Add role names when they add clarity</li>
+<li>Use navigability arrows to show direction of knowledge</li>
+</ul>
+<p><strong>Naming:</strong></p>
+<ul>
+<li>Classes: noun phrases (Customer, ShoppingCart)</li>
+<li>Attributes: noun phrases (firstName, orderTotal)</li>
+<li>Methods: verb phrases (calculateTotal, validateInput)</li>
+<li>Use consistent naming conventions</li>
+</ul>
+<p><strong>Common Mistakes:</strong></p>
+<ul>
+<li>Too much detail (every attribute and method)</li>
+<li>Too little detail (just boxes with names)</li>
+<li>Incorrect relationship types</li>
+<li>Missing multiplicities</li>
+<li>Confusing domain concepts with implementation classes</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="choosing-the-right-diagram" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="choosing-the-right-diagram"><span class="header-section-number">6.8</span> 3.7 Choosing the Right Diagram</h2>
+<p>With multiple diagram types available, how do you decide which to use?</p>
+<section id="matching-diagrams-to-questions" class="level3">
+<h3 class="anchored" data-anchor-id="matching-diagrams-to-questions">3.7.1 Matching Diagrams to Questions</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 67%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Question You’re Answering</th>
+<th>Diagram Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>What can the system do? Who uses it?</td>
+<td>Use Case Diagram</td>
+</tr>
+<tr class="even">
+<td>How does a process flow? What are the steps?</td>
+<td>Activity Diagram</td>
+</tr>
+<tr class="odd">
+<td>How do objects interact to accomplish a task?</td>
+<td>Sequence Diagram</td>
+</tr>
+<tr class="even">
+<td>What classes exist? How are they related?</td>
+<td>Class Diagram</td>
+</tr>
+<tr class="odd">
+<td>What states can an object be in?</td>
+<td>State Machine Diagram</td>
+</tr>
+<tr class="even">
+<td>How is the system deployed?</td>
+<td>Deployment Diagram</td>
+</tr>
+<tr class="odd">
+<td>How is code organized into packages?</td>
+<td>Package Diagram</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="diagrams-through-the-development-lifecycle" class="level3">
+<h3 class="anchored" data-anchor-id="diagrams-through-the-development-lifecycle">3.7.2 Diagrams Through the Development Lifecycle</h3>
+<p><strong>Requirements Phase:</strong></p>
+<ul>
+<li>Use Case diagrams to capture functionality</li>
+<li>Activity diagrams for business processes</li>
+<li>Domain models for key concepts</li>
+</ul>
+<p><strong>Design Phase:</strong></p>
+<ul>
+<li>Sequence diagrams for use case realizations</li>
+<li>Class diagrams for detailed design</li>
+<li>State diagrams for complex object behavior</li>
+<li>Component and deployment diagrams for architecture</li>
+</ul>
+<p><strong>Implementation Phase:</strong></p>
+<ul>
+<li>Class diagrams as code reference</li>
+<li>Sequence diagrams for complex interactions</li>
+<li>Activity diagrams for algorithms</li>
+</ul>
+<p><strong>Testing Phase:</strong></p>
+<ul>
+<li>Use cases and activity diagrams for test scenarios</li>
+<li>Sequence diagrams for integration test design</li>
+</ul>
+</section>
+<section id="diagram-selection-guide" class="level3">
+<h3 class="anchored" data-anchor-id="diagram-selection-guide">3.7.3 Diagram Selection Guide</h3>
+<pre><code>                        ┌─────────────────────────┐
+                        │ What do you want to     │
+                        │ model?                  │
+                        └───────────┬─────────────┘
+                                    │
+              ┌─────────────────────┼─────────────────────┐
+              │                     │                     │
+              ▼                     ▼                     ▼
+    ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
+    │ System          │   │ Dynamic         │   │ Static          │
+    │ Functionality   │   │ Behavior        │   │ Structure       │
+    └────────┬────────┘   └────────┬────────┘   └────────┬────────┘
+             │                     │                     │
+             ▼                     │                     ▼
+    ╭─────────────────╮            │            ╭─────────────────╮
+    │ Use Case        │            │            │ Class           │
+    │ Diagram         │            │            │ Diagram         │
+    ╰─────────────────╯            │            ╰─────────────────╯
+                                   │
+                   ┌───────────────┼───────────────┐
+                   │               │               │
+                   ▼               ▼               ▼
+         ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+         │ Process/    │  │ Object      │  │ Object      │
+         │ Workflow    │  │ Interactions│  │ Lifecycle   │
+         └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+                │                │                │
+                ▼                ▼                ▼
+       ╭─────────────────╮╭─────────────────╮╭─────────────────╮
+       │ Activity        ││ Sequence        ││ State Machine   │
+       │ Diagram         ││ Diagram         ││ Diagram         │
+       ╰─────────────────╯╰─────────────────╯╰─────────────────╯</code></pre>
+<hr>
+</section>
+</section>
+<section id="modeling-tools" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="modeling-tools"><span class="header-section-number">6.9</span> 3.8 Modeling Tools</h2>
+<p>While you can sketch UML diagrams on paper or whiteboards, tools provide benefits like professional appearance, easy modification, and collaboration features.</p>
+<section id="categories-of-tools" class="level3">
+<h3 class="anchored" data-anchor-id="categories-of-tools">3.8.1 Categories of Tools</h3>
+<p><strong>Full-Featured UML Tools:</strong></p>
+<ul>
+<li>Enterprise Architect (commercial)</li>
+<li>Visual Paradigm (commercial/free community edition)</li>
+<li>StarUML (commercial/free)</li>
+<li>Modelio (open source)</li>
+</ul>
+<p>These tools offer complete UML support, code generation, reverse engineering, and team collaboration.</p>
+<p><strong>Diagramming Tools with UML Support:</strong></p>
+<ul>
+<li>Lucidchart (web-based, collaborative)</li>
+<li>Draw.io/diagrams.net (free, web and desktop)</li>
+<li>Microsoft Visio (commercial)</li>
+<li>Miro (web-based, collaborative)</li>
+</ul>
+<p>These tools support UML shapes but aren’t specialized UML tools.</p>
+<p><strong>Text-Based Tools:</strong></p>
+<ul>
+<li>PlantUML (text to diagram)</li>
+<li>Mermaid (text to diagram, integrates with Markdown)</li>
+<li>Nomnoml (text to diagram)</li>
+</ul>
+<p>These tools let you write diagrams in a text format that’s version-control friendly.</p>
+</section>
+<section id="plantuml-example" class="level3">
+<h3 class="anchored" data-anchor-id="plantuml-example">3.8.2 PlantUML Example</h3>
+<p>PlantUML uses a simple text syntax to generate diagrams:</p>
+<p><strong>Use Case Diagram:</strong></p>
+<pre class="plantuml"><code>@startuml
+left to right direction
+actor Customer
+actor Admin
+
+rectangle "Online Store" {
+    Customer --&gt; (Browse Products)
+    Customer --&gt; (Place Order)
+    Customer --&gt; (Track Order)
+    Admin --&gt; (Manage Products)
+    Admin --&gt; (Process Orders)
+    (Place Order) .&gt; (Process Payment) : include
+}
+@enduml</code></pre>
+<p><strong>Sequence Diagram:</strong></p>
+<pre class="plantuml"><code>@startuml
+actor User
+participant "Login Controller" as LC
+participant "Auth Service" as AS
+database "User DB" as DB
+
+User -&gt; LC: enterCredentials(user, pass)
+LC -&gt; AS: authenticate(user, pass)
+AS -&gt; DB: findUser(user)
+DB --&gt; AS: user
+AS -&gt; AS: verifyPassword()
+AS --&gt; LC: token
+LC --&gt; User: loginSuccess(token)
+@enduml</code></pre>
+<p><strong>Class Diagram:</strong></p>
+<pre class="plantuml"><code>@startuml
+class Customer {
+    -id: Long
+    -name: String
+    -email: String
+    +placeOrder(): Order
+}
+
+class Order {
+    -id: Long
+    -date: Date
+    -status: OrderStatus
+    +calculateTotal(): Decimal
+    +cancel(): void
+}
+
+class OrderLine {
+    -quantity: int
+    -unitPrice: Decimal
+    +getSubtotal(): Decimal
+}
+
+Customer "1" -- "0..*" Order : places
+Order "1" *-- "1..*" OrderLine : contains
+@enduml</code></pre>
+</section>
+<section id="mermaid-example" class="level3">
+<h3 class="anchored" data-anchor-id="mermaid-example">3.8.3 Mermaid Example</h3>
+<p>Mermaid integrates well with Markdown and is supported by GitHub, GitLab, and many documentation platforms:</p>
+<p><strong>Sequence Diagram:</strong></p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant U as User
+    participant L as LoginController
+    participant A as AuthService
+    participant D as Database
+    
+    U-&gt;&gt;L: enterCredentials(user, pass)
+    L-&gt;&gt;A: authenticate(user, pass)
+    A-&gt;&gt;D: findUser(user)
+    D--&gt;&gt;A: user
+    A-&gt;&gt;A: verifyPassword()
+    A--&gt;&gt;L: token
+    L--&gt;&gt;U: loginSuccess(token)</code></pre>
+<p><strong>Class Diagram:</strong></p>
+<pre class="mermaid"><code>classDiagram
+    class Customer {
+        -Long id
+        -String name
+        -String email
+        +placeOrder() Order
+    }
+    
+    class Order {
+        -Long id
+        -Date date
+        -OrderStatus status
+        +calculateTotal() Decimal
+        +cancel() void
+    }
+    
+    Customer "1" --&gt; "0..*" Order : places</code></pre>
+</section>
+<section id="tool-selection-considerations" class="level3">
+<h3 class="anchored" data-anchor-id="tool-selection-considerations">3.8.4 Tool Selection Considerations</h3>
+<p>When choosing a modeling tool, consider:</p>
+<ul>
+<li><strong>Learning curve</strong>: How quickly can you become productive?</li>
+<li><strong>Collaboration</strong>: Does your team need to work together on diagrams?</li>
+<li><strong>Integration</strong>: Does it integrate with your other tools (IDE, documentation)?</li>
+<li><strong>Cost</strong>: Is it within budget?</li>
+<li><strong>Version control</strong>: Can diagrams be tracked in Git?</li>
+<li><strong>Export options</strong>: What formats can you export to?</li>
+</ul>
+<p>For your course project, Draw.io (free, easy) or PlantUML (text-based, version-control friendly) are excellent choices.</p>
+<hr>
+</section>
+</section>
+<section id="chapter-summary" class="level2" data-number="6.10">
+<h2 data-number="6.10" class="anchored" data-anchor-id="chapter-summary"><span class="header-section-number">6.10</span> 3.9 Chapter Summary</h2>
+<p>Systems modeling provides visual blueprints that help us understand, communicate, and design software. UML offers a standardized notation for these models, with different diagram types serving different purposes.</p>
+<p>Key takeaways from this chapter:</p>
+<ul>
+<li><p><strong>Models</strong> are simplified representations that help us understand complex systems. Different diagrams reveal different aspects of the system.</p></li>
+<li><p><strong>Use Case diagrams</strong> capture system functionality from the user’s perspective. They show actors (who uses the system) and use cases (what they can do).</p></li>
+<li><p><strong>Activity diagrams</strong> model workflows and processes. They’re excellent for showing the steps in a process, decision points, parallel activities, and swimlanes for responsibility.</p></li>
+<li><p><strong>Sequence diagrams</strong> show how objects interact over time. They’re particularly useful for modeling use case scenarios and understanding the flow of messages between components.</p></li>
+<li><p><strong>Class diagrams</strong> show the static structure of the system: classes, their attributes and methods, and relationships between them. They range from conceptual domain models to detailed design specifications.</p></li>
+<li><p><strong>Choosing the right diagram</strong> depends on what you’re trying to communicate. Use case diagrams for requirements, activity diagrams for processes, sequence diagrams for interactions, and class diagrams for structure.</p></li>
+<li><p><strong>Tools</strong> range from simple drawing applications to sophisticated modeling environments. Text-based tools like PlantUML offer version-control-friendly alternatives.</p></li>
+</ul>
+<hr>
+</section>
+<section id="key-terms" class="level2" data-number="6.11">
+<h2 data-number="6.11" class="anchored" data-anchor-id="key-terms"><span class="header-section-number">6.11</span> 3.10 Key Terms</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>UML</strong></td>
+<td>Unified Modeling Language; a standardized visual notation for software systems</td>
+</tr>
+<tr class="even">
+<td><strong>Actor</strong></td>
+<td>An external entity (person, system, device) that interacts with the system</td>
+</tr>
+<tr class="odd">
+<td><strong>Use Case</strong></td>
+<td>A discrete piece of functionality that provides value to an actor</td>
+</tr>
+<tr class="even">
+<td><strong>Activity Diagram</strong></td>
+<td>A diagram showing the flow of activities in a process</td>
+</tr>
+<tr class="odd">
+<td><strong>Swimlane</strong></td>
+<td>A partition in an activity diagram showing who performs each activity</td>
+</tr>
+<tr class="even">
+<td><strong>Sequence Diagram</strong></td>
+<td>A diagram showing object interactions over time</td>
+</tr>
+<tr class="odd">
+<td><strong>Lifeline</strong></td>
+<td>The representation of a participant in a sequence diagram</td>
+</tr>
+<tr class="even">
+<td><strong>Class Diagram</strong></td>
+<td>A diagram showing classes, their attributes/methods, and relationships</td>
+</tr>
+<tr class="odd">
+<td><strong>Association</strong></td>
+<td>A relationship between classes indicating objects of one class know about objects of another</td>
+</tr>
+<tr class="even">
+<td><strong>Aggregation</strong></td>
+<td>A “has-a” relationship where parts can exist independently</td>
+</tr>
+<tr class="odd">
+<td><strong>Composition</strong></td>
+<td>A “has-a” relationship where parts cannot exist without the whole</td>
+</tr>
+<tr class="even">
+<td><strong>Generalization</strong></td>
+<td>An “is-a” (inheritance) relationship between classes</td>
+</tr>
+<tr class="odd">
+<td><strong>Domain Model</strong></td>
+<td>A conceptual class diagram showing concepts in the problem domain</td>
+</tr>
+<tr class="even">
+<td><strong>Multiplicity</strong></td>
+<td>The number of instances that participate in a relationship</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="review-questions" class="level2" data-number="6.12">
+<h2 data-number="6.12" class="anchored" data-anchor-id="review-questions"><span class="header-section-number">6.12</span> 3.11 Review Questions</h2>
+<ol type="1">
+<li><p>Explain the purpose of systems modeling in software engineering. What are three benefits of creating models before writing code?</p></li>
+<li><p>What is the difference between structural and behavioral UML diagrams? Give two examples of each.</p></li>
+<li><p>In a use case diagram, what is the difference between the «include» and «extend» relationships? When would you use each?</p></li>
+<li><p>Create a use case diagram for an ATM system. Include at least three actors and eight use cases with appropriate relationships.</p></li>
+<li><p>Explain the purpose of swimlanes in activity diagrams. When are they most useful?</p></li>
+<li><p>What is the difference between a fork and a decision in an activity diagram? How do they differ visually and semantically?</p></li>
+<li><p>In a sequence diagram, what is the difference between synchronous and asynchronous messages? When would you use each?</p></li>
+<li><p>Explain the difference between aggregation and composition in class diagrams. Provide an example of each.</p></li>
+<li><p>What is the difference between a domain model and a design class diagram? At what project phase would you create each?</p></li>
+<li><p>You’re designing a ride-sharing application. Which UML diagrams would you create, and what would each show?</p></li>
+</ol>
+<hr>
+</section>
+<section id="hands-on-exercises" class="level2" data-number="6.13">
+<h2 data-number="6.13" class="anchored" data-anchor-id="hands-on-exercises"><span class="header-section-number">6.13</span> 3.12 Hands-On Exercises</h2>
+<section id="exercise-3.1-use-case-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-3.1-use-case-diagram">Exercise 3.1: Use Case Diagram</h3>
+<p>Create a use case diagram for a hotel reservation system. Include:</p>
+<ol type="1">
+<li>At least 3 actors (consider guests, staff, external systems)</li>
+<li>At least 10 use cases</li>
+<li>At least 2 «include» relationships</li>
+<li>At least 1 «extend» relationship</li>
+<li>A system boundary</li>
+</ol>
+<p>Write detailed use case descriptions for 2 of your use cases.</p>
+</section>
+<section id="exercise-3.2-activity-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-3.2-activity-diagram">Exercise 3.2: Activity Diagram</h3>
+<p>Create an activity diagram for one of the following processes:</p>
+<p>Option A: Online food ordering (from browsing menu to delivery) Option B: Library book borrowing (including reservation if unavailable) Option C: Job application process (from submission to hire/reject)</p>
+<p>Include:</p>
+<ol type="1">
+<li>Initial and final nodes</li>
+<li>At least 2 decision points with guards</li>
+<li>At least 1 fork/join for parallel activities</li>
+<li>Swimlanes showing different participants</li>
+</ol>
+</section>
+<section id="exercise-3.3-sequence-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-3.3-sequence-diagram">Exercise 3.3: Sequence Diagram</h3>
+<p>Create a sequence diagram for one of the following scenarios:</p>
+<p>Option A: User purchasing an item online (including payment processing) Option B: User posting a message to a social media platform Option C: ATM withdrawal transaction</p>
+<p>Include:</p>
+<ol type="1">
+<li>At least 4 lifelines</li>
+<li>At least one combined fragment (alt, opt, or loop)</li>
+<li>Synchronous and return messages</li>
+<li>Activation bars</li>
+</ol>
+</section>
+<section id="exercise-3.4-class-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-3.4-class-diagram">Exercise 3.4: Class Diagram</h3>
+<p>Create a class diagram for a course registration system. Include:</p>
+<ol type="1">
+<li>At least 8 classes</li>
+<li>Appropriate attributes and methods for each class</li>
+<li>At least one inheritance relationship</li>
+<li>At least one composition relationship</li>
+<li>At least one association with multiplicity</li>
+<li>An interface</li>
+</ol>
+</section>
+<section id="exercise-3.5-project-uml-package" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-3.5-project-uml-package">Exercise 3.5: Project UML Package</h3>
+<p>For your semester project, create a UML package containing:</p>
+<ol type="1">
+<li>A use case diagram showing the main functionality</li>
+<li>An activity diagram for a key process or workflow</li>
+<li>A sequence diagram for a primary use case</li>
+<li>A domain model (conceptual class diagram)</li>
+</ol>
+<p>Upload all diagrams to your GitHub repository in a <code>docs/diagrams</code> folder.</p>
+</section>
+<section id="exercise-3.6-tool-exploration" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-3.6-tool-exploration">Exercise 3.6: Tool Exploration</h3>
+<p>Choose one of these modeling approaches and create the class diagram from Exercise 3.4:</p>
+<ol type="1">
+<li>Draw.io: Create the diagram using the web-based tool</li>
+<li>PlantUML: Write the diagram in text format</li>
+<li>Mermaid: Write the diagram in Mermaid syntax in a Markdown file</li>
+</ol>
+<p>Compare the experience. Which do you prefer and why?</p>
+<hr>
+</section>
+</section>
+<section id="further-reading" class="level2" data-number="6.14">
+<h2 data-number="6.14" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">6.14</span> 3.13 Further Reading</h2>
+<p><strong>Books:</strong></p>
+<ul>
+<li>Fowler, M. (2003). <em>UML Distilled: A Brief Guide to the Standard Object Modeling Language</em> (3rd Edition). Addison-Wesley.</li>
+<li>Larman, C. (2004). <em>Applying UML and Patterns</em> (3rd Edition). Prentice Hall.</li>
+<li>Rumbaugh, J., Jacobson, I., &amp; Booch, G. (2004). <em>The Unified Modeling Language Reference Manual</em> (2nd Edition). Addison-Wesley.</li>
+</ul>
+<p><strong>Online Resources:</strong></p>
+<ul>
+<li>UML Specification (OMG): https://www.omg.org/spec/UML/</li>
+<li>PlantUML Documentation: https://plantuml.com/</li>
+<li>Mermaid Documentation: https://mermaid.js.org/</li>
+<li>Draw.io: https://app.diagrams.net/</li>
+<li>Visual Paradigm UML Guides: https://www.visual-paradigm.com/guide/uml-unified-modeling-language/</li>
+</ul>
+<p><strong>Tutorials:</strong></p>
+<ul>
+<li>UML Diagrams (Lucidchart): https://www.lucidchart.com/pages/uml</li>
+<li>UML Tutorial (Tutorialspoint): https://www.tutorialspoint.com/uml/</li>
+</ul>
+<hr>
+</section>
+<section id="references" class="level2" data-number="6.15">
+<h2 data-number="6.15" class="anchored" data-anchor-id="references"><span class="header-section-number">6.15</span> References</h2>
+<p>Booch, G., Rumbaugh, J., &amp; Jacobson, I. (2005). <em>The Unified Modeling Language User Guide</em> (2nd Edition). Addison-Wesley.</p>
+<p>Fowler, M. (2003). <em>UML Distilled: A Brief Guide to the Standard Object Modeling Language</em> (3rd Edition). Addison-Wesley.</p>
+<p>Larman, C. (2004). <em>Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development</em> (3rd Edition). Prentice Hall.</p>
+<p>Object Management Group. (2017). <em>OMG Unified Modeling Language (OMG UML) Version 2.5.1</em>. Retrieved from https://www.omg.org/spec/UML/2.5.1/</p>
+<p>Rumbaugh, J., Jacobson, I., &amp; Booch, G. (2004). <em>The Unified Modeling Language Reference Manual</em> (2nd Edition). Addison-Wesley.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/02-requirements-engineering.html" class="pagination-link" aria-label="Chapter 2: Requirements Engineering">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Chapter 2: Requirements Engineering</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/04-software-architecture.html" class="pagination-link" aria-label="Chapter 4: Software Architecture and Design Patterns">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Chapter 4: Software Architecture and Design Patterns</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

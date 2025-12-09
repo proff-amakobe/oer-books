@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>8&nbsp; Chapter 5: UI/UX Design and Prototyping – The Complete Software Engineering Lifecycle</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/06-agile-methodologies.html" rel="next">
+<link href="../chapters/04-software-architecture.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles/custom.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/05-ui-ux.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 5: UI/UX Design and Prototyping</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">The Complete Software Engineering Lifecycle</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">The Complete Software Engineering Lifecycle</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preface.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">preface.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../acknowledgments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">acknowledgments.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Chapter 1: Introduction to Software Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-requirements-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Chapter 2: Requirements Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-systems-modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Chapter 3: Systems Modeling and UML</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-software-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Chapter 4: Software Architecture and Design Patterns</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-ui-ux.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 5: UI/UX Design and Prototyping</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-agile-methodologies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Chapter 6: Agile Methodologies and Project Management</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-version-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Chapter 7: Version Control Workflows</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-prototype-implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">09-prototype-implementation.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">10-testing.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-quality-assurance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">11-quality-assurance.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-data-management-apis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">12-data-management-apis.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-devops-deployment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">13-devops-deployment.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">14-security.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-maintenance-evolution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">15-maintenance-evolution.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-final-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">16-final-integration.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-project-guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">appendix-project-guide.html</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">glossary.html</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives"><span class="header-section-number">8.1</span> Learning Objectives</a></li>
+  <li><a href="#understanding-ui-and-ux" id="toc-understanding-ui-and-ux" class="nav-link" data-scroll-target="#understanding-ui-and-ux"><span class="header-section-number">8.2</span> 5.1 Understanding UI and UX</a>
+  <ul class="collapse">
+  <li><a href="#what-is-user-experience-ux" id="toc-what-is-user-experience-ux" class="nav-link" data-scroll-target="#what-is-user-experience-ux">5.1.1 What Is User Experience (UX)?</a></li>
+  <li><a href="#what-is-user-interface-ui" id="toc-what-is-user-interface-ui" class="nav-link" data-scroll-target="#what-is-user-interface-ui">5.1.2 What Is User Interface (UI)?</a></li>
+  <li><a href="#the-relationship-between-ux-and-ui" id="toc-the-relationship-between-ux-and-ui" class="nav-link" data-scroll-target="#the-relationship-between-ux-and-ui">5.1.3 The Relationship Between UX and UI</a></li>
+  <li><a href="#why-software-engineers-need-design-skills" id="toc-why-software-engineers-need-design-skills" class="nav-link" data-scroll-target="#why-software-engineers-need-design-skills">5.1.4 Why Software Engineers Need Design Skills</a></li>
+  </ul></li>
+  <li><a href="#human-centered-design" id="toc-human-centered-design" class="nav-link" data-scroll-target="#human-centered-design"><span class="header-section-number">8.3</span> 5.2 Human-Centered Design</a>
+  <ul class="collapse">
+  <li><a href="#principles-of-human-centered-design" id="toc-principles-of-human-centered-design" class="nav-link" data-scroll-target="#principles-of-human-centered-design">5.2.1 Principles of Human-Centered Design</a></li>
+  <li><a href="#understanding-users" id="toc-understanding-users" class="nav-link" data-scroll-target="#understanding-users">5.2.2 Understanding Users</a></li>
+  <li><a href="#defining-the-problem" id="toc-defining-the-problem" class="nav-link" data-scroll-target="#defining-the-problem">5.2.3 Defining the Problem</a></li>
+  </ul></li>
+  <li><a href="#ux-design-heuristics" id="toc-ux-design-heuristics" class="nav-link" data-scroll-target="#ux-design-heuristics"><span class="header-section-number">8.4</span> 5.3 UX Design Heuristics</a>
+  <ul class="collapse">
+  <li><a href="#nielsens-10-usability-heuristics" id="toc-nielsens-10-usability-heuristics" class="nav-link" data-scroll-target="#nielsens-10-usability-heuristics">5.3.1 Nielsen’s 10 Usability Heuristics</a></li>
+  <li><a href="#applying-heuristics-heuristic-evaluation" id="toc-applying-heuristics-heuristic-evaluation" class="nav-link" data-scroll-target="#applying-heuristics-heuristic-evaluation">5.3.2 Applying Heuristics: Heuristic Evaluation</a></li>
+  </ul></li>
+  <li><a href="#wireframing-and-prototyping" id="toc-wireframing-and-prototyping" class="nav-link" data-scroll-target="#wireframing-and-prototyping"><span class="header-section-number">8.5</span> 5.4 Wireframing and Prototyping</a>
+  <ul class="collapse">
+  <li><a href="#the-prototyping-spectrum" id="toc-the-prototyping-spectrum" class="nav-link" data-scroll-target="#the-prototyping-spectrum">5.4.1 The Prototyping Spectrum</a></li>
+  <li><a href="#sketching" id="toc-sketching" class="nav-link" data-scroll-target="#sketching">5.4.2 Sketching</a></li>
+  <li><a href="#wireframes" id="toc-wireframes" class="nav-link" data-scroll-target="#wireframes">5.4.3 Wireframes</a></li>
+  <li><a href="#interactive-prototypes" id="toc-interactive-prototypes" class="nav-link" data-scroll-target="#interactive-prototypes">5.4.4 Interactive Prototypes</a></li>
+  <li><a href="#prototyping-tools" id="toc-prototyping-tools" class="nav-link" data-scroll-target="#prototyping-tools">5.4.5 Prototyping Tools</a></li>
+  </ul></li>
+  <li><a href="#visual-design-fundamentals" id="toc-visual-design-fundamentals" class="nav-link" data-scroll-target="#visual-design-fundamentals"><span class="header-section-number">8.6</span> 5.5 Visual Design Fundamentals</a>
+  <ul class="collapse">
+  <li><a href="#visual-hierarchy" id="toc-visual-hierarchy" class="nav-link" data-scroll-target="#visual-hierarchy">5.5.1 Visual Hierarchy</a></li>
+  <li><a href="#typography" id="toc-typography" class="nav-link" data-scroll-target="#typography">5.5.2 Typography</a></li>
+  <li><a href="#color" id="toc-color" class="nav-link" data-scroll-target="#color">5.5.3 Color</a></li>
+  <li><a href="#layout-and-spacing" id="toc-layout-and-spacing" class="nav-link" data-scroll-target="#layout-and-spacing">5.5.4 Layout and Spacing</a></li>
+  </ul></li>
+  <li><a href="#responsive-design" id="toc-responsive-design" class="nav-link" data-scroll-target="#responsive-design"><span class="header-section-number">8.7</span> 5.6 Responsive Design</a>
+  <ul class="collapse">
+  <li><a href="#why-responsive-design-matters" id="toc-why-responsive-design-matters" class="nav-link" data-scroll-target="#why-responsive-design-matters">5.6.1 Why Responsive Design Matters</a></li>
+  <li><a href="#responsive-design-principles" id="toc-responsive-design-principles" class="nav-link" data-scroll-target="#responsive-design-principles">5.6.2 Responsive Design Principles</a></li>
+  <li><a href="#breakpoints" id="toc-breakpoints" class="nav-link" data-scroll-target="#breakpoints">5.6.3 Breakpoints</a></li>
+  <li><a href="#responsive-patterns" id="toc-responsive-patterns" class="nav-link" data-scroll-target="#responsive-patterns">5.6.4 Responsive Patterns</a></li>
+  <li><a href="#touch-considerations" id="toc-touch-considerations" class="nav-link" data-scroll-target="#touch-considerations">5.6.5 Touch Considerations</a></li>
+  </ul></li>
+  <li><a href="#accessibility" id="toc-accessibility" class="nav-link" data-scroll-target="#accessibility"><span class="header-section-number">8.8</span> 5.7 Accessibility</a>
+  <ul class="collapse">
+  <li><a href="#why-accessibility-matters" id="toc-why-accessibility-matters" class="nav-link" data-scroll-target="#why-accessibility-matters">5.7.1 Why Accessibility Matters</a></li>
+  <li><a href="#wcag-guidelines" id="toc-wcag-guidelines" class="nav-link" data-scroll-target="#wcag-guidelines">5.7.2 WCAG Guidelines</a></li>
+  <li><a href="#common-accessibility-requirements" id="toc-common-accessibility-requirements" class="nav-link" data-scroll-target="#common-accessibility-requirements">5.7.3 Common Accessibility Requirements</a></li>
+  <li><a href="#accessibility-testing" id="toc-accessibility-testing" class="nav-link" data-scroll-target="#accessibility-testing">5.7.4 Accessibility Testing</a></li>
+  </ul></li>
+  <li><a href="#design-systems-and-style-guides" id="toc-design-systems-and-style-guides" class="nav-link" data-scroll-target="#design-systems-and-style-guides"><span class="header-section-number">8.9</span> 5.8 Design Systems and Style Guides</a>
+  <ul class="collapse">
+  <li><a href="#why-design-systems-matter" id="toc-why-design-systems-matter" class="nav-link" data-scroll-target="#why-design-systems-matter">5.8.1 Why Design Systems Matter</a></li>
+  <li><a href="#components-of-a-design-system" id="toc-components-of-a-design-system" class="nav-link" data-scroll-target="#components-of-a-design-system">5.8.2 Components of a Design System</a></li>
+  <li><a href="#creating-a-style-guide" id="toc-creating-a-style-guide" class="nav-link" data-scroll-target="#creating-a-style-guide">5.8.3 Creating a Style Guide</a></li>
+  <li><a href="#style-guide-example" id="toc-style-guide-example" class="nav-link" data-scroll-target="#style-guide-example">5.8.4 Style Guide Example</a></li>
+  </ul></li>
+  <li><a href="#prototyping-in-practice-using-figma" id="toc-prototyping-in-practice-using-figma" class="nav-link" data-scroll-target="#prototyping-in-practice-using-figma"><span class="header-section-number">8.10</span> 5.9 Prototyping in Practice: Using Figma</a>
+  <ul class="collapse">
+  <li><a href="#figma-basics" id="toc-figma-basics" class="nav-link" data-scroll-target="#figma-basics">5.9.1 Figma Basics</a></li>
+  <li><a href="#creating-a-simple-wireframe-in-figma" id="toc-creating-a-simple-wireframe-in-figma" class="nav-link" data-scroll-target="#creating-a-simple-wireframe-in-figma">5.9.2 Creating a Simple Wireframe in Figma</a></li>
+  <li><a href="#figma-tips-for-beginners" id="toc-figma-tips-for-beginners" class="nav-link" data-scroll-target="#figma-tips-for-beginners">5.9.3 Figma Tips for Beginners</a></li>
+  </ul></li>
+  <li><a href="#chapter-summary" id="toc-chapter-summary" class="nav-link" data-scroll-target="#chapter-summary"><span class="header-section-number">8.11</span> 5.10 Chapter Summary</a></li>
+  <li><a href="#key-terms" id="toc-key-terms" class="nav-link" data-scroll-target="#key-terms"><span class="header-section-number">8.12</span> 5.11 Key Terms</a></li>
+  <li><a href="#review-questions" id="toc-review-questions" class="nav-link" data-scroll-target="#review-questions"><span class="header-section-number">8.13</span> 5.12 Review Questions</a></li>
+  <li><a href="#hands-on-exercises" id="toc-hands-on-exercises" class="nav-link" data-scroll-target="#hands-on-exercises"><span class="header-section-number">8.14</span> 5.13 Hands-On Exercises</a>
+  <ul class="collapse">
+  <li><a href="#exercise-5.1-heuristic-evaluation" id="toc-exercise-5.1-heuristic-evaluation" class="nav-link" data-scroll-target="#exercise-5.1-heuristic-evaluation">Exercise 5.1: Heuristic Evaluation</a></li>
+  <li><a href="#exercise-5.2-user-persona-creation" id="toc-exercise-5.2-user-persona-creation" class="nav-link" data-scroll-target="#exercise-5.2-user-persona-creation">Exercise 5.2: User Persona Creation</a></li>
+  <li><a href="#exercise-5.3-paper-prototyping" id="toc-exercise-5.3-paper-prototyping" class="nav-link" data-scroll-target="#exercise-5.3-paper-prototyping">Exercise 5.3: Paper Prototyping</a></li>
+  <li><a href="#exercise-5.4-digital-wireframes" id="toc-exercise-5.4-digital-wireframes" class="nav-link" data-scroll-target="#exercise-5.4-digital-wireframes">Exercise 5.4: Digital Wireframes</a></li>
+  <li><a href="#exercise-5.5-style-guide-creation" id="toc-exercise-5.5-style-guide-creation" class="nav-link" data-scroll-target="#exercise-5.5-style-guide-creation">Exercise 5.5: Style Guide Creation</a></li>
+  <li><a href="#exercise-5.6-accessibility-audit" id="toc-exercise-5.6-accessibility-audit" class="nav-link" data-scroll-target="#exercise-5.6-accessibility-audit">Exercise 5.6: Accessibility Audit</a></li>
+  <li><a href="#exercise-5.7-responsive-design" id="toc-exercise-5.7-responsive-design" class="nav-link" data-scroll-target="#exercise-5.7-responsive-design">Exercise 5.7: Responsive Design</a></li>
+  </ul></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">8.15</span> 5.14 Further Reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">8.16</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 5: UI/UX Design and Prototyping</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="learning-objectives" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">8.1</span> Learning Objectives</h2>
+<p>By the end of this chapter, you will be able to:</p>
+<ul>
+<li>Explain the principles of human-centered design and their importance in software development</li>
+<li>Distinguish between User Interface (UI) and User Experience (UX) design</li>
+<li>Apply UX heuristics to evaluate and improve interface designs</li>
+<li>Create wireframes and prototypes at varying levels of fidelity</li>
+<li>Design responsive interfaces that work across different devices and screen sizes</li>
+<li>Implement accessibility best practices to create inclusive software</li>
+<li>Develop a UI style guide for consistent design across an application</li>
+<li>Use modern prototyping tools to communicate design ideas</li>
+</ul>
+<hr>
+</section>
+<section id="understanding-ui-and-ux" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="understanding-ui-and-ux"><span class="header-section-number">8.2</span> 5.1 Understanding UI and UX</h2>
+<p>You’ve probably used software that felt frustrating—confusing menus, buttons that didn’t look clickable, forms that lost your data, error messages that made no sense. You’ve also used software that felt effortless—intuitive navigation, clear feedback, tasks accomplished with minimal friction. The difference isn’t accidental. It’s the result of thoughtful design.</p>
+<p><strong>User Experience (UX)</strong> and <strong>User Interface (UI)</strong> design are the disciplines that create this difference. While often mentioned together, they address different aspects of how users interact with software.</p>
+<section id="what-is-user-experience-ux" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-user-experience-ux">5.1.1 What Is User Experience (UX)?</h3>
+<p><strong>User Experience</strong> encompasses all aspects of a user’s interaction with a product, service, or company. It’s about how the product feels to use—whether it’s satisfying, frustrating, efficient, or confusing.</p>
+<p>UX design asks questions like:</p>
+<ul>
+<li>What problem is the user trying to solve?</li>
+<li>What steps must users take to accomplish their goals?</li>
+<li>How do users feel during and after using the product?</li>
+<li>What obstacles prevent users from succeeding?</li>
+<li>How can we make the experience more efficient and enjoyable?</li>
+</ul>
+<p>UX extends beyond the screen. It includes:</p>
+<ul>
+<li>The user’s first impression when discovering the product</li>
+<li>The onboarding experience for new users</li>
+<li>The day-to-day experience of regular use</li>
+<li>Error handling and recovery</li>
+<li>Customer support interactions</li>
+<li>The experience of leaving or canceling</li>
+</ul>
+<p><strong>UX Design Activities:</strong></p>
+<ul>
+<li>User research and interviews</li>
+<li>Creating user personas</li>
+<li>Journey mapping</li>
+<li>Information architecture</li>
+<li>Interaction design</li>
+<li>Usability testing</li>
+<li>Analyzing user behavior data</li>
+</ul>
+</section>
+<section id="what-is-user-interface-ui" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-user-interface-ui">5.1.2 What Is User Interface (UI)?</h3>
+<p><strong>User Interface</strong> design focuses on the visual and interactive elements users directly interact with—buttons, icons, typography, colors, layouts, animations, and more.</p>
+<p>UI design asks questions like:</p>
+<ul>
+<li>What should users see on this screen?</li>
+<li>How should interactive elements look and behave?</li>
+<li>What visual hierarchy guides users’ attention?</li>
+<li>How do colors, fonts, and spacing create the right mood?</li>
+<li>How does the interface communicate its state?</li>
+</ul>
+<p>UI design is about making the interface:</p>
+<ul>
+<li><strong>Visually appealing</strong>: Aesthetically pleasing and aligned with brand identity</li>
+<li><strong>Clear</strong>: Users understand what they’re seeing</li>
+<li><strong>Consistent</strong>: Similar elements look and behave similarly</li>
+<li><strong>Responsive</strong>: Interface provides feedback for user actions</li>
+</ul>
+<p><strong>UI Design Activities:</strong></p>
+<ul>
+<li>Visual design (colors, typography, imagery)</li>
+<li>Layout and composition</li>
+<li>Icon and button design</li>
+<li>Motion and animation design</li>
+<li>Creating design systems and style guides</li>
+<li>Responsive design for multiple screen sizes</li>
+</ul>
+</section>
+<section id="the-relationship-between-ux-and-ui" class="level3">
+<h3 class="anchored" data-anchor-id="the-relationship-between-ux-and-ui">5.1.3 The Relationship Between UX and UI</h3>
+<p>UX and UI are deeply interconnected:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                         User Experience (UX)                            │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                      User Interface (UI)                          │  │
+│  │                                                                   │  │
+│  │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │  │
+│  │   │   Visual    │  │ Interactive │  │   Layout    │              │  │
+│  │   │   Design    │  │  Elements   │  │             │              │  │
+│  │   └─────────────┘  └─────────────┘  └─────────────┘              │  │
+│  │                                                                   │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │   User      │  │ Information │  │ Interaction │  │  Usability  │    │
+│  │  Research   │  │Architecture │  │   Design    │  │   Testing   │    │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<p>A useful analogy: If your product were a house, UX would be the architecture—the floor plan, the flow between rooms, how living in it feels. UI would be the interior design—the paint colors, the furniture choices, the light fixtures.</p>
+<p>You can have:</p>
+<ul>
+<li>Good UX with poor UI: The product works well but looks outdated or unappealing</li>
+<li>Good UI with poor UX: The product looks beautiful but is frustrating to use</li>
+<li>Good UX and UI: The product is both effective and delightful (the goal!)</li>
+</ul>
+</section>
+<section id="why-software-engineers-need-design-skills" class="level3">
+<h3 class="anchored" data-anchor-id="why-software-engineers-need-design-skills">5.1.4 Why Software Engineers Need Design Skills</h3>
+<p>You might wonder why a software engineering course covers design. Can’t designers handle this? In practice:</p>
+<p><strong>Many teams don’t have dedicated designers.</strong> Startups, small companies, and internal tools often rely on developers to make design decisions.</p>
+<p><strong>Design affects technical decisions.</strong> How you structure your code depends on what the interface needs to do. Understanding design helps you build better systems.</p>
+<p><strong>Better communication with designers.</strong> Even with dedicated designers, understanding their work improves collaboration.</p>
+<p><strong>Design thinking improves problem-solving.</strong> The empathy and iteration central to design make you a better engineer overall.</p>
+<p><strong>Users don’t separate code from design.</strong> Users experience the whole product. Poor design undermines excellent code.</p>
+<hr>
+</section>
+</section>
+<section id="human-centered-design" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="human-centered-design"><span class="header-section-number">8.3</span> 5.2 Human-Centered Design</h2>
+<p><strong>Human-Centered Design (HCD)</strong> is an approach that grounds the design process in information about the people who will use the product. Rather than designing based on assumptions or technical constraints, HCD starts with understanding users’ needs, behaviors, and contexts.</p>
+<section id="principles-of-human-centered-design" class="level3">
+<h3 class="anchored" data-anchor-id="principles-of-human-centered-design">5.2.1 Principles of Human-Centered Design</h3>
+<p><strong>1. Focus on People</strong></p>
+<p>Design begins with understanding users—not technology, not business requirements, but the humans who will interact with the system.</p>
+<p>This means:</p>
+<ul>
+<li>Observing users in their natural environment</li>
+<li>Understanding their goals, frustrations, and contexts</li>
+<li>Recognizing that users are experts in their own needs</li>
+<li>Designing for real people, not idealized users</li>
+</ul>
+<p><strong>2. Find the Right Problem</strong></p>
+<p>Many failed products solve the wrong problem beautifully. HCD invests in problem definition before jumping to solutions.</p>
+<blockquote class="blockquote">
+<p>“If I had an hour to solve a problem, I’d spend 55 minutes thinking about the problem and 5 minutes thinking about solutions.” — attributed to Albert Einstein</p>
+</blockquote>
+<p><strong>3. Think Systemically</strong></p>
+<p>Problems exist within systems. A solution that fixes one issue might create others. HCD considers the broader context and ripple effects of design decisions.</p>
+<p><strong>4. Iterate Relentlessly</strong></p>
+<p>Perfect solutions rarely emerge fully formed. HCD embraces iteration—designing, testing, learning, and refining in cycles.</p>
+<pre><code>         ┌──────────────┐
+         │   Empathize  │
+         │ (Understand  │
+         │    users)    │
+         └──────┬───────┘
+                │
+                ▼
+         ┌──────────────┐
+         │    Define    │
+         │  (Frame the  │
+         │   problem)   │
+         └──────┬───────┘
+                │
+                ▼
+         ┌──────────────┐
+         │    Ideate    │
+         │  (Generate   │
+         │   ideas)     │
+         └──────┬───────┘
+                │
+                ▼
+         ┌──────────────┐
+         │  Prototype   │
+         │   (Build to  │
+         │    learn)    │
+         └──────┬───────┘
+                │
+                ▼
+         ┌──────────────┐
+         │    Test      │◄────────────────┐
+         │  (Get user   │                 │
+         │  feedback)   │                 │
+         └──────┬───────┘                 │
+                │                         │
+                └─────────────────────────┘
+                      (Iterate)</code></pre>
+<p><strong>5. Prototype to Learn</strong></p>
+<p>Prototypes aren’t mini-products; they’re thinking tools. Build prototypes to answer questions and test assumptions, not to show off solutions.</p>
+</section>
+<section id="understanding-users" class="level3">
+<h3 class="anchored" data-anchor-id="understanding-users">5.2.2 Understanding Users</h3>
+<p>Before designing, you need to understand who you’re designing for. Several techniques help build this understanding:</p>
+<p><strong>User Research Methods:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Interviews</td>
+<td>One-on-one conversations</td>
+<td>Deep understanding of needs and motivations</td>
+</tr>
+<tr class="even">
+<td>Surveys</td>
+<td>Questionnaires to many users</td>
+<td>Quantitative data, validating hypotheses</td>
+</tr>
+<tr class="odd">
+<td>Observation</td>
+<td>Watching users in context</td>
+<td>Understanding actual behavior</td>
+</tr>
+<tr class="even">
+<td>Usability Testing</td>
+<td>Users attempt tasks</td>
+<td>Evaluating existing designs</td>
+</tr>
+<tr class="odd">
+<td>Analytics</td>
+<td>Behavioral data from usage</td>
+<td>Understanding patterns at scale</td>
+</tr>
+<tr class="even">
+<td>Card Sorting</td>
+<td>Users organize information</td>
+<td>Designing information architecture</td>
+</tr>
+</tbody>
+</table>
+<p><strong>User Personas</strong></p>
+<p>A <strong>persona</strong> is a fictional character representing a user type. Personas help teams maintain empathy for users throughout the project.</p>
+<p><strong>Example Persona:</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  PERSONA: Sarah Chen                                                    │
+│  ═══════════════════                                                    │
+│                                                                         │
+│  Demographics:                                                          │
+│  • 34 years old                                                         │
+│  • Marketing Manager at mid-size company                                │
+│  • Lives in suburban Chicago                                            │
+│  • Uses iPhone, MacBook, and iPad                                       │
+│                                                                         │
+│  Goals:                                                                 │
+│  • Coordinate marketing campaigns across her team of 6                  │
+│  • Track project progress without micromanaging                         │
+│  • Meet deadlines reliably                                              │
+│  • Reduce time spent in status meetings                                 │
+│                                                                         │
+│  Frustrations:                                                          │
+│  • Information scattered across email, Slack, and spreadsheets          │
+│  • Surprises about project delays discovered too late                   │
+│  • Team members working on outdated versions of documents               │
+│  • Too many tools that don't integrate well                             │
+│                                                                         │
+│  Tech Comfort: Moderate                                                 │
+│  • Comfortable with common apps (Office, Google Workspace)              │
+│  • Prefers intuitive tools over powerful-but-complex ones               │
+│  • Willing to learn new tools if the benefit is clear                   │
+│                                                                         │
+│  Quote: "I just want to know what's happening without having to ask."   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>User Journey Maps</strong></p>
+<p>A <strong>journey map</strong> visualizes the user’s experience over time, including their actions, thoughts, emotions, and pain points.</p>
+<pre><code>USER JOURNEY: New Customer Making First Purchase
+═══════════════════════════════════════════════
+
+Stage:     DISCOVER    →    EVALUATE    →    PURCHASE    →    RECEIVE    →    USE
+
+Actions:   • Sees ad    • Browses       • Creates       • Tracks       • Opens
+           • Visits       products        account        shipping       package
+             site       • Reads         • Enters        • Waits        • Uses
+           • Browses      reviews         payment                        product
+                        • Compares
+
+Thinking:  "This looks  "Will this     "Is this       "When will    "Is this what
+           interesting"  work for me?"   secure?"       it arrive?"   I expected?"
+
+Feeling:   😊 Curious   🤔 Uncertain   😰 Anxious     😐 Impatient  😊 or 😞
+
+Pain       • Slow       • Not enough   • Long         • No          • Instructions
+Points:      loading      reviews        checkout       tracking       unclear
+           • Cluttered  • Hard to      • Account      • Delayed     • Missing
+             homepage     compare        required       delivery       pieces
+
+Opportu-   • Fast,      • Rich         • Guest        • Real-time   • Quick
+nities:      clean        product        checkout       updates        start
+             first        info           option       • Proactive      guide
+             impression • Easy           available      communication
+                          comparison</code></pre>
+</section>
+<section id="defining-the-problem" class="level3">
+<h3 class="anchored" data-anchor-id="defining-the-problem">5.2.3 Defining the Problem</h3>
+<p>Good problem definition is half the solution. A well-framed problem focuses the team and prevents wasted effort on the wrong issues.</p>
+<p><strong>Problem Statement Format:</strong></p>
+<blockquote class="blockquote">
+<p>[User] needs a way to [accomplish goal] because [insight from research], but [current obstacle].</p>
+</blockquote>
+<p><strong>Example:</strong></p>
+<blockquote class="blockquote">
+<p>Marketing managers need a way to <strong>track their team’s project progress in real-time</strong> because <strong>they’re accountable for deadlines they can’t directly control</strong>, but <strong>current tools require manually asking for updates</strong>, which is time-consuming and often provides outdated information.</p>
+</blockquote>
+<p><strong>“How Might We” Questions:</strong></p>
+<p>Transform problem statements into opportunity questions:</p>
+<ul>
+<li>How might we help managers see project status without asking?</li>
+<li>How might we surface delays before they become crises?</li>
+<li>How might we reduce the friction of status updates for team members?</li>
+</ul>
+<p>These questions open possibilities without constraining solutions.</p>
+<hr>
+</section>
+</section>
+<section id="ux-design-heuristics" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="ux-design-heuristics"><span class="header-section-number">8.4</span> 5.3 UX Design Heuristics</h2>
+<p><strong>Heuristics</strong> are rules of thumb—general principles that guide design decisions without prescribing specific solutions. Jakob Nielsen’s 10 Usability Heuristics, developed in the 1990s, remain the most influential framework for evaluating interface design.</p>
+<section id="nielsens-10-usability-heuristics" class="level3">
+<h3 class="anchored" data-anchor-id="nielsens-10-usability-heuristics">5.3.1 Nielsen’s 10 Usability Heuristics</h3>
+<p><strong>1. Visibility of System Status</strong></p>
+<p>The system should always keep users informed about what is going on through appropriate feedback within a reasonable time.</p>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Progress bars during file uploads</li>
+<li>“Saving…” indicator in document editors</li>
+<li>Real-time character count in text fields with limits</li>
+<li>Loading spinners during data fetches</li>
+</ul>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>Submitting a form with no feedback</li>
+<li>Processes running with no indication of progress</li>
+<li>Buttons that don’t respond to clicks</li>
+</ul>
+<p><strong>Implementation:</strong></p>
+<pre><code>┌─────────────────────────────────────────┐
+│  Uploading document...                  │
+│                                         │
+│  ████████████████░░░░░░░░  67%         │
+│                                         │
+│  2 of 3 files uploaded                  │
+│  Estimated time remaining: 12 seconds   │
+│                                         │
+│  [Cancel]                               │
+└─────────────────────────────────────────┘</code></pre>
+<p><strong>2. Match Between System and the Real World</strong></p>
+<p>The system should speak the user’s language, using words, phrases, and concepts familiar to the user rather than system-oriented terms. Follow real-world conventions, making information appear in a natural and logical order.</p>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Shopping cart icon for e-commerce</li>
+<li>“Trash” or “Recycle Bin” for deleted items</li>
+<li>Calendar interfaces that look like calendars</li>
+<li>Using “Save” instead of “Persist to Database”</li>
+</ul>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>Technical jargon in user interfaces (“SQLException occurred”)</li>
+<li>Arbitrary icons without clear meaning</li>
+<li>Navigation that doesn’t match user mental models</li>
+</ul>
+<p><strong>Tip:</strong> Use the same terminology users use when describing their tasks. If users say “customers,” don’t call them “accounts” in the interface.</p>
+<p><strong>3. User Control and Freedom</strong></p>
+<p>Users often choose system functions by mistake and need a clearly marked “emergency exit” to leave the unwanted state without going through an extended process.</p>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Undo/Redo functionality (Ctrl+Z, Ctrl+Y)</li>
+<li>“Cancel” buttons on forms and dialogs</li>
+<li>“Go back” option in wizards</li>
+<li>Gmail’s “Undo send” feature</li>
+<li>Clear navigation to return to previous states</li>
+</ul>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>No way to cancel a long-running operation</li>
+<li>Destructive actions without confirmation</li>
+<li>Wizards with no back button</li>
+<li>Modal dialogs without close buttons</li>
+</ul>
+<p><strong>4. Consistency and Standards</strong></p>
+<p>Users should not have to wonder whether different words, situations, or actions mean the same thing. Follow platform conventions.</p>
+<p><strong>Types of Consistency:</strong></p>
+<ul>
+<li><strong>Internal consistency</strong>: The same action works the same way throughout your application</li>
+<li><strong>External consistency</strong>: Your application follows conventions users know from other applications</li>
+<li><strong>Visual consistency</strong>: Similar elements look similar</li>
+</ul>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Blue underlined text for links</li>
+<li>“X” in top corner to close dialogs</li>
+<li>Ctrl+S to save (on Windows)</li>
+<li>Swipe to delete (on mobile)</li>
+</ul>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>Different button styles for the same type of action</li>
+<li>Non-standard icons for common functions</li>
+<li>Inconsistent placement of navigation elements</li>
+</ul>
+<p><strong>5. Error Prevention</strong></p>
+<p>Even better than good error messages is a careful design that prevents problems from occurring in the first place.</p>
+<p><strong>Types of Error Prevention:</strong></p>
+<ul>
+<li><strong>Constraints</strong>: Prevent invalid input (date pickers, dropdowns)</li>
+<li><strong>Suggestions</strong>: Autocomplete reduces typos</li>
+<li><strong>Defaults</strong>: Sensible defaults reduce decisions</li>
+<li><strong>Confirmations</strong>: Confirm destructive actions</li>
+</ul>
+<p><strong>Good Examples:</strong></p>
+<pre><code>┌─────────────────────────────────────────┐
+│  Delete project "Annual Report 2024"?  │
+│                                         │
+│  This will permanently delete:          │
+│  • 47 tasks                             │
+│  • 12 documents                         │
+│  • 156 comments                         │
+│                                         │
+│  This action cannot be undone.          │
+│                                         │
+│  Type "Annual Report 2024" to confirm:  │
+│  ┌─────────────────────────────────────┐│
+│  │                                     ││
+│  └─────────────────────────────────────┘│
+│                                         │
+│        [Cancel]    [Delete Project]     │
+└─────────────────────────────────────────┘</code></pre>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>Free-form date entry instead of date pickers</li>
+<li>Delete buttons without confirmation</li>
+<li>Allowing form submission with known invalid data</li>
+</ul>
+<p><strong>6. Recognition Rather Than Recall</strong></p>
+<p>Minimize user memory load by making objects, actions, and options visible. Users should not have to remember information from one part of the interface to another.</p>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Dropdown menus showing all options</li>
+<li>Recent files and search history</li>
+<li>Autocomplete showing previous entries</li>
+<li>Icons with labels (not icons alone)</li>
+<li>Showing examples of expected input formats</li>
+</ul>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>Requiring users to remember codes or IDs</li>
+<li>Icons without labels</li>
+<li>Empty forms without hints about expected format</li>
+<li>Requiring memorization of keyboard shortcuts</li>
+</ul>
+<p><strong>7. Flexibility and Efficiency of Use</strong></p>
+<p>Accelerators—invisible to novice users—may speed up interaction for expert users. Allow users to tailor frequent actions.</p>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Keyboard shortcuts for common actions</li>
+<li>Customizable toolbars and dashboards</li>
+<li>“Recent” and “Favorites” lists</li>
+<li>Bulk operations for power users</li>
+<li>Templates for common tasks</li>
+</ul>
+<p><strong>Implementation Example:</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  File    Edit    View    Help                               │
+├─────────────────────────────────────────────────────────────┤
+│  New           Ctrl+N                                       │
+│  Open          Ctrl+O                                       │
+│  ──────────────────────                                     │
+│  Save          Ctrl+S                                       │
+│  Save As...    Ctrl+Shift+S                                 │
+│  ──────────────────────                                     │
+│  Recent Files  ►  │ report-final.docx                       │
+│                    │ presentation-v2.pptx                   │
+│                    │ budget-2024.xlsx                       │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>8. Aesthetic and Minimalist Design</strong></p>
+<p>Interfaces should not contain information that is irrelevant or rarely needed. Every extra unit of information competes with relevant information and diminishes their relative visibility.</p>
+<p><strong>Principles:</strong></p>
+<ul>
+<li>Remove unnecessary elements</li>
+<li>Prioritize important information visually</li>
+<li>Use progressive disclosure (show more on demand)</li>
+<li>White space is not wasted space</li>
+</ul>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Google’s search homepage (minimal)</li>
+<li>Progressive disclosure in settings (basic → advanced)</li>
+<li>Contextual toolbars that show relevant tools</li>
+</ul>
+<p><strong>Bad Examples:</strong></p>
+<ul>
+<li>Cluttered dashboards showing everything at once</li>
+<li>Dense forms with rarely-used fields always visible</li>
+<li>Excessive decorative elements</li>
+</ul>
+<p><strong>9. Help Users Recognize, Diagnose, and Recover from Errors</strong></p>
+<p>Error messages should be expressed in plain language (no codes), precisely indicate the problem, and constructively suggest a solution.</p>
+<p><strong>Good Error Message:</strong></p>
+<pre><code>┌─────────────────────────────────────────┐
+│  ⚠️  Couldn't save your changes         │
+│                                         │
+│  Your internet connection was lost.     │
+│  Your changes have been saved locally   │
+│  and will sync when you're back online. │
+│                                         │
+│  [Retry Now]    [Work Offline]          │
+└─────────────────────────────────────────┘</code></pre>
+<p><strong>Bad Error Messages:</strong></p>
+<ul>
+<li>“Error 500: Internal Server Error”</li>
+<li>“An error occurred”</li>
+<li>“Invalid input”</li>
+<li>“Operation failed. Contact administrator.”</li>
+</ul>
+<p><strong>Error Message Checklist:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="">Says what went wrong (specifically)</label></li>
+<li><label><input type="checkbox" checked="">Uses plain language (no technical jargon)</label></li>
+<li><label><input type="checkbox" checked="">Suggests how to fix it</label></li>
+<li><label><input type="checkbox" checked="">Offers an action the user can take</label></li>
+</ul>
+<p><strong>10. Help and Documentation</strong></p>
+<p>Even though it’s better if the system can be used without documentation, it may be necessary to provide help and documentation. Such information should be easy to search, focused on the user’s task, list concrete steps, and not be too large.</p>
+<p><strong>Good Examples:</strong></p>
+<ul>
+<li>Contextual help (? icons next to complex fields)</li>
+<li>Searchable help documentation</li>
+<li>Interactive tutorials and onboarding</li>
+<li>Tooltips explaining interface elements</li>
+</ul>
+<p><strong>Help Types:</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  API Rate Limit  [?]                                        │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │  1000                                                 │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ ℹ️  Maximum API requests per hour per user.           │  │
+│  │    Higher limits may affect server performance.       │  │
+│  │    Learn more about rate limiting →                   │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+</section>
+<section id="applying-heuristics-heuristic-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="applying-heuristics-heuristic-evaluation">5.3.2 Applying Heuristics: Heuristic Evaluation</h3>
+<p>A <strong>heuristic evaluation</strong> is a usability inspection method where evaluators examine an interface and judge its compliance with recognized usability principles.</p>
+<p><strong>How to Conduct a Heuristic Evaluation:</strong></p>
+<ol type="1">
+<li><strong>Prepare</strong>: Gather the interface (or prototype) and the heuristic checklist</li>
+<li><strong>Evaluate individually</strong>: Each evaluator reviews the interface alone, noting violations</li>
+<li><strong>Rate severity</strong>: Assign severity ratings to each issue</li>
+</ol>
+<p><strong>Severity Rating Scale:</strong></p>
+<ul>
+<li>0 = Not a usability problem</li>
+<li>1 = Cosmetic problem; fix if time permits</li>
+<li>2 = Minor problem; low priority</li>
+<li>3 = Major problem; important to fix</li>
+<li>4 = Catastrophic; must fix before release</li>
+</ul>
+<ol start="4" type="1">
+<li><strong>Aggregate</strong>: Combine findings from all evaluators</li>
+<li><strong>Prioritize</strong>: Address issues by severity and frequency</li>
+</ol>
+<p><strong>Heuristic Evaluation Template:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Issue Description</th>
+<th>Heuristic Violated</th>
+<th>Severity</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>No feedback after form submission</td>
+<td>#1 Visibility of System Status</td>
+<td>3</td>
+<td>Add success/error message</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Technical error messages shown to users</td>
+<td>#9 Error Recovery</td>
+<td>3</td>
+<td>Translate to plain language</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Delete button has no confirmation</td>
+<td>#5 Error Prevention</td>
+<td>4</td>
+<td>Add confirmation dialog</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Icons without labels</td>
+<td>#6 Recognition vs Recall</td>
+<td>2</td>
+<td>Add tooltips or labels</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="wireframing-and-prototyping" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="wireframing-and-prototyping"><span class="header-section-number">8.5</span> 5.4 Wireframing and Prototyping</h2>
+<p>Design is an iterative process, and prototypes are the tools that enable iteration. They let you explore ideas, communicate concepts, and test assumptions—all before investing in full implementation.</p>
+<section id="the-prototyping-spectrum" class="level3">
+<h3 class="anchored" data-anchor-id="the-prototyping-spectrum">5.4.1 The Prototyping Spectrum</h3>
+<p>Prototypes exist on a spectrum from low-fidelity sketches to high-fidelity interactive simulations:</p>
+<pre><code>Low Fidelity ◄─────────────────────────────────────────────► High Fidelity
+
+┌──────────────┬──────────────┬──────────────┬──────────────┐
+│   Sketches   │  Wireframes  │   Mockups    │ Prototypes   │
+├──────────────┼──────────────┼──────────────┼──────────────┤
+│ Paper/       │ Digital,     │ Visual       │ Interactive, │
+│ whiteboard   │ grayscale,   │ design with  │ clickable,   │
+│ rough ideas  │ layout focus │ colors/fonts │ simulates    │
+│              │              │              │ behavior     │
+├──────────────┼──────────────┼──────────────┼──────────────┤
+│ Minutes      │ Hours        │ Hours-Days   │ Days-Weeks   │
+├──────────────┼──────────────┼──────────────┼──────────────┤
+│ Explore      │ Define       │ Refine       │ Validate     │
+│ concepts     │ structure    │ aesthetics   │ interactions │
+└──────────────┴──────────────┴──────────────┴──────────────┘</code></pre>
+<p><strong>Low-fidelity prototypes</strong> are quick and cheap. They’re good for exploring many ideas and getting early feedback without emotional attachment.</p>
+<p><strong>High-fidelity prototypes</strong> look and feel like real products. They’re better for testing detailed interactions and getting reactions to visual design.</p>
+</section>
+<section id="sketching" class="level3">
+<h3 class="anchored" data-anchor-id="sketching">5.4.2 Sketching</h3>
+<p><strong>Sketching</strong> is the fastest way to explore ideas. Don’t worry about artistic ability—rough sketches communicate ideas effectively.</p>
+<p><strong>Why Sketch?</strong></p>
+<ul>
+<li>Extremely fast (seconds to minutes)</li>
+<li>No software needed</li>
+<li>Easy to iterate—just flip to a new page</li>
+<li>Encourages divergent thinking</li>
+<li>No emotional attachment to rough sketches</li>
+</ul>
+<p><strong>Sketching Tips:</strong></p>
+<ul>
+<li>Use pen (not pencil) to avoid erasing—just draw again</li>
+<li>Draw multiple variations quickly</li>
+<li>Annotate with notes explaining behavior</li>
+<li>Use standard UI conventions (boxes for buttons, lines for text)</li>
+<li>Include arrows and notes for interactions</li>
+</ul>
+<p><strong>Basic UI Sketching Vocabulary:</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  ┌─────────────┐    Button                                  │
+│  │   Label     │                                            │
+│  └─────────────┘                                            │
+│                                                             │
+│  ┌─────────────────────────────────────┐                    │
+│  │                                     │    Text input      │
+│  └─────────────────────────────────────┘                    │
+│                                                             │
+│  ────────────────────────────────────────   Line of text    │
+│  ────────────────────────────────────                       │
+│  ──────────────────────────                                 │
+│                                                             │
+│  ┌─────────────────────────────────────┐                    │
+│  │  ☰  Header / Navigation             │    Header bar      │
+│  └─────────────────────────────────────┘                    │
+│                                                             │
+│  ┌─────┐                                                    │
+│  │  ×  │    Image placeholder                               │
+│  └─────┘                                                    │
+│                                                             │
+│  [○] Option A                           Radio button        │
+│  [●] Option B (selected)                                    │
+│                                                             │
+│  [✓] Checkbox (checked)                 Checkbox            │
+│  [ ] Checkbox (unchecked)                                   │
+│                                                             │
+│  ┌─────────────────────────────▼┐       Dropdown            │
+│  │  Select an option...         │                           │
+│  └──────────────────────────────┘                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+</section>
+<section id="wireframes" class="level3">
+<h3 class="anchored" data-anchor-id="wireframes">5.4.3 Wireframes</h3>
+<p><strong>Wireframes</strong> are low-fidelity representations of a user interface that show structure, layout, and content hierarchy without visual design details.</p>
+<p><strong>Wireframe Characteristics:</strong></p>
+<ul>
+<li>Grayscale (no colors)</li>
+<li>Placeholder content (Lorem ipsum, gray boxes for images)</li>
+<li>Focus on layout and information hierarchy</li>
+<li>Basic UI elements without styling</li>
+<li>Annotations explaining functionality</li>
+</ul>
+<p><strong>Purpose of Wireframes:</strong></p>
+<ul>
+<li>Define content and structure</li>
+<li>Establish layout and spacing</li>
+<li>Plan navigation and user flows</li>
+<li>Communicate functionality to stakeholders</li>
+<li>Serve as blueprint for visual design</li>
+</ul>
+<p><strong>Wireframe Example - Dashboard:</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────┐
+│  ┌──────┐                                            [?] [🔔] [👤 User ▼]│
+│  │ Logo │   Dashboard    Projects    Team    Settings                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  Welcome back, Sarah!                                    [+ New Project]│
+│                                                                         │
+│  ┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐  │
+│  │   Active Projects  │ │    Tasks Due       │ │   Team Activity    │  │
+│  │                    │ │                    │ │                    │  │
+│  │       12           │ │        5           │ │        23          │  │
+│  │                    │ │      Today         │ │    Updates         │  │
+│  └────────────────────┘ └────────────────────┘ └────────────────────┘  │
+│                                                                         │
+│  Recent Projects                                          [View All →] │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  [×] Website Redesign          Progress: ████████░░░ 75%       │   │
+│  │      Due: Oct 15    Team: 4    Status: On Track                │   │
+│  ├─────────────────────────────────────────────────────────────────┤   │
+│  │  [×] Mobile App v2             Progress: ████░░░░░░░ 40%       │   │
+│  │      Due: Nov 30    Team: 6    Status: At Risk                 │   │
+│  ├─────────────────────────────────────────────────────────────────┤   │
+│  │  [×] Q4 Marketing Campaign     Progress: ██░░░░░░░░░ 20%       │   │
+│  │      Due: Dec 1     Team: 3    Status: On Track                │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│  My Tasks                                                 [View All →] │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  [ ] Review design mockups              Due: Today              │   │
+│  │  [ ] Approve budget proposal            Due: Today              │   │
+│  │  [ ] Team standup meeting               Due: Tomorrow           │   │
+│  │  [ ] Review Q3 report                   Due: Oct 10             │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>Wireframe Example - Mobile Login:</strong></p>
+<pre><code>┌─────────────────────────┐
+│ ◀ Back                  │
+├─────────────────────────┤
+│                         │
+│                         │
+│      ┌─────────┐        │
+│      │  Logo   │        │
+│      └─────────┘        │
+│                         │
+│    Welcome Back         │
+│  Sign in to continue    │
+│                         │
+│  Email                  │
+│  ┌─────────────────────┐│
+│  │ sarah@example.com   ││
+│  └─────────────────────┘│
+│                         │
+│  Password               │
+│  ┌─────────────────────┐│
+│  │ ••••••••••     [👁] ││
+│  └─────────────────────┘│
+│                         │
+│  [ ] Remember me        │
+│                         │
+│  ┌─────────────────────┐│
+│  │      Sign In        ││
+│  └─────────────────────┘│
+│                         │
+│    Forgot password?     │
+│                         │
+│  ─────────────────────  │
+│                         │
+│  Don't have an account? │
+│       Sign Up           │
+│                         │
+└─────────────────────────┘</code></pre>
+</section>
+<section id="interactive-prototypes" class="level3">
+<h3 class="anchored" data-anchor-id="interactive-prototypes">5.4.4 Interactive Prototypes</h3>
+<p><strong>Interactive prototypes</strong> add behavior to wireframes or mockups. Users can click, tap, and navigate as if using a real application.</p>
+<p><strong>Levels of Interactivity:</strong></p>
+<p><strong>Click-through prototypes</strong>: Pages linked together. Clicking a button navigates to another page. Good for testing navigation and flow.</p>
+<p><strong>Interactive prototypes</strong>: Include form interactions, animations, conditional logic. Good for testing detailed interactions.</p>
+<p><strong>Functional prototypes</strong>: Working code (often simplified). Real data, real logic, limited scope. Good for technical validation.</p>
+<p><strong>What to Test with Prototypes:</strong></p>
+<ul>
+<li><strong>Navigation</strong>: Can users find their way around?</li>
+<li><strong>Comprehension</strong>: Do users understand what they’re seeing?</li>
+<li><strong>Task completion</strong>: Can users accomplish specific tasks?</li>
+<li><strong>Expectations</strong>: Does the design match user mental models?</li>
+<li><strong>Desirability</strong>: Do users like the design?</li>
+</ul>
+</section>
+<section id="prototyping-tools" class="level3">
+<h3 class="anchored" data-anchor-id="prototyping-tools">5.4.5 Prototyping Tools</h3>
+<p>Modern tools make creating prototypes faster than ever:</p>
+<p><strong>Low-Fidelity / Wireframing:</strong></p>
+<ul>
+<li><strong>Balsamiq</strong>: Intentionally sketch-like wireframes</li>
+<li><strong>Whimsical</strong>: Flowcharts and wireframes</li>
+<li><strong>Excalidraw</strong>: Hand-drawn style diagrams (free)</li>
+<li><strong>Paper and pen</strong>: Still valid!</li>
+</ul>
+<p><strong>High-Fidelity / Design:</strong></p>
+<ul>
+<li><strong>Figma</strong>: Industry standard, collaborative, free tier (highly recommended)</li>
+<li><strong>Sketch</strong>: Mac-only, popular with designers</li>
+<li><strong>Adobe XD</strong>: Part of Adobe ecosystem</li>
+<li><strong>Framer</strong>: Design with code-like interactions</li>
+</ul>
+<p><strong>Code-Based Prototyping:</strong></p>
+<ul>
+<li><strong>HTML/CSS</strong>: For web interfaces</li>
+<li><strong>React with Storybook</strong>: Component-based prototyping</li>
+<li><strong>SwiftUI Previews</strong>: iOS prototyping</li>
+</ul>
+<p><strong>Choosing a Tool:</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Need</th>
+<th>Recommended Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Quick exploration</td>
+<td>Paper, Whimsical</td>
+</tr>
+<tr class="even">
+<td>Shareable wireframes</td>
+<td>Figma, Balsamiq</td>
+</tr>
+<tr class="odd">
+<td>High-fidelity mockups</td>
+<td>Figma, Sketch</td>
+</tr>
+<tr class="even">
+<td>Complex interactions</td>
+<td>Figma, Framer</td>
+</tr>
+<tr class="odd">
+<td>Team collaboration</td>
+<td>Figma</td>
+</tr>
+<tr class="even">
+<td>Developer handoff</td>
+<td>Figma</td>
+</tr>
+</tbody>
+</table>
+<p>For this course, <strong>Figma</strong> is recommended because it’s free, web-based, collaborative, and industry-standard.</p>
+<hr>
+</section>
+</section>
+<section id="visual-design-fundamentals" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="visual-design-fundamentals"><span class="header-section-number">8.6</span> 5.5 Visual Design Fundamentals</h2>
+<p>While this isn’t a graphic design course, understanding visual design principles helps you create more effective interfaces—and communicate better with designers.</p>
+<section id="visual-hierarchy" class="level3">
+<h3 class="anchored" data-anchor-id="visual-hierarchy">5.5.1 Visual Hierarchy</h3>
+<p><strong>Visual hierarchy</strong> guides users’ attention to the most important elements first. It’s achieved through size, color, contrast, position, and spacing.</p>
+<p><strong>Hierarchy Techniques:</strong></p>
+<p><strong>Size</strong>: Larger elements attract attention first</p>
+<pre><code>┌─────────────────────────────────────┐
+│                                     │
+│   BIG HEADLINE                      │  ← Eye goes here first
+│   Smaller subheading                │  ← Then here
+│   Body text that provides more      │  ← Then here
+│   detail about the content...       │
+│                                     │
+└─────────────────────────────────────┘</code></pre>
+<p><strong>Color and Contrast</strong>: High-contrast elements stand out</p>
+<pre><code>┌─────────────────────────────────────┐
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │      Primary Action         │   │  ← High contrast button
+│   └─────────────────────────────┘   │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │     Secondary Action        │   │  ← Lower contrast
+│   └─────────────────────────────┘   │
+│                                     │
+│          Tertiary link              │  ← Lowest emphasis
+│                                     │
+└─────────────────────────────────────┘</code></pre>
+<p><strong>Position</strong>: Top-left (in LTR languages) gets attention first; center draws focus</p>
+<p><strong>White Space</strong>: Isolated elements with surrounding space appear more important</p>
+</section>
+<section id="typography" class="level3">
+<h3 class="anchored" data-anchor-id="typography">5.5.2 Typography</h3>
+<p>Typography significantly impacts readability and tone.</p>
+<p><strong>Font Categories:</strong></p>
+<ul>
+<li><strong>Serif</strong> (Times, Georgia): Traditional, formal, good for body text in print</li>
+<li><strong>Sans-serif</strong> (Arial, Helvetica, Inter): Modern, clean, good for screens</li>
+<li><strong>Monospace</strong> (Courier, Fira Code): Technical, code, data</li>
+<li><strong>Display</strong> (decorative fonts): Headlines only, use sparingly</li>
+</ul>
+<p><strong>Typography Best Practices:</strong></p>
+<ul>
+<li><strong>Limit font families</strong>: 1-2 per project</li>
+<li><strong>Establish hierarchy</strong>: Different sizes for headings, subheadings, body</li>
+<li><strong>Line length</strong>: 50-75 characters per line for readability</li>
+<li><strong>Line height</strong>: 1.4-1.6 for body text</li>
+<li><strong>Contrast</strong>: Ensure sufficient contrast against background</li>
+</ul>
+<p><strong>Type Scale Example:</strong></p>
+<pre><code>H1: 32px / Bold      "Page Title"
+H2: 24px / Semibold  "Section Heading"
+H3: 20px / Semibold  "Subsection"
+Body: 16px / Regular "Paragraph text that users will read..."
+Small: 14px / Regular "Helper text, captions"
+Tiny: 12px / Regular "Legal text, timestamps"</code></pre>
+</section>
+<section id="color" class="level3">
+<h3 class="anchored" data-anchor-id="color">5.5.3 Color</h3>
+<p>Color creates mood, guides attention, and communicates meaning.</p>
+<p><strong>Color Purposes in UI:</strong></p>
+<ul>
+<li><strong>Primary color</strong>: Brand identity, primary actions</li>
+<li><strong>Secondary color</strong>: Supporting elements</li>
+<li><strong>Neutral colors</strong>: Text, backgrounds, borders</li>
+<li><strong>Semantic colors</strong>: Success (green), warning (yellow), error (red), info (blue)</li>
+</ul>
+<p><strong>Color Accessibility:</strong></p>
+<ul>
+<li>Don’t rely on color alone to convey meaning</li>
+<li>Ensure sufficient contrast ratios (WCAG guidelines)</li>
+<li>Test with color blindness simulators</li>
+</ul>
+<p><strong>Contrast Ratios (WCAG 2.1):</strong></p>
+<ul>
+<li>Normal text: 4.5:1 minimum</li>
+<li>Large text (18px+ or 14px+ bold): 3:1 minimum</li>
+<li>UI components: 3:1 minimum</li>
+</ul>
+<p><strong>Simple Color Palette:</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  PRIMARY                                                    │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐              │
+│  │  50  │ │ 100  │ │ 500  │ │ 700  │ │ 900  │              │
+│  │(light)│ │      │ │(main)│ │      │ │(dark)│              │
+│  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘              │
+│                                                             │
+│  NEUTRAL                                                    │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │
+│  │White │ │Gray  │ │Gray  │ │Gray  │ │Gray  │ │Black │     │
+│  │      │ │ 100  │ │ 300  │ │ 500  │ │ 700  │ │      │     │
+│  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │
+│                                                             │
+│  SEMANTIC                                                   │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐                       │
+│  │Success│ │Warning│ │Error │ │ Info │                       │
+│  │(green)│ │(yellow)│ │(red) │ │(blue)│                       │
+│  └──────┘ └──────┘ └──────┘ └──────┘                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+</section>
+<section id="layout-and-spacing" class="level3">
+<h3 class="anchored" data-anchor-id="layout-and-spacing">5.5.4 Layout and Spacing</h3>
+<p>Consistent spacing creates visual rhythm and makes interfaces feel polished.</p>
+<p><strong>Spacing Systems:</strong></p>
+<p>Use a consistent scale (e.g., multiples of 4px or 8px):</p>
+<ul>
+<li>4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px</li>
+</ul>
+<p><strong>Grid Systems:</strong></p>
+<p>Grids provide structure for layout:</p>
+<ul>
+<li><strong>Column grids</strong>: Common for web (12-column is standard)</li>
+<li><strong>Modular grids</strong>: Rows and columns for complex layouts</li>
+<li><strong>Baseline grids</strong>: Align text across columns</li>
+</ul>
+<p><strong>Layout Principles:</strong></p>
+<p><strong>Alignment</strong>: Elements should align with each other</p>
+<pre><code>Good:                          Bad:
+┌──────────────────────┐      ┌──────────────────────┐
+│ Label                │      │ Label                │
+│ ┌──────────────────┐ │      │   ┌────────────────┐ │
+│ │ Input            │ │      │   │ Input          │ │
+│ └──────────────────┘ │      │   └────────────────┘ │
+│                      │      │                      │
+│ Label                │      │  Label               │
+│ ┌──────────────────┐ │      │ ┌──────────────────┐ │
+│ │ Input            │ │      │ │ Input            │ │
+│ └──────────────────┘ │      │ └──────────────────┘ │
+└──────────────────────┘      └──────────────────────┘</code></pre>
+<p><strong>Proximity</strong>: Related elements should be closer together</p>
+<pre><code>┌────────────────────────────────────┐
+│  Billing Address                   │
+│  ┌──────────────────────────────┐  │  ← These belong together
+│  │ Street                       │  │
+│  └──────────────────────────────┘  │
+│  ┌─────────┐ ┌───────┐ ┌───────┐  │
+│  │ City    │ │ State │ │ Zip   │  │
+│  └─────────┘ └───────┘ └───────┘  │
+│                                    │  ← Gap separates sections
+│  Shipping Address                  │
+│  ┌──────────────────────────────┐  │  ← New group
+│  │ Street                       │  │
+│  └──────────────────────────────┘  │
+└────────────────────────────────────┘</code></pre>
+<hr>
+</section>
+</section>
+<section id="responsive-design" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="responsive-design"><span class="header-section-number">8.7</span> 5.6 Responsive Design</h2>
+<p><strong>Responsive design</strong> creates interfaces that adapt to different screen sizes and devices. Rather than building separate versions for desktop, tablet, and mobile, responsive design uses flexible layouts that reflow and resize.</p>
+<section id="why-responsive-design-matters" class="level3">
+<h3 class="anchored" data-anchor-id="why-responsive-design-matters">5.6.1 Why Responsive Design Matters</h3>
+<p>Users access the web from many devices:</p>
+<ul>
+<li>Desktop computers (various screen sizes)</li>
+<li>Laptops</li>
+<li>Tablets (portrait and landscape)</li>
+<li>Smartphones (various sizes)</li>
+<li>Smart TVs</li>
+<li>Wearables</li>
+</ul>
+<p>Building separate versions for each is impractical. Responsive design handles this variety with a single codebase.</p>
+</section>
+<section id="responsive-design-principles" class="level3">
+<h3 class="anchored" data-anchor-id="responsive-design-principles">5.6.2 Responsive Design Principles</h3>
+<p><strong>1. Fluid Layouts</strong></p>
+<p>Use percentages and flexible units instead of fixed pixels:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Fixed - doesn't adapt */</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.container</span> {</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">width</span><span class="ch">:</span> <span class="dv">960</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">/* Fluid - adapts to screen */</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="fu">.container</span> {</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">width</span><span class="ch">:</span> <span class="dv">90</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">max-width</span><span class="ch">:</span> <span class="dv">1200</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>2. Flexible Images</strong></p>
+<p>Images should scale within their containers:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>img {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">max-width</span><span class="ch">:</span> <span class="dv">100</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">height</span><span class="ch">:</span> <span class="bu">auto</span><span class="op">;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>3. Media Queries</strong></p>
+<p>Apply different styles based on screen characteristics:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Base styles (mobile-first) */</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.sidebar</span> {</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">width</span><span class="ch">:</span> <span class="dv">100</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">/* Tablet and up */</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="im">@media</span> <span class="fu">(</span><span class="kw">min-width</span><span class="ch">:</span> <span class="dv">768</span><span class="dt">px</span><span class="fu">)</span> {</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">.sidebar</span> {</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">width</span><span class="ch">:</span> <span class="dv">30</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">float</span><span class="ch">:</span> <span class="dv">left</span><span class="op">;</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">/* Desktop and up */</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="im">@media</span> <span class="fu">(</span><span class="kw">min-width</span><span class="ch">:</span> <span class="dv">1024</span><span class="dt">px</span><span class="fu">)</span> {</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">.sidebar</span> {</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">width</span><span class="ch">:</span> <span class="dv">25</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="breakpoints" class="level3">
+<h3 class="anchored" data-anchor-id="breakpoints">5.6.3 Breakpoints</h3>
+<p><strong>Breakpoints</strong> are the screen widths where layout changes occur. Common breakpoints:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Breakpoint</th>
+<th>Target Devices</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>&lt; 576px</td>
+<td>Small phones</td>
+</tr>
+<tr class="even">
+<td>576px - 768px</td>
+<td>Large phones, small tablets</td>
+</tr>
+<tr class="odd">
+<td>768px - 1024px</td>
+<td>Tablets</td>
+</tr>
+<tr class="even">
+<td>1024px - 1200px</td>
+<td>Small desktops, laptops</td>
+</tr>
+<tr class="odd">
+<td>&gt; 1200px</td>
+<td>Large desktops</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mobile-First vs.&nbsp;Desktop-First:</strong></p>
+<p><strong>Mobile-first</strong>: Start with mobile styles, add complexity for larger screens</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Mobile styles (default) */</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.nav</span> { <span class="kw">display</span><span class="ch">:</span> <span class="dv">none</span><span class="op">;</span> }</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">/* Larger screens */</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="im">@media</span> <span class="fu">(</span><span class="kw">min-width</span><span class="ch">:</span> <span class="dv">768</span><span class="dt">px</span><span class="fu">)</span> {</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">.nav</span> { <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span> }</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Desktop-first</strong>: Start with desktop styles, simplify for smaller screens</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Desktop styles (default) */</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.nav</span> { <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span> }</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">/* Smaller screens */</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="im">@media</span> <span class="fu">(</span><span class="kw">max-width</span><span class="ch">:</span> <span class="dv">767</span><span class="dt">px</span><span class="fu">)</span> {</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">.nav</span> { <span class="kw">display</span><span class="ch">:</span> <span class="dv">none</span><span class="op">;</span> }</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Mobile-first is generally recommended because:</p>
+<ul>
+<li>Forces prioritization of essential content</li>
+<li>Progressive enhancement (add features vs.&nbsp;remove them)</li>
+<li>Mobile usage continues to grow</li>
+</ul>
+</section>
+<section id="responsive-patterns" class="level3">
+<h3 class="anchored" data-anchor-id="responsive-patterns">5.6.4 Responsive Patterns</h3>
+<p><strong>Column Drop:</strong></p>
+<p>Multi-column layout stacks into single column on small screens:</p>
+<pre><code>Desktop:                    Mobile:
+┌────────┬────────┬────────┐ ┌────────────────┐
+│   A    │   B    │   C    │ │       A        │
+│        │        │        │ ├────────────────┤
+│        │        │        │ │       B        │
+└────────┴────────┴────────┘ ├────────────────┤
+                             │       C        │
+                             └────────────────┘</code></pre>
+<p><strong>Layout Shifter:</strong></p>
+<p>Layout reorganizes more dramatically across breakpoints:</p>
+<pre><code>Desktop:                    Mobile:
+┌──────────────────────────┐ ┌────────────────┐
+│          Header          │ │     Header     │
+├────────┬─────────────────┤ ├────────────────┤
+│        │                 │ │                │
+│  Nav   │     Content     │ │    Content     │
+│        │                 │ │                │
+│        │                 │ ├────────────────┤
+└────────┴─────────────────┘ │      Nav       │
+                             └────────────────┘</code></pre>
+<p><strong>Off-Canvas:</strong></p>
+<p>Navigation hidden off-screen on mobile, slides in when activated:</p>
+<pre><code>Desktop:                    Mobile (menu closed):    Mobile (menu open):
+┌────────────────────────┐  ┌────────────────┐      ┌──────┬─────────┐
+│ Logo  Nav Nav Nav  User│  │ ☰ Logo    User │      │ Nav  │ Content │
+├────────────────────────┤  ├────────────────┤      │      │ (dimmed)│
+│                        │  │                │      │ Nav  │         │
+│        Content         │  │    Content     │      │      │         │
+│                        │  │                │      │ Nav  │         │
+└────────────────────────┘  └────────────────┘      └──────┴─────────┘</code></pre>
+</section>
+<section id="touch-considerations" class="level3">
+<h3 class="anchored" data-anchor-id="touch-considerations">5.6.5 Touch Considerations</h3>
+<p>Mobile interfaces require touch-friendly design:</p>
+<p><strong>Touch Target Sizes:</strong></p>
+<ul>
+<li>Minimum 44x44 points (Apple) or 48x48dp (Google)</li>
+<li>Adequate spacing between targets</li>
+<li>Important actions should have larger targets</li>
+</ul>
+<p><strong>Touch Gestures:</strong></p>
+<ul>
+<li>Tap: Primary interaction</li>
+<li>Swipe: Navigate, delete, reveal actions</li>
+<li>Pinch: Zoom</li>
+<li>Long press: Context menus, selection</li>
+</ul>
+<p><strong>Mobile-Specific Patterns:</strong></p>
+<ul>
+<li>Bottom navigation (thumb-friendly)</li>
+<li>Pull to refresh</li>
+<li>Swipe actions on list items</li>
+<li>Floating action buttons</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="accessibility" class="level2" data-number="8.8">
+<h2 data-number="8.8" class="anchored" data-anchor-id="accessibility"><span class="header-section-number">8.8</span> 5.7 Accessibility</h2>
+<p><strong>Accessibility</strong> means designing products that can be used by people with disabilities. This includes users who are blind or have low vision, deaf or hard of hearing, have motor impairments, or have cognitive disabilities.</p>
+<section id="why-accessibility-matters" class="level3">
+<h3 class="anchored" data-anchor-id="why-accessibility-matters">5.7.1 Why Accessibility Matters</h3>
+<p><strong>It’s the right thing to do.</strong> Everyone deserves access to digital services.</p>
+<p><strong>It’s often legally required.</strong> Many jurisdictions mandate accessibility (ADA in the US, EN 301 549 in EU).</p>
+<p><strong>It improves usability for everyone.</strong> Accessibility features like clear language, keyboard navigation, and good contrast benefit all users.</p>
+<p><strong>It expands your audience.</strong> Over 1 billion people worldwide have disabilities.</p>
+</section>
+<section id="wcag-guidelines" class="level3">
+<h3 class="anchored" data-anchor-id="wcag-guidelines">5.7.2 WCAG Guidelines</h3>
+<p>The <strong>Web Content Accessibility Guidelines (WCAG)</strong> are the international standard for web accessibility. WCAG 2.1 organizes guidelines under four principles (POUR):</p>
+<p><strong>Perceivable</strong>: Information must be presentable in ways users can perceive</p>
+<ul>
+<li>Text alternatives for images</li>
+<li>Captions for video</li>
+<li>Sufficient color contrast</li>
+<li>Content adapts to different presentations</li>
+</ul>
+<p><strong>Operable</strong>: Interface components must be operable</p>
+<ul>
+<li>Keyboard accessible</li>
+<li>Enough time to read and use content</li>
+<li>No seizure-inducing content</li>
+<li>Navigable (clear structure, findable content)</li>
+</ul>
+<p><strong>Understandable</strong>: Information and operation must be understandable</p>
+<ul>
+<li>Readable text</li>
+<li>Predictable behavior</li>
+<li>Help users avoid and correct mistakes</li>
+</ul>
+<p><strong>Robust</strong>: Content must be robust enough for diverse user agents</p>
+<ul>
+<li>Compatible with assistive technologies</li>
+<li>Valid, well-structured code</li>
+</ul>
+<p><strong>Conformance Levels:</strong></p>
+<ul>
+<li><strong>Level A</strong>: Minimum accessibility (must meet)</li>
+<li><strong>Level AA</strong>: Standard target for most sites (should meet)</li>
+<li><strong>Level AAA</strong>: Highest accessibility (enhanced, not always possible)</li>
+</ul>
+</section>
+<section id="common-accessibility-requirements" class="level3">
+<h3 class="anchored" data-anchor-id="common-accessibility-requirements">5.7.3 Common Accessibility Requirements</h3>
+<p><strong>1. Alternative Text for Images</strong></p>
+<p>Screen readers can’t see images; they read alt text instead.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Informative image --&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"chart.png"</span><span class="ot"> alt</span><span class="op">=</span><span class="st">"Sales increased 25% from Q1 to Q2"</span><span class="dt">&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Decorative image (empty alt) --&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"decorative-line.png"</span><span class="ot"> alt</span><span class="op">=</span><span class="st">""</span><span class="dt">&gt;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Complex image (link to description) --&gt;</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"complex-diagram.png"</span><span class="ot"> alt</span><span class="op">=</span><span class="st">"System architecture diagram"</span><span class="ot"> </span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="ot">     aria-describedby</span><span class="op">=</span><span class="st">"diagram-description"</span><span class="dt">&gt;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"diagram-description"</span><span class="dt">&gt;</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    Detailed description of the diagram...</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>2. Keyboard Navigation</strong></p>
+<p>Everything should be operable with keyboard alone:</p>
+<ul>
+<li>Tab: Move between interactive elements</li>
+<li>Enter/Space: Activate buttons/links</li>
+<li>Arrow keys: Navigate within components</li>
+<li>Escape: Close dialogs/menus</li>
+</ul>
+<div class="sourceCode" id="cb29"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Good: Native button is keyboard accessible --&gt;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> onclick</span><span class="op">=</span><span class="st">"submit()"</span><span class="dt">&gt;</span>Submit<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Bad: Div requires extra work for accessibility --&gt;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> onclick</span><span class="op">=</span><span class="st">"submit()"</span><span class="dt">&gt;</span>Submit<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- If you must use div, add keyboard support --&gt;</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> role</span><span class="op">=</span><span class="st">"button"</span><span class="ot"> tabindex</span><span class="op">=</span><span class="st">"0"</span><span class="ot"> </span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="ot">     onclick</span><span class="op">=</span><span class="st">"submit()"</span><span class="ot"> </span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="ot">     onkeydown</span><span class="op">=</span><span class="st">"if(event.key==='Enter') submit()"</span><span class="dt">&gt;</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    Submit</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>3. Focus Indicators</strong></p>
+<p>Users must see which element has keyboard focus:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Don't remove focus outlines without replacement */</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co">/* Bad: */</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="in">:focus</span> { <span class="kw">outline</span><span class="ch">:</span> <span class="dv">none</span><span class="op">;</span> }</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co">/* Good: Custom focus style */</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="in">:focus</span> {</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">outline</span><span class="ch">:</span> <span class="dv">2</span><span class="dt">px</span> <span class="dv">solid</span> <span class="cn">#0066cc</span><span class="op">;</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">outline-offset</span><span class="ch">:</span> <span class="dv">2</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="co">/* Or use focus-visible for mouse/keyboard distinction */</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="in">:focus-visible</span> {</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">outline</span><span class="ch">:</span> <span class="dv">2</span><span class="dt">px</span> <span class="dv">solid</span> <span class="cn">#0066cc</span><span class="op">;</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>4. Color Contrast</strong></p>
+<p>Text must have sufficient contrast against background:</p>
+<pre><code>Good Contrast:                Poor Contrast:
+┌─────────────────────────┐   ┌─────────────────────────┐
+│                         │   │                         │
+│   Dark text on light    │   │   Light gray on white   │
+│   background (7:1)      │   │   background (1.5:1)    │
+│                         │   │                         │
+└─────────────────────────┘   └─────────────────────────┘</code></pre>
+<p>Tools to check contrast:</p>
+<ul>
+<li>WebAIM Contrast Checker</li>
+<li>Figma accessibility plugins</li>
+<li>Browser developer tools</li>
+</ul>
+<p><strong>5. Form Labels</strong></p>
+<p>Every form input needs an associated label:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Good: Label explicitly associated --&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">"email"</span><span class="dt">&gt;</span>Email address<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">"email"</span><span class="ot"> id</span><span class="op">=</span><span class="st">"email"</span><span class="ot"> name</span><span class="op">=</span><span class="st">"email"</span><span class="dt">&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Good: Label wraps input --&gt;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    Email address</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">"email"</span><span class="ot"> name</span><span class="op">=</span><span class="st">"email"</span><span class="dt">&gt;</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Bad: No label association --&gt;</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="dt">&gt;</span>Email address<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">"email"</span><span class="ot"> name</span><span class="op">=</span><span class="st">"email"</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>6. Semantic HTML</strong></p>
+<p>Use HTML elements for their intended purpose:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Good: Semantic structure --&gt;</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">nav</span><span class="dt">&gt;</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"/"</span><span class="dt">&gt;</span>Home<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"/about"</span><span class="dt">&gt;</span>About<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">nav</span><span class="dt">&gt;</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">main</span><span class="dt">&gt;</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Article Title<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Content...<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">footer</span><span class="dt">&gt;</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Copyright 2024<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">footer</span><span class="dt">&gt;</span></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Bad: Divs for everything --&gt;</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"header"</span><span class="dt">&gt;</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"nav"</span><span class="dt">&gt;</span></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"nav-item"</span><span class="dt">&gt;</span>Home<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"nav-item"</span><span class="dt">&gt;</span>About<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"content"</span><span class="dt">&gt;</span></span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"title"</span><span class="dt">&gt;</span>Article Title<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="dt">&gt;</span>Content...<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>7. ARIA When Needed</strong></p>
+<p><strong>ARIA (Accessible Rich Internet Applications)</strong> adds semantic information when HTML alone isn’t sufficient:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Tab interface --&gt;</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> role</span><span class="op">=</span><span class="st">"tablist"</span><span class="dt">&gt;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> role</span><span class="op">=</span><span class="st">"tab"</span><span class="ot"> aria-selected</span><span class="op">=</span><span class="st">"true"</span><span class="ot"> aria-controls</span><span class="op">=</span><span class="st">"panel1"</span><span class="dt">&gt;</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>        Tab 1</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> role</span><span class="op">=</span><span class="st">"tab"</span><span class="ot"> aria-selected</span><span class="op">=</span><span class="st">"false"</span><span class="ot"> aria-controls</span><span class="op">=</span><span class="st">"panel2"</span><span class="dt">&gt;</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>        Tab 2</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> role</span><span class="op">=</span><span class="st">"tabpanel"</span><span class="ot"> id</span><span class="op">=</span><span class="st">"panel1"</span><span class="dt">&gt;</span>Content 1<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> role</span><span class="op">=</span><span class="st">"tabpanel"</span><span class="ot"> id</span><span class="op">=</span><span class="st">"panel2"</span><span class="ot"> hidden</span><span class="dt">&gt;</span>Content 2<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Live region for dynamic updates --&gt;</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> aria-live</span><span class="op">=</span><span class="st">"polite"</span><span class="ot"> aria-atomic</span><span class="op">=</span><span class="st">"true"</span><span class="dt">&gt;</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Screen reader announces when this content changes --&gt;</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    Your cart has been updated</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>ARIA Rules:</strong></p>
+<ol type="1">
+<li>Don’t use ARIA if HTML can do it</li>
+<li>Don’t change native semantics (unless necessary)</li>
+<li>All interactive ARIA controls must be keyboard accessible</li>
+<li>Don’t use <code>role="presentation"</code> or <code>aria-hidden="true"</code> on focusable elements</li>
+<li>All interactive elements must have an accessible name</li>
+</ol>
+</section>
+<section id="accessibility-testing" class="level3">
+<h3 class="anchored" data-anchor-id="accessibility-testing">5.7.4 Accessibility Testing</h3>
+<p><strong>Automated Testing:</strong></p>
+<ul>
+<li>axe DevTools (browser extension)</li>
+<li>WAVE (web accessibility evaluator)</li>
+<li>Lighthouse (built into Chrome)</li>
+<li>ESLint accessibility plugins</li>
+</ul>
+<p><strong>Manual Testing:</strong></p>
+<ul>
+<li>Navigate with keyboard only</li>
+<li>Use a screen reader (VoiceOver, NVDA, JAWS)</li>
+<li>Zoom to 200%</li>
+<li>Test with high contrast mode</li>
+<li>Verify focus order makes sense</li>
+</ul>
+<p><strong>Accessibility Checklist:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox">All images have appropriate alt text</label></li>
+<li><label><input type="checkbox">Color contrast meets WCAG AA (4.5:1 for text)</label></li>
+<li><label><input type="checkbox">All functionality available via keyboard</label></li>
+<li><label><input type="checkbox">Focus indicator is visible</label></li>
+<li><label><input type="checkbox">Form inputs have labels</label></li>
+<li><label><input type="checkbox">Errors are clearly described</label></li>
+<li><label><input type="checkbox">Page has proper heading structure</label></li>
+<li><label><input type="checkbox">Links have descriptive text</label></li>
+<li><label><input type="checkbox">Dynamic content is announced to screen readers</label></li>
+<li><label><input type="checkbox">No content flashes more than 3 times per second</label></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="design-systems-and-style-guides" class="level2" data-number="8.9">
+<h2 data-number="8.9" class="anchored" data-anchor-id="design-systems-and-style-guides"><span class="header-section-number">8.9</span> 5.8 Design Systems and Style Guides</h2>
+<p>A <strong>design system</strong> is a collection of reusable components, guided by clear standards, that can be assembled to build any number of applications. A <strong>style guide</strong> documents these standards.</p>
+<section id="why-design-systems-matter" class="level3">
+<h3 class="anchored" data-anchor-id="why-design-systems-matter">5.8.1 Why Design Systems Matter</h3>
+<p><strong>Consistency</strong>: Users learn patterns once and apply them everywhere.</p>
+<p><strong>Efficiency</strong>: Don’t redesign buttons for every project. Reuse proven solutions.</p>
+<p><strong>Quality</strong>: Components are refined over time, incorporating accessibility and usability improvements.</p>
+<p><strong>Scalability</strong>: Large teams can work independently while maintaining consistency.</p>
+<p><strong>Communication</strong>: Shared vocabulary between designers and developers.</p>
+</section>
+<section id="components-of-a-design-system" class="level3">
+<h3 class="anchored" data-anchor-id="components-of-a-design-system">5.8.2 Components of a Design System</h3>
+<p><strong>Design Tokens:</strong></p>
+<p>The smallest elements—colors, typography, spacing, shadows:</p>
+<pre><code>COLORS
+──────────────────────────────────────
+primary-50:    #E3F2FD
+primary-100:   #BBDEFB
+primary-500:   #2196F3  (main)
+primary-700:   #1976D2
+primary-900:   #0D47A1
+
+TYPOGRAPHY
+──────────────────────────────────────
+font-family-primary:    "Inter", sans-serif
+font-family-mono:       "Fira Code", monospace
+
+font-size-xs:     12px
+font-size-sm:     14px
+font-size-base:   16px
+font-size-lg:     18px
+font-size-xl:     20px
+font-size-2xl:    24px
+font-size-3xl:    32px
+
+SPACING
+──────────────────────────────────────
+space-1:    4px
+space-2:    8px
+space-3:    12px
+space-4:    16px
+space-5:    20px
+space-6:    24px
+space-8:    32px
+space-10:   40px
+space-12:   48px
+space-16:   64px
+
+SHADOWS
+──────────────────────────────────────
+shadow-sm:    0 1px 2px rgba(0,0,0,0.05)
+shadow-md:    0 4px 6px rgba(0,0,0,0.1)
+shadow-lg:    0 10px 15px rgba(0,0,0,0.1)
+
+BORDER RADIUS
+──────────────────────────────────────
+radius-sm:    4px
+radius-md:    8px
+radius-lg:    16px
+radius-full:  9999px</code></pre>
+<p><strong>UI Components:</strong></p>
+<p>Reusable building blocks:</p>
+<pre><code>BUTTONS
+──────────────────────────────────────
+
+Primary Button
+┌─────────────────────┐
+│    Primary Action   │  Background: primary-500
+└─────────────────────┘  Text: white
+                         Padding: space-3 space-6
+                         Border-radius: radius-md
+
+Secondary Button
+┌─────────────────────┐
+│   Secondary Action  │  Background: transparent
+└─────────────────────┘  Border: 1px solid primary-500
+                         Text: primary-500
+
+Destructive Button
+┌─────────────────────┐
+│       Delete        │  Background: error-500
+└─────────────────────┘  Text: white
+
+Button States:
+- Default
+- Hover (darken background 10%)
+- Active (darken background 20%)
+- Focused (add focus ring)
+- Disabled (50% opacity, no pointer events)
+
+FORM INPUTS
+──────────────────────────────────────
+
+Text Input
+┌─────────────────────────────────────┐
+│ Placeholder text                    │
+└─────────────────────────────────────┘
+Border: 1px solid gray-300
+Border-radius: radius-md
+Padding: space-3 space-4
+
+States:
+- Default: gray-300 border
+- Focused: primary-500 border + shadow
+- Error: error-500 border
+- Disabled: gray-100 background
+
+CARDS
+──────────────────────────────────────
+
+┌─────────────────────────────────────┐
+│  Card Title                         │
+│─────────────────────────────────────│
+│                                     │
+│  Card content goes here with       │
+│  supporting text and information.   │
+│                                     │
+│  [Secondary]  [Primary Action]      │
+└─────────────────────────────────────┘
+Background: white
+Border-radius: radius-lg
+Shadow: shadow-md
+Padding: space-6</code></pre>
+<p><strong>Patterns:</strong></p>
+<p>Common UI patterns built from components:</p>
+<pre><code>NAVIGATION PATTERN
+──────────────────────────────────────
+
+Top Navigation (Desktop)
+┌─────────────────────────────────────────────────────────────┐
+│ [Logo]    Nav Item    Nav Item    Nav Item        [Avatar ▼]│
+└─────────────────────────────────────────────────────────────┘
+
+Mobile Navigation
+┌─────────────────────────────────────┐
+│ [☰]              [Logo]        [🔔] │
+└─────────────────────────────────────┘
+
+FORM PATTERN
+──────────────────────────────────────
+
+Standard Form Layout
+┌─────────────────────────────────────┐
+│  Form Title                         │
+│  Subtitle or instructions           │
+│                                     │
+│  Label                              │
+│  ┌─────────────────────────────────┐│
+│  │ Input                           ││
+│  └─────────────────────────────────┘│
+│  Helper text                        │
+│                                     │
+│  Label                              │
+│  ┌─────────────────────────────────┐│
+│  │ Input                           ││
+│  └─────────────────────────────────┘│
+│                                     │
+│           [Cancel]  [Submit]        │
+└─────────────────────────────────────┘</code></pre>
+</section>
+<section id="creating-a-style-guide" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-style-guide">5.8.3 Creating a Style Guide</h3>
+<p>A style guide documents your design system. For your project, include:</p>
+<p><strong>1. Introduction</strong></p>
+<ul>
+<li>Purpose of the style guide</li>
+<li>How to use it</li>
+<li>Where to find resources (Figma files, code repositories)</li>
+</ul>
+<p><strong>2. Design Principles</strong></p>
+<ul>
+<li>Core values guiding design decisions</li>
+<li>Example: “Clarity over decoration,” “Accessibility first”</li>
+</ul>
+<p><strong>3. Brand</strong></p>
+<ul>
+<li>Logo usage</li>
+<li>Voice and tone</li>
+</ul>
+<p><strong>4. Visual Foundation</strong></p>
+<ul>
+<li>Color palette (with accessibility notes)</li>
+<li>Typography scale</li>
+<li>Spacing system</li>
+<li>Iconography</li>
+<li>Imagery guidelines</li>
+</ul>
+<p><strong>5. Components</strong></p>
+<ul>
+<li>Each component with:
+<ul>
+<li>Visual examples (all states)</li>
+<li>Usage guidelines (when to use/not use)</li>
+<li>Specifications (sizes, colors, spacing)</li>
+<li>Code examples (if technical)</li>
+<li>Accessibility requirements</li>
+</ul></li>
+</ul>
+<p><strong>6. Patterns</strong></p>
+<ul>
+<li>Common UI patterns</li>
+<li>Page layouts</li>
+<li>Navigation patterns</li>
+<li>Form patterns</li>
+</ul>
+</section>
+<section id="style-guide-example" class="level3">
+<h3 class="anchored" data-anchor-id="style-guide-example">5.8.4 Style Guide Example</h3>
+<p>Here’s a condensed style guide structure:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># TaskFlow Style Guide</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## 1. Design Principles</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Clarity First**: Every element should have a clear purpose</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Respectful of Time**: Minimize steps, reduce friction</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Accessible to All**: WCAG AA compliance minimum</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Consistent Experience**: Same patterns throughout</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## 2. Colors</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="fu">### Primary Palette</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Name        <span class="pp">|</span> Hex     <span class="pp">|</span> Usage                    <span class="pp">|</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="pp">|-------------|---------|--------------------------|</span></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Primary     <span class="pp">|</span> #2563EB <span class="pp">|</span> Interactive elements     <span class="pp">|</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Primary Dark<span class="pp">|</span> #1D4ED8 <span class="pp">|</span> Hover states             <span class="pp">|</span></span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Primary Light<span class="pp">|</span> #DBEAFE<span class="pp">|</span> Backgrounds, highlights  <span class="pp">|</span></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a><span class="fu">### Semantic Colors</span></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Name    <span class="pp">|</span> Hex     <span class="pp">|</span> Usage            <span class="pp">|</span></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------|---------|------------------|</span></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Success <span class="pp">|</span> #10B981 <span class="pp">|</span> Success states   <span class="pp">|</span></span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Warning <span class="pp">|</span> #F59E0B <span class="pp">|</span> Warning states   <span class="pp">|</span></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Error   <span class="pp">|</span> #EF4444 <span class="pp">|</span> Error states     <span class="pp">|</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Info    <span class="pp">|</span> #3B82F6 <span class="pp">|</span> Info states      <span class="pp">|</span></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a><span class="fu">### Neutrals</span></span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Name      <span class="pp">|</span> Hex     <span class="pp">|</span> Usage            <span class="pp">|</span></span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a><span class="pp">|-----------|---------|------------------|</span></span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Gray 900  <span class="pp">|</span> #111827 <span class="pp">|</span> Primary text     <span class="pp">|</span></span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Gray 600  <span class="pp">|</span> #4B5563 <span class="pp">|</span> Secondary text   <span class="pp">|</span></span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Gray 400  <span class="pp">|</span> #9CA3AF <span class="pp">|</span> Disabled, hints  <span class="pp">|</span></span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Gray 200  <span class="pp">|</span> #E5E7EB <span class="pp">|</span> Borders          <span class="pp">|</span></span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Gray 50   <span class="pp">|</span> #F9FAFB <span class="pp">|</span> Backgrounds      <span class="pp">|</span></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. Typography</span></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-38"><a href="#cb38-38" aria-hidden="true" tabindex="-1"></a>**Font Family**: Inter (sans-serif)</span>
+<span id="cb38-39"><a href="#cb38-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-40"><a href="#cb38-40" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Style    <span class="pp">|</span> Size <span class="pp">|</span> Weight <span class="pp">|</span> Line Height <span class="pp">|</span> Usage        <span class="pp">|</span></span>
+<span id="cb38-41"><a href="#cb38-41" aria-hidden="true" tabindex="-1"></a><span class="pp">|----------|------|--------|-------------|--------------|</span></span>
+<span id="cb38-42"><a href="#cb38-42" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> H1       <span class="pp">|</span> 32px <span class="pp">|</span> 700    <span class="pp">|</span> 1.2         <span class="pp">|</span> Page titles  <span class="pp">|</span></span>
+<span id="cb38-43"><a href="#cb38-43" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> H2       <span class="pp">|</span> 24px <span class="pp">|</span> 600    <span class="pp">|</span> 1.3         <span class="pp">|</span> Section heads<span class="pp">|</span></span>
+<span id="cb38-44"><a href="#cb38-44" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> H3       <span class="pp">|</span> 20px <span class="pp">|</span> 600    <span class="pp">|</span> 1.4         <span class="pp">|</span> Subsections  <span class="pp">|</span></span>
+<span id="cb38-45"><a href="#cb38-45" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Body     <span class="pp">|</span> 16px <span class="pp">|</span> 400    <span class="pp">|</span> 1.5         <span class="pp">|</span> Body text    <span class="pp">|</span></span>
+<span id="cb38-46"><a href="#cb38-46" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Small    <span class="pp">|</span> 14px <span class="pp">|</span> 400    <span class="pp">|</span> 1.5         <span class="pp">|</span> Helper text  <span class="pp">|</span></span>
+<span id="cb38-47"><a href="#cb38-47" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Caption  <span class="pp">|</span> 12px <span class="pp">|</span> 400    <span class="pp">|</span> 1.4         <span class="pp">|</span> Labels       <span class="pp">|</span></span>
+<span id="cb38-48"><a href="#cb38-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-49"><a href="#cb38-49" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4. Spacing</span></span>
+<span id="cb38-50"><a href="#cb38-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-51"><a href="#cb38-51" aria-hidden="true" tabindex="-1"></a>Base unit: 4px</span>
+<span id="cb38-52"><a href="#cb38-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-53"><a href="#cb38-53" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Token   <span class="pp">|</span> Value <span class="pp">|</span> Usage                    <span class="pp">|</span></span>
+<span id="cb38-54"><a href="#cb38-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------|-------|--------------------------|</span></span>
+<span id="cb38-55"><a href="#cb38-55" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> xs      <span class="pp">|</span> 4px   <span class="pp">|</span> Tight spacing            <span class="pp">|</span></span>
+<span id="cb38-56"><a href="#cb38-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> sm      <span class="pp">|</span> 8px   <span class="pp">|</span> Related elements         <span class="pp">|</span></span>
+<span id="cb38-57"><a href="#cb38-57" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> md      <span class="pp">|</span> 16px  <span class="pp">|</span> Default spacing          <span class="pp">|</span></span>
+<span id="cb38-58"><a href="#cb38-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> lg      <span class="pp">|</span> 24px  <span class="pp">|</span> Section spacing          <span class="pp">|</span></span>
+<span id="cb38-59"><a href="#cb38-59" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> xl      <span class="pp">|</span> 32px  <span class="pp">|</span> Large gaps               <span class="pp">|</span></span>
+<span id="cb38-60"><a href="#cb38-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2xl     <span class="pp">|</span> 48px  <span class="pp">|</span> Page sections            <span class="pp">|</span></span>
+<span id="cb38-61"><a href="#cb38-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-62"><a href="#cb38-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## 5. Components</span></span>
+<span id="cb38-63"><a href="#cb38-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-64"><a href="#cb38-64" aria-hidden="true" tabindex="-1"></a><span class="fu">### Buttons</span></span>
+<span id="cb38-65"><a href="#cb38-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-66"><a href="#cb38-66" aria-hidden="true" tabindex="-1"></a>**Primary Button**</span>
+<span id="cb38-67"><a href="#cb38-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Background: Primary (#2563EB)</span>
+<span id="cb38-68"><a href="#cb38-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Text: White</span>
+<span id="cb38-69"><a href="#cb38-69" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Padding: 12px 24px</span>
+<span id="cb38-70"><a href="#cb38-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Border-radius: 6px</span>
+<span id="cb38-71"><a href="#cb38-71" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>States: Hover (Primary Dark), Disabled (50% opacity)</span>
+<span id="cb38-72"><a href="#cb38-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-73"><a href="#cb38-73" aria-hidden="true" tabindex="-1"></a>**Usage**: Use for primary actions. One per section maximum.</span>
+<span id="cb38-74"><a href="#cb38-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-75"><a href="#cb38-75" aria-hidden="true" tabindex="-1"></a>**Accessibility**: </span>
+<span id="cb38-76"><a href="#cb38-76" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Minimum touch target 44x44px</span>
+<span id="cb38-77"><a href="#cb38-77" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Focus ring: 2px offset, Primary color</span>
+<span id="cb38-78"><a href="#cb38-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-79"><a href="#cb38-79" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Continue for each component...</span><span class="co">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+</section>
+<section id="prototyping-in-practice-using-figma" class="level2" data-number="8.10">
+<h2 data-number="8.10" class="anchored" data-anchor-id="prototyping-in-practice-using-figma"><span class="header-section-number">8.10</span> 5.9 Prototyping in Practice: Using Figma</h2>
+<p><strong>Figma</strong> is the industry-standard tool for UI design and prototyping. This section provides a practical introduction.</p>
+<section id="figma-basics" class="level3">
+<h3 class="anchored" data-anchor-id="figma-basics">5.9.1 Figma Basics</h3>
+<p><strong>Key Concepts:</strong></p>
+<ul>
+<li><strong>Canvas</strong>: Infinite workspace where you design</li>
+<li><strong>Frames</strong>: Containers for your designs (like artboards)</li>
+<li><strong>Layers</strong>: Objects stack in layers (like Photoshop)</li>
+<li><strong>Components</strong>: Reusable elements</li>
+<li><strong>Variants</strong>: Different versions of a component</li>
+<li><strong>Auto Layout</strong>: Flexible, responsive containers</li>
+<li><strong>Prototyping</strong>: Link frames to create interactive flows</li>
+</ul>
+<p><strong>Essential Tools:</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Tool</th>
+<th>Shortcut</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Move</td>
+<td>V</td>
+<td>Select and move objects</td>
+</tr>
+<tr class="even">
+<td>Frame</td>
+<td>F</td>
+<td>Create frames/containers</td>
+</tr>
+<tr class="odd">
+<td>Rectangle</td>
+<td>R</td>
+<td>Draw rectangles</td>
+</tr>
+<tr class="even">
+<td>Ellipse</td>
+<td>O</td>
+<td>Draw circles/ellipses</td>
+</tr>
+<tr class="odd">
+<td>Line</td>
+<td>L</td>
+<td>Draw lines</td>
+</tr>
+<tr class="even">
+<td>Text</td>
+<td>T</td>
+<td>Add text</td>
+</tr>
+<tr class="odd">
+<td>Pen</td>
+<td>P</td>
+<td>Draw custom shapes</td>
+</tr>
+<tr class="even">
+<td>Hand</td>
+<td>H (hold Space)</td>
+<td>Pan around canvas</td>
+</tr>
+<tr class="odd">
+<td>Zoom</td>
+<td>Scroll or Z</td>
+<td>Zoom in/out</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="creating-a-simple-wireframe-in-figma" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-simple-wireframe-in-figma">5.9.2 Creating a Simple Wireframe in Figma</h3>
+<p><strong>Step 1: Set Up Frame</strong></p>
+<ol type="1">
+<li>Press F for Frame tool</li>
+<li>Select a device preset (e.g., “Desktop” 1440x900)</li>
+<li>Name your frame in the layers panel</li>
+</ol>
+<p><strong>Step 2: Add Structure</strong></p>
+<ol type="1">
+<li><p>Draw rectangles (R) for major areas:</p>
+<ul>
+<li>Header</li>
+<li>Sidebar</li>
+<li>Main content</li>
+<li>Footer</li>
+</ul></li>
+<li><p>Use gray fills (#E5E7EB for backgrounds, #9CA3AF for placeholders)</p></li>
+</ol>
+<p><strong>Step 3: Add Content Placeholders</strong></p>
+<ol type="1">
+<li>Text tool (T) for headings and labels</li>
+<li>Rectangles with X pattern for image placeholders</li>
+<li>Lines for text content</li>
+</ol>
+<p><strong>Step 4: Create Components</strong></p>
+<ol type="1">
+<li>Select a reusable element (e.g., a button)</li>
+<li>Right-click → “Create Component” (or Ctrl/Cmd + Alt + K)</li>
+<li>Use instances of the component throughout your design</li>
+</ol>
+<p><strong>Step 5: Add Prototyping Interactions</strong></p>
+<ol type="1">
+<li>Switch to Prototype tab (right panel)</li>
+<li>Select an element</li>
+<li>Drag the connection handle to the target frame</li>
+<li>Set interaction (e.g., “On Click → Navigate to”)</li>
+<li>Press Play button to preview</li>
+</ol>
+</section>
+<section id="figma-tips-for-beginners" class="level3">
+<h3 class="anchored" data-anchor-id="figma-tips-for-beginners">5.9.3 Figma Tips for Beginners</h3>
+<p><strong>Organization:</strong></p>
+<ul>
+<li>Name your layers meaningfully</li>
+<li>Group related elements (Ctrl/Cmd + G)</li>
+<li>Use pages for different sections of your project</li>
+<li>Create a “Components” page for your design system</li>
+</ul>
+<p><strong>Efficiency:</strong></p>
+<ul>
+<li>Copy styles: Select object with desired style, then use eyedropper</li>
+<li>Duplicate: Alt + drag</li>
+<li>Align/distribute: Use toolbar or right-click</li>
+<li>Auto Layout: Makes responsive containers (Shift + A)</li>
+</ul>
+<p><strong>Collaboration:</strong></p>
+<ul>
+<li>Share link for viewing/editing</li>
+<li>Leave comments on designs</li>
+<li>Use branches for major changes</li>
+<li>Export assets for development (PNG, SVG, CSS)</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="chapter-summary" class="level2" data-number="8.11">
+<h2 data-number="8.11" class="anchored" data-anchor-id="chapter-summary"><span class="header-section-number">8.11</span> 5.10 Chapter Summary</h2>
+<p>UI/UX design is essential to creating software that users actually want to use. Good design isn’t about making things pretty—it’s about understanding users and creating interfaces that help them accomplish their goals efficiently and pleasantly.</p>
+<p>Key takeaways from this chapter:</p>
+<ul>
+<li><p><strong>UX design</strong> focuses on the overall experience—how users feel when using a product. <strong>UI design</strong> focuses on the visual and interactive elements they directly interact with.</p></li>
+<li><p><strong>Human-centered design</strong> starts with understanding users through research, empathy, and observation. Personas and journey maps help teams maintain focus on user needs.</p></li>
+<li><p><strong>Nielsen’s 10 Usability Heuristics</strong> provide a framework for evaluating and improving interfaces. They address visibility, consistency, error prevention, and more.</p></li>
+<li><p><strong>Prototyping</strong> ranges from paper sketches to interactive simulations. Different fidelities serve different purposes in the design process.</p></li>
+<li><p><strong>Visual design fundamentals</strong>—hierarchy, typography, color, and layout—create interfaces that communicate clearly and guide user attention.</p></li>
+<li><p><strong>Responsive design</strong> creates interfaces that adapt to different screen sizes using fluid layouts, flexible images, and media queries.</p></li>
+<li><p><strong>Accessibility</strong> ensures products work for users with disabilities. WCAG provides guidelines organized around perceivability, operability, understandability, and robustness.</p></li>
+<li><p><strong>Design systems and style guides</strong> document reusable components and standards, enabling consistency and efficiency across projects.</p></li>
+<li><p><strong>Figma</strong> is the industry-standard tool for UI design and prototyping, enabling designers and developers to collaborate on interface designs.</p></li>
+</ul>
+<hr>
+</section>
+<section id="key-terms" class="level2" data-number="8.12">
+<h2 data-number="8.12" class="anchored" data-anchor-id="key-terms"><span class="header-section-number">8.12</span> 5.11 Key Terms</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>User Experience (UX)</strong></td>
+<td>The overall experience a user has when interacting with a product</td>
+</tr>
+<tr class="even">
+<td><strong>User Interface (UI)</strong></td>
+<td>The visual and interactive elements users interact with</td>
+</tr>
+<tr class="odd">
+<td><strong>Human-Centered Design</strong></td>
+<td>Design approach that focuses on understanding and addressing user needs</td>
+</tr>
+<tr class="even">
+<td><strong>Persona</strong></td>
+<td>Fictional character representing a user type</td>
+</tr>
+<tr class="odd">
+<td><strong>Journey Map</strong></td>
+<td>Visualization of user experience over time</td>
+</tr>
+<tr class="even">
+<td><strong>Heuristic</strong></td>
+<td>Rule of thumb for evaluating design quality</td>
+</tr>
+<tr class="odd">
+<td><strong>Wireframe</strong></td>
+<td>Low-fidelity representation of interface layout</td>
+</tr>
+<tr class="even">
+<td><strong>Prototype</strong></td>
+<td>Interactive model for testing design concepts</td>
+</tr>
+<tr class="odd">
+<td><strong>Responsive Design</strong></td>
+<td>Design that adapts to different screen sizes</td>
+</tr>
+<tr class="even">
+<td><strong>Breakpoint</strong></td>
+<td>Screen width where layout changes occur</td>
+</tr>
+<tr class="odd">
+<td><strong>Accessibility</strong></td>
+<td>Design that can be used by people with disabilities</td>
+</tr>
+<tr class="even">
+<td><strong>WCAG</strong></td>
+<td>Web Content Accessibility Guidelines</td>
+</tr>
+<tr class="odd">
+<td><strong>Design System</strong></td>
+<td>Collection of reusable components with documented standards</td>
+</tr>
+<tr class="even">
+<td><strong>Style Guide</strong></td>
+<td>Documentation of design standards and patterns</td>
+</tr>
+<tr class="odd">
+<td><strong>Design Token</strong></td>
+<td>Smallest element of a design system (color, spacing, etc.)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="review-questions" class="level2" data-number="8.13">
+<h2 data-number="8.13" class="anchored" data-anchor-id="review-questions"><span class="header-section-number">8.13</span> 5.12 Review Questions</h2>
+<ol type="1">
+<li><p>Explain the difference between UX and UI design. How do they relate to each other?</p></li>
+<li><p>What is human-centered design? Describe its key principles and why they matter for software development.</p></li>
+<li><p>Choose three of Nielsen’s 10 Usability Heuristics and explain each with an example of how a violation would affect users.</p></li>
+<li><p>What is the difference between low-fidelity and high-fidelity prototypes? When would you use each?</p></li>
+<li><p>Explain the mobile-first approach to responsive design. What are its advantages?</p></li>
+<li><p>What is WCAG, and what are its four main principles? Give one specific guideline for each principle.</p></li>
+<li><p>Why do keyboard navigation and focus indicators matter for accessibility?</p></li>
+<li><p>What is a design system, and what are its benefits for software development teams?</p></li>
+<li><p>Explain the concept of visual hierarchy. What techniques can you use to create it?</p></li>
+<li><p>You’re designing a checkout flow for an e-commerce site. How would you apply error prevention principles to reduce user mistakes?</p></li>
+</ol>
+<hr>
+</section>
+<section id="hands-on-exercises" class="level2" data-number="8.14">
+<h2 data-number="8.14" class="anchored" data-anchor-id="hands-on-exercises"><span class="header-section-number">8.14</span> 5.13 Hands-On Exercises</h2>
+<section id="exercise-5.1-heuristic-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.1-heuristic-evaluation">Exercise 5.1: Heuristic Evaluation</h3>
+<p>Choose a website or application you use regularly. Conduct a heuristic evaluation:</p>
+<ol type="1">
+<li>Review the interface against Nielsen’s 10 heuristics</li>
+<li>Identify at least 10 usability issues</li>
+<li>Rate each issue’s severity (0-4)</li>
+<li>Provide specific recommendations for improvement</li>
+<li>Document your findings in a report</li>
+</ol>
+</section>
+<section id="exercise-5.2-user-persona-creation" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.2-user-persona-creation">Exercise 5.2: User Persona Creation</h3>
+<p>For your semester project:</p>
+<ol type="1">
+<li>Identify your primary user type(s)</li>
+<li>Create at least 2 detailed personas including:
+<ul>
+<li>Demographics and background</li>
+<li>Goals and motivations</li>
+<li>Frustrations and pain points</li>
+<li>Technology comfort level</li>
+<li>A representative quote</li>
+</ul></li>
+<li>Create a user journey map for one key task</li>
+</ol>
+</section>
+<section id="exercise-5.3-paper-prototyping" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.3-paper-prototyping">Exercise 5.3: Paper Prototyping</h3>
+<p>Before using digital tools:</p>
+<ol type="1">
+<li>Sketch wireframes on paper for 5-7 key screens of your project</li>
+<li>Include annotations explaining functionality</li>
+<li>Test your paper prototype with a classmate:
+<ul>
+<li>Give them a task to complete</li>
+<li>“Swap” paper screens as they navigate</li>
+<li>Note where they get confused</li>
+</ul></li>
+<li>Iterate based on feedback</li>
+</ol>
+</section>
+<section id="exercise-5.4-digital-wireframes" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.4-digital-wireframes">Exercise 5.4: Digital Wireframes</h3>
+<p>Using Figma (or similar tool):</p>
+<ol type="1">
+<li>Create wireframes for your project’s main screens</li>
+<li>Include:
+<ul>
+<li>Navigation structure</li>
+<li>Content layout</li>
+<li>Key UI elements (buttons, forms, etc.)</li>
+<li>Placeholder content</li>
+</ul></li>
+<li>Link wireframes into an interactive prototype</li>
+<li>Test with at least 2 users and document findings</li>
+</ol>
+</section>
+<section id="exercise-5.5-style-guide-creation" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.5-style-guide-creation">Exercise 5.5: Style Guide Creation</h3>
+<p>Create a style guide for your project including:</p>
+<ol type="1">
+<li><p><strong>Color Palette</strong></p>
+<ul>
+<li>Primary, secondary, and accent colors</li>
+<li>Semantic colors (success, error, warning, info)</li>
+<li>Neutral/gray scale</li>
+<li>Accessibility notes for each color combination</li>
+</ul></li>
+<li><p><strong>Typography</strong></p>
+<ul>
+<li>Font families</li>
+<li>Size scale (H1-H6, body, small)</li>
+<li>Weight and line-height specifications</li>
+</ul></li>
+<li><p><strong>Spacing System</strong></p>
+<ul>
+<li>Base unit and scale</li>
+</ul></li>
+<li><p><strong>Component Documentation</strong> (at least 5 components):</p>
+<ul>
+<li>Buttons (with all states)</li>
+<li>Input fields (with states)</li>
+<li>Cards</li>
+<li>Navigation</li>
+<li>One additional component of your choice</li>
+</ul></li>
+</ol>
+</section>
+<section id="exercise-5.6-accessibility-audit" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.6-accessibility-audit">Exercise 5.6: Accessibility Audit</h3>
+<p>Conduct an accessibility review of your project prototype:</p>
+<ol type="1">
+<li>Use an accessibility checker tool (axe, WAVE)</li>
+<li>Test keyboard navigation manually</li>
+<li>Check color contrast for all text</li>
+<li>Verify all images have alt text</li>
+<li>Test with a screen reader (even briefly)</li>
+<li>Document issues found and fixes needed</li>
+<li>Create an accessibility compliance checklist for your project</li>
+</ol>
+</section>
+<section id="exercise-5.7-responsive-design" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-5.7-responsive-design">Exercise 5.7: Responsive Design</h3>
+<p>For one screen of your project:</p>
+<ol type="1">
+<li>Design the mobile version (375px wide)</li>
+<li>Design the tablet version (768px wide)</li>
+<li>Design the desktop version (1440px wide)</li>
+<li>Document what changes at each breakpoint</li>
+<li>Explain your responsive design decisions</li>
+</ol>
+<hr>
+</section>
+</section>
+<section id="further-reading" class="level2" data-number="8.15">
+<h2 data-number="8.15" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">8.15</span> 5.14 Further Reading</h2>
+<p><strong>Books:</strong></p>
+<ul>
+<li>Krug, S. (2014). <em>Don’t Make Me Think, Revisited: A Common Sense Approach to Web Usability</em> (3rd Edition). New Riders.</li>
+<li>Norman, D. (2013). <em>The Design of Everyday Things</em> (Revised Edition). Basic Books.</li>
+<li>Cooper, A., Reimann, R., Cronin, D., &amp; Noessel, C. (2014). <em>About Face: The Essentials of Interaction Design</em> (4th Edition). Wiley.</li>
+<li>Lidwell, W., Holden, K., &amp; Butler, J. (2010). <em>Universal Principles of Design</em> (Revised Edition). Rockport.</li>
+</ul>
+<p><strong>Online Resources:</strong></p>
+<ul>
+<li>Nielsen Norman Group: https://www.nngroup.com/articles/</li>
+<li>Laws of UX: https://lawsofux.com/</li>
+<li>WebAIM Accessibility: https://webaim.org/</li>
+<li>Figma Learn: https://help.figma.com/</li>
+<li>A11y Project: https://www.a11yproject.com/</li>
+<li>Material Design Guidelines: https://material.io/design</li>
+</ul>
+<p><strong>Tools:</strong></p>
+<ul>
+<li>Figma: https://www.figma.com/ (free tier available)</li>
+<li>WebAIM Contrast Checker: https://webaim.org/resources/contrastchecker/</li>
+<li>axe DevTools: Browser extension for accessibility testing</li>
+<li>Stark: Figma plugin for accessibility</li>
+</ul>
+<hr>
+</section>
+<section id="references" class="level2" data-number="8.16">
+<h2 data-number="8.16" class="anchored" data-anchor-id="references"><span class="header-section-number">8.16</span> References</h2>
+<p>Cooper, A., Reimann, R., Cronin, D., &amp; Noessel, C. (2014). <em>About Face: The Essentials of Interaction Design</em> (4th Edition). Wiley.</p>
+<p>IDEO. (2015). <em>The Field Guide to Human-Centered Design</em>. IDEO.org.</p>
+<p>Krug, S. (2014). <em>Don’t Make Me Think, Revisited: A Common Sense Approach to Web Usability</em> (3rd Edition). New Riders.</p>
+<p>Nielsen, J. (1994). <em>Usability Engineering</em>. Morgan Kaufmann.</p>
+<p>Nielsen, J. (1994). 10 Usability Heuristics for User Interface Design. Nielsen Norman Group. Retrieved from https://www.nngroup.com/articles/ten-usability-heuristics/</p>
+<p>Norman, D. (2013). <em>The Design of Everyday Things</em> (Revised Edition). Basic Books.</p>
+<p>W3C. (2018). Web Content Accessibility Guidelines (WCAG) 2.1. Retrieved from https://www.w3.org/TR/WCAG21/</p>
+<p>Wroblewski, L. (2011). <em>Mobile First</em>. A Book Apart.Sample content for 06-ui-ux.qmd</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/04-software-architecture.html" class="pagination-link" aria-label="Chapter 4: Software Architecture and Design Patterns">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Chapter 4: Software Architecture and Design Patterns</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/06-agile-methodologies.html" class="pagination-link" aria-label="Chapter 6: Agile Methodologies and Project Management">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Chapter 6: Agile Methodologies and Project Management</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
