@@ -1,0 +1,2874 @@
+# Chapter 10: Data Management and APIs
+
+## Learning Objectives
+
+By the end of this chapter, you will be able to:
+
+-   Design relational database schemas using normalization principles
+-   Write SQL queries for data manipulation and retrieval
+-   Compare relational and NoSQL databases and choose appropriately for different use cases
+-   Design RESTful APIs following industry best practices
+-   Implement CRUD operations with proper HTTP methods and status codes
+-   Create GraphQL schemas and resolvers for flexible data fetching
+-   Document APIs using OpenAPI/Swagger specifications
+-   Implement data validation and meaningful error handling
+-   Apply caching strategies to improve API performance
+-   Secure APIs with authentication and authorization
+
+------------------------------------------------------------------------
+
+## 10.1 The Role of Data in Software Systems
+
+Data is the lifeblood of modern applications. Every action a user takes—creating an account, posting a message, completing a task—generates data that must be stored, organized, and retrieved efficiently. The decisions you make about data management ripple through every aspect of your application, affecting performance, scalability, maintainability, and user experience.
+
+Consider a task management application like the one we're building throughout this course. When a user creates a task, that data must persist beyond the current session. When they log in from a different device, their tasks should appear. When they share a project with teammates, everyone needs to see the same information. These seemingly simple requirements demand careful thought about how data flows through your system.
+
+### 10.1.1 Data Architecture Overview
+
+Before diving into specific technologies, it's important to understand how data typically moves through a modern application. The architecture below represents a common pattern you'll encounter in production systems:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    APPLICATION DATA ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│                         ┌─────────────┐                                 │
+│                         │   Clients   │                                 │
+│                         │ (Web, Mobile)│                                │
+│                         └──────┬──────┘                                 │
+│                                │                                        │
+│                                ▼                                        │
+│                         ┌─────────────┐                                 │
+│                         │     API     │                                 │
+│                         │   Layer     │                                 │
+│                         └──────┬──────┘                                 │
+│                                │                                        │
+│              ┌─────────────────┼─────────────────┐                      │
+│              │                 │                 │                      │
+│              ▼                 ▼                 ▼                      │
+│       ┌───────────┐     ┌───────────┐     ┌───────────┐                │
+│       │  Primary  │     │   Cache   │     │  Search   │                │
+│       │ Database  │     │  (Redis)  │     │(Elastic)  │                │
+│       │(PostgreSQL)│    └───────────┘     └───────────┘                │
+│       └───────────┘                                                     │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+In this architecture, clients (web browsers, mobile apps) never communicate directly with databases. Instead, they interact with an API layer that serves as a gatekeeper. This separation provides several benefits: the API can validate requests before they reach the database, enforce business rules, handle authentication, and present a consistent interface regardless of how data is stored internally.
+
+The primary database (often PostgreSQL, MySQL, or a similar relational database) serves as the authoritative source of truth. This is where your critical business data lives—user accounts, orders, transactions, and other information that must be accurate and durable.
+
+Auxiliary data stores serve specialized purposes. A cache like Redis stores frequently-accessed data in memory for lightning-fast retrieval. A search engine like Elasticsearch provides sophisticated full-text search capabilities that would be slow or impossible with a traditional database. Many production systems use multiple data stores, each optimized for specific access patterns—a strategy called "polyglot persistence."
+
+### 10.1.2 Key Data Management Concerns
+
+As you design your data layer, keep these fundamental concerns in mind:
+
+**Data Integrity** ensures that data is accurate, consistent, and trustworthy. When a user transfers money between accounts, the total balance must remain constant—you can't create or destroy money through a software bug. Database constraints, validations, and transactions protect integrity by enforcing rules about what data can exist and how it can change.
+
+**Data Security** protects sensitive information from unauthorized access. User passwords must be hashed, not stored in plain text. Personal information must be encrypted. Access must be controlled so users can only see and modify their own data. Security isn't an afterthought—it must be designed into your data layer from the beginning.
+
+**Data Availability** ensures that data is accessible when needed. If your database server crashes, can users still access the application? Replication (maintaining copies on multiple servers), backups (regular snapshots for disaster recovery), and failover mechanisms (automatic switching to backup systems) ensure availability.
+
+**Data Scalability** means handling growing data volumes and request rates without degrading performance. When your application grows from 100 users to 100,000 users, your data layer must scale accordingly. Indexing (creating data structures for fast lookups), sharding (distributing data across multiple servers), and caching (storing frequently-accessed data in fast memory) enable scalability.
+
+**Data Consistency** keeps data synchronized across systems. If a user updates their profile, that change should be visible everywhere immediately—or if not immediately, then eventually and predictably. Different applications have different consistency requirements, and understanding these trade-offs is essential for making good architectural decisions.
+
+------------------------------------------------------------------------
+
+## 10.2 Relational Databases
+
+**Relational databases** have been the foundation of data management since Edgar Codd introduced the relational model in 1970. They organize data into tables with rows and columns, using relationships to connect related data. Despite the rise of NoSQL alternatives, relational databases remain the most common choice for applications with structured data and complex querying needs.
+
+### 10.2.1 Core Concepts
+
+To work effectively with relational databases, you need to understand several foundational concepts. Let's explore each one:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    RELATIONAL DATABASE CONCEPTS                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  TABLE (Relation)                                                       │
+│  • Collection of related data organized into rows and columns           │
+│  • Has a defined schema specifying column names and types               │
+│  • Similar to a spreadsheet, but with strict typing                     │
+│                                                                         │
+│  COLUMN (Attribute)                                                     │
+│  • Single piece of data with a specific meaning                         │
+│  • Has a name (like "email") and data type (like VARCHAR)               │
+│  • May have constraints (NOT NULL, UNIQUE, CHECK)                       │
+│                                                                         │
+│  ROW (Record/Tuple)                                                     │
+│  • Single instance representing one entity                              │
+│  • Contains values for each column defined in the table                 │
+│  • Each row should be uniquely identifiable                             │
+│                                                                         │
+│  PRIMARY KEY                                                            │
+│  • Column (or columns) that uniquely identifies each row                │
+│  • Cannot contain NULL values                                           │
+│  • Most commonly an auto-incrementing integer ID                        │
+│                                                                         │
+│  FOREIGN KEY                                                            │
+│  • Column that references the primary key of another table              │
+│  • Creates relationships between tables                                 │
+│  • Enforces referential integrity (can't reference non-existent data)   │
+│                                                                         │
+│  INDEX                                                                  │
+│  • Data structure that speeds up data retrieval                         │
+│  • Like a book's index—helps find information quickly                   │
+│  • Trade-off: faster reads but slower writes (index must be updated)    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**A Table** is the fundamental unit of data organization. Think of it as a spreadsheet where each column has a specific data type. A `users` table might have columns for `id` (integer), `email` (text), `name` (text), and `created_at` (timestamp). Unlike spreadsheets, databases enforce these types strictly—you can't accidentally put a name in the email column.
+
+**Primary Keys** solve the problem of identity. How do you refer to a specific user? Names aren't unique (there might be multiple "John Smith" users), and emails can change. Instead, we assign each row a unique identifier—typically an auto-incrementing integer. This ID becomes the row's permanent address within the database.
+
+**Foreign Keys** create connections between tables. If each task belongs to a user, the tasks table includes a `user_id` column containing the ID of the user who owns that task. This creates a relationship: you can find all tasks belonging to a user, or find the user who owns a particular task.
+
+Let's visualize these concepts with a concrete example from our task management application:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  users                          tasks                                   │
+│  ┌──────────────────────┐       ┌──────────────────────────────┐       │
+│  │ id (PK)              │       │ id (PK)                      │       │
+│  │ email                │       │ title                        │       │
+│  │ name                 │◄──────│ user_id (FK)                 │       │
+│  │ password_hash        │       │ project_id (FK)              │       │
+│  │ created_at           │       │ status                       │       │
+│  │ updated_at           │       │ priority                     │       │
+│  └──────────────────────┘       │ due_date                     │       │
+│                                 │ created_at                   │       │
+│  projects                       │ updated_at                   │       │
+│  ┌──────────────────────┐       └──────────────────────────────┘       │
+│  │ id (PK)              │                    │                         │
+│  │ name                 │◄───────────────────┘                         │
+│  │ description          │                                              │
+│  │ owner_id (FK)        │───────► users.id                             │
+│  │ created_at           │                                              │
+│  └──────────────────────┘                                              │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+This diagram shows three tables and their relationships. The arrows indicate foreign key references—the direction points from the referencing table to the referenced table. Notice that:
+
+-   Each task has a `user_id` pointing to a user (the task's assignee)
+-   Each task optionally has a `project_id` pointing to a project
+-   Each project has an `owner_id` pointing to a user (the project owner)
+
+These relationships create a web of connected data. A single query can traverse these connections to answer complex questions like "Show me all tasks in projects owned by users who joined this year."
+
+### 10.2.2 SQL Fundamentals
+
+**Structured Query Language (SQL)** is the standard language for interacting with relational databases. Despite being over 50 years old, SQL remains essential because it provides a powerful, declarative way to describe what data you want without specifying how to retrieve it. The database engine optimizes query execution automatically.
+
+SQL divides into two main categories: Data Definition Language (DDL) for creating and modifying database structure, and Data Manipulation Language (DML) for working with the data itself.
+
+#### Data Definition Language (DDL)
+
+DDL statements define the structure of your database—creating tables, adding columns, establishing constraints. These statements typically run during application setup or migrations, not during normal operation.
+
+Let's create the tables for our task management application. We'll start with the users table:
+
+``` sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+This statement creates a table with six columns. Let's understand each element:
+
+-   `SERIAL PRIMARY KEY` creates an auto-incrementing integer that uniquely identifies each row. PostgreSQL automatically assigns values (1, 2, 3, ...) when you insert new rows.
+-   `VARCHAR(255)` means variable-length text up to 255 characters. We use this for emails and names.
+-   `UNIQUE` ensures no two users can have the same email address. The database rejects insertions that would create duplicates.
+-   `NOT NULL` means this column must have a value—you can't create a user without an email.
+-   `DEFAULT CURRENT_TIMESTAMP` automatically sets the creation time when a row is inserted.
+
+Now let's create the projects table, which references users:
+
+``` sql
+CREATE TABLE projects (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+The `REFERENCES users(id)` clause creates a foreign key relationship. This tells the database that `owner_id` must contain a valid user ID—you can't create a project owned by a non-existent user. The `ON DELETE CASCADE` clause specifies what happens when the referenced user is deleted: all their projects are automatically deleted too. This maintains referential integrity—you'll never have orphaned projects pointing to deleted users.
+
+Finally, the tasks table with multiple relationships and constraints:
+
+``` sql
+CREATE TABLE tasks (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+    status VARCHAR(20) DEFAULT 'todo' 
+        CHECK (status IN ('todo', 'in_progress', 'review', 'done')),
+    priority INTEGER DEFAULT 0 CHECK (priority BETWEEN 0 AND 4),
+    due_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+This table introduces several new concepts. The `CHECK` constraint validates data before insertion—status must be one of the four allowed values, and priority must be between 0 and 4. The database enforces these rules automatically, preventing invalid data from entering your system.
+
+Notice that `project_id` has a different deletion behavior: `ON DELETE SET NULL`. If a project is deleted, tasks aren't deleted—instead, their `project_id` becomes NULL, indicating they're no longer associated with any project. This design decision reflects business logic: deleting a project shouldn't destroy the work recorded in its tasks.
+
+After creating tables, we typically add indexes to speed up common queries:
+
+``` sql
+CREATE INDEX idx_tasks_user_id ON tasks(user_id);
+CREATE INDEX idx_tasks_project_id ON tasks(project_id);
+CREATE INDEX idx_tasks_status ON tasks(status);
+CREATE INDEX idx_tasks_due_date ON tasks(due_date);
+```
+
+Each index creates a data structure (typically a B-tree) that allows the database to find rows quickly without scanning the entire table. The `idx_tasks_user_id` index makes queries like "find all tasks for user 123" fast, even with millions of tasks.
+
+However, indexes aren't free. Each index consumes storage space and must be updated whenever data changes. Too many indexes slow down insertions and updates. The general rule: index columns that appear frequently in WHERE clauses or JOIN conditions.
+
+#### Data Manipulation Language (DML)
+
+DML statements work with the data itself: inserting new records, querying existing records, updating values, and deleting rows. These are the statements your application executes during normal operation.
+
+**Inserting Data**
+
+The INSERT statement adds new rows to a table:
+
+``` sql
+INSERT INTO users (email, name, password_hash)
+VALUES ('alice@example.com', 'Alice Johnson', '$2b$10$...');
+```
+
+Notice that we don't specify `id`, `created_at`, or `updated_at`—these columns have defaults. The database automatically assigns the next available ID and current timestamp.
+
+You can insert multiple rows in a single statement, which is more efficient than separate INSERT statements:
+
+``` sql
+INSERT INTO tasks (title, description, user_id, project_id, status, priority, due_date)
+VALUES 
+    ('Design homepage mockup', 'Create wireframes and mockups', 1, 1, 'in_progress', 2, '2024-12-15'),
+    ('Implement navigation', 'Build responsive nav component', 1, 1, 'todo', 1, '2024-12-20'),
+    ('Write content', 'Draft copy for main pages', 1, 1, 'todo', 1, '2024-12-18');
+```
+
+This single statement creates three tasks atomically—either all three are created or none are. This atomicity becomes important when you need to ensure data consistency.
+
+**Querying Data**
+
+The SELECT statement retrieves data from tables. It's the most commonly used SQL statement and offers tremendous flexibility.
+
+The simplest query retrieves all columns from a table:
+
+``` sql
+SELECT * FROM users;
+```
+
+In practice, you should specify the columns you need rather than using `*`. This makes your code clearer and can improve performance:
+
+``` sql
+SELECT id, name, email FROM users;
+```
+
+The WHERE clause filters results to rows matching specific conditions:
+
+``` sql
+SELECT * FROM tasks WHERE status = 'todo';
+```
+
+You can combine multiple conditions with AND and OR:
+
+``` sql
+SELECT * FROM tasks 
+WHERE status = 'in_progress' 
+  AND priority >= 2 
+  AND due_date < '2024-12-31';
+```
+
+This query finds high-priority tasks that are in progress and due before year's end. The database evaluates all conditions and returns only rows that satisfy all of them.
+
+Sorting with ORDER BY arranges results in a specific order:
+
+``` sql
+SELECT * FROM tasks ORDER BY due_date ASC, priority DESC;
+```
+
+This sorts tasks by due date (earliest first), and for tasks with the same due date, by priority (highest first). The ASC and DESC keywords specify ascending or descending order.
+
+For large result sets, LIMIT and OFFSET enable pagination:
+
+``` sql
+SELECT * FROM tasks ORDER BY id LIMIT 10 OFFSET 20;
+```
+
+This retrieves tasks 21-30 (skip 20, take 10). Combined with ORDER BY, this pattern enables "page 3 of results" functionality in your application.
+
+**Updating Data**
+
+The UPDATE statement modifies existing rows:
+
+``` sql
+UPDATE tasks 
+SET status = 'done', updated_at = CURRENT_TIMESTAMP 
+WHERE id = 1;
+```
+
+The WHERE clause is critical—without it, UPDATE affects every row in the table. Always include WHERE unless you intentionally want to update all rows.
+
+You can use expressions in updates:
+
+``` sql
+UPDATE tasks 
+SET priority = priority + 1 
+WHERE due_date < CURRENT_DATE AND status != 'done';
+```
+
+This increases the priority of all overdue, incomplete tasks. The database evaluates `priority + 1` for each matching row.
+
+**Deleting Data**
+
+The DELETE statement removes rows:
+
+``` sql
+DELETE FROM tasks WHERE id = 1;
+```
+
+Like UPDATE, DELETE without WHERE removes all rows—a dangerous operation. Most applications prefer "soft deletes" (marking rows as deleted rather than actually removing them) to preserve data and enable recovery.
+
+``` sql
+DELETE FROM tasks 
+WHERE status = 'done' 
+  AND updated_at < NOW() - INTERVAL '30 days';
+```
+
+This cleanup query removes completed tasks older than 30 days. The `INTERVAL` syntax is PostgreSQL-specific; other databases have different date arithmetic syntax.
+
+#### Joining Tables
+
+The real power of relational databases emerges when you combine data from multiple tables. JOIN operations connect rows based on related columns.
+
+An INNER JOIN returns only rows that have matches in both tables:
+
+``` sql
+SELECT 
+    t.id,
+    t.title,
+    t.status,
+    u.name AS assignee,
+    p.name AS project_name
+FROM tasks t
+INNER JOIN users u ON t.user_id = u.id
+INNER JOIN projects p ON t.project_id = p.id;
+```
+
+Let's break down this query. We're selecting from the `tasks` table (aliased as `t` for brevity). The first JOIN connects tasks to users: for each task, find the user whose ID matches the task's user_id. The second JOIN connects to projects similarly.
+
+The `AS` keyword creates column aliases—the results will show "assignee" and "project_name" rather than ambiguous "name" columns.
+
+Important: INNER JOIN excludes tasks that don't have a matching project (where project_id is NULL). If you want to include those tasks, use LEFT JOIN instead:
+
+``` sql
+SELECT 
+    u.name,
+    COUNT(t.id) AS task_count
+FROM users u
+LEFT JOIN tasks t ON u.id = t.user_id
+GROUP BY u.id, u.name;
+```
+
+A LEFT JOIN returns all rows from the left table (users) regardless of whether they have matching rows in the right table (tasks). Users with no tasks appear in results with NULL values for task columns. This query counts how many tasks each user has—including users with zero tasks.
+
+The GROUP BY clause is essential here. Without it, the query would fail because we're mixing aggregate (COUNT) and non-aggregate (name) columns. GROUP BY tells the database to compute one result row per user.
+
+Here's a more complex example that generates project statistics:
+
+``` sql
+SELECT 
+    p.name AS project,
+    COUNT(CASE WHEN t.status = 'done' THEN 1 END) AS completed,
+    COUNT(CASE WHEN t.status != 'done' THEN 1 END) AS remaining,
+    COUNT(t.id) AS total
+FROM projects p
+LEFT JOIN tasks t ON p.id = t.project_id
+GROUP BY p.id, p.name
+ORDER BY total DESC;
+```
+
+This query demonstrates conditional aggregation using CASE expressions. For each project, we count tasks in different categories. The CASE expression returns 1 when the condition is true and NULL otherwise; COUNT ignores NULLs, so we effectively count only matching rows.
+
+#### Aggregations and Subqueries
+
+Aggregate functions compute values across multiple rows. The most common aggregates are:
+
+-   `COUNT(*)` - number of rows
+-   `SUM(column)` - total of values
+-   `AVG(column)` - average value
+-   `MIN(column)` and `MAX(column)` - smallest and largest values
+
+``` sql
+SELECT 
+    COUNT(*) AS total_tasks,
+    COUNT(CASE WHEN status = 'done' THEN 1 END) AS completed_tasks,
+    AVG(estimated_hours) AS avg_estimate,
+    SUM(estimated_hours) AS total_hours
+FROM tasks;
+```
+
+This query computes overall statistics for all tasks. Note that AVG ignores NULL values—if some tasks don't have estimated_hours, they're excluded from the average calculation.
+
+GROUP BY creates separate aggregations for each group:
+
+``` sql
+SELECT 
+    status,
+    COUNT(*) AS count,
+    AVG(priority) AS avg_priority
+FROM tasks
+GROUP BY status;
+```
+
+This produces one row per status value, showing how many tasks are in each status and their average priority.
+
+The HAVING clause filters groups (as opposed to WHERE, which filters individual rows):
+
+``` sql
+SELECT 
+    user_id,
+    COUNT(*) AS task_count
+FROM tasks
+GROUP BY user_id
+HAVING COUNT(*) > 5;
+```
+
+This finds users with more than 5 tasks. The filtering happens after grouping—you can't use aggregate functions in WHERE clauses.
+
+**Subqueries** embed one query inside another:
+
+``` sql
+SELECT * FROM tasks
+WHERE user_id IN (
+    SELECT id FROM users WHERE email LIKE '%@company.com'
+);
+```
+
+The inner query finds all user IDs with company email addresses. The outer query then finds all tasks belonging to those users. This is equivalent to a JOIN but sometimes reads more naturally.
+
+**Common Table Expressions (CTEs)** provide a cleaner way to write complex queries:
+
+``` sql
+WITH task_stats AS (
+    SELECT 
+        user_id,
+        COUNT(*) AS total_tasks,
+        COUNT(CASE WHEN status = 'done' THEN 1 END) AS completed_tasks
+    FROM tasks
+    GROUP BY user_id
+)
+SELECT 
+    u.name,
+    ts.total_tasks,
+    ts.completed_tasks,
+    ROUND(ts.completed_tasks::DECIMAL / NULLIF(ts.total_tasks, 0) * 100, 1) AS completion_rate
+FROM users u
+JOIN task_stats ts ON u.id = ts.user_id
+ORDER BY completion_rate DESC;
+```
+
+The WITH clause defines a temporary result set (task_stats) that we can reference in the main query. This improves readability for complex queries and can sometimes improve performance by allowing the database to materialize intermediate results.
+
+The `NULLIF(ts.total_tasks, 0)` prevents division by zero—if a user has zero tasks, the expression returns NULL instead of causing an error.
+
+### 10.2.3 Database Normalization
+
+**Normalization** is the process of organizing data to minimize redundancy and dependency. Redundant data wastes storage and, more importantly, creates opportunities for inconsistency. If a customer's address is stored in multiple places, updating it requires changing multiple records—miss one, and your data becomes inconsistent.
+
+Normalization follows a series of "normal forms," each building on the previous:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    NORMALIZATION FORMS                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  FIRST NORMAL FORM (1NF)                                                │
+│  • Each column contains atomic (indivisible) values                     │
+│  • No repeating groups or arrays within a single column                 │
+│  • Each row is unique (has a primary key)                               │
+│                                                                         │
+│  SECOND NORMAL FORM (2NF)                                               │
+│  • Meets all 1NF requirements                                           │
+│  • All non-key columns depend on the entire primary key                 │
+│  • No partial dependencies (relevant for composite keys)                │
+│                                                                         │
+│  THIRD NORMAL FORM (3NF)                                                │
+│  • Meets all 2NF requirements                                           │
+│  • No transitive dependencies                                           │
+│  • Non-key columns depend only on the primary key, not on each other    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+Let's see normalization in action. Imagine we start with this denormalized orders table:
+
+```         
+BEFORE (Denormalized - Violates 1NF, 2NF, 3NF):
+┌────────────────────────────────────────────────────────────────────────┐
+│ orders                                                                 │
+├──────────┬────────────┬─────────────────┬──────────┬──────────────────┤
+│ order_id │ customer   │ customer_email  │ products │ product_prices   │
+├──────────┼────────────┼─────────────────┼──────────┼──────────────────┤
+│ 1        │ Alice      │ alice@email.com │ A, B, C  │ 10, 20, 30       │
+│ 2        │ Alice      │ alice@email.com │ B, D     │ 20, 40           │
+│ 3        │ Bob        │ bob@email.com   │ A        │ 10               │
+└──────────┴────────────┴─────────────────┴──────────┴──────────────────┘
+```
+
+This structure has multiple problems:
+
+**1NF Violation**: The products column contains multiple values ("A, B, C"). This makes it impossible to query efficiently—how do you find all orders containing product B? You'd need string manipulation, which is slow and error-prone.
+
+**2NF Violation**: Customer information (name, email) is repeated for every order. If Alice changes her email, you must update multiple rows. Miss one, and her email is inconsistent across orders.
+
+**3NF Violation**: Customer email depends on customer name, not on order_id. This is a "transitive dependency"—email depends on customer, which depends on order. Such dependencies cause update anomalies.
+
+The normalized design separates concerns into distinct tables:
+
+```         
+AFTER (Normalized to 3NF):
+
+customers                    products
+┌────────────┬───────────┐   ┌────────────┬───────┬───────┐
+│ id (PK)    │ email     │   │ id (PK)    │ name  │ price │
+├────────────┼───────────┤   ├────────────┼───────┼───────┤
+│ 1          │ alice@... │   │ 1          │ A     │ 10    │
+│ 2          │ bob@...   │   │ 2          │ B     │ 20    │
+└────────────┴───────────┘   │ 3          │ C     │ 30    │
+                             │ 4          │ D     │ 40    │
+orders                       └────────────┴───────┴───────┘
+┌────────────┬─────────────┐
+│ id (PK)    │ customer_id │  order_items (junction table)
+├────────────┼─────────────┤  ┌──────────┬────────────┬──────────┐
+│ 1          │ 1           │  │ order_id │ product_id │ quantity │
+│ 2          │ 1           │  ├──────────┼────────────┼──────────┤
+│ 3          │ 2           │  │ 1        │ 1          │ 1        │
+└────────────┴─────────────┘  │ 1        │ 2          │ 1        │
+                              │ 1        │ 3          │ 1        │
+                              │ 2        │ 2          │ 1        │
+                              │ 2        │ 4          │ 1        │
+                              │ 3        │ 1          │ 1        │
+                              └──────────┴────────────┴──────────┘
+```
+
+Now each piece of information is stored exactly once. Customer data lives in the customers table. Product data lives in the products table. Orders reference customers by ID. The order_items "junction table" connects orders to products, enabling a many-to-many relationship (an order can contain many products; a product can appear in many orders).
+
+To recreate the original denormalized view, we join the tables:
+
+``` sql
+SELECT 
+    o.id AS order_id,
+    c.name AS customer,
+    c.email,
+    STRING_AGG(p.name, ', ') AS products,
+    SUM(oi.price_at_time * oi.quantity) AS total
+FROM orders o
+JOIN customers c ON o.customer_id = c.id
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+GROUP BY o.id, c.name, c.email;
+```
+
+This query joins all four tables to produce a result similar to our original denormalized structure. The STRING_AGG function concatenates product names into a comma-separated list.
+
+Notice the `price_at_time` column in order_items. This is a deliberate denormalization—we store the price at the time of purchase rather than referencing the products table. Why? Product prices change over time, but an order's total should remain constant. This is an example of intentional denormalization for business requirements.
+
+### 10.2.4 Transactions and ACID Properties
+
+Real-world operations often require multiple database changes that must succeed or fail together. Consider transferring money between bank accounts: you must debit one account AND credit another. If the system crashes between these operations, money would vanish or appear from nowhere.
+
+**Transactions** solve this problem by grouping operations into atomic units. The database guarantees that either all operations in a transaction complete successfully, or none of them do.
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    ACID PROPERTIES                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ATOMICITY                                                              │
+│  All operations complete successfully, or none do. There's no partial   │
+│  state—you can't have "half a transaction." If anything fails, all      │
+│  changes are rolled back as if the transaction never happened.          │
+│                                                                         │
+│  CONSISTENCY                                                            │
+│  A transaction brings the database from one valid state to another.     │
+│  All constraints and rules remain satisfied. You can't end up with      │
+│  invalid data, even if the transaction is interrupted.                  │
+│                                                                         │
+│  ISOLATION                                                              │
+│  Concurrent transactions don't interfere with each other. Each          │
+│  transaction sees a consistent snapshot of the database. Two users      │
+│  booking the last airplane seat can't both succeed.                     │
+│                                                                         │
+│  DURABILITY                                                             │
+│  Once a transaction commits, it stays committed—even if the server      │
+│  crashes immediately afterward. The database writes to stable storage   │
+│  before confirming the commit.                                          │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+Here's a transaction that transfers money between accounts:
+
+``` sql
+BEGIN TRANSACTION;
+
+UPDATE accounts 
+SET balance = balance - 100 
+WHERE id = 1 AND balance >= 100;
+
+UPDATE accounts 
+SET balance = balance + 100 
+WHERE id = 2;
+
+INSERT INTO transfers (from_account, to_account, amount, created_at)
+VALUES (1, 2, 100, CURRENT_TIMESTAMP);
+
+COMMIT;
+```
+
+The BEGIN TRANSACTION statement starts a new transaction. All subsequent operations are part of this transaction. The COMMIT statement finalizes the transaction, making all changes permanent. If anything goes wrong before COMMIT, you can issue ROLLBACK to undo all changes.
+
+The WHERE clause `balance >= 100` is crucial—it prevents overdrafts. If the account doesn't have sufficient funds, no rows are updated, and your application code should check this and roll back the transaction.
+
+In application code, transaction management typically looks like this:
+
+``` javascript
+async function transferFunds(fromAccountId, toAccountId, amount) {
+  // Start a transaction
+  const trx = await db.transaction();
+  
+  try {
+    // Attempt to debit source account
+    // The WHERE clause ensures sufficient balance
+    const debited = await trx('accounts')
+      .where('id', fromAccountId)
+      .where('balance', '>=', amount)
+      .decrement('balance', amount);
+    
+    // Check if debit succeeded (row was updated)
+    if (debited === 0) {
+      throw new Error('Insufficient funds');
+    }
+    
+    // Credit destination account
+    await trx('accounts')
+      .where('id', toAccountId)
+      .increment('balance', amount);
+    
+    // Record the transfer for audit trail
+    await trx('transfers').insert({
+      from_account: fromAccountId,
+      to_account: toAccountId,
+      amount,
+      created_at: new Date()
+    });
+    
+    // All operations succeeded—commit the transaction
+    await trx.commit();
+    
+    return { success: true };
+  } catch (error) {
+    // Something went wrong—rollback all changes
+    await trx.rollback();
+    throw error;
+  }
+}
+```
+
+This code demonstrates several important patterns. First, we create a transaction object (`trx`) and use it for all database operations. This ensures all operations are part of the same transaction. Second, we check the result of the debit operation—if no rows were updated (insufficient funds), we throw an error. Third, we wrap everything in try/catch to ensure we roll back on any error. Finally, we only commit after all operations succeed.
+
+The beauty of transactions is that you don't need to write cleanup code for each failure scenario. No matter where the error occurs—after the debit but before the credit, or after recording the transfer—the rollback undoes everything atomically.
+
+------------------------------------------------------------------------
+
+## 10.3 NoSQL Databases
+
+While relational databases excel at structured data with complex relationships, they're not the best tool for every situation. **NoSQL databases** emerged to address specific use cases where relational databases struggle: massive scale, flexible schemas, high write throughput, or specialized data models.
+
+The term "NoSQL" originally meant "No SQL," but it's now commonly understood as "Not Only SQL"—acknowledging that these databases complement rather than replace relational databases.
+
+### 10.3.1 Types of NoSQL Databases
+
+NoSQL databases fall into four main categories, each optimized for different use cases:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    NOSQL DATABASE TYPES                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  DOCUMENT STORES                                                        │
+│  Store data as JSON-like documents with flexible, nested structures.    │
+│  Each document can have different fields—no fixed schema required.      │
+│  Best for: Content management, user profiles, product catalogs         │
+│  Examples: MongoDB, CouchDB, Firestore                                  │
+│                                                                         │
+│  KEY-VALUE STORES                                                       │
+│  The simplest model: a key maps to a value. Values can be anything—     │
+│  strings, numbers, or serialized objects. Extremely fast for lookups.   │
+│  Best for: Caching, sessions, feature flags, real-time data            │
+│  Examples: Redis, Memcached, Amazon DynamoDB                           │
+│                                                                         │
+│  COLUMN-FAMILY STORES                                                   │
+│  Store data in columns rather than rows, enabling efficient queries     │
+│  over specific columns across billions of rows.                         │
+│  Best for: Analytics, time-series data, IoT sensor data                │
+│  Examples: Apache Cassandra, HBase, ScyllaDB                           │
+│                                                                         │
+│  GRAPH DATABASES                                                        │
+│  Store entities (nodes) and relationships (edges) as first-class        │
+│  citizens. Optimized for traversing connections between data.           │
+│  Best for: Social networks, recommendations, fraud detection           │
+│  Examples: Neo4j, Amazon Neptune, ArangoDB                             │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 10.3.2 Document Databases (MongoDB)
+
+Document databases store data as self-contained documents, typically in JSON or a binary JSON variant (BSON). Unlike relational tables with fixed columns, documents can have varying structures. This flexibility makes document databases excellent for evolving schemas and hierarchical data.
+
+Here's how a user might be represented in MongoDB:
+
+``` javascript
+{
+  "_id": ObjectId("507f1f77bcf86cd799439011"),
+  "email": "alice@example.com",
+  "name": "Alice Johnson",
+  "profile": {
+    "avatar": "https://example.com/avatars/alice.jpg",
+    "bio": "Software developer",
+    "location": "San Francisco"
+  },
+  "tasks": [
+    {
+      "title": "Complete project proposal",
+      "status": "in_progress",
+      "priority": 2,
+      "tags": ["work", "urgent"],
+      "due_date": ISODate("2024-12-15")
+    },
+    {
+      "title": "Review pull requests",
+      "status": "todo",
+      "priority": 1,
+      "tags": ["work"],
+      "due_date": ISODate("2024-12-10")
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "notifications": true,
+    "language": "en"
+  },
+  "created_at": ISODate("2024-01-15"),
+  "updated_at": ISODate("2024-12-09")
+}
+```
+
+Notice several differences from relational design. First, the document contains nested objects (`profile`, `settings`) that would require separate tables in a relational database. Second, the `tasks` array embeds related data directly within the user document. Third, different users could have different fields—one might have a `company` field that others lack.
+
+This embedding pattern eliminates JOINs for common access patterns. If you typically fetch a user with their tasks, having everything in one document means a single database round-trip instead of multiple queries.
+
+Let's see how to work with MongoDB in Node.js:
+
+``` javascript
+const { MongoClient } = require('mongodb');
+
+// Connect to MongoDB
+const client = new MongoClient(process.env.MONGODB_URI);
+const db = client.db('taskflow');
+```
+
+**Creating documents** uses the insertOne or insertMany methods:
+
+``` javascript
+// Insert a single user
+await db.collection('users').insertOne({
+  email: 'bob@example.com',
+  name: 'Bob Smith',
+  tasks: [],
+  created_at: new Date()
+});
+
+// Insert multiple documents at once
+await db.collection('users').insertMany([
+  { email: 'carol@example.com', name: 'Carol White', tasks: [] },
+  { email: 'dave@example.com', name: 'Dave Brown', tasks: [] }
+]);
+```
+
+MongoDB automatically generates unique `_id` fields if you don't provide them. These ObjectIds include a timestamp, making them roughly sortable by creation time.
+
+**Querying documents** offers flexible filtering:
+
+``` javascript
+// Find a single document by field value
+const user = await db.collection('users')
+  .findOne({ email: 'alice@example.com' });
+
+// Find documents with embedded array matching
+// This finds users who have at least one in_progress task
+const busyUsers = await db.collection('users')
+  .find({ 'tasks.status': 'in_progress' })
+  .toArray();
+
+// Project specific fields (like SQL SELECT)
+// Only returns name and email, not the entire document
+const userNames = await db.collection('users')
+  .find({}, { projection: { name: 1, email: 1 } })
+  .toArray();
+```
+
+The dot notation (`tasks.status`) allows querying nested fields and array elements. This is powerful but requires understanding how MongoDB handles array queries—`'tasks.status': 'in_progress'` finds documents where ANY task has that status.
+
+**Updating documents** can modify the entire document or specific fields:
+
+``` javascript
+// Update a single field using $set
+// Other fields remain unchanged
+await db.collection('users').updateOne(
+  { email: 'alice@example.com' },
+  { $set: { 'profile.bio': 'Senior developer' } }
+);
+
+// Add an element to an array using $push
+await db.collection('users').updateOne(
+  { email: 'alice@example.com' },
+  { 
+    $push: { 
+      tasks: {
+        title: 'New task',
+        status: 'todo',
+        created_at: new Date()
+      }
+    }
+  }
+);
+
+// Update a specific array element using $ positional operator
+// This updates the status of the task with title "Complete project proposal"
+await db.collection('users').updateOne(
+  { 
+    email: 'alice@example.com', 
+    'tasks.title': 'Complete project proposal' 
+  },
+  { $set: { 'tasks.$.status': 'done' } }
+);
+```
+
+The `$` positional operator is crucial for updating array elements. It refers to the first array element that matched the query condition. Without it, you'd need to know the exact array index.
+
+MongoDB's update operators (`$set`, `$push`, `$pull`, `$inc`, etc.) enable atomic modifications without reading and rewriting entire documents. This is both more efficient and safer for concurrent updates.
+
+### 10.3.3 Key-Value Stores (Redis)
+
+Redis is an in-memory data store that excels at speed. Because data lives in RAM rather than on disk, Redis can handle millions of operations per second with sub-millisecond latency. This makes it ideal for caching, session storage, and real-time features.
+
+The trade-off is capacity—RAM is more expensive than disk storage, so Redis typically holds a subset of your data: frequently accessed items, temporary data, or data that needs extremely fast access.
+
+Let's explore Redis's versatile data structures:
+
+``` javascript
+const Redis = require('ioredis');
+const redis = new Redis(process.env.REDIS_URL);
+```
+
+**Basic key-value operations** are the foundation:
+
+``` javascript
+// Store a simple value
+await redis.set('user:1:name', 'Alice');
+
+// Retrieve a value
+const name = await redis.get('user:1:name');  // 'Alice'
+
+// Set with automatic expiration (TTL)
+// This key will disappear after 1 hour
+await redis.set('session:abc123', JSON.stringify({ userId: 1 }), 'EX', 3600);
+
+// Check remaining time-to-live
+const ttl = await redis.ttl('session:abc123');  // seconds remaining
+```
+
+The key naming convention (`user:1:name`) is a Redis best practice. Using colons to create hierarchical namespaces makes keys self-documenting and easier to manage.
+
+Expiration (TTL) is essential for cache management. Without it, cached data would accumulate forever. By setting appropriate TTLs, stale data automatically disappears.
+
+**Hashes** store object-like structures efficiently:
+
+``` javascript
+// Store multiple fields at once
+await redis.hset('user:1', {
+  name: 'Alice',
+  email: 'alice@example.com',
+  role: 'admin'
+});
+
+// Retrieve all fields
+const user = await redis.hgetall('user:1');
+// { name: 'Alice', email: 'alice@example.com', role: 'admin' }
+
+// Retrieve single field
+const email = await redis.hget('user:1', 'email');
+
+// Increment a numeric field atomically
+await redis.hincrby('user:1', 'login_count', 1);
+```
+
+Hashes are more memory-efficient than storing each field as a separate key. They also enable atomic operations on individual fields without reading/writing the entire object.
+
+**Lists** provide ordered collections:
+
+``` javascript
+// Push to the front of a list (newest first)
+await redis.lpush('notifications:1', 'New message');
+await redis.lpush('notifications:1', 'Task assigned');
+
+// Get a range of elements (0 to -1 means all)
+const notifications = await redis.lrange('notifications:1', 0, -1);
+// ['Task assigned', 'New message']
+
+// Pop from the list (remove and return)
+const latest = await redis.lpop('notifications:1');
+
+// Trim to keep only recent items
+await redis.ltrim('notifications:1', 0, 99);  // Keep only 100 newest
+```
+
+Lists are perfect for activity feeds, queues, and recent items. The lpush/rpop combination creates a queue (FIFO), while lpush/lpop creates a stack (LIFO).
+
+**Sets** store unique values:
+
+``` javascript
+// Add members (duplicates are ignored)
+await redis.sadd('user:1:tags', 'developer', 'team-lead', 'remote');
+await redis.sadd('user:1:tags', 'developer');  // No effect—already exists
+
+// Get all members
+const tags = await redis.smembers('user:1:tags');
+// ['developer', 'team-lead', 'remote']
+
+// Check membership
+const isRemote = await redis.sismember('user:1:tags', 'remote');  // 1 (true)
+
+// Set operations
+const user1Tags = await redis.smembers('user:1:tags');
+const user2Tags = await redis.smembers('user:2:tags');
+const commonTags = await redis.sinter('user:1:tags', 'user:2:tags');  // Intersection
+```
+
+Sets are useful for tags, unique visitors, online users, and any scenario where you need fast membership testing without duplicates.
+
+**Sorted sets** add scoring for automatic ordering:
+
+``` javascript
+// Add members with scores
+await redis.zadd('leaderboard', 100, 'alice', 85, 'bob', 92, 'carol');
+
+// Get top performers (highest scores first)
+const topThree = await redis.zrevrange('leaderboard', 0, 2, 'WITHSCORES');
+// ['alice', '100', 'carol', '92', 'bob', '85']
+
+// Get rank (position) of a member
+const aliceRank = await redis.zrevrank('leaderboard', 'alice');  // 0 (first place)
+
+// Increment a score
+await redis.zincrby('leaderboard', 10, 'bob');  // Bob now has 95 points
+```
+
+Sorted sets are perfect for leaderboards, priority queues, and time-based indexes (using timestamps as scores).
+
+**Implementing a caching layer** is one of Redis's most common uses:
+
+``` javascript
+async function getUserWithCache(userId) {
+  const cacheKey = `user:${userId}`;
+  
+  // Step 1: Check the cache
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    console.log('Cache hit!');
+    return JSON.parse(cached);
+  }
+  
+  // Step 2: Cache miss—fetch from primary database
+  console.log('Cache miss—fetching from database');
+  const user = await db('users').where('id', userId).first();
+  
+  // Step 3: Store in cache for future requests
+  if (user) {
+    await redis.set(cacheKey, JSON.stringify(user), 'EX', 300);  // 5 minutes
+  }
+  
+  return user;
+}
+```
+
+This "cache-aside" pattern checks the cache first, falls back to the database on miss, and populates the cache for future requests. The 5-minute TTL balances freshness against database load.
+
+**Cache invalidation** is equally important—when data changes, the cache must be updated or cleared:
+
+``` javascript
+async function updateUser(userId, updates) {
+  // Update the primary database
+  await db('users').where('id', userId).update(updates);
+  
+  // Invalidate the cache (delete, don't update)
+  // Next read will fetch fresh data from database
+  await redis.del(`user:${userId}`);
+}
+```
+
+Deleting rather than updating the cache is usually safer. It ensures the next read gets fresh data from the authoritative source (the database), avoiding any possibility of the cache and database becoming inconsistent.
+
+### 10.3.4 Choosing Between SQL and NoSQL
+
+The choice between SQL and NoSQL isn't about which is "better"—it's about which fits your specific requirements. Here's a framework for making this decision:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    SQL vs. NOSQL COMPARISON                             │
+├───────────────────────────┬─────────────────────────────────────────────┤
+│        RELATIONAL (SQL)   │           NOSQL                             │
+├───────────────────────────┼─────────────────────────────────────────────┤
+│ Fixed schema              │ Flexible schema                             │
+│ ACID transactions         │ Eventual consistency (usually)              │
+│ Complex queries (JOINs)   │ Simple queries, denormalized data           │
+│ Vertical scaling          │ Horizontal scaling                          │
+│ Mature tooling            │ Newer, varied tooling                       │
+│ Strong consistency        │ High availability                           │
+└───────────────────────────┴─────────────────────────────────────────────┘
+```
+
+**Choose a relational database when:**
+
+-   Data has clear relationships that benefit from JOINs
+-   ACID compliance is required (financial transactions, inventory)
+-   You need complex queries and ad-hoc reporting
+-   Schema is well-defined and relatively stable
+-   Data integrity is paramount
+
+Examples: Banking systems, e-commerce orders, ERP systems, traditional web applications
+
+**Choose NoSQL when:**
+
+-   Schema evolves frequently or varies between records
+-   Massive scale is required (millions of writes per second)
+-   Simple access patterns (key-based lookup, document retrieval)
+-   Data is naturally hierarchical or document-shaped
+-   High availability is more important than consistency
+
+Examples: Content management systems, real-time analytics, IoT sensor data, user session storage
+
+**Many production systems use both** (polyglot persistence):
+
+-   PostgreSQL for core business data (users, orders, payments)
+-   Redis for caching and sessions
+-   Elasticsearch for full-text search
+-   MongoDB for flexible content or audit logs
+
+This approach uses each database for what it does best. The complexity cost is worthwhile when different data has genuinely different requirements.
+
+------------------------------------------------------------------------
+
+## 10.4 RESTful API Design
+
+With data stored in databases, we need a way for applications to access it. **REST (Representational State Transfer)** is an architectural style that has become the dominant approach for web APIs. REST APIs use HTTP methods to perform operations on resources, providing a uniform, stateless interface.
+
+### 10.4.1 REST Principles
+
+REST is built on several key principles that guide API design:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    REST PRINCIPLES                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  CLIENT-SERVER SEPARATION                                               │
+│  Clients and servers evolve independently. The server doesn't know or   │
+│  care whether it's serving a web app, mobile app, or CLI tool.          │
+│                                                                         │
+│  STATELESSNESS                                                          │
+│  Each request contains all information needed to process it. The        │
+│  server doesn't remember previous requests. This simplifies scaling—    │
+│  any server can handle any request.                                     │
+│                                                                         │
+│  CACHEABILITY                                                           │
+│  Responses indicate whether they can be cached. This improves           │
+│  performance and reduces server load.                                   │
+│                                                                         │
+│  UNIFORM INTERFACE                                                      │
+│  All resources are accessed through a consistent interface: URIs        │
+│  identify resources, HTTP methods perform operations, standard          │
+│  formats (JSON) represent data.                                         │
+│                                                                         │
+│  LAYERED SYSTEM                                                         │
+│  Clients can't tell whether they're connected directly to the server    │
+│  or through intermediaries (load balancers, caches, gateways).          │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+The **statelessness** principle deserves emphasis. In a REST API, the server doesn't maintain session state between requests. If a user is logged in, every request must include authentication information (typically a token). This seems redundant, but it enables horizontal scaling—since any server can handle any request, you can add servers to handle more load without worrying about session affinity.
+
+### 10.4.2 Resource-Oriented Design
+
+In REST, everything is a **resource**—a conceptual entity that can be identified, retrieved, and manipulated. Resources are identified by URIs (Uniform Resource Identifiers) and typically represent nouns in your domain: users, tasks, projects, comments.
+
+Good URI design follows consistent conventions:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    RESOURCE NAMING CONVENTIONS                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  USE NOUNS, NOT VERBS                                                   │
+│  Resources are things, not actions.                                     │
+│  ✓ /users                    ✗ /getUsers                               │
+│  ✓ /tasks                    ✗ /createTask                             │
+│  ✓ /projects/123/tasks       ✗ /getTasksForProject                     │
+│                                                                         │
+│  USE PLURAL NOUNS                                                       │
+│  Consistency makes the API predictable.                                 │
+│  ✓ /users                    ✗ /user                                   │
+│  ✓ /users/123                ✗ /user/123                               │
+│                                                                         │
+│  USE HIERARCHY FOR RELATIONSHIPS                                        │
+│  Nested resources show ownership or containment.                        │
+│  ✓ /projects/123/tasks       (tasks belonging to project 123)          │
+│  ✓ /users/456/notifications  (notifications for user 456)              │
+│                                                                         │
+│  USE LOWERCASE AND HYPHENS                                              │
+│  URIs are case-sensitive; consistency prevents errors.                  │
+│  ✓ /task-comments            ✗ /taskComments                           │
+│  ✓ /user-profiles            ✗ /UserProfiles                           │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+For our task management API, here's how resources map to URIs:
+
+```         
+/users                      Collection of all users
+/users/123                  Single user with ID 123
+/users/123/tasks            Tasks assigned to user 123
+/users/123/projects         Projects owned by user 123
+
+/projects                   Collection of all projects
+/projects/456               Single project with ID 456
+/projects/456/tasks         Tasks within project 456
+/projects/456/members       Members of project 456
+
+/tasks                      Collection of all tasks
+/tasks/789                  Single task with ID 789
+/tasks/789/comments         Comments on task 789
+/tasks/789/attachments      Files attached to task 789
+```
+
+Notice how the hierarchy expresses relationships. `/projects/456/tasks` and `/users/123/tasks` might return different (or overlapping) sets of tasks, filtered by project or assignee respectively.
+
+### 10.4.3 HTTP Methods and CRUD Operations
+
+REST uses HTTP methods to indicate what operation to perform on a resource. Each method has specific semantics that clients and servers agree on:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    HTTP METHODS AND OPERATIONS                          │
+├──────────┬─────────────┬────────────────────────────────────────────────┤
+│  Method  │  Operation  │  Description                                   │
+├──────────┼─────────────┼────────────────────────────────────────────────┤
+│  GET     │  Read       │  Retrieve resource(s). Safe—doesn't modify     │
+│          │             │  data. Cacheable.                              │
+├──────────┼─────────────┼────────────────────────────────────────────────┤
+│  POST    │  Create     │  Create a new resource. The server assigns     │
+│          │             │  the ID and returns the created resource.      │
+├──────────┼─────────────┼────────────────────────────────────────────────┤
+│  PUT     │  Replace    │  Replace an entire resource. Client provides   │
+│          │             │  all fields; missing fields are cleared.       │
+├──────────┼─────────────┼────────────────────────────────────────────────┤
+│  PATCH   │  Update     │  Partial update. Client provides only the      │
+│          │             │  fields to change.                             │
+├──────────┼─────────────┼────────────────────────────────────────────────┤
+│  DELETE  │  Delete     │  Remove a resource. Often returns empty        │
+│          │             │  response (204 No Content).                    │
+└──────────┴─────────────┴────────────────────────────────────────────────┘
+```
+
+Two important properties distinguish these methods:
+
+**Safety**: GET requests are "safe"—they only retrieve data without side effects. You can call GET as many times as you want without changing anything. This allows aggressive caching and prefetching.
+
+**Idempotency**: GET, PUT, and DELETE are idempotent—calling them multiple times has the same effect as calling once. If you PUT the same data twice, the resource ends up in the same state. POST is NOT idempotent—each POST typically creates a new resource.
+
+Here's how these methods apply to our tasks resource:
+
+```         
+GET    /api/tasks              List all tasks (with pagination)
+GET    /api/tasks/123          Get task with ID 123
+POST   /api/tasks              Create a new task
+PUT    /api/tasks/123          Replace task 123 entirely
+PATCH  /api/tasks/123          Update specific fields of task 123
+DELETE /api/tasks/123          Delete task 123
+
+GET    /api/tasks?status=todo                Filter tasks by status
+GET    /api/tasks?page=2&limit=20            Paginate results
+GET    /api/tasks?sort=due_date&order=asc    Sort results
+```
+
+Query parameters modify GET requests—filtering, pagination, and sorting change which resources are returned and in what order, but they don't create or modify resources.
+
+### 10.4.4 HTTP Status Codes
+
+Status codes communicate the result of an API request. Using appropriate codes makes your API self-documenting and helps clients handle responses correctly:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    ESSENTIAL STATUS CODES                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  SUCCESS (2xx)                                                          │
+│  200 OK              Request succeeded. Body contains result.           │
+│  201 Created         Resource created. Body contains new resource.      │
+│  204 No Content      Success, but no body (common for DELETE).          │
+│                                                                         │
+│  CLIENT ERRORS (4xx) — Problem with the request                         │
+│  400 Bad Request     Malformed request (invalid JSON, wrong format).    │
+│  401 Unauthorized    Authentication required or failed.                 │
+│  403 Forbidden       Authenticated, but not authorized for this.        │
+│  404 Not Found       Resource doesn't exist.                            │
+│  409 Conflict        Request conflicts with current state.              │
+│  422 Unprocessable   Valid request, but validation failed.              │
+│  429 Too Many        Rate limit exceeded.                               │
+│                                                                         │
+│  SERVER ERRORS (5xx) — Problem on the server                            │
+│  500 Internal Error  Unexpected server error (bug, crash).              │
+│  502 Bad Gateway     Invalid response from upstream server.             │
+│  503 Unavailable     Server temporarily overloaded or down.             │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+The distinction between 401 and 403 often confuses developers:
+
+-   **401 Unauthorized**: "I don't know who you are. Please authenticate."
+-   **403 Forbidden**: "I know who you are, but you can't do this."
+
+Similarly, 400 vs 422:
+
+-   **400 Bad Request**: The request is malformed (can't parse JSON, missing required header).
+-   **422 Unprocessable Entity**: The request is valid, but the data fails validation (email format wrong, title too long).
+
+### 10.4.5 Implementing a RESTful API
+
+Let's build a complete REST API for tasks using Express.js. We'll structure the code into layers: routes (HTTP handling), services (business logic), and a clean separation of concerns.
+
+First, the route handlers that define our endpoints:
+
+``` javascript
+// routes/tasks.js
+const express = require('express');
+const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const taskSchema = require('../schemas/task');
+const taskService = require('../services/taskService');
+```
+
+This file begins by importing dependencies. We separate concerns: authentication middleware verifies the user, validation middleware checks request data, and the service layer handles business logic. This structure makes each piece testable and replaceable.
+
+The list endpoint returns paginated, filtered tasks:
+
+``` javascript
+// GET /api/tasks - List tasks with filtering and pagination
+router.get('/', authenticate, async (req, res, next) => {
+  try {
+    // Extract query parameters with defaults
+    const { 
+      page = 1, 
+      limit = 20, 
+      status, 
+      priority, 
+      sort = 'created_at', 
+      order = 'desc' 
+    } = req.query;
+    
+    // Call service layer with parsed parameters
+    const result = await taskService.list({
+      userId: req.user.id,                    // From auth middleware
+      page: parseInt(page),                   // Convert string to number
+      limit: Math.min(parseInt(limit), 100),  // Cap at 100 to prevent abuse
+      filters: { status, priority },
+      sort,
+      order
+    });
+    
+    // Return data with pagination metadata
+    res.json({
+      data: result.tasks,
+      pagination: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: Math.ceil(result.total / result.limit)
+      }
+    });
+  } catch (error) {
+    next(error);  // Pass to error handling middleware
+  }
+});
+```
+
+Several design decisions here merit explanation. The `authenticate` middleware runs before our handler, populating `req.user` with the authenticated user's information. Query parameters are strings, so we parse them to numbers. We cap `limit` at 100 to prevent clients from requesting enormous result sets. The response includes pagination metadata so clients know how to fetch more results.
+
+The single-item endpoint retrieves one task:
+
+``` javascript
+// GET /api/tasks/:id - Get single task
+router.get('/:id', authenticate, async (req, res, next) => {
+  try {
+    // Service checks ownership internally
+    const task = await taskService.getById(req.params.id, req.user.id);
+    
+    if (!task) {
+      return res.status(404).json({
+        error: {
+          code: 'TASK_NOT_FOUND',
+          message: 'Task not found'
+        }
+      });
+    }
+    
+    res.json({ data: task });
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+Notice the error response structure—we include both a machine-readable code (`TASK_NOT_FOUND`) and a human-readable message. This allows clients to handle specific errors programmatically while still displaying meaningful messages to users.
+
+Creating a task validates input and returns the created resource:
+
+``` javascript
+// POST /api/tasks - Create task
+router.post('/', authenticate, validate(taskSchema.create), async (req, res, next) => {
+  try {
+    // Validation already passed (middleware would have returned 422)
+    // Add authenticated user as owner
+    const task = await taskService.create({
+      ...req.body,
+      userId: req.user.id
+    });
+    
+    // 201 Created with the new resource
+    res.status(201).json({ data: task });
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+The `validate(taskSchema.create)` middleware runs before our handler, ensuring `req.body` contains valid data. If validation fails, the middleware returns a 422 response and our handler never runs. This keeps validation logic centralized and reusable.
+
+The update endpoint demonstrates PATCH semantics—partial updates:
+
+``` javascript
+// PATCH /api/tasks/:id - Partial update
+router.patch('/:id', authenticate, validate(taskSchema.patch), async (req, res, next) => {
+  try {
+    // Service updates only provided fields
+    const task = await taskService.update(req.params.id, req.user.id, req.body);
+    
+    if (!task) {
+      return res.status(404).json({
+        error: {
+          code: 'TASK_NOT_FOUND',
+          message: 'Task not found'
+        }
+      });
+    }
+    
+    res.json({ data: task });
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+With PATCH, clients send only the fields they want to change. If you want to update just the status, send `{ "status": "done" }`—other fields remain unchanged. This differs from PUT, where you'd send the entire resource and unspecified fields would be cleared.
+
+Finally, deletion:
+
+``` javascript
+// DELETE /api/tasks/:id - Delete task
+router.delete('/:id', authenticate, async (req, res, next) => {
+  try {
+    const deleted = await taskService.delete(req.params.id, req.user.id);
+    
+    if (!deleted) {
+      return res.status(404).json({
+        error: {
+          code: 'TASK_NOT_FOUND',
+          message: 'Task not found'
+        }
+      });
+    }
+    
+    // 204 No Content - success but nothing to return
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;
+```
+
+DELETE returns 204 No Content on success—there's no body to return since the resource no longer exists.
+
+Now let's look at the service layer that contains business logic:
+
+``` javascript
+// services/taskService.js
+const db = require('../db');
+
+class TaskService {
+  async list({ userId, page, limit, filters, sort, order }) {
+    // Start building query
+    const query = db('tasks')
+      .where('user_id', userId)
+      .orderBy(sort, order);
+    
+    // Apply filters conditionally
+    if (filters.status) {
+      query.where('status', filters.status);
+    }
+    if (filters.priority) {
+      query.where('priority', filters.priority);
+    }
+    
+    // Get total count for pagination (before limit/offset)
+    const countQuery = query.clone();
+    const [{ count }] = await countQuery.count('* as count');
+    
+    // Apply pagination
+    const tasks = await query
+      .limit(limit)
+      .offset((page - 1) * limit);
+    
+    return {
+      tasks,
+      page,
+      limit,
+      total: parseInt(count)
+    };
+  }
+```
+
+The list method demonstrates several important patterns. We build the query incrementally, adding filters only if provided. We clone the query before counting because limit/offset would affect the count. The offset calculation `(page - 1) * limit` converts page numbers (1-indexed) to database offsets (0-indexed).
+
+``` javascript
+  async getById(id, userId) {
+    // Combine id check and ownership check in one query
+    return db('tasks')
+      .where({ id, user_id: userId })
+      .first();
+  }
+```
+
+The getById method includes `user_id` in the query. This ensures users can only access their own tasks—a form of authorization baked into the query itself.
+
+``` javascript
+  async create(data) {
+    // Insert and return the created row
+    const [task] = await db('tasks')
+      .insert({
+        title: data.title,
+        description: data.description,
+        user_id: data.userId,
+        project_id: data.projectId,
+        status: data.status || 'todo',
+        priority: data.priority || 0,
+        due_date: data.dueDate
+      })
+      .returning('*');  // PostgreSQL returns the inserted row
+    
+    return task;
+  }
+```
+
+The create method maps from API field names (camelCase) to database column names (snake_case). The `.returning('*')` clause tells PostgreSQL to return the inserted row, including the generated ID and timestamps.
+
+``` javascript
+  async update(id, userId, data) {
+    // Only update provided fields
+    const [task] = await db('tasks')
+      .where({ id, user_id: userId })
+      .update({
+        ...data,                      // Spread provided fields
+        updated_at: db.fn.now()       // Always update timestamp
+      })
+      .returning('*');
+    
+    return task;  // undefined if no row matched
+  }
+  
+  async delete(id, userId) {
+    const deleted = await db('tasks')
+      .where({ id, user_id: userId })
+      .del();
+    
+    return deleted > 0;  // True if a row was deleted
+  }
+}
+
+module.exports = new TaskService();
+```
+
+The service layer handles data access and business logic, keeping route handlers thin. This separation makes the code more testable—you can test service methods directly without HTTP, and test routes with a mocked service.
+
+### 10.4.6 Response Structure
+
+Consistent response formats make your API predictable and easier to consume. Here's a structure that works well:
+
+``` javascript
+// Success - single resource
+{
+  "data": {
+    "id": 123,
+    "title": "Complete project",
+    "status": "in_progress",
+    "created_at": "2024-12-09T10:30:00Z"
+  }
+}
+
+// Success - collection with pagination
+{
+  "data": [
+    { "id": 123, "title": "Task 1" },
+    { "id": 124, "title": "Task 2" }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 45,
+    "totalPages": 3
+  }
+}
+
+// Error
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request data",
+    "details": [
+      { "field": "title", "message": "Title is required" },
+      { "field": "priority", "message": "Priority must be between 0 and 4" }
+    ]
+  }
+}
+```
+
+The consistent `data` wrapper makes responses predictable—clients always look in the same place for the result. The `error` structure provides both machine-readable codes for programmatic handling and human-readable messages for display. The optional `details` array allows field-level error reporting for forms.
+
+------------------------------------------------------------------------
+
+## 10.5 GraphQL
+
+While REST has served us well, it has limitations. Mobile apps with limited bandwidth want minimal data. Complex UIs need data from multiple resources. Different clients have different data needs. **GraphQL** addresses these challenges by letting clients specify exactly what data they need.
+
+### 10.5.1 The Problem GraphQL Solves
+
+Consider a mobile app displaying a task list. With REST, you might face these issues:
+
+**Over-fetching**: The `/tasks` endpoint returns all task fields, but the list view only needs `id`, `title`, and `status`. You're transferring unnecessary data.
+
+**Under-fetching**: The list also shows the assignee's name, but that requires a separate request to `/users/{id}` for each task—the dreaded N+1 problem.
+
+**Multiple round trips**: To show a dashboard with user info, their tasks, and project summaries, you need three separate requests.
+
+GraphQL solves these with a single query that specifies exactly what's needed:
+
+``` graphql
+query Dashboard {
+  me {
+    name
+    avatar
+  }
+  myTasks(limit: 5) {
+    id
+    title
+    status
+    assignee {
+      name
+    }
+  }
+  myProjects {
+    name
+    taskCount
+  }
+}
+```
+
+One request, exactly the needed data, no wasted bandwidth.
+
+### 10.5.2 GraphQL Schema
+
+A GraphQL API is defined by its **schema**—a type system describing what data is available and how it can be queried. Let's build a schema for our task management application:
+
+``` graphql
+# schema.graphql
+
+# Enums define a fixed set of values
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+```
+
+Enums provide type safety—the API rejects invalid status values rather than accepting arbitrary strings.
+
+``` graphql
+# Object types define the shape of resources
+type User {
+  id: ID!                                          # ! means non-nullable
+  email: String!
+  name: String!
+  avatar: String                                   # No ! means nullable
+  tasks(status: TaskStatus, limit: Int): [Task!]!  # Returns list of Tasks
+  projects: [Project!]!
+  createdAt: DateTime!
+}
+```
+
+The User type shows several GraphQL features. `ID!` is a non-nullable unique identifier. `String` (without `!`) is a nullable string—avatar might be null. `[Task!]!` means a non-nullable list of non-nullable tasks—the list is always present (might be empty), and every element is a valid Task.
+
+The `tasks` field has arguments—clients can filter by status or limit results. This flexibility is part of what makes GraphQL powerful.
+
+``` graphql
+type Task {
+  id: ID!
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  assignee: User!                  # Relationship to User
+  project: Project                 # Optional relationship
+  comments: [Comment!]!
+  dueDate: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Project {
+  id: ID!
+  name: String!
+  description: String
+  owner: User!
+  members: [User!]!
+  tasks(status: TaskStatus): [Task!]!
+  taskCount: Int!                  # Computed field
+  completedTaskCount: Int!
+  createdAt: DateTime!
+}
+```
+
+Notice how types reference each other—Task has an `assignee` (User) and `project` (Project), while Project has `tasks` (list of Task). These relationships form a graph that clients can traverse in queries.
+
+**Input types** define the shape of mutation arguments:
+
+``` graphql
+input CreateTaskInput {
+  title: String!
+  description: String
+  projectId: ID
+  priority: TaskPriority = MEDIUM    # Default value
+  dueDate: DateTime
+}
+
+input UpdateTaskInput {
+  title: String
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: DateTime
+}
+```
+
+Input types are similar to object types but used for arguments. They can have default values—if `priority` isn't provided, it defaults to MEDIUM.
+
+**The Query type** defines read operations:
+
+``` graphql
+type Query {
+  # Current authenticated user
+  me: User!
+  
+  # Look up specific resources
+  user(id: ID!): User
+  task(id: ID!): Task
+  project(id: ID!): Project
+  
+  # List resources with filtering
+  tasks(
+    status: TaskStatus
+    priority: TaskPriority
+    projectId: ID
+    limit: Int
+    offset: Int
+  ): [Task!]!
+}
+```
+
+Each field in Query is an entry point for reads. Arguments enable filtering and pagination. The return types specify what clients receive.
+
+**The Mutation type** defines write operations:
+
+``` graphql
+type Mutation {
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+  deleteTask(id: ID!): Boolean!
+  
+  addComment(taskId: ID!, text: String!): Comment!
+}
+```
+
+Mutations modify data and return the affected resource. This lets clients update their cache without additional requests.
+
+### 10.5.3 Writing GraphQL Queries
+
+GraphQL queries declare exactly what data to fetch. Let's explore increasingly complex examples:
+
+**Simple query**:
+
+``` graphql
+query GetMe {
+  me {
+    id
+    name
+    email
+  }
+}
+```
+
+This fetches only three fields from the current user. The response mirrors the query structure:
+
+``` json
+{
+  "data": {
+    "me": {
+      "id": "123",
+      "name": "Alice",
+      "email": "alice@example.com"
+    }
+  }
+}
+```
+
+**Query with arguments**:
+
+``` graphql
+query GetTask($taskId: ID!) {
+  task(id: $taskId) {
+    id
+    title
+    status
+    dueDate
+  }
+}
+```
+
+Variables (prefixed with `$`) are passed separately, enabling query reuse and preventing injection attacks. The client sends:
+
+``` json
+{
+  "query": "...",
+  "variables": { "taskId": "789" }
+}
+```
+
+**Nested query traversing relationships**:
+
+``` graphql
+query GetUserWithTasks($userId: ID!) {
+  user(id: $userId) {
+    id
+    name
+    tasks(status: IN_PROGRESS, limit: 10) {
+      id
+      title
+      priority
+      project {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+This single query fetches a user, their in-progress tasks (limited to 10), and each task's project. With REST, this would require multiple requests. The nested structure shows GraphQL's power—clients traverse the data graph as needed.
+
+**Complex dashboard query**:
+
+``` graphql
+query Dashboard {
+  me {
+    id
+    name
+    tasks(limit: 5) {
+      id
+      title
+      status
+      dueDate
+    }
+  }
+  
+  projects {
+    id
+    name
+    taskCount
+    completedTaskCount
+  }
+  
+  urgentTasks: tasks(priority: URGENT, status: TODO) {
+    id
+    title
+    dueDate
+    project {
+      name
+    }
+  }
+}
+```
+
+One query fetches everything a dashboard needs: user info, recent tasks, project summaries, and urgent items. The `urgentTasks:` prefix is an alias—it renames the field in the response, allowing multiple calls to `tasks` with different filters.
+
+**Fragments for reusable field selections**:
+
+``` graphql
+fragment TaskFields on Task {
+  id
+  title
+  status
+  priority
+  dueDate
+}
+
+query GetProjectTasks($projectId: ID!) {
+  project(id: $projectId) {
+    name
+    tasks {
+      ...TaskFields
+      assignee {
+        name
+      }
+    }
+  }
+}
+```
+
+Fragments define reusable field sets. `...TaskFields` spreads those fields into the selection. This reduces repetition and ensures consistency across queries.
+
+### 10.5.4 GraphQL Mutations
+
+Mutations modify data. They look similar to queries but conventionally cause side effects:
+
+``` graphql
+mutation CreateTask($input: CreateTaskInput!) {
+  createTask(input: $input) {
+    id
+    title
+    status
+    createdAt
+  }
+}
+```
+
+Variables:
+
+``` json
+{
+  "input": {
+    "title": "Review documentation",
+    "projectId": "123",
+    "priority": "HIGH",
+    "dueDate": "2024-12-15"
+  }
+}
+```
+
+The mutation returns the created task, including server-generated fields like `id` and `createdAt`. Clients can use this to update their local cache without a separate fetch.
+
+**Multiple mutations in one request**:
+
+``` graphql
+mutation BatchUpdate {
+  task1: updateTask(id: "1", input: { status: DONE }) {
+    id
+    status
+  }
+  task2: updateTask(id: "2", input: { status: IN_PROGRESS }) {
+    id
+    status
+  }
+}
+```
+
+Mutations execute sequentially (unlike queries, which can parallelize). Aliases (`task1:`, `task2:`) distinguish multiple calls to the same mutation.
+
+### 10.5.5 Implementing GraphQL Resolvers
+
+Resolvers are functions that fetch data for each field in your schema. Let's implement resolvers for our task management API:
+
+``` javascript
+// resolvers.js
+const db = require('./db');
+
+const resolvers = {
+  // Root Query resolvers
+  Query: {
+    me: async (_, __, { user }) => {
+      // The third argument is context, containing authenticated user
+      if (!user) throw new Error('Not authenticated');
+      return db('users').where('id', user.id).first();
+    },
+    
+    task: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      return db('tasks').where({ id, user_id: user.id }).first();
+    },
+    
+    tasks: async (_, { status, priority, projectId, limit = 20, offset = 0 }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Build query with conditional filters
+      const query = db('tasks').where('user_id', user.id);
+      
+      if (status) query.where('status', status.toLowerCase());
+      if (priority) query.where('priority', priorityToNumber(priority));
+      if (projectId) query.where('project_id', projectId);
+      
+      return query
+        .limit(limit)
+        .offset(offset)
+        .orderBy('created_at', 'desc');
+    },
+  },
+```
+
+Each resolver receives four arguments:
+
+1.  `parent` - The result of the parent resolver (for nested fields)
+2.  `args` - Arguments passed to the field
+3.  `context` - Shared data like the authenticated user
+4.  `info` - Query metadata (rarely used)
+
+Root Query resolvers have `undefined` as parent since they're entry points.
+
+**Mutation resolvers** modify data:
+
+``` javascript
+  Mutation: {
+    createTask: async (_, { input }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      const [task] = await db('tasks')
+        .insert({
+          title: input.title,
+          description: input.description,
+          user_id: user.id,
+          project_id: input.projectId,
+          priority: priorityToNumber(input.priority),
+          due_date: input.dueDate,
+          status: 'todo'
+        })
+        .returning('*');
+      
+      return task;
+    },
+    
+    updateTask: async (_, { id, input }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Build update object from provided fields
+      const updates = { updated_at: db.fn.now() };
+      if (input.title) updates.title = input.title;
+      if (input.description !== undefined) updates.description = input.description;
+      if (input.status) updates.status = input.status.toLowerCase();
+      if (input.priority) updates.priority = priorityToNumber(input.priority);
+      if (input.dueDate) updates.due_date = input.dueDate;
+      
+      const [task] = await db('tasks')
+        .where({ id, user_id: user.id })
+        .update(updates)
+        .returning('*');
+      
+      return task;
+    },
+  },
+```
+
+**Field resolvers** handle nested data and computed fields:
+
+``` javascript
+  // Resolvers for Task type fields
+  Task: {
+    // Resolve the assignee relationship
+    assignee: (task) => {
+      return db('users').where('id', task.user_id).first();
+    },
+    
+    // Resolve the optional project relationship
+    project: (task) => {
+      if (!task.project_id) return null;
+      return db('projects').where('id', task.project_id).first();
+    },
+    
+    // Resolve comments list
+    comments: (task) => {
+      return db('comments')
+        .where('task_id', task.id)
+        .orderBy('created_at', 'asc');
+    },
+    
+    // Transform database values to GraphQL enum format
+    status: (task) => task.status.toUpperCase(),
+    priority: (task) => numberToPriority(task.priority),
+  },
+  
+  // Resolvers for Project type fields
+  Project: {
+    owner: (project) => {
+      return db('users').where('id', project.owner_id).first();
+    },
+    
+    tasks: (project, { status }) => {
+      const query = db('tasks').where('project_id', project.id);
+      if (status) query.where('status', status.toLowerCase());
+      return query;
+    },
+    
+    // Computed field - count tasks
+    taskCount: async (project) => {
+      const [{ count }] = await db('tasks')
+        .where('project_id', project.id)
+        .count('* as count');
+      return parseInt(count);
+    },
+  },
+};
+```
+
+Field resolvers receive the parent object as their first argument. The `assignee` resolver receives the task, extracts `user_id`, and fetches the corresponding user. GraphQL calls these resolvers automatically when clients request those fields.
+
+### 10.5.6 The N+1 Problem and DataLoader
+
+There's a performance trap in the resolvers above. Consider this query:
+
+``` graphql
+query {
+  tasks(limit: 100) {
+    title
+    assignee {
+      name
+    }
+  }
+}
+```
+
+The `tasks` query executes once, returning 100 tasks. Then the `assignee` resolver runs 100 times—once per task—each making a database query. That's 101 queries for what should be 2!
+
+**DataLoader** solves this by batching and caching:
+
+``` javascript
+const DataLoader = require('dataloader');
+
+// Batch function receives array of keys, returns array of results in same order
+const createUserLoader = () => new DataLoader(async (userIds) => {
+  // One query for all requested users
+  const users = await db('users').whereIn('id', userIds);
+  
+  // Return in same order as requested IDs
+  const userMap = new Map(users.map(u => [u.id, u]));
+  return userIds.map(id => userMap.get(id));
+});
+```
+
+DataLoader collects all `load()` calls within a single tick of the event loop, batches them into one request, and distributes results back. Same-ID requests within a request are cached.
+
+Use DataLoader in resolvers:
+
+``` javascript
+// Create fresh loaders per request (in context)
+const context = ({ req }) => ({
+  user: authenticate(req),
+  loaders: {
+    user: createUserLoader(),
+    project: createProjectLoader(),
+  }
+});
+
+// Use loader in resolver
+const resolvers = {
+  Task: {
+    assignee: (task, _, { loaders }) => {
+      return loaders.user.load(task.user_id);
+    },
+    project: (task, _, { loaders }) => {
+      if (!task.project_id) return null;
+      return loaders.project.load(task.project_id);
+    },
+  },
+};
+```
+
+Now the 100-task query makes just 2 database queries: one for tasks, one for all referenced users. DataLoader is essential for performant GraphQL APIs.
+
+------------------------------------------------------------------------
+
+## 10.6 API Documentation
+
+An API without documentation is like a library without a catalog—technically usable but practically frustrating. Good documentation transforms your API from "technically correct" to "delightful to use."
+
+### 10.6.1 OpenAPI Specification
+
+**OpenAPI** (formerly Swagger) is the industry standard for REST API documentation. It's a machine-readable format that enables automatic documentation generation, client SDK generation, and validation.
+
+Here's an excerpt from an OpenAPI specification for our tasks API:
+
+```` yaml
+openapi: 3.0.3
+info:
+  title: TaskFlow API
+  description: |
+    API for the TaskFlow task management application.
+    
+    ## Authentication
+    All endpoints except `/auth/login` and `/auth/register` require 
+    authentication. Include the JWT token in the Authorization header:
+    ```
+    Authorization: Bearer <token>
+    ```
+  version: 1.0.0
+
+servers:
+  - url: https://api.taskflow.com/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local development
+````
+
+The info section provides context. The description supports Markdown, enabling rich documentation with code examples. Multiple servers help developers test against different environments.
+
+``` yaml
+paths:
+  /tasks:
+    get:
+      summary: List tasks
+      description: |
+        Returns a paginated list of tasks for the authenticated user.
+        Results can be filtered by status, priority, and project.
+      tags:
+        - Tasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by task status
+          schema:
+            type: string
+            enum: [todo, in_progress, review, done]
+        - name: page
+          in: query
+          description: Page number (1-indexed)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Results per page (max 100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+```
+
+Each path documents available operations. Parameters specify where each value comes from (`query`, `path`, `header`, `body`) and include validation rules (type, enum values, min/max).
+
+``` yaml
+      responses:
+        '200':
+          description: Paginated list of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+```
+
+Response documentation shows what clients receive. Schema references (`$ref`) enable reuse—define a Task schema once, reference it everywhere.
+
+**Components** define reusable schemas:
+
+``` yaml
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - status
+      properties:
+        id:
+          type: integer
+          example: 123
+        title:
+          type: string
+          example: Review pull request
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [todo, in_progress, review, done]
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 3
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+```
+
+The `example` fields populate documentation with realistic data. Validation rules (`minLength`, `maximum`, `enum`) can drive automatic request validation.
+
+### 10.6.2 Serving Documentation
+
+**Swagger UI** renders OpenAPI specifications as interactive documentation:
+
+``` javascript
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+
+const swaggerDocument = YAML.load('./openapi.yaml');
+
+// Serve documentation at /api-docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'TaskFlow API Documentation'
+}));
+```
+
+Swagger UI provides an interactive interface where developers can read documentation, see examples, and even try API calls directly. This "try it out" feature accelerates integration and debugging.
+
+------------------------------------------------------------------------
+
+## 10.7 Data Validation
+
+Never trust client input. Every API request might contain malformed data, missing fields, or malicious payloads. Validation ensures only valid data enters your system.
+
+### 10.7.1 Validation with Joi
+
+**Joi** is a popular validation library for JavaScript that provides a fluent API for defining schemas:
+
+``` javascript
+const Joi = require('joi');
+
+const taskSchema = {
+  create: Joi.object({
+    title: Joi.string()
+      .min(1)
+      .max(200)
+      .required()
+      .messages({
+        'string.empty': 'Title cannot be empty',
+        'string.max': 'Title cannot exceed 200 characters',
+        'any.required': 'Title is required'
+      }),
+    
+    description: Joi.string()
+      .max(2000)
+      .allow('', null),  // Empty string and null are valid
+    
+    projectId: Joi.number()
+      .integer()
+      .positive()
+      .allow(null),
+    
+    priority: Joi.number()
+      .integer()
+      .min(0)
+      .max(3)
+      .default(0),  // Use 0 if not provided
+    
+    dueDate: Joi.date()
+      .iso()
+      .greater('now')  // Must be in the future
+      .allow(null)
+  }),
+  
+  // Update schema - all fields optional but at least one required
+  update: Joi.object({
+    title: Joi.string().min(1).max(200),
+    description: Joi.string().max(2000).allow('', null),
+    status: Joi.string().valid('todo', 'in_progress', 'review', 'done'),
+    priority: Joi.number().integer().min(0).max(3),
+    dueDate: Joi.date().iso().allow(null)
+  }).min(1)  // At least one field must be provided
+};
+```
+
+Each schema rule has a purpose. `required()` means the field must be present. `allow('', null)` permits empty values for optional text fields. `default(0)` provides a fallback. Custom `.messages()` improve error clarity.
+
+**Validation middleware** applies schemas to requests:
+
+``` javascript
+const validate = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.body, {
+      abortEarly: false,     // Return all errors, not just first
+      stripUnknown: true     // Remove fields not in schema
+    });
+    
+    if (error) {
+      // Transform Joi errors into our API format
+      const details = error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message
+      }));
+      
+      return res.status(422).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid request data',
+          details
+        }
+      });
+    }
+    
+    // Replace body with validated/sanitized version
+    req.body = value;
+    next();
+  };
+};
+```
+
+The `stripUnknown: true` option is a security feature—it removes any fields not defined in the schema, preventing clients from injecting unexpected data.
+
+### 10.7.2 Centralized Error Handling
+
+Rather than handling errors in every route, centralize error handling in middleware:
+
+``` javascript
+// Custom error classes for different scenarios
+class AppError extends Error {
+  constructor(code, message, statusCode = 500, details = null) {
+    super(message);
+    this.code = code;
+    this.statusCode = statusCode;
+    this.details = details;
+    this.isOperational = true;  // Distinguishes from programming bugs
+  }
+}
+
+class NotFoundError extends AppError {
+  constructor(resource = 'Resource') {
+    super('NOT_FOUND', `${resource} not found`, 404);
+  }
+}
+
+class ValidationError extends AppError {
+  constructor(details) {
+    super('VALIDATION_ERROR', 'Invalid request data', 422, details);
+  }
+}
+```
+
+Custom error classes make code clearer and more maintainable. You can throw `new NotFoundError('Task')` anywhere, and the error handler produces the right response.
+
+``` javascript
+// Error handling middleware (must have 4 parameters)
+const errorHandler = (err, req, res, next) => {
+  // Log for debugging
+  console.error('Error:', {
+    message: err.message,
+    code: err.code,
+    stack: err.stack,
+    path: req.path
+  });
+  
+  // Handle our custom errors
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      error: {
+        code: err.code,
+        message: err.message,
+        ...(err.details && { details: err.details })
+      }
+    });
+  }
+  
+  // Handle database constraint violations
+  if (err.code === '23505') {  // PostgreSQL unique violation
+    return res.status(409).json({
+      error: {
+        code: 'CONFLICT',
+        message: 'Resource already exists'
+      }
+    });
+  }
+  
+  // Unknown errors - don't leak details in production
+  res.status(500).json({
+    error: {
+      code: 'INTERNAL_ERROR',
+      message: process.env.NODE_ENV === 'production' 
+        ? 'An unexpected error occurred' 
+        : err.message
+    }
+  });
+};
+
+// Register as last middleware
+app.use(errorHandler);
+```
+
+The error handler transforms various error types into consistent API responses. Database errors get user-friendly messages. Unknown errors hide implementation details in production to prevent information leakage.
+
+------------------------------------------------------------------------
+
+## 10.8 API Security
+
+APIs are attack surfaces. Every endpoint is a potential entry point for malicious actors. Security must be designed in, not bolted on.
+
+### 10.8.1 Authentication with JWT
+
+**JSON Web Tokens (JWT)** provide stateless authentication. The server issues a signed token upon login; clients include this token in subsequent requests. The server verifies the signature without database lookups.
+
+``` javascript
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+async function login(email, password) {
+  // Find user by email
+  const user = await db('users').where('email', email).first();
+  
+  if (!user) {
+    throw new UnauthorizedError('Invalid credentials');
+  }
+  
+  // Verify password against stored hash
+  const validPassword = await bcrypt.compare(password, user.password_hash);
+  
+  if (!validPassword) {
+    throw new UnauthorizedError('Invalid credentials');
+  }
+  
+  // Generate signed token
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },  // Payload
+    process.env.JWT_SECRET,                   // Secret key
+    { expiresIn: '24h' }                      // Options
+  );
+  
+  return { token, user: { id: user.id, name: user.name, email: user.email } };
+}
+```
+
+The token payload contains minimal identifying information—enough to authenticate but not sensitive data. The signature prevents tampering; if anyone modifies the payload, verification fails.
+
+**Authentication middleware** verifies tokens on protected routes:
+
+``` javascript
+const authenticate = async (req, res, next) => {
+  try {
+    // Extract token from header
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedError('No token provided');
+    }
+    
+    const token = authHeader.substring(7);  // Remove 'Bearer ' prefix
+    
+    // Verify signature and decode payload
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Optionally verify user still exists (handles deleted accounts)
+    const user = await db('users').where('id', decoded.userId).first();
+    
+    if (!user) {
+      throw new UnauthorizedError('User no longer exists');
+    }
+    
+    // Attach user to request for downstream handlers
+    req.user = user;
+    next();
+    
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return next(new UnauthorizedError('Token expired'));
+    }
+    if (error.name === 'JsonWebTokenError') {
+      return next(new UnauthorizedError('Invalid token'));
+    }
+    next(error);
+  }
+};
+```
+
+### 10.8.2 Rate Limiting
+
+Rate limiting prevents abuse by restricting how many requests a client can make in a time window:
+
+``` javascript
+const rateLimit = require('express-rate-limit');
+
+// General API rate limit
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minute window
+  max: 100,                   // 100 requests per window
+  message: {
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many requests, please try again later'
+    }
+  }
+});
+
+// Strict limit for authentication (prevents brute force)
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,  // 1 hour window
+  max: 10,                    // 10 attempts per hour
+  skipSuccessfulRequests: true,  // Don't count successful logins
+  message: {
+    error: {
+      code: 'AUTH_RATE_LIMIT',
+      message: 'Too many login attempts, please try again later'
+    }
+  }
+});
+
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', authLimiter);
+```
+
+The authentication limiter uses `skipSuccessfulRequests` so successful logins don't count against the limit—only failed attempts (potential attacks) are limited.
+
+------------------------------------------------------------------------
+
+## 10.9 Caching Strategies
+
+Databases are slow compared to memory. Caching stores frequently-accessed data in fast storage (RAM) to reduce latency and database load. The challenge is keeping cached data synchronized with the source of truth.
+
+### 10.9.1 Cache-Aside Pattern
+
+The most common caching strategy is **cache-aside** (or "lazy loading"):
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    CACHE-ASIDE PATTERN                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  READ FLOW:                                                             │
+│  1. Application checks cache for data                                   │
+│  2. If found (cache hit), return cached data                            │
+│  3. If not found (cache miss), fetch from database                      │
+│  4. Store result in cache for future requests                           │
+│  5. Return data to client                                               │
+│                                                                         │
+│  WRITE FLOW:                                                            │
+│  1. Update database (source of truth)                                   │
+│  2. Invalidate (delete) cached data                                     │
+│  3. Next read will fetch fresh data and repopulate cache                │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+Implementation:
+
+``` javascript
+const CACHE_TTL = 300;  // 5 minutes
+
+async function getTaskWithCache(taskId) {
+  const cacheKey = `task:${taskId}`;
+  
+  // Step 1: Check cache
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    console.log('Cache hit');
+    return JSON.parse(cached);
+  }
+  
+  // Step 2: Cache miss - fetch from database
+  console.log('Cache miss - querying database');
+  const task = await db('tasks').where('id', taskId).first();
+  
+  // Step 3: Populate cache for future requests
+  if (task) {
+    await redis.set(cacheKey, JSON.stringify(task), 'EX', CACHE_TTL);
+  }
+  
+  return task;
+}
+```
+
+The TTL (time-to-live) ensures stale data eventually expires, even if we miss an invalidation. This provides a safety net—worst case, data is 5 minutes stale rather than permanently wrong.
+
+**Cache invalidation** on writes:
+
+``` javascript
+async function updateTask(taskId, updates) {
+  // Update the source of truth
+  const [task] = await db('tasks')
+    .where('id', taskId)
+    .update(updates)
+    .returning('*');
+  
+  // Invalidate cache - next read will fetch fresh data
+  await redis.del(`task:${taskId}`);
+  
+  // Also invalidate related caches
+  await redis.del(`user:${task.user_id}:tasks`);
+  
+  return task;
+}
+```
+
+We delete rather than update the cache. This is safer—if we tried to update and something went wrong, we'd have inconsistent data. Deletion ensures the next read gets authoritative data from the database.
+
+### 10.9.2 Cache Invalidation Challenges
+
+Phil Karlton famously said there are only two hard problems in computer science: cache invalidation and naming things. The difficulty arises from maintaining consistency between cache and database.
+
+**Common pitfalls:**
+
+-   **Forgetting to invalidate**: A bug causes updates to skip cache invalidation. Data becomes permanently stale.
+-   **Race conditions**: A read happens between database update and cache invalidation, caching stale data.
+-   **Cascade effects**: Updating a user should invalidate their tasks, projects, and other related caches.
+
+**Mitigation strategies:**
+
+-   Use TTLs as a safety net (data eventually expires)
+-   Invalidate aggressively (when in doubt, delete from cache)
+-   Use cache tags for related data invalidation
+-   Consider cache-through or write-through patterns for critical data
+
+------------------------------------------------------------------------
+
+## 10.10 Chapter Summary
+
+Data management and APIs form the backbone of modern applications. This chapter covered the essential concepts and practices for storing, accessing, and exposing data effectively.
+
+Key takeaways:
+
+**Relational databases** use tables, relationships, and SQL to manage structured data. Normalization reduces redundancy, while transactions ensure consistency. These databases excel at complex queries and maintaining data integrity.
+
+**NoSQL databases** provide alternatives for specific needs: document stores for flexible schemas, key-value stores for caching, column stores for analytics, and graph databases for relationship-heavy data. The choice depends on your access patterns and consistency requirements.
+
+**RESTful APIs** expose data through resources, HTTP methods, and status codes. Good REST design uses consistent naming, appropriate methods, and meaningful responses. The uniform interface makes APIs predictable and easy to consume.
+
+**GraphQL** offers an alternative where clients specify exactly what data they need. This solves over-fetching and under-fetching but requires careful resolver design to avoid performance pitfalls like the N+1 problem.
+
+**API documentation** using OpenAPI/Swagger makes APIs discoverable and reduces integration friction. Interactive documentation lets developers experiment without writing code.
+
+**Validation and error handling** protect your system from invalid data and provide meaningful feedback when things go wrong. Never trust client input.
+
+**Security** must be designed in from the start. Authentication verifies identity, authorization controls access, rate limiting prevents abuse, and input sanitization stops injection attacks.
+
+**Caching** improves performance by reducing database load. The cache-aside pattern is most common, but cache invalidation remains challenging. TTLs provide a safety net against stale data.
+
+------------------------------------------------------------------------
+
+## 10.11 Key Terms
+
+| Term | Definition |
+|------------------------------------|------------------------------------|
+| **Primary Key** | Column(s) that uniquely identify each row in a table |
+| **Foreign Key** | Column that references a primary key in another table, creating relationships |
+| **Normalization** | Process of organizing data to reduce redundancy and improve integrity |
+| **ACID** | Properties (Atomicity, Consistency, Isolation, Durability) ensuring reliable transactions |
+| **NoSQL** | Non-relational databases optimized for specific use cases |
+| **REST** | Architectural style using resources, HTTP methods, and stateless communication |
+| **Resource** | Conceptual entity in REST, identified by a URI |
+| **GraphQL** | Query language allowing clients to specify exactly what data they need |
+| **Resolver** | Function that fetches data for a GraphQL field |
+| **OpenAPI** | Specification standard for documenting REST APIs |
+| **JWT** | JSON Web Token—compact, self-contained token for authentication |
+| **Rate Limiting** | Controlling request frequency to prevent abuse |
+| **Cache-Aside** | Caching pattern where application explicitly manages cache |
+| **N+1 Problem** | Performance issue where fetching N items causes N+1 database queries |
+| **DataLoader** | Utility that batches and caches requests to solve N+1 problems |
+
+------------------------------------------------------------------------
+
+## 10.12 Review Questions
+
+1.  Explain the difference between primary keys and foreign keys. How do they work together to establish relationships between tables?
+
+2.  What are the three normal forms in database normalization? Provide an example of denormalized data and show how you would normalize it.
+
+3.  When would you choose a document database (like MongoDB) over a relational database (like PostgreSQL)? Give specific scenarios for each.
+
+4.  Describe the REST principles. How do HTTP methods map to CRUD operations?
+
+5.  Compare REST and GraphQL. What problems does GraphQL solve that REST doesn't? What challenges does it introduce?
+
+6.  Explain the N+1 problem in GraphQL. How does DataLoader solve it?
+
+7.  What information should be included in an OpenAPI specification? Why is API documentation important?
+
+8.  Explain the difference between authentication and authorization. How would you implement both in a REST API?
+
+9.  Describe the cache-aside pattern. When would you use it, and what are the challenges?
+
+10. What strategies can you use for API versioning? What are the trade-offs of each approach?
+
+------------------------------------------------------------------------
+
+## 10.13 Hands-On Exercises
+
+### Exercise 10.1: Database Design
+
+Design a complete database schema for your project:
+
+1.  Identify all entities (users, tasks, projects, etc.)
+2.  Define attributes for each entity with appropriate data types
+3.  Establish relationships (one-to-many, many-to-many)
+4.  Write CREATE TABLE statements with proper constraints
+5.  Add indexes for columns used in WHERE clauses and JOINs
+6.  Document your schema with an entity-relationship diagram
+
+### Exercise 10.2: SQL Query Practice
+
+Write SQL queries for common operations in your application:
+
+1.  CRUD operations for your main entity
+2.  A join query combining at least 3 tables
+3.  An aggregation query using GROUP BY and HAVING
+4.  A query using a subquery or CTE
+5.  A query that would benefit from an index (and create that index)
+
+### Exercise 10.3: REST API Implementation
+
+Implement a complete REST API for one resource:
+
+1.  Create routes for all CRUD operations
+2.  Use appropriate HTTP methods and status codes
+3.  Implement pagination, filtering, and sorting for list endpoints
+4.  Add input validation with meaningful error messages
+5.  Write integration tests for all endpoints
+
+### Exercise 10.4: API Documentation
+
+Document your API using OpenAPI:
+
+1.  Define all endpoints with parameters and responses
+2.  Create reusable schemas for request/response objects
+3.  Document authentication requirements
+4.  Include example requests and responses
+5.  Set up Swagger UI to serve the documentation
+
+### Exercise 10.5: Caching Implementation
+
+Add a caching layer to your API:
+
+1.  Set up Redis connection
+2.  Implement cache-aside pattern for read operations
+3.  Add cache invalidation when data changes
+4.  Configure appropriate TTLs for different data types
+5.  Measure and document the performance improvement
+
+### Exercise 10.6: GraphQL Alternative
+
+Implement a GraphQL API alongside your REST API:
+
+1.  Define the schema with types, queries, and mutations
+2.  Implement resolvers for all operations
+3.  Add DataLoader to prevent N+1 queries
+4.  Compare the developer experience with REST
+
+------------------------------------------------------------------------
+
+## 10.14 Further Reading
+
+**Books:**
+
+-   Kleppmann, M. (2017). *Designing Data-Intensive Applications*. O'Reilly Media.
+-   Richardson, C. (2018). *Microservices Patterns*. Manning Publications.
+-   Masse, M. (2011). *REST API Design Rulebook*. O'Reilly Media.
+
+**Online Resources:**
+
+-   PostgreSQL Documentation: https://www.postgresql.org/docs/
+-   MongoDB Manual: https://docs.mongodb.com/manual/
+-   Redis Documentation: https://redis.io/documentation
+-   GraphQL Official Learn: https://graphql.org/learn/
+-   OpenAPI Specification: https://swagger.io/specification/
+
+------------------------------------------------------------------------
+
+## References
+
+Codd, E. F. (1970). A Relational Model of Data for Large Shared Data Banks. *Communications of the ACM*, 13(6), 377-387.
+
+Date, C. J. (2003). *An Introduction to Database Systems* (8th Edition). Addison-Wesley.
+
+Fielding, R. T. (2000). *Architectural Styles and the Design of Network-based Software Architectures* (Doctoral dissertation). University of California, Irvine.
+
+Kleppmann, M. (2017). *Designing Data-Intensive Applications*. O'Reilly Media.
+
+Facebook. (2015). GraphQL Specification. Retrieved from https://spec.graphql.org/
+
+OpenAPI Initiative. (2021). OpenAPI Specification. Retrieved from https://spec.openapis.org/oas/v3.1.0

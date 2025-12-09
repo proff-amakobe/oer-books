@@ -1,0 +1,3005 @@
+# Chapter 9: Continuous Integration and Continuous Deployment
+
+## Learning Objectives
+
+By the end of this chapter, you will be able to:
+
+-   Explain the principles and benefits of continuous integration and continuous deployment
+-   Distinguish between continuous integration, continuous delivery, and continuous deployment
+-   Design and implement CI/CD pipelines using GitHub Actions
+-   Configure automated builds, tests, and deployments
+-   Implement deployment strategies including blue-green, canary, and rolling deployments
+-   Manage environment configurations and secrets securely
+-   Monitor deployments and implement rollback procedures
+-   Apply infrastructure as code principles for reproducible environments
+-   Troubleshoot common CI/CD pipeline issues
+
+------------------------------------------------------------------------
+
+## 9.1 The Evolution of Software Delivery
+
+Software delivery has transformed dramatically over the past decades. What once took months or years now happens in minutes. Understanding this evolution helps appreciate why CI/CD practices exist and why they matter.
+
+### 9.1.1 The Old Way: Manual Releases
+
+In traditional software development, releases were major events:
+
+```         
+Traditional Release Process (weeks to months)
+═══════════════════════════════════════════════════════════════
+
+Development Phase (weeks)
+    │
+    ▼
+Code Freeze
+    │
+    ▼
+Integration Phase (days to weeks)
+    ├── Merge all developer branches
+    ├── Fix integration conflicts
+    └── Stabilize combined code
+    │
+    ▼
+Testing Phase (days to weeks)
+    ├── QA team tests entire application
+    ├── Bug fixes and retesting
+    └── Sign-off from stakeholders
+    │
+    ▼
+Release Preparation (days)
+    ├── Create release branch
+    ├── Build release artifacts
+    ├── Write release notes
+    └── Prepare deployment scripts
+    │
+    ▼
+Deployment (hours to days)
+    ├── Schedule maintenance window
+    ├── Notify users of downtime
+    ├── Manual server updates
+    ├── Database migrations
+    ├── Smoke testing
+    └── Prayer and hope
+    │
+    ▼
+Post-Release (days)
+    ├── Monitor for issues
+    ├── Hotfix critical bugs
+    └── Begin next development cycle
+```
+
+**Problems with this approach:**
+
+-   **Integration hell**: Merging weeks of isolated work caused massive conflicts
+-   **Long feedback loops**: Bugs weren't discovered until late in the cycle
+-   **Risky deployments**: Large changes meant large risks
+-   **Infrequent releases**: Customers waited months for features and fixes
+-   **Stressful releases**: "Release weekends" became dreaded events
+-   **Fear of change**: Teams avoided changes to avoid risk
+
+### 9.1.2 The CI/CD Revolution
+
+Modern practices flip this model:
+
+```         
+Modern CI/CD Process (minutes to hours)
+═══════════════════════════════════════════════════════════════
+
+Developer commits code
+    │
+    ▼ (seconds)
+Automated pipeline triggers
+    │
+    ▼ (minutes)
+┌─────────────────────────────────────────────────────────────┐
+│  Build → Lint → Unit Tests → Integration Tests → Security  │
+└─────────────────────────────────────────────────────────────┘
+    │
+    ▼ (minutes)
+Deploy to staging environment
+    │
+    ▼ (minutes)
+Automated E2E tests on staging
+    │
+    ▼ (automatic or one-click)
+Deploy to production
+    │
+    ▼ (continuous)
+Monitoring and alerting
+```
+
+**Benefits:**
+
+-   **Fast feedback**: Know within minutes if changes break anything
+-   **Small changes**: Easier to review, test, and debug
+-   **Reduced risk**: Small, frequent deployments are safer than large, rare ones
+-   **Faster delivery**: Features reach users in hours, not months
+-   **Happier teams**: Routine deployments instead of stressful events
+-   **Higher quality**: Automated testing catches issues before users do
+
+### 9.1.3 Key Terminology
+
+Understanding the distinctions between related terms:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    CI/CD TERMINOLOGY                                    │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  CONTINUOUS INTEGRATION (CI)                                            │
+│  ─────────────────────────                                              │
+│  • Developers integrate code frequently (at least daily)                │
+│  • Each integration triggers automated build and tests                  │
+│  • Problems detected early, when they're easy to fix                    │
+│  • Main branch stays stable and deployable                              │
+│                                                                         │
+│  CONTINUOUS DELIVERY (CD)                                               │
+│  ────────────────────────                                               │
+│  • Code is always in a deployable state                                 │
+│  • Automated pipeline prepares release artifacts                        │
+│  • Deployment to production requires manual approval                    │
+│  • "Push-button" releases whenever business decides                     │
+│                                                                         │
+│  CONTINUOUS DEPLOYMENT (CD)                                             │
+│  ─────────────────────────                                              │
+│  • Every change that passes tests deploys automatically                 │
+│  • No manual intervention required                                      │
+│  • Highest level of automation                                          │
+│  • Requires mature testing and monitoring                               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Visual comparison:**
+
+```         
+                    Continuous        Continuous        Continuous
+                    Integration       Delivery          Deployment
+                    
+Code Commit         ●                 ●                 ●
+    │               │                 │                 │
+    ▼               ▼                 ▼                 ▼
+Build               ● Automated       ● Automated       ● Automated
+    │               │                 │                 │
+    ▼               ▼                 ▼                 ▼
+Test                ● Automated       ● Automated       ● Automated
+    │               │                 │                 │
+    ▼               ▼                 ▼                 ▼
+Deploy to Staging   ○ Optional        ● Automated       ● Automated
+    │               │                 │                 │
+    ▼               ▼                 ▼                 ▼
+Deploy to Prod      ○ Manual          ◐ Manual Trigger  ● Automated
+                                        (One-click)
+```
+
+------------------------------------------------------------------------
+
+## 9.2 Continuous Integration Fundamentals
+
+**Continuous Integration (CI)** is the practice of frequently integrating code changes into a shared repository, where each integration is verified by automated builds and tests.
+
+### 9.2.1 Core CI Practices
+
+**1. Maintain a Single Source Repository**
+
+All code lives in version control. Everyone works from the same repository.
+
+```         
+Repository Structure:
+├── main branch (always deployable)
+├── feature branches (short-lived)
+└── All configuration in version control
+    ├── Application code
+    ├── Test code
+    ├── Build scripts
+    ├── Infrastructure definitions
+    └── CI/CD pipeline definitions
+```
+
+**2. Automate the Build**
+
+Building software should require a single command:
+
+``` bash
+# One command to build everything
+npm run build
+# or
+./gradlew build
+# or
+make all
+```
+
+The build should:
+
+-   Compile all code
+-   Run static analysis
+-   Generate artifacts
+-   Be reproducible (same inputs → same outputs)
+
+**3. Make the Build Self-Testing**
+
+Every build runs automated tests:
+
+``` bash
+# Build includes tests
+npm run build  # Compiles and runs tests
+npm test       # Just tests
+
+# Build fails if tests fail
+$ npm test
+FAIL  src/calculator.test.js
+  ✕ adds numbers correctly (5ms)
+  
+npm ERR! Test failed.
+```
+
+**4. Everyone Commits Frequently**
+
+Integrate at least daily—more often is better:
+
+```         
+Good:
+Monday: 3 commits
+Tuesday: 4 commits
+Wednesday: 2 commits
+Thursday: 5 commits
+Friday: 3 commits
+
+Bad:
+Monday-Thursday: Working locally...
+Friday: 1 massive commit with a week's work
+```
+
+**5. Every Commit Triggers a Build**
+
+Automated systems build and test every change:
+
+```         
+Commit pushed
+    │
+    ▼
+CI server detects change
+    │
+    ▼
+Pipeline executes automatically
+    │
+    ├── Success → Green checkmark ✓
+    │
+    └── Failure → Red X, team notified ✗
+```
+
+**6. Keep the Build Fast**
+
+Fast feedback is essential. Target build times:
+
+```         
+Build Stage          Target Time
+─────────────────────────────────
+Lint                 < 30 seconds
+Unit tests           < 5 minutes
+Integration tests    < 10 minutes
+Full pipeline        < 15 minutes
+
+If build takes > 15 minutes, consider:
+• Parallelizing tests
+• Optimizing slow tests
+• Splitting pipeline stages
+```
+
+**7. Test in a Clone of Production**
+
+Test environments should mirror production:
+
+```         
+Production Environment
+├── Ubuntu 22.04
+├── Node.js 20.x
+├── PostgreSQL 15
+├── Redis 7
+└── nginx 1.24
+
+CI Test Environment (should match!)
+├── Ubuntu 22.04
+├── Node.js 20.x
+├── PostgreSQL 15
+├── Redis 7
+└── nginx 1.24
+```
+
+**8. Make It Easy to Get Latest Deliverables**
+
+Anyone should be able to get the latest working version:
+
+``` bash
+# Get latest artifacts
+aws s3 cp s3://builds/latest/app.zip .
+
+# Or use package registry
+npm install @company/app@latest
+docker pull company/app:latest
+```
+
+**9. Everyone Can See What's Happening**
+
+Build status is visible to all:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CI DASHBOARD                                                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  main branch:     ✓ Build #1234 passed (3m ago)                        │
+│  develop branch:  ✓ Build #567 passed (15m ago)                        │
+│  feature/auth:    ✗ Build #89 failed - Test failure (1h ago)           │
+│  feature/api:     ◐ Build #90 in progress...                           │
+│                                                                         │
+│  Recent Activity:                                                       │
+│  ├── alice: Merged PR #142 into main                                   │
+│  ├── bob: Fixed failing test in feature/auth                           │
+│  └── carol: Opened PR #143 for review                                  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**10. Automate Deployment**
+
+Deployment should be automated, not manual:
+
+``` bash
+# Not this:
+ssh production-server
+cd /var/www/app
+git pull
+npm install
+npm run build
+pm2 restart all
+
+# This:
+git push origin main  # Triggers automated deployment
+```
+
+### 9.2.2 The CI Feedback Loop
+
+CI creates a rapid feedback loop:
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│    Write Code ──────► Commit ──────► CI Pipeline ──────► Feedback       │
+│         ▲                                                    │          │
+│         │                                                    │          │
+│         │              ┌──────────────────────┐              │          │
+│         │              │                      │              │          │
+│         └──────────────┤   Fix if broken     ◄──────────────┘          │
+│                        │   Continue if passing│                         │
+│                        │                      │                         │
+│                        └──────────────────────┘                         │
+│                                                                         │
+│    Feedback Time: Minutes, not days                                     │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+When the build breaks:
+
+1.  Stop what you're doing
+2.  Fix the build immediately
+3.  Don't commit more broken code on top
+
+> "The first rule of Continuous Integration is: when the build breaks, fixing it becomes the team's top priority."
+
+### 9.2.3 CI Anti-Patterns
+
+**Ignoring Broken Builds:**
+
+```         
+❌ "The build's been red for a week, but we're too busy to fix it."
+
+✓ Fix broken builds immediately. A red build is an emergency.
+```
+
+**Infrequent Integration:**
+
+```         
+❌ Committing once a week with massive changes
+
+✓ Commit multiple times daily with small changes
+```
+
+**Skipping Tests:**
+
+```         
+❌ "I'll add tests later" or "Tests are too slow, skip them"
+
+✓ Tests are non-negotiable. Optimize slow tests.
+```
+
+**Not Running Pipeline Locally:**
+
+```         
+❌ "It works on my machine" → Push → CI fails
+
+✓ Run the same checks locally before pushing
+```
+
+**Long-Lived Feature Branches:**
+
+```         
+❌ Feature branch that diverges for months
+
+✓ Short-lived branches, merged within days
+```
+
+------------------------------------------------------------------------
+
+## 9.3 Building CI Pipelines with GitHub Actions
+
+**GitHub Actions** is GitHub's built-in CI/CD platform. It's free for public repositories and has generous free tiers for private repositories.
+
+### 9.3.1 GitHub Actions Concepts
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    GITHUB ACTIONS HIERARCHY                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  WORKFLOW                                                               │
+│  ├── Defined in .github/workflows/*.yml                                 │
+│  ├── Triggered by events (push, PR, schedule, etc.)                     │
+│  └── Contains one or more jobs                                          │
+│                                                                         │
+│  JOB                                                                    │
+│  ├── Runs on a specific runner (ubuntu, windows, macos)                 │
+│  ├── Contains one or more steps                                         │
+│  ├── Jobs run in parallel by default                                    │
+│  └── Can depend on other jobs                                           │
+│                                                                         │
+│  STEP                                                                   │
+│  ├── Individual task within a job                                       │
+│  ├── Either runs a command or uses an action                            │
+│  └── Steps run sequentially                                             │
+│                                                                         │
+│  ACTION                                                                 │
+│  ├── Reusable unit of code                                              │
+│  ├── Published in GitHub Marketplace                                    │
+│  └── Example: actions/checkout, actions/setup-node                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Visual representation:**
+
+```         
+Workflow: ci.yml
+│
+├── Job: lint
+│   ├── Step: Checkout code
+│   ├── Step: Setup Node.js
+│   └── Step: Run linter
+│
+├── Job: test (depends on: lint)
+│   ├── Step: Checkout code
+│   ├── Step: Setup Node.js
+│   ├── Step: Install dependencies
+│   └── Step: Run tests
+│
+└── Job: build (depends on: test)
+    ├── Step: Checkout code
+    ├── Step: Setup Node.js
+    ├── Step: Build application
+    └── Step: Upload artifacts
+```
+
+### 9.3.2 Basic Workflow Structure
+
+``` yaml
+# .github/workflows/ci.yml
+
+# Workflow name (displayed in GitHub UI)
+name: CI
+
+# Triggers - when should this workflow run?
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+# Jobs to execute
+jobs:
+  # Job identifier
+  build:
+    # Runner environment
+    runs-on: ubuntu-latest
+    
+    # Job steps
+    steps:
+      # Use a pre-built action
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Run a shell command
+      - name: Display Node version
+        run: node --version
+      
+      # Multi-line command
+      - name: Install and test
+        run: |
+          npm ci
+          npm test
+```
+
+### 9.3.3 Complete CI Pipeline Example
+
+Here's a comprehensive CI pipeline for a Node.js application:
+
+``` yaml
+# .github/workflows/ci.yml
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Environment variables available to all jobs
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================
+  # JOB 1: Code Quality Checks
+  # ============================================
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npm run lint
+      
+      - name: Check Prettier formatting
+        run: npm run format:check
+      
+      - name: Run TypeScript compiler
+        run: npm run type-check
+
+  # ============================================
+  # JOB 2: Unit Tests
+  # ============================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint  # Only run if lint passes
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run unit tests
+        run: npm test -- --coverage --reporters=default --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./reports
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()  # Upload even if tests fail
+        with:
+          name: test-results
+          path: reports/junit.xml
+
+  # ============================================
+  # JOB 3: Integration Tests
+  # ============================================
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    # Service containers for integration tests
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run database migrations
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          REDIS_URL: redis://localhost:6379
+
+  # ============================================
+  # JOB 4: Build
+  # ============================================
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+          retention-days: 7
+
+  # ============================================
+  # JOB 5: Security Scan
+  # ============================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+      
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true  # Don't fail build, just report
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # ============================================
+  # JOB 6: E2E Tests (only on main/develop)
+  # ============================================
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+      
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run start:test
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+      
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+      
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos/
+```
+
+### 9.3.4 Workflow Triggers
+
+``` yaml
+on:
+  # Push to specific branches
+  push:
+    branches:
+      - main
+      - 'release/**'  # Wildcard pattern
+    paths:
+      - 'src/**'      # Only when src/ changes
+      - '!**.md'      # Ignore markdown files
+  
+  # Pull request events
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  
+  # Scheduled runs (cron syntax)
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+  
+  # Triggered by another workflow
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  
+  # Repository events
+  release:
+    types: [published]
+  
+  issues:
+    types: [opened, labeled]
+```
+
+### 9.3.5 Job Dependencies and Parallelization
+
+``` yaml
+jobs:
+  # These run in parallel (no dependencies)
+  lint:
+    runs-on: ubuntu-latest
+    steps: [...]
+  
+  security:
+    runs-on: ubuntu-latest
+    steps: [...]
+  
+  # This waits for lint to complete
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps: [...]
+  
+  # This waits for both lint AND security
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, security]
+    steps: [...]
+  
+  # This waits for test AND build
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    steps: [...]
+```
+
+**Execution flow:**
+
+```         
+      ┌──────┐     ┌──────────┐
+      │ lint │     │ security │
+      └──┬───┘     └────┬─────┘
+         │              │
+         ▼              │
+      ┌──────┐          │
+      │ test │          │
+      └──┬───┘          │
+         │              │
+         └──────┬───────┘
+                │
+                ▼
+            ┌───────┐
+            │ build │
+            └───┬───┘
+                │
+                ▼
+            ┌────────┐
+            │ deploy │
+            └────────┘
+```
+
+### 9.3.6 Matrix Builds
+
+Test across multiple versions and platforms:
+
+``` yaml
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20, 22]
+        exclude:
+          # Don't test Node 18 on macOS
+          - os: macos-latest
+            node-version: 18
+        include:
+          # Add specific configuration
+          - os: ubuntu-latest
+            node-version: 20
+            coverage: true
+      fail-fast: false  # Continue other jobs if one fails
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - run: npm ci
+      - run: npm test
+      
+      - name: Upload coverage
+        if: matrix.coverage
+        run: npm run coverage:upload
+```
+
+This creates 8 parallel jobs (3 OS × 3 Node versions - 1 exclusion).
+
+### 9.3.7 Caching Dependencies
+
+Speed up pipelines by caching dependencies:
+
+``` yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Automatic caching with setup-node
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'  # Automatically caches node_modules
+      
+      - run: npm ci
+      - run: npm run build
+
+  # Manual caching for more control
+  build-manual-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      
+      - name: Cache build output
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: ${{ runner.os }}-build-${{ hashFiles('src/**') }}
+      
+      - run: npm ci
+      - run: npm run build
+```
+
+### 9.3.8 Secrets and Environment Variables
+
+``` yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    # Environment with protection rules
+    environment:
+      name: production
+      url: https://example.com
+    
+    env:
+      # Available to all steps in this job
+      NODE_ENV: production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to production
+        run: |
+          echo "Deploying to $DEPLOY_URL"
+          ./deploy.sh
+        env:
+          # Secrets from repository settings
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DEPLOY_URL: ${{ vars.PRODUCTION_URL }}
+          
+          # GitHub-provided variables
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+```
+
+**Setting up secrets:**
+
+```         
+Repository Settings → Secrets and variables → Actions
+
+Repository secrets:
+├── AWS_ACCESS_KEY_ID
+├── AWS_SECRET_ACCESS_KEY
+├── DATABASE_URL
+└── API_KEY
+
+Environment secrets (per environment):
+├── production
+│   ├── DATABASE_URL (production database)
+│   └── API_KEY (production API key)
+└── staging
+    ├── DATABASE_URL (staging database)
+    └── API_KEY (staging API key)
+```
+
+------------------------------------------------------------------------
+
+## 9.4 Continuous Deployment Strategies
+
+Deploying to production requires careful strategies to minimize risk and enable quick rollbacks.
+
+### 9.4.1 Deployment Strategies Overview
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    DEPLOYMENT STRATEGIES                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  RECREATE                                                               │
+│  • Stop old version, start new version                                  │
+│  • Simple but causes downtime                                           │
+│  • Use for: Non-critical apps, major database migrations               │
+│                                                                         │
+│  ROLLING                                                                │
+│  • Gradually replace instances                                          │
+│  • Zero downtime                                                        │
+│  • Use for: Most applications                                           │
+│                                                                         │
+│  BLUE-GREEN                                                             │
+│  • Two identical environments                                           │
+│  • Switch traffic instantly                                             │
+│  • Use for: Critical apps needing instant rollback                      │
+│                                                                         │
+│  CANARY                                                                 │
+│  • Deploy to small subset first                                         │
+│  • Gradually increase if healthy                                        │
+│  • Use for: Risk-averse deployments, A/B testing                        │
+│                                                                         │
+│  FEATURE FLAGS                                                          │
+│  • Deploy code, enable features separately                              │
+│  • Instant enable/disable without deployment                            │
+│  • Use for: Trunk-based development, gradual rollouts                   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.4.2 Recreate Deployment
+
+The simplest strategy: stop everything, deploy, start everything.
+
+```         
+Before:
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► Server 1: v1.0 ●                                            │
+│       ├──► Server 2: v1.0 ●                                            │
+│       └──► Server 3: v1.0 ●                                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+During deployment (DOWNTIME):
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► Server 1: Updating... ○                                     │
+│       ├──► Server 2: Updating... ○                                     │
+│       └──► Server 3: Updating... ○                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+After:
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► Server 1: v2.0 ●                                            │
+│       ├──► Server 2: v2.0 ●                                            │
+│       └──► Server 3: v2.0 ●                                            │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Pros:**
+
+-   Simple to implement
+-   Clean state—no version mixing
+
+**Cons:**
+
+-   Causes downtime
+-   All-or-nothing risk
+
+### 9.4.3 Rolling Deployment
+
+Update instances one at a time, maintaining availability:
+
+```         
+Step 1: Update Server 1
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► Server 1: v2.0 ● (updated)                                  │
+│       ├──► Server 2: v1.0 ●                                            │
+│       └──► Server 3: v1.0 ●                                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Step 2: Update Server 2
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► Server 1: v2.0 ●                                            │
+│       ├──► Server 2: v2.0 ● (updated)                                  │
+│       └──► Server 3: v1.0 ●                                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Step 3: Update Server 3
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► Server 1: v2.0 ●                                            │
+│       ├──► Server 2: v2.0 ●                                            │
+│       └──► Server 3: v2.0 ● (updated)                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation (Kubernetes):**
+
+``` yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Max extra pods during update
+      maxUnavailable: 0  # Never reduce below desired count
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:v2.0
+```
+
+**Pros:**
+
+-   Zero downtime
+-   Gradual rollout
+-   Easy to implement
+
+**Cons:**
+
+-   Multiple versions running simultaneously
+-   Slower than recreate
+-   Rollback requires another rolling update
+
+### 9.4.4 Blue-Green Deployment
+
+Maintain two identical environments. Switch traffic instantly.
+
+```         
+BLUE Environment (current production):
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  Server 1: v1.0 ●                                                      │
+│  Server 2: v1.0 ●        ◄──── 100% Traffic                            │
+│  Server 3: v1.0 ●                                                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+GREEN Environment (staging new version):
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  Server 1: v2.0 ●                                                      │
+│  Server 2: v2.0 ●        ◄──── 0% Traffic (testing)                    │
+│  Server 3: v2.0 ●                                                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+After switch:
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  BLUE: v1.0 ●●●          ◄──── 0% Traffic (standby for rollback)       │
+│                                                                         │
+│  GREEN: v2.0 ●●●         ◄──── 100% Traffic                            │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation with AWS/Route 53:**
+
+``` yaml
+# GitHub Actions blue-green deployment
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to green environment
+        run: |
+          aws ecs update-service \
+            --cluster production \
+            --service myapp-green \
+            --task-definition myapp:${{ github.sha }}
+      
+      - name: Wait for green to be healthy
+        run: |
+          aws ecs wait services-stable \
+            --cluster production \
+            --services myapp-green
+      
+      - name: Run smoke tests on green
+        run: |
+          curl -f https://green.example.com/health
+          npm run test:smoke -- --url=https://green.example.com
+      
+      - name: Switch traffic to green
+        run: |
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} \
+            --change-batch file://switch-to-green.json
+      
+      - name: Keep blue as rollback
+        run: |
+          echo "Blue environment available for rollback"
+          echo "To rollback, switch DNS back to blue"
+```
+
+**Pros:**
+
+-   Instant switch and rollback
+-   Full testing before going live
+-   Zero downtime
+
+**Cons:**
+
+-   Requires double infrastructure
+-   More expensive
+-   Database migrations are tricky
+
+### 9.4.5 Canary Deployment
+
+Deploy to a small percentage of users first, then gradually increase:
+
+```         
+Step 1: Deploy to 5% (canary)
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► 95% ──► Production (v1.0): ●●●●●●●●●●                       │
+│       │                                                                 │
+│       └──► 5%  ──► Canary (v2.0): ●                                    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Step 2: Monitor metrics. If healthy, increase to 25%
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       ├──► 75% ──► Production (v1.0): ●●●●●●●●                         │
+│       │                                                                 │
+│       └──► 25% ──► Canary (v2.0): ●●●                                  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Step 3: Continue to 50%, 75%, 100%
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Load Balancer                                                          │
+│       │                                                                 │
+│       └──► 100% ──► New Production (v2.0): ●●●●●●●●●●                  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Canary with Kubernetes and Istio:**
+
+``` yaml
+# VirtualService for traffic splitting
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: myapp
+spec:
+  hosts:
+    - myapp.example.com
+  http:
+    - route:
+        - destination:
+            host: myapp-stable
+            port:
+              number: 80
+          weight: 95
+        - destination:
+            host: myapp-canary
+            port:
+              number: 80
+          weight: 5
+```
+
+**Automated Canary Analysis:**
+
+``` yaml
+# GitHub Actions canary deployment
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy canary (5%)
+        run: kubectl apply -f canary-5-percent.yaml
+      
+      - name: Wait and analyze metrics
+        run: |
+          sleep 300  # Wait 5 minutes
+          
+          # Check error rate
+          ERROR_RATE=$(curl -s "prometheus/api/v1/query?query=error_rate{version='canary'}")
+          if [ "$ERROR_RATE" -gt "0.01" ]; then
+            echo "Error rate too high, rolling back"
+            kubectl apply -f rollback.yaml
+            exit 1
+          fi
+          
+          # Check latency
+          LATENCY=$(curl -s "prometheus/api/v1/query?query=p99_latency{version='canary'}")
+          if [ "$LATENCY" -gt "500" ]; then
+            echo "Latency too high, rolling back"
+            kubectl apply -f rollback.yaml
+            exit 1
+          fi
+      
+      - name: Increase to 25%
+        run: kubectl apply -f canary-25-percent.yaml
+      
+      # ... continue pattern ...
+      
+      - name: Full rollout
+        run: kubectl apply -f full-rollout.yaml
+```
+
+**Pros:**
+
+-   Minimal blast radius if issues
+-   Real production testing
+-   Data-driven promotion decisions
+
+**Cons:**
+
+-   Complex to implement
+-   Requires good monitoring
+-   Multiple versions in production
+
+### 9.4.6 Feature Flags
+
+Deploy code to everyone but enable features selectively:
+
+``` javascript
+// Feature flag implementation
+const LaunchDarkly = require('launchdarkly-node-server-sdk');
+const client = LaunchDarkly.init(process.env.LD_SDK_KEY);
+
+app.get('/checkout', async (req, res) => {
+  const user = { key: req.user.id, email: req.user.email };
+  
+  // Check if new checkout is enabled for this user
+  const newCheckoutEnabled = await client.variation(
+    'new-checkout-flow',
+    user,
+    false  // Default value
+  );
+  
+  if (newCheckoutEnabled) {
+    return res.render('checkout-v2');
+  } else {
+    return res.render('checkout-v1');
+  }
+});
+```
+
+**Feature flag strategies:**
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    FEATURE FLAG STRATEGIES                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  BOOLEAN FLAG                                                           │
+│  • Simple on/off                                                        │
+│  • Example: dark_mode_enabled: true/false                               │
+│                                                                         │
+│  PERCENTAGE ROLLOUT                                                     │
+│  • Gradually enable for more users                                      │
+│  • Example: new_feature: 25% of users                                   │
+│                                                                         │
+│  USER TARGETING                                                         │
+│  • Enable for specific users/groups                                     │
+│  • Example: beta_feature: [user_ids: 1, 2, 3]                          │
+│                                                                         │
+│  ENVIRONMENT-BASED                                                      │
+│  • Different values per environment                                     │
+│  • Example: debug_mode: true (dev), false (prod)                        │
+│                                                                         │
+│  A/B TESTING                                                            │
+│  • Different variants for different users                               │
+│  • Example: checkout_button: "Buy Now" vs "Purchase"                    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Pros:**
+
+-   Decouple deployment from release
+-   Instant enable/disable
+-   Enables A/B testing
+
+**Cons:**
+
+-   Code complexity (if/else everywhere)
+-   Technical debt (old flags)
+-   Testing combinations is hard
+
+------------------------------------------------------------------------
+
+## 9.5 Environment Management
+
+Managing multiple environments (development, staging, production) is crucial for safe deployments.
+
+### 9.5.1 Environment Hierarchy
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    ENVIRONMENT HIERARCHY                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  LOCAL DEVELOPMENT                                                      │
+│  • Developer's machine                                                  │
+│  • Local database, mock services                                        │
+│  • Fast iteration                                                       │
+│         │                                                               │
+│         ▼                                                               │
+│  CI ENVIRONMENT                                                         │
+│  • Automated builds and tests                                           │
+│  • Ephemeral (created/destroyed per build)                              │
+│  • Isolated from other builds                                           │
+│         │                                                               │
+│         ▼                                                               │
+│  DEVELOPMENT/DEV                                                        │
+│  • Shared development environment                                       │
+│  • Latest code from develop branch                                      │
+│  • May be unstable                                                      │
+│         │                                                               │
+│         ▼                                                               │
+│  STAGING/QA                                                             │
+│  • Production-like environment                                          │
+│  • Pre-production testing                                               │
+│  • Same infrastructure as production                                    │
+│         │                                                               │
+│         ▼                                                               │
+│  PRODUCTION                                                             │
+│  • Live environment with real users                                     │
+│  • Highest security and monitoring                                      │
+│  • Changes require approval                                             │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.5.2 Environment Configuration
+
+**Environment Variables:**
+
+``` bash
+# .env.development
+NODE_ENV=development
+DATABASE_URL=postgresql://localhost:5432/app_dev
+REDIS_URL=redis://localhost:6379
+API_URL=http://localhost:3000
+LOG_LEVEL=debug
+DEBUG=true
+
+# .env.staging
+NODE_ENV=staging
+DATABASE_URL=postgresql://staging-db.example.com:5432/app
+REDIS_URL=redis://staging-redis.example.com:6379
+API_URL=https://staging-api.example.com
+LOG_LEVEL=info
+DEBUG=false
+
+# .env.production
+NODE_ENV=production
+DATABASE_URL=postgresql://prod-db.example.com:5432/app
+REDIS_URL=redis://prod-redis.example.com:6379
+API_URL=https://api.example.com
+LOG_LEVEL=warn
+DEBUG=false
+```
+
+**Configuration Management:**
+
+``` javascript
+// config/index.js
+const configs = {
+  development: {
+    database: {
+      host: 'localhost',
+      port: 5432,
+      name: 'app_dev',
+      pool: { min: 2, max: 10 }
+    },
+    cache: {
+      ttl: 60,  // Short TTL for dev
+      enabled: false
+    },
+    features: {
+      newCheckout: true,  // Enable all features in dev
+      darkMode: true
+    }
+  },
+  
+  staging: {
+    database: {
+      host: process.env.DB_HOST,
+      port: 5432,
+      name: 'app_staging',
+      pool: { min: 5, max: 20 }
+    },
+    cache: {
+      ttl: 300,
+      enabled: true
+    },
+    features: {
+      newCheckout: true,
+      darkMode: true
+    }
+  },
+  
+  production: {
+    database: {
+      host: process.env.DB_HOST,
+      port: 5432,
+      name: 'app_prod',
+      pool: { min: 10, max: 50 }
+    },
+    cache: {
+      ttl: 3600,
+      enabled: true
+    },
+    features: {
+      newCheckout: false,  // Gradually enable via feature flags
+      darkMode: true
+    }
+  }
+};
+
+const env = process.env.NODE_ENV || 'development';
+module.exports = configs[env];
+```
+
+### 9.5.3 GitHub Actions Environments
+
+``` yaml
+# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to staging
+        run: ./deploy.sh staging
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment:
+      name: production
+      url: https://example.com
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to production
+        run: ./deploy.sh production
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+```
+
+**Environment Protection Rules:**
+
+```         
+Repository Settings → Environments → production
+
+Protection Rules:
+☑ Required reviewers
+  • @team-leads
+  
+☑ Wait timer
+  • 30 minutes after staging deploy
+  
+☑ Restrict branches
+  • Only main branch can deploy
+
+☑ Custom deployment branch policy
+  • Selected branches: main, release/*
+```
+
+### 9.5.4 Secrets Management
+
+**Never commit secrets:**
+
+``` bash
+# .gitignore
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+```
+
+**Use environment-specific secrets:**
+
+``` yaml
+# GitHub Actions
+steps:
+  - name: Deploy
+    env:
+      # Different secrets per environment
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}  # Set per environment
+      API_KEY: ${{ secrets.API_KEY }}
+```
+
+**Secret rotation:**
+
+``` yaml
+# Scheduled secret rotation check
+name: Secret Rotation Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secret age
+        run: |
+          # Check if secrets are older than 90 days
+          # Alert if rotation needed
+          ./scripts/check-secret-age.sh
+      
+      - name: Send alert
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Secret rotation required',
+              body: 'Secrets are older than 90 days and should be rotated.'
+            })
+```
+
+------------------------------------------------------------------------
+
+## 9.6 Infrastructure as Code
+
+**Infrastructure as Code (IaC)** treats infrastructure configuration as software—versioned, reviewed, and automated.
+
+### 9.6.1 Why Infrastructure as Code?
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MANUAL vs. INFRASTRUCTURE AS CODE                    │
+├────────────────────────────────────┬────────────────────────────────────┤
+│            MANUAL                  │     INFRASTRUCTURE AS CODE         │
+├────────────────────────────────────┼────────────────────────────────────┤
+│ Click through AWS console          │ Define in code files               │
+│ Document steps in wiki             │ Code IS the documentation          │
+│ "Works on my AWS account"          │ Reproducible anywhere              │
+│ Drift from documented state        │ Version controlled                 │
+│ Slow to recreate                   │ Fast to provision                  │
+│ Hard to review changes             │ Pull request review                │
+│ Inconsistent environments          │ Identical environments             │
+│ Scary to modify                    │ Confident changes                  │
+└────────────────────────────────────┴────────────────────────────────────┘
+```
+
+### 9.6.2 Docker for Application Infrastructure
+
+**Dockerfile:**
+
+``` dockerfile
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files first (better caching)
+COPY package*.json ./
+RUN npm ci
+
+# Copy source and build
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Copy only production dependencies and build output
+COPY --from=builder /app/package*.json ./
+RUN npm ci --only=production
+
+COPY --from=builder /app/dist ./dist
+
+# Use non-root user
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+EXPOSE 3000
+
+CMD ["node", "dist/server.js"]
+```
+
+**Docker Compose for local development:**
+
+``` yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/app_dev
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+      - /app/node_modules  # Don't override node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: npm run dev
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Test database for integration tests
+  db-test:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_test
+    ports:
+      - "5433:5432"
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+### 9.6.3 Terraform for Cloud Infrastructure
+
+**Basic Terraform structure:**
+
+``` hcl
+# main.tf
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+  
+  backend "s3" {
+    bucket = "my-terraform-state"
+    key    = "prod/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# VPC
+resource "aws_vpc" "main" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  
+  tags = {
+    Name        = "${var.project_name}-vpc"
+    Environment = var.environment
+  }
+}
+
+# Subnets
+resource "aws_subnet" "public" {
+  count             = 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.${count.index + 1}.0/24"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+  
+  map_public_ip_on_launch = true
+  
+  tags = {
+    Name = "${var.project_name}-public-${count.index + 1}"
+  }
+}
+
+# RDS Database
+resource "aws_db_instance" "main" {
+  identifier        = "${var.project_name}-db"
+  engine            = "postgres"
+  engine_version    = "15"
+  instance_class    = var.db_instance_class
+  allocated_storage = 20
+  
+  db_name  = var.db_name
+  username = var.db_username
+  password = var.db_password
+  
+  vpc_security_group_ids = [aws_security_group.db.id]
+  db_subnet_group_name   = aws_db_subnet_group.main.name
+  
+  backup_retention_period = 7
+  skip_final_snapshot     = var.environment != "production"
+  
+  tags = {
+    Name        = "${var.project_name}-db"
+    Environment = var.environment
+  }
+}
+
+# ECS Cluster
+resource "aws_ecs_cluster" "main" {
+  name = "${var.project_name}-cluster"
+  
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}
+
+# ECS Service
+resource "aws_ecs_service" "app" {
+  name            = "${var.project_name}-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = var.app_count
+  launch_type     = "FARGATE"
+  
+  network_configuration {
+    subnets         = aws_subnet.public[*].id
+    security_groups = [aws_security_group.app.id]
+  }
+  
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app.arn
+    container_name   = "app"
+    container_port   = 3000
+  }
+}
+```
+
+**Variables:**
+
+``` hcl
+# variables.tf
+variable "project_name" {
+  description = "Name of the project"
+  type        = string
+  default     = "taskflow"
+}
+
+variable "environment" {
+  description = "Deployment environment"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "app_count" {
+  description = "Number of app instances"
+  type        = number
+  default     = 2
+}
+```
+
+**Environments with workspaces:**
+
+``` bash
+# Create workspaces for each environment
+terraform workspace new staging
+terraform workspace new production
+
+# Select workspace
+terraform workspace select staging
+
+# Apply with environment-specific variables
+terraform apply -var-file="environments/staging.tfvars"
+```
+
+### 9.6.4 CI/CD for Infrastructure
+
+``` yaml
+# .github/workflows/infrastructure.yml
+name: Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+      
+      - name: Terraform Format Check
+        run: terraform fmt -check
+        working-directory: terraform
+      
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+      
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+      - name: Save plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/tfplan
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: terraform
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+```
+
+------------------------------------------------------------------------
+
+## 9.7 Deployment Automation
+
+### 9.7.1 Complete Deployment Pipeline
+
+``` yaml
+# .github/workflows/deploy.yml
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================
+  # Build and test
+  # ============================================
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Deploy to staging
+  # ============================================
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster staging-cluster \
+            --service app-service \
+            --force-new-deployment
+      
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster staging-cluster \
+            --services app-service
+      
+      - name: Run smoke tests
+        run: |
+          npm run test:smoke -- --url=https://staging.example.com
+
+  # ============================================
+  # Deploy to production (requires approval)
+  # ============================================
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://example.com
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Deploy to production (Blue-Green)
+        run: |
+          # Deploy to green environment
+          aws ecs update-service \
+            --cluster production-cluster \
+            --service app-green \
+            --force-new-deployment
+          
+          # Wait for green to be stable
+          aws ecs wait services-stable \
+            --cluster production-cluster \
+            --services app-green
+      
+      - name: Run production smoke tests
+        run: |
+          npm run test:smoke -- --url=https://green.example.com
+      
+      - name: Switch traffic to green
+        run: |
+          aws elbv2 modify-listener \
+            --listener-arn ${{ secrets.LISTENER_ARN }} \
+            --default-actions Type=forward,TargetGroupArn=${{ secrets.GREEN_TG_ARN }}
+      
+      - name: Verify production
+        run: |
+          sleep 30
+          npm run test:smoke -- --url=https://example.com
+      
+      - name: Create release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `v${new Date().toISOString().split('T')[0]}-${context.sha.substring(0, 7)}`,
+              name: `Release ${new Date().toISOString().split('T')[0]}`,
+              body: `Deployed commit ${context.sha}`,
+              draft: false,
+              prerelease: false
+            })
+```
+
+### 9.7.2 Database Migrations in CI/CD
+
+``` yaml
+# Database migration job
+migrate:
+  runs-on: ubuntu-latest
+  needs: build
+  environment: ${{ github.event.inputs.environment || 'staging' }}
+  
+  steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run migrations
+      run: npm run db:migrate
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    
+    - name: Verify migration
+      run: npm run db:verify
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+```
+
+**Safe migration practices:**
+
+``` javascript
+// migrations/20241209_add_user_role.js
+
+// ✓ Safe: Adding a column with default
+exports.up = async (knex) => {
+  await knex.schema.alterTable('users', (table) => {
+    table.string('role').defaultTo('user');
+  });
+};
+
+exports.down = async (knex) => {
+  await knex.schema.alterTable('users', (table) => {
+    table.dropColumn('role');
+  });
+};
+```
+
+``` javascript
+// ✗ Dangerous: Renaming column (breaks running code)
+// Instead, do it in phases:
+
+// Phase 1: Add new column
+exports.up_phase1 = async (knex) => {
+  await knex.schema.alterTable('users', (table) => {
+    table.string('full_name');
+  });
+  // Copy data
+  await knex.raw('UPDATE users SET full_name = name');
+};
+
+// Phase 2: Deploy code that uses both columns
+// Phase 3: Remove old column (after all code updated)
+exports.up_phase3 = async (knex) => {
+  await knex.schema.alterTable('users', (table) => {
+    table.dropColumn('name');
+  });
+};
+```
+
+### 9.7.3 Rollback Procedures
+
+``` yaml
+# .github/workflows/rollback.yml
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: 'Version to rollback to (leave empty for previous)'
+        required: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Get previous task definition
+        id: previous
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            TASK_DEF="${{ github.event.inputs.version }}"
+          else
+            # Get second most recent task definition
+            TASK_DEF=$(aws ecs list-task-definitions \
+              --family-prefix myapp \
+              --sort DESC \
+              --max-items 2 \
+              --query 'taskDefinitionArns[1]' \
+              --output text)
+          fi
+          echo "task_def=$TASK_DEF" >> $GITHUB_OUTPUT
+      
+      - name: Rollback ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ github.event.inputs.environment }}-cluster \
+            --service app-service \
+            --task-definition ${{ steps.previous.outputs.task_def }}
+      
+      - name: Wait for rollback
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ github.event.inputs.environment }}-cluster \
+            --services app-service
+      
+      - name: Verify rollback
+        run: |
+          URL="https://${{ github.event.inputs.environment }}.example.com"
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            URL="https://example.com"
+          fi
+          curl -f "$URL/health"
+      
+      - name: Notify team
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🔄 Rollback completed for ${{ github.event.inputs.environment }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Rollback completed*\n• Environment: ${{ github.event.inputs.environment }}\n• Version: ${{ steps.previous.outputs.task_def }}\n• Triggered by: ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+------------------------------------------------------------------------
+
+## 9.8 Monitoring and Observability
+
+Deployment doesn't end when code reaches production. Monitoring ensures the deployment is healthy.
+
+### 9.8.1 The Three Pillars of Observability
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    THREE PILLARS OF OBSERVABILITY                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  LOGS                                                                   │
+│  ────                                                                   │
+│  • Discrete events with context                                         │
+│  • Debug information                                                    │
+│  • Audit trail                                                          │
+│  • Example: "User 123 logged in at 2024-12-09T10:30:00Z"               │
+│                                                                         │
+│  METRICS                                                                │
+│  ───────                                                                │
+│  • Numeric measurements over time                                       │
+│  • Aggregatable and comparable                                          │
+│  • Alerts and dashboards                                                │
+│  • Example: request_duration_seconds{endpoint="/api/users"} = 0.125    │
+│                                                                         │
+│  TRACES                                                                 │
+│  ──────                                                                 │
+│  • Request flow across services                                         │
+│  • Latency breakdown                                                    │
+│  • Dependency mapping                                                   │
+│  • Example: Request -> API -> Database -> Cache -> Response            │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.8.2 Key Metrics to Monitor
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    KEY DEPLOYMENT METRICS                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  THE FOUR GOLDEN SIGNALS (Google SRE)                                   │
+│                                                                         │
+│  1. LATENCY                                                             │
+│     • Request duration                                                  │
+│     • p50, p95, p99 percentiles                                        │
+│     • Alert: p99 > 500ms                                                │
+│                                                                         │
+│  2. TRAFFIC                                                             │
+│     • Requests per second                                               │
+│     • Concurrent users                                                  │
+│     • Alert: Unusual spike or drop                                      │
+│                                                                         │
+│  3. ERRORS                                                              │
+│     • Error rate (5xx responses)                                        │
+│     • Failed requests                                                   │
+│     • Alert: Error rate > 1%                                            │
+│                                                                         │
+│  4. SATURATION                                                          │
+│     • CPU utilization                                                   │
+│     • Memory usage                                                      │
+│     • Queue depth                                                       │
+│     • Alert: CPU > 80% for 5 minutes                                    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.8.3 Health Checks
+
+``` javascript
+// healthcheck.js
+const express = require('express');
+const db = require('./db');
+const redis = require('./redis');
+
+const router = express.Router();
+
+// Basic liveness check (is the process running?)
+router.get('/health/live', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Readiness check (is the app ready to serve traffic?)
+router.get('/health/ready', async (req, res) => {
+  const checks = {
+    database: false,
+    redis: false,
+    memory: false
+  };
+  
+  try {
+    // Database check
+    await db.raw('SELECT 1');
+    checks.database = true;
+  } catch (error) {
+    console.error('Database health check failed:', error);
+  }
+  
+  try {
+    // Redis check
+    await redis.ping();
+    checks.redis = true;
+  } catch (error) {
+    console.error('Redis health check failed:', error);
+  }
+  
+  // Memory check (under 90% usage)
+  const memUsage = process.memoryUsage();
+  const heapUsedPercent = memUsage.heapUsed / memUsage.heapTotal;
+  checks.memory = heapUsedPercent < 0.9;
+  
+  const allHealthy = Object.values(checks).every(v => v);
+  
+  res.status(allHealthy ? 200 : 503).json({
+    status: allHealthy ? 'healthy' : 'unhealthy',
+    checks,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Detailed health for debugging
+router.get('/health/details', async (req, res) => {
+  res.json({
+    version: process.env.APP_VERSION || 'unknown',
+    commit: process.env.GIT_COMMIT || 'unknown',
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
+module.exports = router;
+```
+
+### 9.8.4 Post-Deployment Verification
+
+``` yaml
+# Post-deployment verification in CI/CD
+verify-deployment:
+  runs-on: ubuntu-latest
+  needs: deploy
+  
+  steps:
+    - name: Wait for deployment to stabilize
+      run: sleep 60
+    
+    - name: Check health endpoint
+      run: |
+        for i in {1..5}; do
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://example.com/health/ready)
+          if [ "$STATUS" = "200" ]; then
+            echo "Health check passed"
+            exit 0
+          fi
+          echo "Health check failed (attempt $i), waiting..."
+          sleep 10
+        done
+        echo "Health check failed after 5 attempts"
+        exit 1
+    
+    - name: Check error rate
+      run: |
+        # Query Prometheus/Datadog for error rate
+        ERROR_RATE=$(curl -s "$PROMETHEUS_URL/api/v1/query?query=rate(http_requests_total{status=~'5..'}[5m])")
+        # Parse and check error rate
+        # Alert if > 1%
+    
+    - name: Check response times
+      run: |
+        # Run quick performance check
+        npm run test:performance -- --url=https://example.com --threshold=500ms
+    
+    - name: Rollback if unhealthy
+      if: failure()
+      run: |
+        echo "Deployment verification failed, initiating rollback"
+        gh workflow run rollback.yml -f environment=production
+```
+
+### 9.8.5 Alerting
+
+``` yaml
+# Example Prometheus alerting rules
+groups:
+  - name: deployment-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: Error rate is {{ $value | humanizePercentage }} over the last 5 minutes
+      
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High latency detected
+          description: p99 latency is {{ $value }}s
+      
+      - alert: DeploymentFailed
+        expr: kube_deployment_status_replicas_ready / kube_deployment_spec_replicas < 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Deployment not fully ready
+          description: Only {{ $value | humanizePercentage }} of pods are ready
+```
+
+------------------------------------------------------------------------
+
+## 9.9 Troubleshooting CI/CD
+
+### 9.9.1 Common Issues and Solutions
+
+```         
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    COMMON CI/CD ISSUES                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ISSUE: Build fails but works locally                                   │
+│  ─────────────────────────────────────                                  │
+│  Causes:                                                                │
+│  • Different Node/Python version                                        │
+│  • Missing environment variables                                        │
+│  • Cached dependencies out of sync                                      │
+│  • OS differences (Windows vs Linux)                                    │
+│                                                                         │
+│  Solutions:                                                             │
+│  • Match CI versions to local versions                                  │
+│  • Use .nvmrc or .python-version                                        │
+│  • Clear CI cache                                                       │
+│  • Use Docker for consistency                                           │
+│                                                                         │
+│  ─────────────────────────────────────                                  │
+│                                                                         │
+│  ISSUE: Flaky tests                                                     │
+│  ─────────────────                                                      │
+│  Causes:                                                                │
+│  • Race conditions                                                      │
+│  • Time-dependent tests                                                 │
+│  • Shared test state                                                    │
+│  • External dependencies                                                │
+│                                                                         │
+│  Solutions:                                                             │
+│  • Use proper async/await                                               │
+│  • Mock time-dependent code                                             │
+│  • Isolate test data                                                    │
+│  • Mock external services                                               │
+│                                                                         │
+│  ─────────────────────────────────────                                  │
+│                                                                         │
+│  ISSUE: Slow pipelines                                                  │
+│  ───────────────────                                                    │
+│  Causes:                                                                │
+│  • No caching                                                           │
+│  • Sequential jobs that could parallel                                  │
+│  • Large Docker images                                                  │
+│  • Too many dependencies                                                │
+│                                                                         │
+│  Solutions:                                                             │
+│  • Cache dependencies                                                   │
+│  • Parallelize jobs                                                     │
+│  • Use multi-stage Docker builds                                        │
+│  • Split test suites                                                    │
+│                                                                         │
+│  ─────────────────────────────────────                                  │
+│                                                                         │
+│  ISSUE: Deployment succeeds but app broken                              │
+│  ──────────────────────────────────────                                 │
+│  Causes:                                                                │
+│  • Missing environment variables                                        │
+│  • Database migration issues                                            │
+│  • Incompatible dependencies                                            │
+│  • Configuration drift                                                  │
+│                                                                         │
+│  Solutions:                                                             │
+│  • Comprehensive smoke tests                                            │
+│  • Health check endpoints                                               │
+│  • Staging environment that mirrors prod                                │
+│  • Infrastructure as Code                                               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.9.2 Debugging Techniques
+
+**Debugging GitHub Actions:**
+
+``` yaml
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      # Print all environment variables
+      - name: Debug environment
+        run: env | sort
+      
+      # Print GitHub context
+      - name: Debug GitHub context
+        run: echo '${{ toJson(github) }}'
+      
+      # Enable debug logging
+      - name: Debug step
+        run: echo "Debug info"
+        env:
+          ACTIONS_STEP_DEBUG: true
+      
+      # SSH into runner for debugging
+      - name: Setup tmate session
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+```
+
+**Debugging Docker builds:**
+
+``` bash
+# Build with verbose output
+docker build --progress=plain -t myapp .
+
+# Build specific stage
+docker build --target builder -t myapp:builder .
+
+# Run intermediate layer
+docker run -it myapp:builder sh
+
+# Check image layers
+docker history myapp
+
+# Inspect image
+docker inspect myapp
+```
+
+### 9.9.3 CI/CD Best Practices Checklist
+
+```         
+CI/CD BEST PRACTICES CHECKLIST
+═══════════════════════════════════════════════════════════════
+
+CONTINUOUS INTEGRATION
+☐ Single source repository
+☐ Automated builds on every commit
+☐ Fast feedback (< 15 minutes)
+☐ Self-testing builds
+☐ Fix broken builds immediately
+☐ Keep the build green
+
+TESTING
+☐ Unit tests with high coverage
+☐ Integration tests for critical paths
+☐ E2E tests for user journeys
+☐ Tests run in CI
+☐ No flaky tests
+
+DEPLOYMENT
+☐ Automated deployments
+☐ Multiple environments (dev, staging, prod)
+☐ Production-like staging
+☐ Deployment approval for production
+☐ Rollback procedure documented and tested
+
+SECURITY
+☐ Secrets in secret manager (not in code)
+☐ Dependency scanning
+☐ Security scanning in CI
+☐ Least privilege for CI credentials
+☐ Audit logging
+
+MONITORING
+☐ Health check endpoints
+☐ Key metrics monitored
+☐ Alerts configured
+☐ Post-deployment verification
+☐ Logging and tracing
+
+DOCUMENTATION
+☐ Pipeline documented
+☐ Runbook for common issues
+☐ Rollback procedure documented
+☐ Environment configuration documented
+```
+
+------------------------------------------------------------------------
+
+## 9.10 Chapter Summary
+
+Continuous Integration and Continuous Deployment transform how teams deliver software. By automating builds, tests, and deployments, teams can ship faster with higher quality and lower risk.
+
+Key takeaways from this chapter:
+
+-   **Continuous Integration** means integrating code frequently, with automated builds and tests verifying each change. Problems are caught early when they're easiest to fix.
+
+-   **Continuous Delivery** ensures code is always in a deployable state, with push-button releases to production.
+
+-   **Continuous Deployment** goes further—every change that passes tests deploys automatically to production.
+
+-   **GitHub Actions** provides powerful CI/CD capabilities with workflows defined in YAML, jobs that run in parallel or sequence, and matrix builds for testing across configurations.
+
+-   **Deployment strategies** like rolling, blue-green, and canary deployments minimize risk and enable quick rollbacks.
+
+-   **Environment management** requires careful configuration of development, staging, and production environments with proper secrets management.
+
+-   **Infrastructure as Code** treats infrastructure like software—versioned, reviewed, and automated.
+
+-   **Monitoring and observability** are essential for knowing whether deployments are healthy. The three pillars—logs, metrics, and traces—provide visibility into system behavior.
+
+-   **Troubleshooting** CI/CD requires understanding common issues like environment differences, flaky tests, and slow pipelines.
+
+------------------------------------------------------------------------
+
+## 9.11 Key Terms
+
+| Term | Definition |
+|------------------------------------|------------------------------------|
+| **Continuous Integration (CI)** | Practice of frequently integrating code with automated verification |
+| **Continuous Delivery** | Keeping code always deployable with push-button releases |
+| **Continuous Deployment** | Automatically deploying every change that passes tests |
+| **Pipeline** | Automated sequence of build, test, and deploy stages |
+| **Workflow** | GitHub Actions term for an automated process |
+| **Job** | Unit of work in a CI/CD pipeline |
+| **Runner** | Machine that executes CI/CD jobs |
+| **Artifact** | File or package produced by a build |
+| **Blue-Green Deployment** | Strategy using two identical environments for instant switching |
+| **Canary Deployment** | Gradual rollout to small percentage of users |
+| **Rolling Deployment** | Updating instances one at a time |
+| **Feature Flag** | Toggle to enable/disable features without deployment |
+| **Infrastructure as Code** | Managing infrastructure through version-controlled files |
+| **Health Check** | Endpoint that reports application health |
+| **Rollback** | Reverting to a previous version after failed deployment |
+
+------------------------------------------------------------------------
+
+## 9.12 Review Questions
+
+1.  Explain the difference between Continuous Integration, Continuous Delivery, and Continuous Deployment.
+
+2.  What are the core practices of Continuous Integration? Why is each important?
+
+3.  Describe the structure of a GitHub Actions workflow. What are workflows, jobs, and steps?
+
+4.  Compare blue-green, canary, and rolling deployment strategies. When would you use each?
+
+5.  Why is "fix broken builds immediately" a critical CI principle?
+
+6.  How do you securely manage secrets in CI/CD pipelines?
+
+7.  What is Infrastructure as Code? What problems does it solve?
+
+8.  Explain the purpose of staging environments. How should they relate to production?
+
+9.  What are the four golden signals of monitoring? Why are they important for deployments?
+
+10. A deployment succeeds but users report errors. What steps would you take to diagnose and resolve the issue?
+
+------------------------------------------------------------------------
+
+## 9.13 Hands-On Exercises
+
+### Exercise 9.1: Basic CI Pipeline
+
+Create a CI pipeline for your project:
+
+1.  Create `.github/workflows/ci.yml`
+2.  Configure triggers for push and pull requests
+3.  Add jobs for:
+    -   Linting
+    -   Unit tests
+    -   Build
+4.  Verify the pipeline runs on a pull request
+5.  Add a README badge showing build status
+
+### Exercise 9.2: Matrix Testing
+
+Extend your CI pipeline with matrix builds:
+
+1.  Test across multiple Node.js versions (18, 20, 22)
+2.  Test on multiple operating systems (ubuntu, windows)
+3.  Add a coverage job that only runs on one combination
+4.  Verify all combinations pass
+
+### Exercise 9.3: Automated Deployment
+
+Set up automated deployment to a hosting platform:
+
+1.  Choose a platform (Vercel, Netlify, Render, or similar)
+2.  Create deployment workflow triggered by main branch
+3.  Add staging environment (deploy on all branches)
+4.  Add production environment with approval requirement
+5.  Document the deployment process
+
+### Exercise 9.4: Docker and CI
+
+Containerize your application:
+
+1.  Create a Dockerfile for your application
+2.  Create docker-compose.yml for local development
+3.  Add Docker build and push to CI pipeline
+4.  Configure caching for faster builds
+5.  Test the container locally and in CI
+
+### Exercise 9.5: Health Checks and Monitoring
+
+Implement health checks:
+
+1.  Add `/health/live` endpoint (basic liveness)
+2.  Add `/health/ready` endpoint (checks dependencies)
+3.  Add health check to Dockerfile
+4.  Configure CI to verify health after deployment
+5.  Document health check responses
+
+### Exercise 9.6: Rollback Procedure
+
+Create and test a rollback procedure:
+
+1.  Create `rollback.yml` workflow
+2.  Accept environment and version as inputs
+3.  Implement rollback logic (revert to previous version)
+4.  Test rollback in staging environment
+5.  Document the rollback procedure
+
+### Exercise 9.7: Complete CI/CD Pipeline
+
+Build a complete pipeline integrating all concepts:
+
+1.  Lint, test, and build on every commit
+2.  Deploy to staging on develop branch
+3.  Deploy to production on main with approval
+4.  Include security scanning
+5.  Post-deployment health verification
+6.  Slack/Discord notification on deployment
+7.  Document the entire pipeline
+
+------------------------------------------------------------------------
+
+## 9.14 Further Reading
+
+**Books:**
+
+-   Humble, J., & Farley, D. (2010). *Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation*. Addison-Wesley.
+-   Kim, G., Humble, J., Debois, P., & Willis, J. (2016). *The DevOps Handbook*. IT Revolution Press.
+-   Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The Science of Lean Software and DevOps*. IT Revolution Press.
+
+**Online Resources:**
+
+-   GitHub Actions Documentation: https://docs.github.com/en/actions
+-   Docker Documentation: https://docs.docker.com/
+-   Terraform Documentation: https://www.terraform.io/docs
+-   Martin Fowler's CI/CD Articles: https://martinfowler.com/articles/continuousIntegration.html
+-   Google SRE Book: https://sre.google/sre-book/table-of-contents/
+
+**Tools:**
+
+-   GitHub Actions: https://github.com/features/actions
+-   Docker: https://www.docker.com/
+-   Terraform: https://www.terraform.io/
+-   Kubernetes: https://kubernetes.io/
+-   ArgoCD: https://argoproj.github.io/cd/
+
+------------------------------------------------------------------------
+
+## References
+
+Fowler, M. (2006). Continuous Integration. Retrieved from https://martinfowler.com/articles/continuousIntegration.html
+
+Humble, J., & Farley, D. (2010). *Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation*. Addison-Wesley.
+
+Kim, G., Humble, J., Debois, P., & Willis, J. (2016). *The DevOps Handbook: How to Create World-Class Agility, Reliability, and Security in Technology Organizations*. IT Revolution Press.
+
+Beyer, B., Jones, C., Petoff, J., & Murphy, N. R. (2016). *Site Reliability Engineering: How Google Runs Production Systems*. O'Reilly Media.
+
+GitHub. (2024). GitHub Actions Documentation. Retrieved from https://docs.github.com/en/actions
