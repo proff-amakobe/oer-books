@@ -20,16 +20,33 @@ jobs:
       - uses: actions/checkout@v4
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
-         tinytex: true
+          tinytex: true
 
-      - name: Render book
+      - name: Render books
         run: |
           set -e
+
+          # ---- Advanced Algorithms Book ----
           cd advanced-algorithms-book
           quarto render
           cd ..
-          rm -rf public && mkdir -p public/advanced-algorithms-book
+
+          # ---- Software Engineering Lifecycle Book ----
+          cd se_lifecycle_book
+          quarto render
+          cd ..
+
+          # ---- Prepare public directory ----
+          rm -rf public && mkdir -p public
+
+          # Copy Advanced Algorithms Book
+          mkdir -p public/advanced-algorithms-book
           cp -r advanced-algorithms-book/_book/* public/advanced-algorithms-book/
+
+          # Copy Software Engineering Lifecycle Book
+          mkdir -p public/se_lifecycle_book
+          cp -r se_lifecycle_book/_book/* public/se_lifecycle_book/
+
           echo "----- Deployed tree -----"
           ls -R public
 
