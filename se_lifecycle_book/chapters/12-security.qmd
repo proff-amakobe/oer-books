@@ -4,18 +4,18 @@
 
 By the end of this chapter, you will be able to:
 
-- Explain the importance of security as a fundamental software quality attribute
-- Identify and mitigate the OWASP Top 10 web application vulnerabilities
-- Implement secure authentication and authorization mechanisms
-- Apply secure coding practices to prevent common vulnerabilities
-- Properly validate and sanitize user input to prevent injection attacks
-- Use encryption appropriately for data at rest and in transit
-- Configure security headers to protect against client-side attacks
-- Establish a vulnerability management process for dependencies
-- Design and execute security testing strategies
-- Respond effectively to security incidents
+-   Explain the importance of security as a fundamental software quality attribute
+-   Identify and mitigate the OWASP Top 10 web application vulnerabilities
+-   Implement secure authentication and authorization mechanisms
+-   Apply secure coding practices to prevent common vulnerabilities
+-   Properly validate and sanitize user input to prevent injection attacks
+-   Use encryption appropriately for data at rest and in transit
+-   Configure security headers to protect against client-side attacks
+-   Establish a vulnerability management process for dependencies
+-   Design and execute security testing strategies
+-   Respond effectively to security incidents
 
----
+------------------------------------------------------------------------
 
 ## 12.1 The Imperative of Software Security
 
@@ -27,7 +27,7 @@ The consequences of security failures are severe and far-reaching. Data breaches
 
 Consider some notable breaches that illustrate what can go wrong:
 
-**Equifax (2017)** exposed 147 million people's Social Security numbers, birth dates, and addresses. The cause? An unpatched vulnerability in the Apache Struts framework that had a fix available two months before the breach. The company paid over $700 million in settlements and suffered immeasurable reputational damage.
+**Equifax (2017)** exposed 147 million people's Social Security numbers, birth dates, and addresses. The cause? An unpatched vulnerability in the Apache Struts framework that had a fix available two months before the breach. The company paid over \$700 million in settlements and suffered immeasurable reputational damage.
 
 **Capital One (2019)** lost 100 million customer records including credit scores, payment history, and Social Security numbers. A misconfigured web application firewall allowed an attacker to execute a Server-Side Request Forgery attack, accessing data stored in Amazon S3. One configuration error led to one of the largest bank data breaches in history.
 
@@ -41,7 +41,7 @@ These weren't attacks on small, under-resourced companies—they were sophistica
 
 Before diving into specific vulnerabilities and mitigations, let's establish foundational security principles that guide secure software development. These principles aren't just theoretical guidelines—they inform every security decision throughout this chapter and your career.
 
-```
+```         
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    CORE SECURITY PRINCIPLES                             │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -103,7 +103,7 @@ This shift in mindset doesn't come naturally to most developers. We want to trus
 
 This mindset doesn't mean being paranoid—it means being appropriately cautious. Every security decision involves trade-offs between security, usability, and development cost. The goal is making informed decisions about which risks to accept, not achieving perfect security (which is impossible).
 
----
+------------------------------------------------------------------------
 
 ## 12.2 OWASP Top 10 Web Application Vulnerabilities
 
@@ -133,7 +133,7 @@ There are several common patterns of access control failure:
 
 Secure access control requires several layers working together. Let's walk through a comprehensive implementation, starting with authentication middleware that establishes user identity:
 
-```javascript
+``` javascript
 const jwt = require('jsonwebtoken');
 
 const authenticate = async (req, res, next) => {
@@ -185,7 +185,7 @@ This authentication middleware does more than just validate the token. It also v
 
 With authentication established, we need authorization middleware to verify the user has permission for specific actions:
 
-```javascript
+``` javascript
 // Middleware to verify resource ownership
 const authorizeOwner = (resourceUserIdField = 'userId') => {
   return async (req, res, next) => {
@@ -241,7 +241,7 @@ Notice that we log failed authorization attempts. This is crucial for security m
 
 Now let's see how these middleware functions protect actual routes:
 
-```javascript
+``` javascript
 // User can only access their own profile
 app.get('/api/users/:userId/profile', 
   authenticate,           // First, verify who they are
@@ -278,7 +278,7 @@ Each route explicitly declares its security requirements through middleware. Thi
 
 **A critical principle**: never trust client input for authorization-sensitive fields. When creating resources, the server should control who owns them:
 
-```javascript
+``` javascript
 // Creating a task - server controls ownership
 app.post('/api/tasks',
   authenticate,
@@ -327,7 +327,7 @@ Passwords are the most commonly mishandled sensitive data. Let's understand why 
 
 Here's how to implement password hashing properly:
 
-```javascript
+``` javascript
 const bcrypt = require('bcrypt');
 
 // Work factor of 12 means 2^12 = 4096 iterations
@@ -363,7 +363,7 @@ For data that needs to be encrypted (not hashed), use modern authenticated encry
 
 AES-256-GCM (Advanced Encryption Standard, 256-bit key, Galois/Counter Mode) is the current industry standard:
 
-```javascript
+``` javascript
 const crypto = require('crypto');
 
 const ALGORITHM = 'aes-256-gcm';
@@ -429,7 +429,7 @@ SQL injection occurs when user input becomes part of a SQL query without proper 
 
 Consider a login function that checks credentials:
 
-```javascript
+``` javascript
 // VULNERABLE CODE - DO NOT USE
 async function checkLogin(email, password) {
   const query = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`;
@@ -440,27 +440,27 @@ async function checkLogin(email, password) {
 
 For a normal user entering `alice@example.com` and `secretpassword`, the query becomes:
 
-```sql
+``` sql
 SELECT * FROM users WHERE email = 'alice@example.com' AND password = 'secretpassword'
 ```
 
 This works fine. But what if someone enters the email `' OR '1'='1' --`? The query becomes:
 
-```sql
+``` sql
 SELECT * FROM users WHERE email = '' OR '1'='1' --' AND password = '...'
 ```
 
 Let's break this down:
 
-- The attacker's `'` closes the email string
-- `OR '1'='1'` adds a condition that's always true
-- `--` is a SQL comment, making the rest of the query (including the password check) irrelevant
+-   The attacker's `'` closes the email string
+-   `OR '1'='1'` adds a condition that's always true
+-   `--` is a SQL comment, making the rest of the query (including the password check) irrelevant
 
 The query now returns all users, and the attacker logs in as the first user in the database—often an administrator.
 
 It gets worse. An attacker could enter:
 
-```
+```         
 '; DROP TABLE users; --
 ```
 
@@ -468,7 +468,7 @@ This closes the original query, adds a new command to delete the users table, an
 
 More sophisticated attacks extract data gradually:
 
-```
+```         
 ' UNION SELECT password_hash FROM users WHERE email = 'admin@example.com' --
 ```
 
@@ -478,7 +478,7 @@ This UNION attack combines results from the original query with data from a comp
 
 The solution is **parameterized queries** (also called prepared statements). Instead of building a string with user input, you write a query template with placeholders, and the database driver safely substitutes values:
 
-```javascript
+``` javascript
 // SECURE: Using parameterized queries
 async function checkLogin(email, password) {
   // The ? placeholders are filled by the driver, which properly escapes values
@@ -494,7 +494,7 @@ With parameterized queries, the database treats parameters as literal data value
 
 Modern query builders make parameterized queries the default:
 
-```javascript
+``` javascript
 // Using Knex query builder - automatically parameterized
 async function getUserByEmail(email) {
   return db('users')
@@ -522,7 +522,7 @@ The key insight: **never build query strings through concatenation with user inp
 
 The same principle applies to operating system commands. If user input becomes part of a shell command, attackers can inject additional commands:
 
-```javascript
+``` javascript
 // VULNERABLE: User controls part of shell command
 app.post('/api/ping', (req, res) => {
   const { host } = req.body;
@@ -539,7 +539,7 @@ The semicolon ends the first command, and everything after is a new command. The
 
 Prevention follows the same pattern—don't interpolate user input into commands:
 
-```javascript
+``` javascript
 // SECURE: Arguments passed as array, not interpolated into string
 const { execFile } = require('child_process');
 
@@ -584,26 +584,26 @@ Let's walk through designing a secure password reset flow. This is a common feat
 
 **Threat model considerations:**
 
-- Attackers want to take over accounts by resetting passwords they shouldn't control
-- Email isn't encrypted; reset links might be intercepted
-- Attackers might try to brute-force reset tokens
-- Attackers might try to enumerate which email addresses are registered
-- Attackers might flood targets with reset emails (harassment)
-- Reset tokens might leak through referrer headers or browser history
+-   Attackers want to take over accounts by resetting passwords they shouldn't control
+-   Email isn't encrypted; reset links might be intercepted
+-   Attackers might try to brute-force reset tokens
+-   Attackers might try to enumerate which email addresses are registered
+-   Attackers might flood targets with reset emails (harassment)
+-   Reset tokens might leak through referrer headers or browser history
 
 **Design decisions that address these threats:**
 
-1. **Rate limiting** prevents brute-force attacks and email flooding
-2. **Consistent responses** prevent email enumeration
-3. **Cryptographically random tokens** can't be predicted
-4. **Token hashing** in database means stolen database doesn't expose valid tokens
-5. **Short expiration** limits attack window
-6. **Single-use tokens** prevent replay attacks
-7. **Session invalidation** after password change removes attacker access
+1.  **Rate limiting** prevents brute-force attacks and email flooding
+2.  **Consistent responses** prevent email enumeration
+3.  **Cryptographically random tokens** can't be predicted
+4.  **Token hashing** in database means stolen database doesn't expose valid tokens
+5.  **Short expiration** limits attack window
+6.  **Single-use tokens** prevent replay attacks
+7.  **Session invalidation** after password change removes attacker access
 
 Here's a secure implementation incorporating these design decisions:
 
-```javascript
+``` javascript
 const crypto = require('crypto');
 
 // Rate limiting at multiple levels
@@ -622,7 +622,7 @@ const resetTokenLimiter = rateLimit({
 
 The rate limiting operates at two levels: requesting resets and attempting to use reset tokens. This prevents both email flooding and token brute-forcing.
 
-```javascript
+``` javascript
 app.post('/api/auth/forgot-password', requestResetLimiter, async (req, res) => {
   const { email } = req.body;
   
@@ -643,7 +643,7 @@ app.post('/api/auth/forgot-password', requestResetLimiter, async (req, res) => {
 
 The same response for existing and non-existing emails is critical. Without this, attackers could use the password reset to check which email addresses are registered. The artificial delay ensures consistent timing—without it, responses for non-existent emails would be slightly faster, leaking information.
 
-```javascript
+``` javascript
   // Generate cryptographically secure token
   // 32 bytes = 256 bits of entropy - infeasible to brute force
   const resetToken = crypto.randomBytes(32).toString('hex');
@@ -678,7 +678,7 @@ The same response for existing and non-existing emails is critical. Without this
 
 We store a hash of the token, not the token itself. This means if attackers somehow access the database (through SQL injection, backup theft, or insider threat), they can't use the stored hashes—they need the actual token from the email. This is the same principle as password hashing: the database never contains the secret itself.
 
-```javascript
+``` javascript
 app.post('/api/auth/reset-password', resetTokenLimiter, async (req, res) => {
   const { token, newPassword } = req.body;
   
@@ -700,7 +700,7 @@ app.post('/api/auth/reset-password', resetTokenLimiter, async (req, res) => {
 
 The query checks three things: the token matches, it hasn't expired, and it hasn't been used. All three must be true.
 
-```javascript
+``` javascript
   // Validate new password meets requirements
   const passwordErrors = validatePasswordStrength(newPassword);
   if (passwordErrors.length > 0) {
@@ -760,7 +760,7 @@ This vulnerability is particularly insidious because many applications are vulne
 
 A properly configured Express.js application addresses these issues systematically:
 
-```javascript
+``` javascript
 const express = require('express');
 const helmet = require('helmet');
 
@@ -773,7 +773,7 @@ app.use(helmet());
 
 Helmet is a collection of middleware that sets security-related HTTP headers. With one line, you get reasonable defaults for X-Content-Type-Options, X-Frame-Options, Strict-Transport-Security, and more. Let's customize it for our needs:
 
-```javascript
+``` javascript
 app.use(helmet({
   // Content Security Policy - controls which resources can load
   contentSecurityPolicy: {
@@ -801,7 +801,7 @@ app.use(helmet({
 
 Content-Security-Policy (CSP) deserves special attention. It tells browsers which resources are allowed to load and execute. Even if an attacker injects a script tag through XSS, the browser won't execute it if scripts from that source aren't allowed by CSP. This is defense in depth—CSP protects against XSS even when input sanitization fails.
 
-```javascript
+``` javascript
 // CORS configuration - allow only specific origins
 const corsOptions = {
   origin: isProduction 
@@ -826,7 +826,7 @@ The CORS configuration explicitly lists allowed origins rather than using wildca
 
 Error handling must balance developer needs with security:
 
-```javascript
+``` javascript
 // Error handling middleware
 app.use((err, req, res, next) => {
   // Always log full error details for debugging
@@ -886,7 +886,7 @@ Real-world examples illustrate the severity:
 
 The first step is knowing what you depend on. Generate a software bill of materials:
 
-```bash
+``` bash
 # List all dependencies and their versions
 npm list --all
 
@@ -903,7 +903,7 @@ This tree can be hundreds or thousands of lines. That's hundreds or thousands of
 
 Automated scanning catches known vulnerabilities:
 
-```bash
+``` bash
 # Built-in npm audit
 npm audit
 
@@ -919,7 +919,7 @@ npm audit
 
 For more comprehensive scanning, tools like Snyk provide additional features:
 
-```yaml
+``` yaml
 # .github/workflows/security.yml
 name: Security Scan
 
@@ -950,7 +950,7 @@ The daily scheduled scan is important. A dependency that was safe yesterday migh
 
 **Keeping dependencies updated** is the most effective mitigation:
 
-```bash
+``` bash
 # See which packages have updates available
 npm outdated
 
@@ -978,15 +978,15 @@ The first defense is ensuring users create strong passwords. However, password p
 
 Modern guidance from NIST (National Institute of Standards and Technology) recommends:
 
-- Minimum 8 characters (longer is better; consider 12+ character minimum)
-- Check against breached password databases
-- No arbitrary complexity requirements
-- No forced rotation unless compromise is suspected
-- Allow paste (enables password managers)
+-   Minimum 8 characters (longer is better; consider 12+ character minimum)
+-   Check against breached password databases
+-   No arbitrary complexity requirements
+-   No forced rotation unless compromise is suspected
+-   Allow paste (enables password managers)
 
 Implementing breached password checking:
 
-```javascript
+``` javascript
 const crypto = require('crypto');
 const https = require('https');
 
@@ -1026,7 +1026,7 @@ This uses the HaveIBeenPwned API with k-anonymity: we only send the first 5 char
 
 Without protection, attackers can try thousands of passwords per second. Rate limiting makes brute force impractical:
 
-```javascript
+``` javascript
 const loginAttempts = new Map();  // In production, use Redis for distributed systems
 
 async function checkBruteForce(email, ip) {
@@ -1074,7 +1074,7 @@ Progressive lockout increases the delay with each failed attempt. Three failures
 
 After authentication, sessions maintain logged-in state. Session tokens must be unpredictable, securely stored, and properly invalidated.
 
-```javascript
+``` javascript
 // Secure cookie settings for session tokens
 const sessionCookie = {
   httpOnly: true,    // JavaScript cannot access the cookie
@@ -1101,16 +1101,16 @@ Your application's security depends on every component in its supply chain: sour
 
 **Secure your CI/CD pipeline:**
 
-- Require code review for all changes
-- Sign commits with GPG keys
-- Use pinned dependency versions (lock files)
-- Verify checksums of downloaded artifacts
-- Limit who can modify build configurations
-- Audit pipeline access and changes
+-   Require code review for all changes
+-   Sign commits with GPG keys
+-   Use pinned dependency versions (lock files)
+-   Verify checksums of downloaded artifacts
+-   Limit who can modify build configurations
+-   Audit pipeline access and changes
 
 **Verify dependency integrity:**
 
-```json
+``` json
 // package-lock.json includes integrity hashes
 {
   "packages": {
@@ -1133,7 +1133,7 @@ Deserialization—converting data formats back into objects—can be dangerous w
 
 This is particularly dangerous in languages like PHP, Python, and Ruby where serialization formats can include arbitrary objects with code that executes on instantiation. In JavaScript, the primary risk comes from libraries that extend JSON with code execution capabilities:
 
-```javascript
+``` javascript
 // DANGEROUS: Libraries that deserialize with code execution
 const nodeSerialize = require('node-serialize');
 
@@ -1149,7 +1149,7 @@ app.post('/api/data', (req, res) => {
 
 **The solution is simple: use safe formats.** JSON.parse() is safe—it creates data structures but never executes code. Never use serialization formats that support code execution for untrusted data.
 
-```javascript
+``` javascript
 // SAFE: JSON.parse only creates data, never executes code
 app.post('/api/data', (req, res) => {
   const data = JSON.parse(req.body.payload);
@@ -1196,7 +1196,7 @@ Logging itself introduces security concerns:
 
 **Make logs searchable.** Logs are useless if you can't find relevant entries. Use structured logging (JSON format) and centralized log management.
 
-```javascript
+``` javascript
 const winston = require('winston');
 
 const securityLogger = winston.createLogger({
@@ -1233,18 +1233,18 @@ Logs are only valuable if someone reviews them. Automated monitoring catches iss
 
 **Alert on anomalies:**
 
-- Sudden spike in failed logins
-- Login from unusual geographic location
-- Activity at unusual times
-- Many authorization failures from one user
-- Requests matching known attack patterns
+-   Sudden spike in failed logins
+-   Login from unusual geographic location
+-   Activity at unusual times
+-   Many authorization failures from one user
+-   Requests matching known attack patterns
 
 **Set up dashboards:**
 
-- Authentication metrics over time
-- Error rates by category
-- Top IP addresses hitting rate limits
-- Geographic distribution of requests
+-   Authentication metrics over time
+-   Error rates by category
+-   Top IP addresses hitting rate limits
+-   Geographic distribution of requests
 
 The goal is detecting attacks in progress or immediately after, not discovering them months later during an audit.
 
@@ -1266,10 +1266,10 @@ This special IP address (169.254.169.254) is the AWS metadata service, only acce
 
 Other SSRF targets:
 
-- Internal services: `http://internal-api:8080/admin`
-- Local services: `http://localhost:6379/` (Redis)
-- Cloud metadata: `http://metadata.google.internal/` (GCP)
-- File access: `file:///etc/passwd` (if file:// protocol is supported)
+-   Internal services: `http://internal-api:8080/admin`
+-   Local services: `http://localhost:6379/` (Redis)
+-   Cloud metadata: `http://metadata.google.internal/` (GCP)
+-   File access: `file:///etc/passwd` (if file:// protocol is supported)
 
 #### Preventing SSRF
 
@@ -1277,7 +1277,7 @@ The core principle: **never let users completely control URLs your server fetche
 
 **Allowlist approach**: Only permit specific domains. If your feature integrates with GitHub, only allow `github.com` URLs:
 
-```javascript
+``` javascript
 const ALLOWED_DOMAINS = ['github.com', 'api.github.com', 'raw.githubusercontent.com'];
 
 function validateUrl(userUrl) {
@@ -1293,7 +1293,7 @@ function validateUrl(userUrl) {
 
 **Blocklist approach**: When you need to allow arbitrary URLs but must block internal resources:
 
-```javascript
+``` javascript
 async function safeFetch(userUrl) {
   const parsed = new URL(userUrl);
   
@@ -1336,7 +1336,7 @@ async function safeFetch(userUrl) {
 
 The DNS resolution check is crucial. An attacker might control `evil.com` which resolves to `127.0.0.1`. Checking the hostname isn't enough; you must verify the resolved IP address isn't internal.
 
----
+------------------------------------------------------------------------
 
 ## 12.3 Input Validation and Sanitization
 
@@ -1348,7 +1348,7 @@ Input validation ensures data meets expected criteria before processing. Sanitiz
 
 **Allowlisting** (also called whitelisting) accepts only known good input. Define exactly what's allowed; reject everything else. This is the most secure approach but requires knowing all valid inputs:
 
-```javascript
+``` javascript
 // Only allow alphanumeric characters and limited punctuation
 const USERNAME_PATTERN = /^[a-zA-Z0-9_-]{3,30}$/;
 
@@ -1359,7 +1359,7 @@ if (!USERNAME_PATTERN.test(username)) {
 
 **Blocklisting** (blacklisting) rejects known bad input. This is weaker because you must anticipate every malicious input. Attackers often find bypasses by encoding, case variations, or Unicode tricks:
 
-```javascript
+``` javascript
 // WEAK: Block <script> tags
 if (input.includes('<script>')) {
   throw new Error('Invalid input');
@@ -1369,7 +1369,7 @@ if (input.includes('<script>')) {
 
 **Type conversion** ensures data is the expected type. JavaScript's loose typing means "123" might work where a number is expected, but "123abc" might cause unexpected behavior:
 
-```javascript
+``` javascript
 // Convert to expected type, reject if conversion fails
 const userId = parseInt(req.params.id, 10);
 if (isNaN(userId) || userId <= 0) {
@@ -1379,7 +1379,7 @@ if (isNaN(userId) || userId <= 0) {
 
 **Range and length checking** ensures values fall within acceptable bounds:
 
-```javascript
+``` javascript
 // Age must be reasonable
 if (age < 0 || age > 150) {
   throw new Error('Age must be between 0 and 150');
@@ -1395,7 +1395,7 @@ if (title.length < 1 || title.length > 200) {
 
 Rather than writing ad-hoc validation code throughout your application, use a validation library that provides a declarative, comprehensive approach:
 
-```javascript
+``` javascript
 const Joi = require('joi');
 
 // Define validation schemas once, use everywhere
@@ -1435,7 +1435,7 @@ Each schema documents exactly what valid input looks like. The `.messages()` met
 
 Create middleware that validates requests automatically:
 
-```javascript
+``` javascript
 function validate(schemaName) {
   return (req, res, next) => {
     const schema = schemas[schemaName];
@@ -1473,7 +1473,7 @@ Validation ensures input is safe for processing. **Output encoding** ensures dat
 
 For HTML context, characters like `<`, `>`, and `&` have special meaning and must be encoded:
 
-```javascript
+``` javascript
 const he = require('he');
 
 // User input that might contain HTML
@@ -1489,7 +1489,7 @@ const safeComment = he.encode(userComment);
 
 Modern frontend frameworks like React handle this automatically—JSX expressions are encoded by default. The danger comes when you deliberately bypass this protection:
 
-```jsx
+``` jsx
 // SAFE: React automatically encodes
 <div>{userComment}</div>
 
@@ -1499,7 +1499,7 @@ Modern frontend frameworks like React handle this automatically—JSX expression
 
 If you must allow some HTML (rich text editors, markdown), use a library that sanitizes to an allowlist of safe tags:
 
-```javascript
+``` javascript
 const DOMPurify = require('dompurify');
 const { JSDOM } = require('jsdom');
 
@@ -1513,7 +1513,7 @@ const safeHtml = purify.sanitize(userHtml, {
 });
 ```
 
----
+------------------------------------------------------------------------
 
 ## 12.4 Security Headers
 
@@ -1525,7 +1525,7 @@ HTTP security headers instruct browsers to enable security features. They provid
 
 CSP works by specifying allowed sources for different resource types:
 
-```http
+``` http
 Content-Security-Policy: 
   default-src 'self';
   script-src 'self' https://cdn.example.com;
@@ -1551,7 +1551,7 @@ Let's understand each directive:
 
 **The challenge with CSP** is that strict policies break many applications. Inline event handlers (`onclick="..."`), inline styles, and dynamically generated scripts all violate strict CSP. Implementing CSP often requires refactoring:
 
-```html
+``` html
 <!-- VIOLATES CSP: Inline event handler -->
 <button onclick="handleClick()">Click</button>
 
@@ -1562,7 +1562,7 @@ Let's understand each directive:
 
 **Start with report-only mode** to identify violations without breaking functionality:
 
-```http
+``` http
 Content-Security-Policy-Report-Only: default-src 'self'; report-uri /csp-report
 ```
 
@@ -1572,7 +1572,7 @@ Browsers send violation reports to your endpoint instead of blocking resources. 
 
 **Strict-Transport-Security (HSTS)** forces HTTPS connections:
 
-```http
+``` http
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 ```
 
@@ -1580,7 +1580,7 @@ Once a browser sees this header, it will only make HTTPS requests to your domain
 
 **X-Content-Type-Options** prevents MIME type sniffing:
 
-```http
+``` http
 X-Content-Type-Options: nosniff
 ```
 
@@ -1588,19 +1588,19 @@ Without this, browsers might execute a file as JavaScript even if it's served wi
 
 **X-Frame-Options** provides clickjacking protection (superseded by CSP's frame-ancestors but still useful for older browsers):
 
-```http
+``` http
 X-Frame-Options: DENY
 ```
 
 **Referrer-Policy** controls how much information is sent in the Referer header:
 
-```http
+``` http
 Referrer-Policy: strict-origin-when-cross-origin
 ```
 
 This sends the full URL for same-origin requests but only the origin (scheme + domain) for cross-origin requests. This prevents leaking sensitive URL parameters to third parties.
 
----
+------------------------------------------------------------------------
 
 ## 12.5 Security Testing
 
@@ -1626,7 +1626,7 @@ Limitations: DAST only tests what it can reach through the interface. Code paths
 
 Automated security testing should run on every code change:
 
-```yaml
+``` yaml
 # .github/workflows/security.yml
 name: Security
 
@@ -1670,7 +1670,7 @@ The daily schedule catches newly disclosed vulnerabilities in dependencies. A li
 
 Security tests verify specific security controls work as intended:
 
-```javascript
+``` javascript
 describe('Authentication Security', () => {
   test('rejects requests without authentication', async () => {
     const response = await request(app)
@@ -1743,7 +1743,7 @@ describe('Input Validation', () => {
 
 These tests serve as regression prevention. If someone accidentally removes a security check, the tests fail.
 
----
+------------------------------------------------------------------------
 
 ## 12.6 Incident Response
 
@@ -1753,7 +1753,7 @@ Despite best efforts, security incidents happen. Having a plan ensures you respo
 
 Security professionals follow a structured incident response process:
 
-```
+```         
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    INCIDENT RESPONSE PHASES                             │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -1826,7 +1826,7 @@ During incidents, clear communication is essential:
 
 **Documentation**: Keep detailed notes of what's happening, what actions are taken, and why. This serves the lessons learned phase and potential legal proceedings.
 
----
+------------------------------------------------------------------------
 
 ## 12.7 Chapter Summary
 
@@ -1850,54 +1850,53 @@ Key takeaways:
 
 Security is everyone's responsibility. Every developer should understand security basics and incorporate security thinking into their daily work. Perfect security is impossible, but thoughtful security dramatically reduces risk.
 
----
+------------------------------------------------------------------------
 
 ## 12.8 Key Terms
 
-|Term|Definition|
-|---|---|
-|**OWASP**|Open Web Application Security Project—nonprofit producing security standards and tools|
-|**SQL Injection**|Attack that inserts malicious SQL code through user input|
-|**XSS**|Cross-Site Scripting—injecting malicious scripts into web pages|
-|**CSRF**|Cross-Site Request Forgery—tricking users into performing unintended actions|
-|**SSRF**|Server-Side Request Forgery—making servers request unintended URLs|
-|**IDOR**|Insecure Direct Object Reference—accessing objects by manipulating identifiers|
-|**bcrypt**|Password hashing algorithm designed to be computationally expensive|
-|**JWT**|JSON Web Token—compact, self-contained token for authentication|
-|**CSP**|Content Security Policy—header controlling resource loading in browsers|
-|**HSTS**|HTTP Strict Transport Security—forces HTTPS connections|
-|**SAST**|Static Application Security Testing—analyzing source code for vulnerabilities|
-|**DAST**|Dynamic Application Security Testing—testing running applications|
-|**SCA**|Software Composition Analysis—scanning third-party dependencies for vulnerabilities|
-|**Defense in Depth**|Layering multiple security controls so failure of one doesn't compromise security|
-|**Least Privilege**|Granting only the minimum permissions necessary for a task|
+| Term | Definition |
+|------------------------------------|------------------------------------|
+| **OWASP** | Open Web Application Security Project—nonprofit producing security standards and tools |
+| **SQL Injection** | Attack that inserts malicious SQL code through user input |
+| **XSS** | Cross-Site Scripting—injecting malicious scripts into web pages |
+| **CSRF** | Cross-Site Request Forgery—tricking users into performing unintended actions |
+| **SSRF** | Server-Side Request Forgery—making servers request unintended URLs |
+| **IDOR** | Insecure Direct Object Reference—accessing objects by manipulating identifiers |
+| **bcrypt** | Password hashing algorithm designed to be computationally expensive |
+| **JWT** | JSON Web Token—compact, self-contained token for authentication |
+| **CSP** | Content Security Policy—header controlling resource loading in browsers |
+| **HSTS** | HTTP Strict Transport Security—forces HTTPS connections |
+| **SAST** | Static Application Security Testing—analyzing source code for vulnerabilities |
+| **DAST** | Dynamic Application Security Testing—testing running applications |
+| **SCA** | Software Composition Analysis—scanning third-party dependencies for vulnerabilities |
+| **Defense in Depth** | Layering multiple security controls so failure of one doesn't compromise security |
+| **Least Privilege** | Granting only the minimum permissions necessary for a task |
 
----
+------------------------------------------------------------------------
 
 ## 12.9 Review Questions
 
-1. Explain the principle of defense in depth. How would you apply it to protect against SQL injection?
-    
-2. What is the difference between authentication and authorization? Give an example of a failure in each.
-    
-3. Why should passwords be hashed rather than encrypted? What properties make bcrypt suitable for password hashing?
-    
-4. Explain how parameterized queries prevent SQL injection. Why is input validation alone insufficient?
-    
-5. Describe the purpose of Content-Security-Policy. How does it help prevent XSS attacks even when input validation fails?
-    
-6. What is the difference between SAST and DAST? What types of vulnerabilities is each best at finding?
-    
-7. Explain SSRF attacks and why they're particularly dangerous in cloud environments.
-    
-8. How does rate limiting protect against brute force attacks? What factors should you consider when setting limits?
-    
-9. What should be included in security logging? What should NOT be logged?
-    
-10. Describe the phases of incident response. Why is the "lessons learned" phase important?
-    
+1.  Explain the principle of defense in depth. How would you apply it to protect against SQL injection?
 
----
+2.  What is the difference between authentication and authorization? Give an example of a failure in each.
+
+3.  Why should passwords be hashed rather than encrypted? What properties make bcrypt suitable for password hashing?
+
+4.  Explain how parameterized queries prevent SQL injection. Why is input validation alone insufficient?
+
+5.  Describe the purpose of Content-Security-Policy. How does it help prevent XSS attacks even when input validation fails?
+
+6.  What is the difference between SAST and DAST? What types of vulnerabilities is each best at finding?
+
+7.  Explain SSRF attacks and why they're particularly dangerous in cloud environments.
+
+8.  How does rate limiting protect against brute force attacks? What factors should you consider when setting limits?
+
+9.  What should be included in security logging? What should NOT be logged?
+
+10. Describe the phases of incident response. Why is the "lessons learned" phase important?
+
+------------------------------------------------------------------------
 
 ## 12.10 Hands-On Exercises
 
@@ -1905,80 +1904,80 @@ Security is everyone's responsibility. Every developer should understand securit
 
 Conduct a security review of your project:
 
-1. Review authentication implementation (password hashing algorithm, session management)
-2. Audit authorization logic (access control checks on all endpoints)
-3. Check input validation (all user inputs validated)
-4. Examine error handling (no sensitive data in error messages)
-5. Document findings with severity ratings and remediation steps
+1.  Review authentication implementation (password hashing algorithm, session management)
+2.  Audit authorization logic (access control checks on all endpoints)
+3.  Check input validation (all user inputs validated)
+4.  Examine error handling (no sensitive data in error messages)
+5.  Document findings with severity ratings and remediation steps
 
 ### Exercise 12.2: Implement OWASP Protections
 
 Add protections against common vulnerabilities:
 
-1. Implement parameterized queries throughout your database layer
-2. Add input validation using Joi or Zod for all endpoints
-3. Configure security headers using Helmet
-4. Add rate limiting to authentication endpoints
-5. Implement CSRF protection if using session cookies
+1.  Implement parameterized queries throughout your database layer
+2.  Add input validation using Joi or Zod for all endpoints
+3.  Configure security headers using Helmet
+4.  Add rate limiting to authentication endpoints
+5.  Implement CSRF protection if using session cookies
 
 ### Exercise 12.3: Security Testing Suite
 
 Create automated security tests:
 
-1. Test authentication bypass attempts (missing token, invalid token, expired token)
-2. Test authorization boundaries (accessing other users' data, admin endpoints)
-3. Test input validation (SQL injection payloads, XSS payloads, oversized inputs)
-4. Verify security headers are present in responses
-5. Test rate limiting behavior
+1.  Test authentication bypass attempts (missing token, invalid token, expired token)
+2.  Test authorization boundaries (accessing other users' data, admin endpoints)
+3.  Test input validation (SQL injection payloads, XSS payloads, oversized inputs)
+4.  Verify security headers are present in responses
+5.  Test rate limiting behavior
 
 ### Exercise 12.4: Dependency Security Pipeline
 
 Set up automated dependency scanning:
 
-1. Configure npm audit to run in CI/CD
-2. Set up Snyk or similar tool for deeper scanning
-3. Create policy document for handling discovered vulnerabilities
-4. Implement automated alerts for new critical vulnerabilities
-5. Document process for evaluating and updating dependencies
+1.  Configure npm audit to run in CI/CD
+2.  Set up Snyk or similar tool for deeper scanning
+3.  Create policy document for handling discovered vulnerabilities
+4.  Implement automated alerts for new critical vulnerabilities
+5.  Document process for evaluating and updating dependencies
 
 ### Exercise 12.5: Security Logging Implementation
 
 Add comprehensive security logging:
 
-1. Log all authentication events (login success/failure, logout, password changes)
-2. Log authorization failures with context
-3. Log input validation failures with request details (not sensitive data)
-4. Create alerts for suspicious patterns (multiple failures, unusual times)
-5. Set up log aggregation and create security dashboard
+1.  Log all authentication events (login success/failure, logout, password changes)
+2.  Log authorization failures with context
+3.  Log input validation failures with request details (not sensitive data)
+4.  Create alerts for suspicious patterns (multiple failures, unusual times)
+5.  Set up log aggregation and create security dashboard
 
 ### Exercise 12.6: Incident Response Plan
 
 Create an incident response plan for your project:
 
-1. Define incident severity levels with examples
-2. Document containment procedures for common incident types
-3. Create communication templates for stakeholders
-4. Establish escalation paths and contact information
-5. Design post-incident review template
+1.  Define incident severity levels with examples
+2.  Document containment procedures for common incident types
+3.  Create communication templates for stakeholders
+4.  Establish escalation paths and contact information
+5.  Design post-incident review template
 
----
+------------------------------------------------------------------------
 
 ## 12.11 Further Reading
 
 **Books:**
 
-- Stuttard, D. & Pinto, M. (2011). _The Web Application Hacker's Handbook_ (2nd Edition). Wiley.
-- McDonald, M. (2020). _Web Security for Developers_. No Starch Press.
-- Hoffman, A. (2020). _Web Application Security_. O'Reilly Media.
+-   Stuttard, D. & Pinto, M. (2011). *The Web Application Hacker's Handbook* (2nd Edition). Wiley.
+-   McDonald, M. (2020). *Web Security for Developers*. No Starch Press.
+-   Hoffman, A. (2020). *Web Application Security*. O'Reilly Media.
 
 **Online Resources:**
 
-- OWASP Top 10: https://owasp.org/Top10/
-- OWASP Cheat Sheet Series: https://cheatsheetseries.owasp.org/
-- PortSwigger Web Security Academy: https://portswigger.net/web-security
-- Mozilla Web Security Guidelines: https://infosec.mozilla.org/guidelines/web_security
+-   OWASP Top 10: https://owasp.org/Top10/
+-   OWASP Cheat Sheet Series: https://cheatsheetseries.owasp.org/
+-   PortSwigger Web Security Academy: https://portswigger.net/web-security
+-   Mozilla Web Security Guidelines: https://infosec.mozilla.org/guidelines/web_security
 
----
+------------------------------------------------------------------------
 
 ## References
 

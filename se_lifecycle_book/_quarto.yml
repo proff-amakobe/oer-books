@@ -1,10 +1,13 @@
 project:
   type: book
+  output-dir: _book
 
 book:
   title: "The Complete Software Engineering Lifecycle"
   subtitle: "Methods, Patterns, and Implementation"
   author: "Dr. Moody Amakobe"
+  publisher: "Global Data Science Institute"
+  license: "CC BY 4.0"
   date: today
   cover-image: images/cover.png
   chapters:
@@ -21,7 +24,10 @@ book:
     - chapters/09-cicd.qmd
     - chapters/10-data-management.qmd
     - chapters/11-cloud-services.qmd
-    - chapters/appendix-project-guide.qmd
+    - chapters/12-security.qmd
+    - chapters/13-maintenance-evolution.qmd
+    - chapters/14-ethics-professionalism.qmd
+    - chapters/15-final-project-integration.qmd
     - chapters/glossary.qmd
 
 bibliography: references.bib
@@ -31,19 +37,33 @@ format:
   html:
     theme: cosmo
     toc: true
-    toc-depth: 3
+    code-copy: true
     number-sections: true
-    number-depth: 2
-    css: styles/custom.css
 
   pdf:
     documentclass: scrbook
-    papersize: letter
+    papersize: "7in,10in"
     fontsize: 11pt
     geometry:
-      - top=1in
-      - bottom=1in
-      - left=1in
-      - right=1in
+      - top=0.75in
+      - bottom=0.75in
+      - inner=0.9in
+      - outer=0.6in
+    linestretch: 1.15
+    include-in-header:
+      text: |
+        \usepackage{setspace}
+        \AtBeginEnvironment{verbatim}{\singlespacing}
+        \usepackage{algorithm}
+        \usepackage{algpseudocode}
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    linkcolor: blue
+    urlcolor: blue
+
+  epub:
+    number-sections: true
 
 editor: visual
