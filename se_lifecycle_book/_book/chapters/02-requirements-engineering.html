@@ -344,36 +344,12 @@ ul.task-list li input[type="checkbox"] {
 <section id="why-requirements-matter" class="level3" data-number="5.2.1">
 <h3 data-number="5.2.1" class="anchored" data-anchor-id="why-requirements-matter"><span class="header-section-number">5.2.1</span> 2.1.1 Why Requirements Matter</h3>
 <p>Requirements engineering might seem like overhead—time spent not writing code. But consider the economics of software defects. The cost of fixing a bug increases dramatically depending on when it’s discovered:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Phase Discovered</th>
-<th>Relative Cost to Fix</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Requirements</td>
-<td>1x</td>
-</tr>
-<tr class="even">
-<td>Design</td>
-<td>5x</td>
-</tr>
-<tr class="odd">
-<td>Implementation</td>
-<td>10x</td>
-</tr>
-<tr class="even">
-<td>Testing</td>
-<td>20x</td>
-</tr>
-<tr class="odd">
-<td>After Release</td>
-<td>50-200x</td>
-</tr>
-</tbody>
-</table>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig2_defect_cost.svg" class="img-fluid figure-img"></p>
+<figcaption>Defect Cost Increase</figcaption>
+</figure>
+</div>
 <p>A requirement error caught during the requirements phase might take an hour to fix—a conversation to clarify what the customer actually needs. That same error, if it survives into production code, might require redesigning components, rewriting thousands of lines of code, updating tests, redeploying, and dealing with unhappy users.</p>
 <p>The Standish Group’s research on software projects has consistently found that the top factors in project success include:</p>
 <ul>
@@ -391,13 +367,12 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>2. Analysis</strong>: Examining requirements for conflicts, ambiguities, and incompleteness. This phase involves prioritization, negotiation between stakeholders, and feasibility assessment.</p>
 <p><strong>3. Specification</strong>: Documenting requirements in a clear, precise, and verifiable form. The output is typically a Software Requirements Specification (SRS) document.</p>
 <p><strong>4. Validation</strong>: Ensuring that the documented requirements actually reflect stakeholder needs and that they are achievable within project constraints.</p>
-<pre><code>┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│ Elicitation │────►│  Analysis   │────►│Specification│────►│ Validation  │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-       ▲                   │                   │                   │
-       │                   │                   │                   │
-       └───────────────────┴───────────────────┴───────────────────┘
-                         (Iterative Process)</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig1_re_process.svg" class="img-fluid figure-img"></p>
+<figcaption>Requirements Engineering Process</figcaption>
+</figure>
+</div>
 <p>These activities are iterative and often overlap. As you document requirements (specification), you’ll discover gaps that require more elicitation. Validation might reveal conflicts that require additional analysis. Requirements engineering continues throughout the project as understanding deepens and circumstances change.</p>
 <hr>
 </section>
@@ -449,7 +424,7 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p><strong>Reliability Requirements</strong> specify uptime, availability, and fault tolerance:</p>
 <ul>
-<li>The system shall maintain 99.9% uptime (less than 8.76 hours downtime per year)</li>
+<li>The system shall maintain 99.9% uptime (less than 8.76 hours of downtime per year)</li>
 <li>The system shall recover from failures within 5 minutes</li>
 <li>No data loss shall occur during system crashes</li>
 <li>The system shall maintain full functionality when one database server fails</li>
@@ -783,6 +758,12 @@ ul.task-list li input[type="checkbox"] {
 <blockquote class="blockquote">
 <p>As an admin, I want to export user data to CSV so that I can analyze trends in spreadsheet software I’m familiar with. ✓</p>
 </blockquote>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig7_invest.svg" class="img-fluid figure-img"></p>
+<figcaption>INVEST Criteria</figcaption>
+</figure>
+</div>
 </section>
 <section id="acceptance-criteria" class="level3" data-number="5.5.3">
 <h3 data-number="5.5.3" class="anchored" data-anchor-id="acceptance-criteria"><span class="header-section-number">5.5.3</span> 2.4.3 Acceptance Criteria</h3>
@@ -838,20 +819,12 @@ Acceptance Criteria:
 <section id="epics-stories-and-tasks" class="level3" data-number="5.5.4">
 <h3 data-number="5.5.4" class="anchored" data-anchor-id="epics-stories-and-tasks"><span class="header-section-number">5.5.4</span> 2.4.4 Epics, Stories, and Tasks</h3>
 <p>User stories exist within a hierarchy:</p>
-<pre><code>┌─────────────────────────────────────────────────────────────────┐
-│                           EPIC                                  │
-│  Large body of work that can be broken into smaller pieces      │
-│  Example: "User Account Management"                             │
-│                                                                 │
-│  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ │
-│  │   USER STORY 1   │ │   USER STORY 2   │ │   USER STORY 3   │ │
-│  │  User registration│ │  Password reset  │ │ Profile editing  │ │
-│  │                  │ │                  │ │                  │ │
-│  │  ┌────┐ ┌────┐   │ │  ┌────┐ ┌────┐   │ │  ┌────┐ ┌────┐   │ │
-│  │  │Task│ │Task│   │ │  │Task│ │Task│   │ │  │Task│ │Task│   │ │
-│  │  └────┘ └────┘   │ │  └────┘ └────┘   │ │  └────┘ └────┘   │ │
-│  └──────────────────┘ └──────────────────┘ └──────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig3_epic_story_task.svg" class="img-fluid figure-img"></p>
+<figcaption>Epics, Stories, and Tasks Hierarchy</figcaption>
+</figure>
+</div>
 <p><strong>Epics</strong> are large bodies of work that span multiple sprints. They represent major features or capabilities but are too big to complete in one iteration.</p>
 <p><strong>User Stories</strong> are the primary unit of work in Agile. Each story delivers a specific piece of value and can be completed within a sprint.</p>
 <p><strong>Tasks</strong> are the technical activities required to complete a story. Unlike stories, tasks describe implementation details.</p>
@@ -880,28 +853,12 @@ User Story 4: Apply discount codes
 <section id="story-mapping" class="level3" data-number="5.5.5">
 <h3 data-number="5.5.5" class="anchored" data-anchor-id="story-mapping"><span class="header-section-number">5.5.5</span> 2.4.5 Story Mapping</h3>
 <p><strong>User story mapping</strong> is a technique for organizing user stories to understand the full picture of user experience. Created by Jeff Patton, it arranges stories in a two-dimensional map.</p>
-<pre><code>User Activities (left to right = user journey)
-─────────────────────────────────────────────────────────────►
-
-│    Browse      Search      View         Add to      Checkout
-│   Products    Products    Product        Cart
-│
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
-│  │ View    │ │ Search  │ │ View    │ │ Add     │ │ Enter   │
-│  │ catalog │ │ by name │ │ details │ │ item    │ │shipping │  ◄── MVP
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘     Release 1
-P  ─────────────────────────────────────────────────────────────
-r  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
-i  │ Filter  │ │ Search  │ │ View    │ │ Update  │ │ Choose  │
-o  │ by      │ │ by      │ │ reviews │ │quantity │ │ payment │  ◄── Release 2
-r  │ category│ │ category│ │         │ │         │ │         │
-i  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘
-t  ─────────────────────────────────────────────────────────────
-y  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
-│  │ View    │ │ Save    │ │ Zoom    │ │ Save    │ │ Apply   │
-│  │ featured│ │ search  │ │ images  │ │ for     │ │ coupon  │  ◄── Release 3
-│  │ items   │ │         │ │         │ │ later   │ │         │
-▼  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig4_story_map.svg" class="img-fluid figure-img"></p>
+<figcaption>User Story Mapping</figcaption>
+</figure>
+</div>
 <p>The horizontal axis shows the user’s journey through the system—the activities they perform from left to right. The vertical axis shows priority, with the most essential stories at the top.</p>
 <p>Story mapping helps teams:</p>
 <ul>
@@ -1046,21 +1003,12 @@ y  ┌─────────┐ ┌─────────┐ ┌──
 <li>Email services for user communications</li>
 </ul>
 </blockquote>
-<p>Include a context diagram showing the system and its external interfaces:</p>
-<pre><code>                    ┌─────────────────┐
-                    │  Google OAuth   │
-                    └────────┬────────┘
-                             │
-┌─────────────┐    ┌─────────▼─────────┐    ┌─────────────┐
-│    User     │◄───►│                   │◄───►│    Slack    │
-│  (Browser)  │    │     TaskFlow      │    │             │
-└─────────────┘    │                   │    └─────────────┘
-                   └─────────┬─────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  Email Service  │
-                    └─────────────────┘</code></pre>
-<p><em>2.2 Product Functions</em></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig5_context_diagram.svg" class="img-fluid figure-img"></p>
+<figcaption>Context Diagram</figcaption>
+</figure>
+</div>
 <p>Provide a summary of major functions (detailed in Section 3).</p>
 <blockquote class="blockquote">
 <p>Major functions include:</p>
@@ -1310,7 +1258,7 @@ pre-populate tasks and settings.</code></pre>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 16%">
-<col style="width: 16%">
+<col style="width: 20%">
 <col style="width: 16%">
 <col style="width: 16%">
 <col style="width: 16%">
@@ -1440,16 +1388,12 @@ pre-populate tasks and settings.</code></pre>
 </ul>
 <p>Backward traceability ensures all development work serves a documented need—no “gold plating” or undocumented features.</p>
 <p><strong>Bi-directional Traceability</strong>: Both directions combined, providing complete coverage.</p>
-<pre><code>                Forward Traceability
-        ────────────────────────────────────►
-
-┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐
-│Business │     │Software │     │  Design │     │  Test   │
-│  Needs  │────►│   Req   │────►│         │────►│  Cases  │
-└─────────┘     └─────────┘     └─────────┘     └─────────┘
-
-        ◄────────────────────────────────────
-                Backward Traceability</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig6_traceability.svg" class="img-fluid figure-img"></p>
+<figcaption>Traceability Types</figcaption>
+</figure>
+</div>
 </section>
 <section id="maintaining-the-rtm" class="level3" data-number="5.7.4">
 <h3 data-number="5.7.4" class="anchored" data-anchor-id="maintaining-the-rtm"><span class="header-section-number">5.7.4</span> 2.6.4 Maintaining the RTM</h3>
@@ -1525,6 +1469,12 @@ pre-populate tasks and settings.</code></pre>
 <li><strong>Could have</strong>: Nice to have if time permits</li>
 <li><strong>Won’t have</strong>: Explicitly out of scope (this time)</li>
 </ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../assets/images/ch2_fig9_moscow.svg" class="img-fluid figure-img"></p>
+<figcaption>MoSCoW Prioritization</figcaption>
+</figure>
+</div>
 </section>
 <section id="ambiguous-requirements" class="level3" data-number="5.8.2">
 <h3 data-number="5.8.2" class="anchored" data-anchor-id="ambiguous-requirements"><span class="header-section-number">5.8.2</span> 2.7.2 Ambiguous Requirements</h3>

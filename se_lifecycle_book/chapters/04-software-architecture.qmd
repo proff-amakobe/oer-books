@@ -4,15 +4,15 @@
 
 By the end of this chapter, you will be able to:
 
-- Define software architecture and explain its importance in system development
-- Compare and contrast major architectural styles and patterns
-- Apply the SOLID principles to create maintainable, flexible designs
-- Recognize and implement common creational, structural, and behavioral design patterns
-- Make informed architectural decisions based on system requirements
-- Create a Software Architecture Document (SAD) for a project
-- Evaluate trade-offs between different architectural approaches
+-   Define software architecture and explain its importance in system development
+-   Compare and contrast major architectural styles and patterns
+-   Apply the SOLID principles to create maintainable, flexible designs
+-   Recognize and implement common creational, structural, and behavioral design patterns
+-   Make informed architectural decisions based on system requirements
+-   Create a Software Architecture Document (SAD) for a project
+-   Evaluate trade-offs between different architectural approaches
 
----
+------------------------------------------------------------------------
 
 ## 4.1 What Is Software Architecture?
 
@@ -40,17 +40,17 @@ People often confuse software architecture with software design, and the boundar
 
 **Architecture** concerns the decisions that are:
 
-- Hard to change later
-- Affect multiple components or the entire system
-- Related to quality attributes (performance, security, maintainability)
-- About structure at a high level of abstraction
+-   Hard to change later
+-   Affect multiple components or the entire system
+-   Related to quality attributes (performance, security, maintainability)
+-   About structure at a high level of abstraction
 
 **Design** concerns the decisions that are:
 
-- Relatively easy to change
-- Affect individual components or modules
-- Related to implementing specific functionality
-- About structure at a lower level of abstraction
+-   Relatively easy to change
+-   Affect individual components or modules
+-   Related to implementing specific functionality
+-   About structure at a lower level of abstraction
 
 Consider a house analogy: Architecture is deciding to have three stories, placing load-bearing walls, and running plumbing through certain walls. Design is choosing cabinet hardware, paint colors, and light fixtures. You can change the paint without affecting the building's structure; you can't easily move a load-bearing wall.
 
@@ -70,7 +70,7 @@ In some organizations, "software architect" is a formal title held by senior tec
 
 **Evolving the architecture**: Requirements change. Technology evolves. Architectures must adapt. The best architectures anticipate change and make evolution possible.
 
----
+------------------------------------------------------------------------
 
 ## 4.2 Architectural Styles and Patterns
 
@@ -82,78 +82,55 @@ Let's explore the major architectural styles you'll encounter in modern software
 
 The **layered architecture** (also called n-tier architecture) organizes the system into horizontal layers, each providing services to the layer above it and consuming services from the layer below.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Presentation Layer                        │
-│            (UI, Views, Controllers, API endpoints)           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Business Logic Layer                      │
-│              (Services, Domain logic, Rules)                 │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Access Layer                         │
-│           (Repositories, DAOs, ORM mappings)                 │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      Database Layer                          │
-│              (Database, File system, External APIs)          │
-└─────────────────────────────────────────────────────────────┘
-```
+![](/assets/images/ch4_fig1_layered_architecture.svg)
 
 **Key Principles:**
 
-- Each layer has a specific responsibility
-- Layers only communicate with adjacent layers (typically downward)
-- Higher layers depend on lower layers, not vice versa
-- Each layer can be developed and tested somewhat independently
+-   Each layer has a specific responsibility
+-   Layers only communicate with adjacent layers (typically downward)
+-   Higher layers depend on lower layers, not vice versa
+-   Each layer can be developed and tested somewhat independently
 
 **Common Layer Configurations:**
 
 **Three-tier architecture**:
 
-1. Presentation (UI)
-2. Business Logic
-3. Data
+1.  Presentation (UI)
+2.  Business Logic
+3.  Data
 
 **Four-tier architecture**:
 
-1. Presentation
-2. Application/API
-3. Business Logic
-4. Data
+1.  Presentation
+2.  Application/API
+3.  Business Logic
+4.  Data
 
 **Advantages:**
 
-- **Separation of concerns**: Each layer focuses on one aspect of the system
-- **Testability**: Layers can be tested independently with mocks for adjacent layers
-- **Maintainability**: Changes to one layer typically don't affect others
-- **Team organization**: Different teams can work on different layers
-- **Familiar pattern**: Well understood by most developers
+-   **Separation of concerns**: Each layer focuses on one aspect of the system
+-   **Testability**: Layers can be tested independently with mocks for adjacent layers
+-   **Maintainability**: Changes to one layer typically don't affect others
+-   **Team organization**: Different teams can work on different layers
+-   **Familiar pattern**: Well understood by most developers
 
 **Disadvantages:**
 
-- **Performance overhead**: Requests must pass through all layers
-- **Monolithic deployment**: Usually deployed as a single unit
-- **Rigidity**: Strict layering can feel constraining
-- **God classes risk**: Business logic layer can become bloated
+-   **Performance overhead**: Requests must pass through all layers
+-   **Monolithic deployment**: Usually deployed as a single unit
+-   **Rigidity**: Strict layering can feel constraining
+-   **God classes risk**: Business logic layer can become bloated
 
 **When to Use:**
 
-- Traditional enterprise applications
-- Applications with clear separation between presentation, logic, and data
-- Teams familiar with this pattern
-- Systems where simplicity is valued over flexibility
+-   Traditional enterprise applications
+-   Applications with clear separation between presentation, logic, and data
+-   Teams familiar with this pattern
+-   Systems where simplicity is valued over flexibility
 
 **Example Structure (Web Application):**
 
-```
+```         
 src/
 ├── presentation/
 │   ├── controllers/
@@ -182,31 +159,7 @@ src/
 
 **MVC** is an architectural pattern that separates an application into three interconnected components, originally developed for desktop GUIs but now ubiquitous in web applications.
 
-```
-                         ┌─────────────────┐
-                         │      User       │
-                         └────────┬────────┘
-                                  │
-                         interacts with
-                                  │
-                                  ▼
-┌─────────────────────────────────────────────────────────────┐
-│                           VIEW                               │
-│                    (Displays data to user)                   │
-└─────────────────────────────────────────────────────────────┘
-         ▲                                          │
-         │                                          │
-    updates                                    user actions
-         │                                          │
-         │                                          ▼
-┌─────────────────┐                    ┌─────────────────────┐
-│                 │   manipulates      │                     │
-│      MODEL      │◄───────────────────│     CONTROLLER      │
-│   (Data and     │                    │   (Handles input,   │
-│    Logic)       │────────────────────►│    coordinates)     │
-│                 │    notifies        │                     │
-└─────────────────┘                    └─────────────────────┘
-```
+![](/assets/images/ch4_fig2_mvc_pattern.svg)
 
 **Components:**
 
@@ -222,118 +175,69 @@ src/
 
 **MVP (Model-View-Presenter)**: The Presenter mediates all communication between Model and View. The View is passive.
 
-```
-┌─────────┐     ┌─────────────┐     ┌─────────┐
-│  View   │◄───►│  Presenter  │◄───►│  Model  │
-└─────────┘     └─────────────┘     └─────────┘
-```
+![](/assets/images/ch4_fig11_mvp_pattern.svg)
 
 **MVVM (Model-View-ViewModel)**: Common in modern frontend frameworks. ViewModel exposes data streams that the View binds to.
 
-```
-┌─────────┐   data binding   ┌─────────────┐     ┌─────────┐
-│  View   │◄═══════════════►│  ViewModel  │◄───►│  Model  │
-└─────────┘                  └─────────────┘     └─────────┘
-```
+![](/assets/images/ch4_fig12_mvvm_pattern.svg)
 
 **MVC in Web Frameworks:**
 
 Most web frameworks implement a variation of MVC:
 
-- **Ruby on Rails**: Traditional MVC with ActiveRecord models
-- **Django**: Often called MTV (Model-Template-View)
-- **Spring MVC**: Java-based MVC framework
-- **ASP.NET MVC**: Microsoft's MVC implementation
-- **Express.js**: Flexible, but commonly structured as MVC
+-   **Ruby on Rails**: Traditional MVC with ActiveRecord models
+-   **Django**: Often called MTV (Model-Template-View)
+-   **Spring MVC**: Java-based MVC framework
+-   **ASP.NET MVC**: Microsoft's MVC implementation
+-   **Express.js**: Flexible, but commonly structured as MVC
 
 **Example Flow (Web Application):**
 
-```
-1. User submits login form
-   │
-   ▼
-2. Controller receives POST /login
-   │
-   ▼
-3. Controller extracts credentials, calls UserService.authenticate()
-   │
-   ▼
-4. Model (UserService) validates credentials against database
-   │
-   ▼
-5. Model returns result to Controller
-   │
-   ▼
-6. Controller selects appropriate View (dashboard or error page)
-   │
-   ▼
-7. View renders response and returns to user
-```
+![](/assets/images/ch4_fig13_mvc_flow.svg)
 
 **Advantages:**
 
-- Clear separation of concerns
-- Multiple views for same data
-- Easier testing (test model independently)
-- Parallel development (UI team and backend team)
-- Well-supported by many frameworks
+-   Clear separation of concerns
+-   Multiple views for same data
+-   Easier testing (test model independently)
+-   Parallel development (UI team and backend team)
+-   Well-supported by many frameworks
 
 **Disadvantages:**
 
-- Can be complex for simple applications
-- Controllers can become bloated ("fat controllers")
-- Tight coupling between View and Controller
-- Learning curve for proper implementation
+-   Can be complex for simple applications
+-   Controllers can become bloated ("fat controllers")
+-   Tight coupling between View and Controller
+-   Learning curve for proper implementation
 
 ### 4.2.3 Microservices Architecture
 
 **Microservices architecture** structures an application as a collection of small, autonomous services that communicate over a network. Each service is independently deployable, scalable, and can be written in different programming languages.
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                              API Gateway                                 │
-└───────────────────────────────────┬─────────────────────────────────────┘
-                                    │
-        ┌───────────────┬───────────┼───────────┬───────────────┐
-        │               │           │           │               │
-        ▼               ▼           ▼           ▼               ▼
-┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
-│    User       │ │    Order      │ │   Product     │ │   Payment     │
-│   Service     │ │   Service     │ │   Service     │ │   Service     │
-├───────────────┤ ├───────────────┤ ├───────────────┤ ├───────────────┤
-│   [Users DB]  │ │  [Orders DB]  │ │ [Products DB] │ │ [Payments DB] │
-└───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
-        │               │                   │               │
-        └───────────────┴─────────┬─────────┴───────────────┘
-                                  │
-                         ┌────────▼────────┐
-                         │  Message Queue  │
-                         │  (Async Comm)   │
-                         └─────────────────┘
-```
+![](/assets/images/ch4_fig3_microservices.svg)
 
 **Key Characteristics:**
 
-- **Single responsibility**: Each service does one thing well
-- **Autonomy**: Services are independently deployable
-- **Decentralized data**: Each service manages its own database
-- **Smart endpoints, dumb pipes**: Services contain the logic; communication infrastructure is simple
-- **Design for failure**: Services expect other services to fail
-- **Evolutionary design**: Easy to replace or rewrite individual services
+-   **Single responsibility**: Each service does one thing well
+-   **Autonomy**: Services are independently deployable
+-   **Decentralized data**: Each service manages its own database
+-   **Smart endpoints, dumb pipes**: Services contain the logic; communication infrastructure is simple
+-   **Design for failure**: Services expect other services to fail
+-   **Evolutionary design**: Easy to replace or rewrite individual services
 
 **Service Communication:**
 
 **Synchronous (Request-Response)**:
 
-- REST APIs over HTTP
-- gRPC for high-performance communication
-- GraphQL for flexible querying
+-   REST APIs over HTTP
+-   gRPC for high-performance communication
+-   GraphQL for flexible querying
 
 **Asynchronous (Event-Based)**:
 
-- Message queues (RabbitMQ, Amazon SQS)
-- Event streaming (Apache Kafka)
-- Pub/sub patterns
+-   Message queues (RabbitMQ, Amazon SQS)
+-   Event streaming (Apache Kafka)
+-   Pub/sub patterns
 
 **Common Microservices Patterns:**
 
@@ -347,54 +251,42 @@ Most web frameworks implement a variation of MVC:
 
 **Advantages:**
 
-- **Independent deployment**: Update one service without deploying the entire system
-- **Technology flexibility**: Use different languages/frameworks for different services
-- **Scalability**: Scale individual services based on demand
-- **Resilience**: Failure in one service doesn't bring down the whole system
-- **Team autonomy**: Teams own their services end-to-end
-- **Easier to understand**: Each service is small and focused
+-   **Independent deployment**: Update one service without deploying the entire system
+-   **Technology flexibility**: Use different languages/frameworks for different services
+-   **Scalability**: Scale individual services based on demand
+-   **Resilience**: Failure in one service doesn't bring down the whole system
+-   **Team autonomy**: Teams own their services end-to-end
+-   **Easier to understand**: Each service is small and focused
 
 **Disadvantages:**
 
-- **Distributed system complexity**: Network failures, latency, data consistency
-- **Operational overhead**: Many services to deploy, monitor, and manage
-- **Testing challenges**: Integration testing is complex
-- **Data consistency**: No ACID transactions across services
-- **Initial development speed**: More infrastructure to set up
-- **Debugging difficulty**: Requests span multiple services
+-   **Distributed system complexity**: Network failures, latency, data consistency
+-   **Operational overhead**: Many services to deploy, monitor, and manage
+-   **Testing challenges**: Integration testing is complex
+-   **Data consistency**: No ACID transactions across services
+-   **Initial development speed**: More infrastructure to set up
+-   **Debugging difficulty**: Requests span multiple services
 
 **When to Use:**
 
-- Large, complex applications
-- Systems requiring high scalability
-- Organizations with multiple autonomous teams
-- Systems with varying scalability needs across components
-- When technology diversity is beneficial
+-   Large, complex applications
+-   Systems requiring high scalability
+-   Organizations with multiple autonomous teams
+-   Systems with varying scalability needs across components
+-   When technology diversity is beneficial
 
 **When to Avoid:**
 
-- Small applications or startups (start with a modular monolith)
-- Teams without DevOps expertise
-- Applications where strong consistency is critical
-- When operational maturity is low
+-   Small applications or startups (start with a modular monolith)
+-   Teams without DevOps expertise
+-   Applications where strong consistency is critical
+-   When operational maturity is low
 
 ### 4.2.4 Event-Driven Architecture
 
 **Event-driven architecture** (EDA) is built around the production, detection, consumption, and reaction to events. An event represents a significant change in state.
 
-```
-┌─────────────┐     event     ┌─────────────────┐     event     ┌─────────────┐
-│   Event     │──────────────►│   Event Bus /   │──────────────►│   Event     │
-│  Producer   │               │   Message Queue │               │  Consumer   │
-└─────────────┘               └─────────────────┘               └─────────────┘
-                                      │
-                                      │ event
-                                      ▼
-                              ┌─────────────┐
-                              │   Event     │
-                              │  Consumer   │
-                              └─────────────┘
-```
+![](/assets/images/ch4_fig4_event_driven.svg)
 
 **Key Concepts:**
 
@@ -410,13 +302,13 @@ Most web frameworks implement a variation of MVC:
 
 **Simple Event Notification**: Producer publishes an event; consumers react. The event contains minimal data—just that something happened.
 
-```
+```         
 Event: { type: "OrderPlaced", orderId: "12345", timestamp: "..." }
 ```
 
 **Event-Carried State Transfer**: Events contain all data needed by consumers, reducing the need for callbacks.
 
-```
+```         
 Event: { 
   type: "OrderPlaced", 
   orderId: "12345",
@@ -428,7 +320,7 @@ Event: {
 
 **Event Sourcing**: Instead of storing current state, store the sequence of events that led to current state. The current state is derived by replaying events.
 
-```
+```         
 Events for Account #123:
 1. AccountOpened { amount: 0 }
 2. Deposited { amount: 100 }
@@ -440,45 +332,33 @@ Current balance: 0 + 100 - 30 + 50 = 120
 
 **CQRS (Command Query Responsibility Segregation)**: Separate models for reading and writing data. Often combined with event sourcing.
 
-```
-┌─────────────┐                           ┌─────────────┐
-│  Commands   │───────► Write Model ──────│   Events    │
-└─────────────┘              │            └──────┬──────┘
-                             │                   │
-                             ▼                   ▼
-                       Write Database      Read Database
-                                                 │
-                             ┌───────────────────┘
-                             ▼
-┌─────────────┐         Read Model
-│   Queries   │◄────────────┘
-└─────────────┘
-```
+![](/assets/images/ch4_fig14_cqrs_pattern.svg)
+
 
 **Advantages:**
 
-- **Loose coupling**: Producers don't know about consumers
-- **Scalability**: Consumers can be scaled independently
-- **Flexibility**: Easy to add new consumers without changing producers
-- **Responsiveness**: Asynchronous processing improves perceived performance
-- **Audit trail**: Events provide natural logging
-- **Temporal decoupling**: Producers and consumers don't need to be available simultaneously
+-   **Loose coupling**: Producers don't know about consumers
+-   **Scalability**: Consumers can be scaled independently
+-   **Flexibility**: Easy to add new consumers without changing producers
+-   **Responsiveness**: Asynchronous processing improves perceived performance
+-   **Audit trail**: Events provide natural logging
+-   **Temporal decoupling**: Producers and consumers don't need to be available simultaneously
 
 **Disadvantages:**
 
-- **Complexity**: Harder to trace the flow of operations
-- **Eventual consistency**: Data may be inconsistent temporarily
-- **Debugging difficulty**: Asynchronous flows are hard to debug
-- **Event ordering**: Ensuring correct order across distributed systems is challenging
-- **Event schema evolution**: Changing event formats requires careful migration
+-   **Complexity**: Harder to trace the flow of operations
+-   **Eventual consistency**: Data may be inconsistent temporarily
+-   **Debugging difficulty**: Asynchronous flows are hard to debug
+-   **Event ordering**: Ensuring correct order across distributed systems is challenging
+-   **Event schema evolution**: Changing event formats requires careful migration
 
 **When to Use:**
 
-- Systems with many independent components
-- High-throughput systems with varying load
-- Systems requiring real-time reactions
-- Audit and compliance requirements
-- Complex workflows spanning multiple services
+-   Systems with many independent components
+-   High-throughput systems with varying load
+-   Systems requiring real-time reactions
+-   Audit and compliance requirements
+-   Complex workflows spanning multiple services
 
 ### 4.2.5 Monolithic Architecture
 
@@ -486,86 +366,50 @@ Before moving on, let's acknowledge the **monolithic architecture**—often pres
 
 A monolith is a single deployable unit containing all application functionality.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Monolithic Application                   │
-│                                                             │
-│  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐     │
-│  │     User      │ │     Order     │ │    Product    │     │
-│  │    Module     │ │    Module     │ │    Module     │     │
-│  └───────────────┘ └───────────────┘ └───────────────┘     │
-│                                                             │
-│  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐     │
-│  │    Payment    │ │   Inventory   │ │   Reporting   │     │
-│  │    Module     │ │    Module     │ │    Module     │     │
-│  └───────────────┘ └───────────────┘ └───────────────┘     │
-│                                                             │
-│                    Shared Database                          │
-└─────────────────────────────────────────────────────────────┘
-```
+![](/assets/images/ch4_fig15_monolithic.svg)
 
 **Advantages:**
 
-- Simple to develop, test, deploy, and scale (initially)
-- No distributed system complexity
-- Easy debugging and tracing
-- ACID transactions across the whole application
-- Lower operational overhead
+-   Simple to develop, test, deploy, and scale (initially)
+-   No distributed system complexity
+-   Easy debugging and tracing
+-   ACID transactions across the whole application
+-   Lower operational overhead
 
 **Disadvantages:**
 
-- Harder to scale specific components
-- Technology stack is uniform
-- Large codebase becomes unwieldy
-- Deployment requires full redeployment
-- Team coordination becomes challenging as system grows
+-   Harder to scale specific components
+-   Technology stack is uniform
+-   Large codebase becomes unwieldy
+-   Deployment requires full redeployment
+-   Team coordination becomes challenging as system grows
 
 **The Modular Monolith:**
 
 A middle ground between monolith and microservices. The application is deployed as one unit but internally organized into well-defined, loosely-coupled modules.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Modular Monolith                         │
-│                                                             │
-│  ┌──────────────────────┐    ┌──────────────────────┐       │
-│  │     User Module      │    │    Order Module      │       │
-│  │  ┌───────┐ ┌──────┐  │    │  ┌───────┐ ┌──────┐  │       │
-│  │  │Public │ │Private│  │◄──►│  │Public │ │Private│  │       │
-│  │  │  API  │ │ Impl  │  │    │  │  API  │ │ Impl  │  │       │
-│  │  └───────┘ └──────┘  │    │  └───────┘ └──────┘  │       │
-│  │      [User DB]       │    │     [Order DB]       │       │
-│  └──────────────────────┘    └──────────────────────┘       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+![](/assets/images/ch4_fig16_modular_monolith.svg)
 
 Each module:
 
-- Has a well-defined public API
-- Keeps implementation details private
-- Could have its own database schema
-- Communicates with other modules only through APIs
+-   Has a well-defined public API
+-   Keeps implementation details private
+-   Could have its own database schema
+-   Communicates with other modules only through APIs
 
 This approach provides many benefits of microservices (modularity, team ownership, clear boundaries) while avoiding distributed system complexity. It's often a good starting point, with the option to extract modules into microservices later if needed.
 
 ### 4.2.6 Comparing Architectural Styles
 
-|Aspect|Layered|MVC|Microservices|Event-Driven|
-|---|---|---|---|---|
-|Complexity|Low|Low-Medium|High|High|
-|Scalability|Limited|Limited|Excellent|Excellent|
-|Deployment|Monolithic|Monolithic|Independent|Varies|
-|Team Structure|Horizontal|By function|By service|By domain|
-|Technology Flexibility|Low|Low|High|High|
-|Data Consistency|Strong|Strong|Eventual|Eventual|
-|Best For|Traditional apps|Web apps|Large systems|Reactive systems|
+![](/assets/images/ch4_fig10_architecture_comparison.svg)
 
----
+------------------------------------------------------------------------
 
 ## 4.3 The SOLID Principles
 
 The **SOLID principles** are five design principles that help developers create software that is easy to maintain, understand, and extend. Introduced by Robert C. Martin (Uncle Bob), these principles apply at the class and module level but inform architectural decisions as well.
+
+![](/assets/images/ch4_fig5_solid_principles.svg)
 
 ### 4.3.1 Single Responsibility Principle (SRP)
 
@@ -575,7 +419,7 @@ The Single Responsibility Principle states that a class should have only one job
 
 **Violation Example:**
 
-```java
+``` java
 public class Employee {
     private String name;
     private double salary;
@@ -604,7 +448,7 @@ This class has three reasons to change: business rules, database schema changes,
 
 **Refactored:**
 
-```java
+``` java
 // Handles employee data and business rules
 public class Employee {
     private String name;
@@ -640,10 +484,10 @@ Now each class has one reason to change.
 
 **Benefits:**
 
-- Classes are smaller and more focused
-- Changes are isolated to specific classes
-- Testing is simplified
-- Code is easier to understand
+-   Classes are smaller and more focused
+-   Changes are isolated to specific classes
+-   Testing is simplified
+-   Code is easier to understand
 
 ### 4.3.2 Open/Closed Principle (OCP)
 
@@ -653,7 +497,7 @@ You should be able to add new functionality without changing existing code. This
 
 **Violation Example:**
 
-```java
+``` java
 public class AreaCalculator {
     public double calculateArea(Object shape) {
         if (shape instanceof Rectangle) {
@@ -673,7 +517,7 @@ Every time we add a new shape, we must modify `AreaCalculator`.
 
 **Refactored:**
 
-```java
+``` java
 public interface Shape {
     double calculateArea();
 }
@@ -720,10 +564,10 @@ Now we can add new shapes by creating new classes, without modifying existing co
 
 **Benefits:**
 
-- Reduced risk of breaking existing functionality
-- New features can be added safely
-- Promotes use of abstractions
-- Easier to test new functionality in isolation
+-   Reduced risk of breaking existing functionality
+-   New features can be added safely
+-   Promotes use of abstractions
+-   Easier to test new functionality in isolation
 
 ### 4.3.3 Liskov Substitution Principle (LSP)
 
@@ -733,7 +577,7 @@ Subtypes must be substitutable for their base types. If class B is a subtype of 
 
 **Violation Example:**
 
-```java
+``` java
 public class Rectangle {
     protected int width;
     protected int height;
@@ -768,7 +612,7 @@ public class Square extends Rectangle {
 
 This seems logical—a square is a rectangle—but it violates LSP:
 
-```java
+``` java
 public void testRectangle(Rectangle r) {
     r.setWidth(5);
     r.setHeight(4);
@@ -780,7 +624,7 @@ Code written for `Rectangle` breaks when given a `Square`.
 
 **Refactored:**
 
-```java
+``` java
 public interface Shape {
     int getArea();
 }
@@ -818,10 +662,10 @@ Now Square and Rectangle don't have an inheritance relationship that creates beh
 
 **Signs of LSP Violations:**
 
-- Subclasses that throw UnsupportedOperationException
-- Subclasses that override methods to do nothing
-- Type checking with instanceof before calling methods
-- Unexpected behavior when substituting subtypes
+-   Subclasses that throw UnsupportedOperationException
+-   Subclasses that override methods to do nothing
+-   Type checking with instanceof before calling methods
+-   Unexpected behavior when substituting subtypes
 
 ### 4.3.4 Interface Segregation Principle (ISP)
 
@@ -831,7 +675,7 @@ Large interfaces should be split into smaller, more specific ones so that client
 
 **Violation Example:**
 
-```java
+``` java
 public interface Worker {
     void work();
     void eat();
@@ -869,7 +713,7 @@ public class RobotWorker implements Worker {
 
 **Refactored:**
 
-```java
+``` java
 public interface Workable {
     void work();
 }
@@ -903,10 +747,10 @@ Now each class implements only the interfaces it needs.
 
 **Benefits:**
 
-- Classes aren't forced to implement unused methods
-- Interfaces are more cohesive
-- Changes to one interface don't affect unrelated clients
-- Easier to understand what a class does
+-   Classes aren't forced to implement unused methods
+-   Interfaces are more cohesive
+-   Changes to one interface don't affect unrelated clients
+-   Easier to understand what a class does
 
 ### 4.3.5 Dependency Inversion Principle (DIP)
 
@@ -916,7 +760,7 @@ This principle is about decoupling. High-level business logic should not directl
 
 **Violation Example:**
 
-```java
+``` java
 public class MySQLDatabase {
     public void save(String data) {
         // Save to MySQL
@@ -941,7 +785,7 @@ public class UserService {
 
 **Refactored:**
 
-```java
+``` java
 // Abstraction
 public interface Database {
     void save(String data);
@@ -983,7 +827,7 @@ Now both high-level (`UserService`) and low-level (`MySQLDatabase`) depend on th
 
 DIP is often implemented through **dependency injection**, where dependencies are provided to a class rather than created by it:
 
-```java
+``` java
 // Constructor injection
 UserService service = new UserService(new MySQLDatabase());
 
@@ -993,28 +837,30 @@ UserService testService = new UserService(new MockDatabase());
 
 **Benefits:**
 
-- Loose coupling between components
-- Easier testing (inject mocks)
-- Flexibility to change implementations
-- High-level modules are insulated from low-level changes
+-   Loose coupling between components
+-   Easier testing (inject mocks)
+-   Flexibility to change implementations
+-   High-level modules are insulated from low-level changes
 
 ### 4.3.6 SOLID Summary
 
-|Principle|Focus|Key Benefit|
-|---|---|---|
-|**S**ingle Responsibility|One reason to change|Maintainability|
-|**O**pen/Closed|Open for extension, closed for modification|Extensibility|
-|**L**iskov Substitution|Subtypes are substitutable|Correctness|
-|**I**nterface Segregation|Small, specific interfaces|Flexibility|
-|**D**ependency Inversion|Depend on abstractions|Loose coupling|
+| Principle | Focus | Key Benefit |
+|------------------------|------------------------|------------------------|
+| **S**ingle Responsibility | One reason to change | Maintainability |
+| **O**pen/Closed | Open for extension, closed for modification | Extensibility |
+| **L**iskov Substitution | Subtypes are substitutable | Correctness |
+| **I**nterface Segregation | Small, specific interfaces | Flexibility |
+| **D**ependency Inversion | Depend on abstractions | Loose coupling |
 
----
+------------------------------------------------------------------------
 
 ## 4.4 Design Patterns
 
 **Design patterns** are reusable solutions to common problems in software design. They're not code you can copy directly but templates for solving problems that can be adapted to many situations.
 
-The seminal book "Design Patterns: Elements of Reusable Object-Oriented Software" by the Gang of Four (GoF)—Gamma, Helm, Johnson, and Vlissides—cataloged 23 patterns in three categories: Creational, Structural, and Behavioral.
+The seminal book "Design Patterns: Elements of Reusable Object-Oriented Software" by the Gang of Four (GoF) Gamma, Helm, Johnson, and Vlissides—cataloged 23 patterns in three categories: Creational, Structural, and Behavioral.
+
+![](/assets/images/ch4_fig6_design_patterns_overview.svg)
 
 ### 4.4.1 Creational Patterns
 
@@ -1026,27 +872,17 @@ Creational patterns deal with object creation mechanisms, trying to create objec
 
 **When to Use:**
 
-- Exactly one instance is needed (database connection pool, configuration manager)
-- Controlled access to a shared resource
-- Global state that needs to be consistent
+-   Exactly one instance is needed (database connection pool, configuration manager)
+-   Controlled access to a shared resource
+-   Global state that needs to be consistent
 
 **Structure:**
 
-```
-┌─────────────────────────────────┐
-│           Singleton             │
-├─────────────────────────────────┤
-│ - instance: Singleton           │
-├─────────────────────────────────┤
-│ - Singleton()                   │
-│ + getInstance(): Singleton      │
-│ + operation(): void             │
-└─────────────────────────────────┘
-```
+![](/assets/images/ch4_fig17_singleton_structure.svg)
 
 **Implementation:**
 
-```java
+``` java
 public class DatabaseConnection {
     private static DatabaseConnection instance;
     private Connection connection;
@@ -1081,9 +917,9 @@ db.query("SELECT * FROM users");
 
 **Cautions:**
 
-- Singletons introduce global state, which can make testing difficult
-- They can hide dependencies (classes use the singleton without it being in their interface)
-- Consider dependency injection instead in many cases
+-   Singletons introduce global state, which can make testing difficult
+-   They can hide dependencies (classes use the singleton without it being in their interface)
+-   Consider dependency injection instead in many cases
 
 #### Factory Method Pattern
 
@@ -1091,33 +927,20 @@ db.query("SELECT * FROM users");
 
 **When to Use:**
 
-- A class can't anticipate the class of objects it must create
-- A class wants its subclasses to specify the objects it creates
-- You want to localize the logic of which class to instantiate
+-   A class can't anticipate the class of objects it must create
+-   A class wants its subclasses to specify the objects it creates
+-   You want to localize the logic of which class to instantiate
 
 **Structure:**
 
-```
-┌─────────────────────────────────┐
-│        Creator (abstract)       │
-├─────────────────────────────────┤
-│ + factoryMethod(): Product      │
-│ + operation(): void             │
-└───────────────┬─────────────────┘
-                │
-    ┌───────────┴───────────┐
-    │                       │
-┌───┴───────────────┐  ┌────┴──────────────┐
-│ ConcreteCreatorA  │  │ ConcreteCreatorB  │
-├───────────────────┤  ├───────────────────┤
-│ + factoryMethod() │  │ + factoryMethod() │
-│   : ProductA      │  │   : ProductB      │
-└───────────────────┘  └───────────────────┘
-```
+![](/assets/images/ch4_fig8_factory_pattern.svg)
+
+
+![](/assets/images/ch4_fig18_factory_hierarchy.svg)
 
 **Implementation:**
 
-```java
+``` java
 // Product interface
 public interface Notification {
     void send(String message);
@@ -1173,27 +996,18 @@ notification.send("Hello, World!");
 
 **When to Use:**
 
-- Object construction requires many parameters
-- Some parameters are optional
-- Object creation involves multiple steps
-- Constructors with many parameters are confusing
+-   Object construction requires many parameters
+-   Some parameters are optional
+-   Object creation involves multiple steps
+-   Constructors with many parameters are confusing
 
 **Structure:**
 
-```
-┌─────────────────────────────────┐
-│            Builder              │
-├─────────────────────────────────┤
-│ + setPartA(): Builder           │
-│ + setPartB(): Builder           │
-│ + setPartC(): Builder           │
-│ + build(): Product              │
-└─────────────────────────────────┘
-```
+![](/assets/images/ch4_fig19_builder_pattern.svg)
 
 **Implementation:**
 
-```java
+``` java
 public class User {
     private final String firstName;     // Required
     private final String lastName;      // Required
@@ -1265,31 +1079,18 @@ Structural patterns deal with object composition—how classes and objects are c
 
 **When to Use:**
 
-- You want to use an existing class with an incompatible interface
-- You're integrating with third-party code you can't modify
-- You need to create a reusable class that cooperates with unrelated classes
+-   You want to use an existing class with an incompatible interface
+-   You're integrating with third-party code you can't modify
+-   You need to create a reusable class that cooperates with unrelated classes
 
 **Structure:**
 
-```
-┌──────────────┐        ┌──────────────┐
-│    Client    │───────►│   Target     │
-└──────────────┘        │  Interface   │
-                        └──────┬───────┘
-                               │
-                        ┌──────┴───────┐
-                        │   Adapter    │─────────┐
-                        └──────────────┘         │
-                                                 │
-                        ┌──────────────┐         │
-                        │   Adaptee    │◄────────┘
-                        │ (existing)   │
-                        └──────────────┘
-```
+![](/assets/images/ch4_fig20_adapter_structure.svg)
+
 
 **Implementation:**
 
-```java
+``` java
 // Existing interface our code uses
 public interface MediaPlayer {
     void play(String filename);
@@ -1337,41 +1138,19 @@ player.play("movie.mp4");  // Works through adapter
 
 **When to Use:**
 
-- Add responsibilities to individual objects without affecting other objects
-- Responsibilities can be withdrawn
-- Extension by subclassing is impractical or impossible
+-   Add responsibilities to individual objects without affecting other objects
+-   Responsibilities can be withdrawn
+-   Extension by subclassing is impractical or impossible
 
 **Structure:**
 
-```
-┌─────────────────────────────────┐
-│        Component (interface)    │
-├─────────────────────────────────┤
-│ + operation(): void             │
-└───────────────┬─────────────────┘
-                │
-     ┌──────────┴──────────┐
-     │                     │
-┌────┴────────────┐  ┌─────┴──────────────────┐
-│ConcreteComponent│  │   Decorator (abstract) │
-├─────────────────┤  ├────────────────────────┤
-│ + operation()   │  │ - component: Component │
-└─────────────────┘  │ + operation()          │
-                     └───────────┬────────────┘
-                                 │
-                     ┌───────────┴───────────┐
-                     │                       │
-              ┌──────┴──────────┐  ┌─────────┴────────┐
-              │DecoratorA       │  │DecoratorB        │
-              ├─────────────────┤  ├──────────────────┤
-              │+ operation()    │  │+ operation()     │
-              │+ addedBehavior()│  │+ addedBehavior() │
-              └─────────────────┘  └──────────────────┘
-```
+![](/assets/images/ch4_fig21_decorator_structure.svg)
+
+
 
 **Implementation:**
 
-```java
+``` java
 // Component interface
 public interface Coffee {
     String getDescription();
@@ -1458,33 +1237,17 @@ System.out.println(coffee.getCost());         // 2.75
 
 **When to Use:**
 
-- You want to provide a simple interface to a complex subsystem
-- There are many dependencies between clients and implementation classes
-- You want to layer your subsystems
+-   You want to provide a simple interface to a complex subsystem
+-   There are many dependencies between clients and implementation classes
+-   You want to layer your subsystems
 
 **Structure:**
 
-```
-                    ┌─────────────────┐
-                    │     Client      │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │     Facade      │
-                    └────────┬────────┘
-                             │
-     ┌───────────────────────┼───────────────────────┐
-     │                       │                       │
-     ▼                       ▼                       ▼
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│ Subsystem A │       │ Subsystem B │       │ Subsystem C │
-└─────────────┘       └─────────────┘       └─────────────┘
-```
+![](/assets/images/ch4_fig22_facade_structure.svg)
 
 **Implementation:**
 
-```java
+``` java
 // Complex subsystem classes
 public class CPU {
     public void freeze() { System.out.println("CPU: Freezing"); }
@@ -1547,42 +1310,18 @@ Behavioral patterns deal with communication between objects—how objects intera
 
 **When to Use:**
 
-- Many related classes differ only in their behavior
-- You need different variants of an algorithm
-- An algorithm uses data that clients shouldn't know about
-- A class defines many behaviors as conditional statements
+-   Many related classes differ only in their behavior
+-   You need different variants of an algorithm
+-   An algorithm uses data that clients shouldn't know about
+-   A class defines many behaviors as conditional statements
 
 **Structure:**
 
-```
-┌─────────────────────────────────┐
-│           Context               │
-├─────────────────────────────────┤
-│ - strategy: Strategy            │
-├─────────────────────────────────┤
-│ + setStrategy(s: Strategy)      │
-│ + executeStrategy(): void       │
-└─────────────────┬───────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────┐
-│     Strategy (interface)        │
-├─────────────────────────────────┤
-│ + execute(): void               │
-└─────────────────┬───────────────┘
-                  │
-    ┌─────────────┼─────────────┐
-    │             │             │
-┌───┴───────┐ ┌───┴───────┐ ┌───┴───────┐
-│ConcreteA  │ │ConcreteB  │ │ConcreteC  │
-├───────────┤ ├───────────┤ ├───────────┤
-│+ execute()│ │+ execute()│ │+ execute()│
-└───────────┘ └───────────┘ └───────────┘
-```
+![](/assets/images/ch4_fig7_strategy_pattern.svg)
 
 **Implementation:**
 
-```java
+``` java
 // Strategy interface
 public interface PaymentStrategy {
     void pay(double amount);
@@ -1671,38 +1410,17 @@ cart.checkout();  // Paid $34.98 via PayPal (user@email.com)
 
 **When to Use:**
 
-- Changes to one object require changing others, and you don't know how many objects need to change
-- An object should notify other objects without knowing who they are
-- You need to implement event handling systems
+-   Changes to one object require changing others, and you don't know how many objects need to change
+-   An object should notify other objects without knowing who they are
+-   You need to implement event handling systems
 
 **Structure:**
 
-```
-┌─────────────────────────────────┐
-│      Subject (interface)        │
-├─────────────────────────────────┤
-│ + attach(o: Observer)           │
-│ + detach(o: Observer)           │
-│ + notify(): void                │
-└─────────────────┬───────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────┐       ┌─────────────────────────────────┐
-│      ConcreteSubject            │       │      Observer (interface)       │
-├─────────────────────────────────┤       ├─────────────────────────────────┤
-│ - state                         │──────►│ + update(): void                │
-│ - observers: List<Observer>     │       └─────────────────┬───────────────┘
-├─────────────────────────────────┤                         │
-│ + getState(): State             │       ┌─────────────────┴───────────────┐
-│ + setState(s: State): void      │       │      ConcreteObserver           │
-└─────────────────────────────────┘       ├─────────────────────────────────┤
-                                          │ + update(): void                │
-                                          └─────────────────────────────────┘
-```
+![](/assets/images/ch4_fig9_observer_pattern.svg)
 
 **Implementation:**
 
-```java
+``` java
 // Observer interface
 public interface Observer {
     void update(String message);
@@ -1793,40 +1511,17 @@ agency.setNews("Update: Weather forecast changed");
 
 **When to Use:**
 
-- You want to implement the invariant parts of an algorithm once and leave variable parts to subclasses
-- You want to control subclass extensions
-- Common behavior among subclasses should be factored and localized in a common class
+-   You want to implement the invariant parts of an algorithm once and leave variable parts to subclasses
+-   You want to control subclass extensions
+-   Common behavior among subclasses should be factored and localized in a common class
 
 **Structure:**
 
-```
-┌─────────────────────────────────────────┐
-│       AbstractClass                     │
-├─────────────────────────────────────────┤
-│ + templateMethod(): void                │
-│   - step1()                             │
-│   - step2()  // abstract                │
-│   - step3()  // abstract                │
-│   - step4()                             │
-│ # step1(): void                         │
-│ # step2(): void {abstract}              │
-│ # step3(): void {abstract}              │
-│ # step4(): void                         │
-└─────────────────────┬───────────────────┘
-                      │
-       ┌──────────────┴──────────────┐
-       │                             │
-┌──────┴──────────────┐   ┌──────────┴────────┐
-│  ConcreteClassA     │   │  ConcreteClassB   │
-├─────────────────────┤   ├───────────────────┤
-│ # step2(): void     │   │ # step2(): void   │
-│ # step3(): void     │   │ # step3(): void   │
-└─────────────────────┘   └───────────────────┘
-```
+![](/assets/images/ch4_fig23_template_method.svg)
 
 **Implementation:**
 
-```java
+``` java
 // Abstract class with template method
 public abstract class DataProcessor {
     
@@ -1904,19 +1599,19 @@ jsonProcessor.process();
 
 ### 4.4.4 Design Patterns Summary
 
-|Pattern|Category|Intent|
-|---|---|---|
-|**Singleton**|Creational|Ensure one instance with global access|
-|**Factory Method**|Creational|Defer instantiation to subclasses|
-|**Builder**|Creational|Construct complex objects step by step|
-|**Adapter**|Structural|Convert interface to expected interface|
-|**Decorator**|Structural|Add responsibilities dynamically|
-|**Facade**|Structural|Provide simple interface to complex subsystem|
-|**Strategy**|Behavioral|Encapsulate interchangeable algorithms|
-|**Observer**|Behavioral|Notify dependents of state changes|
-|**Template Method**|Behavioral|Define algorithm skeleton, defer steps|
+| Pattern | Category | Intent |
+|------------------------|------------------------|------------------------|
+| **Singleton** | Creational | Ensure one instance with global access |
+| **Factory Method** | Creational | Defer instantiation to subclasses |
+| **Builder** | Creational | Construct complex objects step by step |
+| **Adapter** | Structural | Convert interface to expected interface |
+| **Decorator** | Structural | Add responsibilities dynamically |
+| **Facade** | Structural | Provide simple interface to complex subsystem |
+| **Strategy** | Behavioral | Encapsulate interchangeable algorithms |
+| **Observer** | Behavioral | Notify dependents of state changes |
+| **Template Method** | Behavioral | Define algorithm skeleton, defer steps |
 
----
+------------------------------------------------------------------------
 
 ## 4.5 The Software Architecture Document (SAD)
 
@@ -1940,7 +1635,7 @@ The SAD serves multiple purposes:
 
 While formats vary, a typical SAD includes:
 
-```
+```         
 1. Introduction
    1.1 Purpose
    1.2 Scope
@@ -1992,31 +1687,8 @@ Appendices
 
 Philippe Kruchten's **4+1 View Model** is a popular way to organize architectural views:
 
-```
-                         ┌─────────────────┐
-                         │   Use Case      │
-                         │     View        │
-                         │ (Scenarios)     │
-                         └────────┬────────┘
-                                  │
-          ┌───────────────────────┼───────────────────────┐
-          │                       │                       │
-          ▼                       ▼                       ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Logical       │     │   Process       │     │  Development    │
-│     View        │     │    View         │     │     View        │
-│ (Functionality) │     │ (Concurrency)   │     │ (Organization)  │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                                 ▼
-                       ┌─────────────────┐
-                       │   Physical      │
-                       │     View        │
-                       │ (Deployment)    │
-                       └─────────────────┘
-```
+![](/assets/images/ch4_fig24_four_plus_one.svg)
+
 
 **Logical View**: The object-oriented decomposition. Shows packages, classes, and their relationships. Addresses functional requirements.
 
@@ -2034,7 +1706,7 @@ Philippe Kruchten's **4+1 View Model** is a popular way to organize architectura
 
 **ADR Template:**
 
-```markdown
+``` markdown
 # ADR-001: Use PostgreSQL as Primary Database
 
 ## Status
@@ -2094,13 +1766,13 @@ We will use PostgreSQL as our primary database.
 
 **Benefits of ADRs:**
 
-- Decisions are documented when made, preserving context
-- New team members can understand why things are the way they are
-- Enables revisiting decisions when circumstances change
-- Creates a decision log over time
-- Encourages explicit, deliberate decision-making
+-   Decisions are documented when made, preserving context
+-   New team members can understand why things are the way they are
+-   Enables revisiting decisions when circumstances change
+-   Creates a decision log over time
+-   Encourages explicit, deliberate decision-making
 
----
+------------------------------------------------------------------------
 
 ## 4.6 Making Architectural Decisions
 
@@ -2146,7 +1818,7 @@ How do you know if an architecture is good? Consider these evaluation approaches
 
 **Prototype/Spike**: Build a minimal implementation to validate technical feasibility.
 
----
+------------------------------------------------------------------------
 
 ## 4.7 Chapter Summary
 
@@ -2154,68 +1826,66 @@ Software architecture is the foundation on which successful systems are built. I
 
 Key takeaways from this chapter:
 
-- **Software architecture** encompasses the fundamental structures of a system and the decisions that are hard to change later. Good architecture enables systems to meet their quality requirements.
-    
-- **Architectural styles** like layered architecture, MVC, microservices, and event-driven architecture provide templates for organizing systems. Each has strengths and trade-offs.
-    
-- **The SOLID principles** guide class and module design: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
-    
-- **Design patterns** are reusable solutions to common problems. Creational patterns (Singleton, Factory, Builder) address object creation. Structural patterns (Adapter, Decorator, Facade) address object composition. Behavioral patterns (Strategy, Observer, Template Method) address object interaction.
-    
-- **The Software Architecture Document** communicates architectural decisions to stakeholders. The 4+1 view model organizes multiple perspectives on the architecture.
-    
-- **Architecture Decision Records** document individual decisions with their context, rationale, and consequences.
-    
-- **Architectural decisions** involve trade-offs. Good architects make these trade-offs explicitly and document their reasoning.
-    
+-   **Software architecture** encompasses the fundamental structures of a system and the decisions that are hard to change later. Good architecture enables systems to meet their quality requirements.
 
----
+-   **Architectural styles** like layered architecture, MVC, microservices, and event-driven architecture provide templates for organizing systems. Each has strengths and trade-offs.
+
+-   **The SOLID principles** guide class and module design: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
+
+-   **Design patterns** are reusable solutions to common problems. Creational patterns (Singleton, Factory, Builder) address object creation. Structural patterns (Adapter, Decorator, Facade) address object composition. Behavioral patterns (Strategy, Observer, Template Method) address object interaction.
+
+-   **The Software Architecture Document** communicates architectural decisions to stakeholders. The 4+1 view model organizes multiple perspectives on the architecture.
+
+-   **Architecture Decision Records** document individual decisions with their context, rationale, and consequences.
+
+-   **Architectural decisions** involve trade-offs. Good architects make these trade-offs explicitly and document their reasoning.
+
+------------------------------------------------------------------------
 
 ## 4.8 Key Terms
 
-|Term|Definition|
-|---|---|
-|**Software Architecture**|The fundamental structures of a software system and the discipline of creating them|
-|**Architectural Style**|A named collection of architectural decisions common in a given context|
-|**Layered Architecture**|Architecture organizing system into horizontal layers|
-|**MVC**|Model-View-Controller; separates data, presentation, and control logic|
-|**Microservices**|Architecture of small, independent, communicating services|
-|**Event-Driven Architecture**|Architecture based on production and consumption of events|
-|**SOLID**|Five design principles for maintainable object-oriented software|
-|**Design Pattern**|A reusable solution to a common software design problem|
-|**Creational Pattern**|Pattern dealing with object creation|
-|**Structural Pattern**|Pattern dealing with object composition|
-|**Behavioral Pattern**|Pattern dealing with object interaction|
-|**SAD**|Software Architecture Document|
-|**ADR**|Architecture Decision Record|
-|**4+1 View Model**|Architectural documentation using four views plus scenarios|
+| Term | Definition |
+|------------------------------------|------------------------------------|
+| **Software Architecture** | The fundamental structures of a software system and the discipline of creating them |
+| **Architectural Style** | A named collection of architectural decisions common in a given context |
+| **Layered Architecture** | Architecture organizing system into horizontal layers |
+| **MVC** | Model-View-Controller; separates data, presentation, and control logic |
+| **Microservices** | Architecture of small, independent, communicating services |
+| **Event-Driven Architecture** | Architecture based on production and consumption of events |
+| **SOLID** | Five design principles for maintainable object-oriented software |
+| **Design Pattern** | A reusable solution to a common software design problem |
+| **Creational Pattern** | Pattern dealing with object creation |
+| **Structural Pattern** | Pattern dealing with object composition |
+| **Behavioral Pattern** | Pattern dealing with object interaction |
+| **SAD** | Software Architecture Document |
+| **ADR** | Architecture Decision Record |
+| **4+1 View Model** | Architectural documentation using four views plus scenarios |
 
----
+------------------------------------------------------------------------
 
 ## 4.9 Review Questions
 
-1. What is software architecture, and why is it important? How does it differ from software design?
-    
-2. Compare and contrast layered architecture and microservices architecture. What are the trade-offs, and when would you choose each?
-    
-3. Explain the MVC pattern. How do Model, View, and Controller interact? What are the benefits of this separation?
-    
-4. Describe each of the SOLID principles and provide an example of how each improves software design.
-    
-5. What is the Single Responsibility Principle? Identify a violation in code you've written or seen, and explain how you would refactor it.
-    
-6. Explain the Dependency Inversion Principle. How does dependency injection help implement this principle?
-    
-7. Compare the Factory Method and Builder patterns. When would you use each?
-    
-8. How does the Strategy pattern differ from a simple if-else chain? What are the benefits of using Strategy?
-    
-9. Describe the Observer pattern and give three real-world examples where it would be appropriate.
-    
-10. What is the purpose of a Software Architecture Document? Who are its audiences, and what do they need from it?
-    
+1.  What is software architecture, and why is it important? How does it differ from software design?
 
----
+2.  Compare and contrast layered architecture and microservices architecture. What are the trade-offs, and when would you choose each?
+
+3.  Explain the MVC pattern. How do Model, View, and Controller interact? What are the benefits of this separation?
+
+4.  Describe each of the SOLID principles and provide an example of how each improves software design.
+
+5.  What is the Single Responsibility Principle? Identify a violation in code you've written or seen, and explain how you would refactor it.
+
+6.  Explain the Dependency Inversion Principle. How does dependency injection help implement this principle?
+
+7.  Compare the Factory Method and Builder patterns. When would you use each?
+
+8.  How does the Strategy pattern differ from a simple if-else chain? What are the benefits of using Strategy?
+
+9.  Describe the Observer pattern and give three real-world examples where it would be appropriate.
+
+10. What is the purpose of a Software Architecture Document? Who are its audiences, and what do they need from it?
+
+------------------------------------------------------------------------
 
 ## 4.10 Hands-On Exercises
 
@@ -2223,17 +1893,17 @@ Key takeaways from this chapter:
 
 For each of the following systems, identify which architectural style(s) would be most appropriate and explain why:
 
-1. A personal blog website
-2. Netflix's streaming service
-3. A banking system processing transactions
-4. A real-time multiplayer game
-5. An IoT system monitoring factory equipment
+1.  A personal blog website
+2.  Netflix's streaming service
+3.  A banking system processing transactions
+4.  A real-time multiplayer game
+5.  An IoT system monitoring factory equipment
 
 ### Exercise 4.2: SOLID Refactoring
 
 The following code violates SOLID principles. Identify which principles are violated and refactor the code:
 
-```java
+``` java
 public class Report {
     private String content;
     private String format;
@@ -2264,32 +1934,31 @@ public class Report {
 
 Implement the following:
 
-1. **Factory Pattern**: Create a `ShapeFactory` that creates different shapes (Circle, Rectangle, Triangle) based on input parameters.
-    
-2. **Decorator Pattern**: Create a `Notification` system where notifications can be decorated with additional delivery methods (SMS, Email, Slack) stacked together.
-    
-3. **Observer Pattern**: Create a weather monitoring system where `WeatherStation` notifies multiple displays (CurrentConditions, Statistics, Forecast) when measurements change.
-    
+1.  **Factory Pattern**: Create a `ShapeFactory` that creates different shapes (Circle, Rectangle, Triangle) based on input parameters.
+
+2.  **Decorator Pattern**: Create a `Notification` system where notifications can be decorated with additional delivery methods (SMS, Email, Slack) stacked together.
+
+3.  **Observer Pattern**: Create a weather monitoring system where `WeatherStation` notifies multiple displays (CurrentConditions, Statistics, Forecast) when measurements change.
 
 ### Exercise 4.4: Architecture Analysis
 
 For your semester project:
 
-1. Identify the primary quality attributes that matter most (e.g., performance, security, maintainability)
-2. Choose an architectural style and justify your choice
-3. Identify at least two design patterns you will use and explain where and why
-4. Document any trade-offs you're making
+1.  Identify the primary quality attributes that matter most (e.g., performance, security, maintainability)
+2.  Choose an architectural style and justify your choice
+3.  Identify at least two design patterns you will use and explain where and why
+4.  Document any trade-offs you're making
 
 ### Exercise 4.5: Software Architecture Document
 
 Create a Software Architecture Document for your semester project, including:
 
-1. Introduction and goals
-2. Architectural style and rationale
-3. Component/Package diagram showing major components
-4. At least one sequence diagram for a key scenario
-5. Deployment view (how will the system be deployed?)
-6. At least two Architecture Decision Records (ADRs) for major decisions
+1.  Introduction and goals
+2.  Architectural style and rationale
+3.  Component/Package diagram showing major components
+4.  At least one sequence diagram for a key scenario
+5.  Deployment view (how will the system be deployed?)
+6.  At least two Architecture Decision Records (ADRs) for major decisions
 
 ### Exercise 4.6: Pattern Recognition
 
@@ -2297,7 +1966,7 @@ Identify which design pattern is being used in each of the following code snippe
 
 **Snippet A:**
 
-```java
+``` java
 public class Logger {
     private static Logger instance;
     
@@ -2314,7 +1983,7 @@ public class Logger {
 
 **Snippet B:**
 
-```java
+``` java
 public interface SortStrategy {
     void sort(int[] array);
 }
@@ -2337,7 +2006,7 @@ public class Sorter {
 
 **Snippet C:**
 
-```java
+``` java
 public interface Beverage {
     double cost();
 }
@@ -2359,43 +2028,43 @@ public class MilkDecorator implements Beverage {
 }
 ```
 
----
+------------------------------------------------------------------------
 
 ## 4.11 Further Reading
 
 **Books:**
 
-- Martin, R. C. (2017). _Clean Architecture: A Craftsman's Guide to Software Structure and Design_. Prentice Hall.
-- Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). _Design Patterns: Elements of Reusable Object-Oriented Software_. Addison-Wesley.
-- Richards, M. & Ford, N. (2020). _Fundamentals of Software Architecture_. O'Reilly Media.
-- Newman, S. (2021). _Building Microservices_ (2nd Edition). O'Reilly Media.
-- Bass, L., Clements, P., & Kazman, R. (2012). _Software Architecture in Practice_ (3rd Edition). Addison-Wesley.
+-   Martin, R. C. (2017). *Clean Architecture: A Craftsman's Guide to Software Structure and Design*. Prentice Hall.
+-   Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
+-   Richards, M. & Ford, N. (2020). *Fundamentals of Software Architecture*. O'Reilly Media.
+-   Newman, S. (2021). *Building Microservices* (2nd Edition). O'Reilly Media.
+-   Bass, L., Clements, P., & Kazman, R. (2012). *Software Architecture in Practice* (3rd Edition). Addison-Wesley.
 
 **Online Resources:**
 
-- Refactoring Guru - Design Patterns: https://refactoring.guru/design-patterns
-- Martin Fowler's Architecture Guide: https://martinfowler.com/architecture/
-- Microsoft Architecture Guides: https://docs.microsoft.com/en-us/azure/architecture/
-- ADR GitHub Organization: https://adr.github.io/
+-   Refactoring Guru - Design Patterns: https://refactoring.guru/design-patterns
+-   Martin Fowler's Architecture Guide: https://martinfowler.com/architecture/
+-   Microsoft Architecture Guides: https://docs.microsoft.com/en-us/azure/architecture/
+-   ADR GitHub Organization: https://adr.github.io/
 
----
+------------------------------------------------------------------------
 
 ## References
 
-Bass, L., Clements, P., & Kazman, R. (2012). _Software Architecture in Practice_ (3rd Edition). Addison-Wesley.
+Bass, L., Clements, P., & Kazman, R. (2012). *Software Architecture in Practice* (3rd Edition). Addison-Wesley.
 
-Buschmann, F., Meunier, R., Rohnert, H., Sommerlad, P., & Stal, M. (1996). _Pattern-Oriented Software Architecture Volume 1: A System of Patterns_. Wiley.
+Buschmann, F., Meunier, R., Rohnert, H., Sommerlad, P., & Stal, M. (1996). *Pattern-Oriented Software Architecture Volume 1: A System of Patterns*. Wiley.
 
-Fowler, M. (2002). _Patterns of Enterprise Application Architecture_. Addison-Wesley.
+Fowler, M. (2002). *Patterns of Enterprise Application Architecture*. Addison-Wesley.
 
-Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). _Design Patterns: Elements of Reusable Object-Oriented Software_. Addison-Wesley.
+Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
 
-Kruchten, P. (1995). The 4+1 View Model of Architecture. _IEEE Software_, 12(6), 42-50.
+Kruchten, P. (1995). The 4+1 View Model of Architecture. *IEEE Software*, 12(6), 42-50.
 
 Martin, R. C. (2000). Design Principles and Design Patterns. Retrieved from http://www.objectmentor.com/
 
-Martin, R. C. (2017). _Clean Architecture: A Craftsman's Guide to Software Structure and Design_. Prentice Hall.
+Martin, R. C. (2017). *Clean Architecture: A Craftsman's Guide to Software Structure and Design*. Prentice Hall.
 
-Newman, S. (2021). _Building Microservices_ (2nd Edition). O'Reilly Media.
+Newman, S. (2021). *Building Microservices* (2nd Edition). O'Reilly Media.
 
-Richards, M., & Ford, N. (2020). _Fundamentals of Software Architecture: An Engineering Approach_. O'Reilly Media.
+Richards, M., & Ford, N. (2020). *Fundamentals of Software Architecture: An Engineering Approach*. O'Reilly Media.

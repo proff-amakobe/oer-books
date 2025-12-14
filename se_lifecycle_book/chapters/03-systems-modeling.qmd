@@ -90,7 +90,7 @@ UML 2.5 defines 14 diagram types, organized into two main categories:
 **Behavioral Diagrams** show the dynamic behavior of the system—what happens over time:
 
 | Diagram                      | Purpose                                    |
-|------------------------------|--------------------------------------------|
+|------------------------------|------------------------------------------|
 | Use Case Diagram             | System functionality from user perspective |
 | Activity Diagram             | Workflows and process flows                |
 | Sequence Diagram             | Object interactions over time              |
@@ -105,6 +105,8 @@ In practice, four diagrams cover most modeling needs:
 -   **Activity diagrams** for processes
 -   **Sequence diagrams** for interactions
 -   **Class diagrams** for structure
+
+![UML Diagram Types](../assets/images/ch3_fig1_uml_types.svg)
 
 This chapter focuses on these four essential diagram types.
 
@@ -248,64 +250,13 @@ Guest   Registered
 Customer Customer
 ```
 
+![Use Case Diagram Elements](../assets/images/ch3_fig2_usecase_elements.svg)
+
 ### 3.3.3 Complete Use Case Diagram Example
 
 Here's a use case diagram for a library management system:
 
-```         
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Library Management System                        │
-│                                                                     │
-│    ╭──────────────╮      ╭──────────────╮      ╭──────────────╮    │
-│    │Search Catalog│      │ View Book    │      │ Reserve Book │    │
-│    ╰──────────────╯      │   Details    │      ╰──────────────╯    │
-│           │              ╰──────────────╯             │            │
-│           │                     │                     │            │
-│    O      └─────────────────────┼─────────────────────┘            │
-│   /|\─────────────────────────────────────────────────────────╮    │
-│   / \                           │                             │    │
-│ Member                          │                             │    │
-│    │      ╭──────────────╮      │      ╭──────────────╮       │    │
-│    │      │ Borrow Book  │──────┘      │ Return Book  │       │    │
-│    │      ╰──────────────╯             ╰──────────────╯       │    │
-│    │             │                            │               │    │
-│    │             │    ╭──────────────╮        │               │    │
-│    │             └────│Update Account│────────┘               │    │
-│    │          «include»╰──────────────╯                       │    │
-│    │                                                          │    │
-│    │      ╭──────────────╮                                    │    │
-│    └──────│  Pay Fine    │                                    │    │
-│           ╰──────────────╯                                    │    │
-│                  │                                            │    │
-│                  │«extend»╭──────────────╮                    │    │
-│                  └────────│ Renew Book   │                    │    │
-│                           ╰──────────────╯                    │    │
-│                                  │                            │    │
-│    O                             │                            │    │
-│   /|\────────────────────────────┼────────────────────────────┘    │
-│   / \                            │                                 │
-│Librarian                         │                                 │
-│    │      ╭──────────────╮       │       ╭──────────────╮          │
-│    ├──────│  Add Book    │       │       │ Remove Book  │──────────┤
-│    │      ╰──────────────╯       │       ╰──────────────╯          │
-│    │                             │                                 │
-│    │      ╭──────────────╮       │       ╭──────────────╮          │
-│    ├──────│Manage Members│       │       │Generate Report│─────────┤
-│    │      ╰──────────────╯       │       ╰──────────────╯          │
-│    │                             │                                 │
-└────┼─────────────────────────────┼─────────────────────────────────┘
-     │                             │
-     │                    ╭────────┴────────╮
-     │                    │  Email Service  │
-     │                    │    «system»     │
-     │                    ╰─────────────────╯
-     │
-╭────┴────────╮
-│   Payment   │
-│   Gateway   │
-│  «system»   │
-╰─────────────╯
-```
+![Use Case Diagram Example](../assets/images/ch3_fig3_usecase_example.svg)
 
 ### 3.3.4 Use Case Descriptions
 
@@ -484,177 +435,17 @@ Frequency: ~200 times per day
 ╰─────────────╯     └─────────┘     ╰─────────────╯
 ```
 
+![Activity Diagram Elements](../assets/images/ch3_fig4_activity_elements.svg)
+
 ### 3.4.3 Complete Activity Diagram Example
 
 Here's an activity diagram for an online order process with swimlanes:
 
-```         
-│        Customer        │         System          │       Warehouse        │
-│                        │                         │                        │
-│           ●            │                         │                        │
-│           │            │                         │                        │
-│           ▼            │                         │                        │
-│  ╭─────────────────╮   │                         │                        │
-│  │  Browse Catalog │   │                         │                        │
-│  ╰────────┬────────╯   │                         │                        │
-│           │            │                         │                        │
-│           ▼            │                         │                        │
-│  ╭─────────────────╮   │                         │                        │
-│  │ Add Items to    │   │                         │                        │
-│  │    Cart         │◄──┼──────────────┐          │                        │
-│  ╰────────┬────────╯   │              │          │                        │
-│           │            │              │          │                        │
-│           ▼            │              │          │                        │
-│          ◇             │              │          │                        │
-│         ╱ ╲            │              │          │                        │
-│ [more] ╱   ╲ [done]    │              │          │                        │
-│       ╱     ╲          │              │          │                        │
-│       │      │         │              │          │                        │
-│       │      ▼         │              │          │                        │
-│       │ ╭───────────╮  │              │          │                        │
-│       │ │  Checkout │  │              │          │                        │
-│       │ ╰─────┬─────╯  │              │          │                        │
-│       │       │        │              │          │                        │
-│       │       ▼        │              │          │                        │
-│       │ ╭───────────╮  │              │          │                        │
-│       │ │Enter Ship │  │              │          │                        │
-│       │ │  Info     │  │              │          │                        │
-│       │ ╰─────┬─────╯  │              │          │                        │
-│       │       │        │              │          │                        │
-│       │       ▼        │              │          │                        │
-│       │ ╭───────────╮  │              │          │                        │
-│       │ │Enter Pay  │  │              │          │                        │
-│       │ │  Info     │──┼─────────►    │          │                        │
-│       │ ╰───────────╯  │ ╭───────────────────╮   │                        │
-│       │                │ │  Validate Payment │   │                        │
-│       │                │ ╰─────────┬─────────╯   │                        │
-│       │                │           │             │                        │
-│       │                │           ▼             │                        │
-│       │                │          ◇              │                        │
-│       │                │         ╱ ╲             │                        │
-│       │                │[invalid]╱   ╲[valid]    │                        │
-│       │                │        ╱     ╲          │                        │
-│       └────────────────┼───────┘       │         │                        │
-│                        │               ▼         │                        │
-│                        │      ════════════════   │                        │
-│                        │      │      │      │    │                        │
-│                        │      ▼      │      ▼    │                        │
-│                        │ ╭────────╮  │ ╭────────╮│                        │
-│                        │ │ Create │  │ │ Send   ││                        │
-│                        │ │ Order  │  │ │ Email  ││                        │
-│                        │ ╰────┬───╯  │ ╰───┬────╯│                        │
-│                        │      │      │     │     │                        │
-│                        │      │      │     │     │                        │
-│                        │      ════════════════   │                        │
-│                        │             │           │                        │
-│                        │             │───────────┼──────────►             │
-│                        │             │           │  ╭─────────────────╮   │
-│                        │             │           │  │  Pick Items     │   │
-│                        │             │           │  ╰────────┬────────╯   │
-│                        │             │           │           │            │
-│                        │             │           │           ▼            │
-│                        │             │           │  ╭─────────────────╮   │
-│                        │             │           │  │  Pack Order     │   │
-│                        │             │           │  ╰────────┬────────╯   │
-│                        │             │           │           │            │
-│                        │             │           │           ▼            │
-│                        │             │           │  ╭─────────────────╮   │
-│                        │             │           │  │  Ship Order     │   │
-│                        │             │           │  ╰────────┬────────╯   │
-│                        │             │           │           │            │
-│                        │  ╭──────────┼───────────┼───────────┘            │
-│                        │  │          │           │                        │
-│                        │  ▼          │           │                        │
-│                        │╭──────────╮ │           │                        │
-│                        ││Update    │ │           │                        │
-│                        ││Tracking  │ │           │                        │
-│                        │╰────┬─────╯ │           │                        │
-│                        │     │       │           │                        │
-│                        │     ▼       │           │                        │
-│                        │     ◉       │           │                        │
-│                        │             │           │                        │
-```
+![Activity Diagram Example](../assets/images/ch3_fig5_activity_example.svg)
 
 ### 3.4.4 Activity Diagram for Algorithm Logic
 
-Activity diagrams can also model algorithms. Here's a diagram for a simple login process:
-
-```         
-                    ●
-                    │
-                    ▼
-          ╭─────────────────╮
-          │  Display Login  │
-          │      Form       │
-          ╰────────┬────────╯
-                   │
-                   ▼
-          ╭─────────────────╮
-          │  Enter Username │
-          │   & Password    │
-          ╰────────┬────────╯
-                   │
-                   ▼
-          ╭─────────────────╮
-          │    Validate     │
-          │   Credentials   │
-          ╰────────┬────────╯
-                   │
-                   ▼
-                  ◇
-                 ╱ ╲
-        [valid] ╱   ╲ [invalid]
-               ╱     ╲
-              │       │
-              │       ▼
-              │  ╭─────────────────╮
-              │  │   Increment     │
-              │  │ Failed Attempts │
-              │  ╰────────┬────────╯
-              │           │
-              │           ▼
-              │          ◇
-              │         ╱ ╲
-              │[< 3]   ╱   ╲ [≥ 3]
-              │       ╱     ╲
-              │      │       │
-              │      │       ▼
-              │      │  ╭─────────────────╮
-              │      │  │  Lock Account   │
-              │      │  │  (30 minutes)   │
-              │      │  ╰────────┬────────╯
-              │      │           │
-              │      │           ▼
-              │      │  ╭─────────────────╮
-              │      │  │  Display Lock   │
-              │      │  │    Message      │
-              │      │  ╰────────┬────────╯
-              │      │           │
-              │      │           │
-              │      └─────┬─────┘
-              │            │
-              │            ▼
-              │   ╭─────────────────╮
-              │   │  Display Error  │
-              │   │    Message      │
-              │   ╰────────┬────────╯
-              │            │
-              │            │ (loop back to form)
-              │            │
-              ▼            │
-     ╭─────────────────╮   │
-     │  Create Session │   │
-     ╰────────┬────────╯   │
-              │            │
-              ▼            │
-     ╭─────────────────╮   │
-     │   Redirect to   │   │
-     │    Dashboard    │   │
-     ╰────────┬────────╯   │
-              │            │
-              ▼            │
-              ◉            │
-```
+Activity diagrams can also model algorithms. Here's a diagram for a simple login process: ![Activity Diagram for Algorithm Logic](../assets/images/ch3_fig11_activity_algorithm.svg)
 
 ### 3.4.5 Best Practices for Activity Diagrams
 
@@ -813,78 +604,13 @@ Activity diagrams can also model algorithms. Here's a diagram for a simple login
     └──────────────────────────────────────┘
 ```
 
+![Sequence Diagram Elements](../assets/images/ch3_fig6_sequence_elements.svg)
+
 ### 3.5.3 Complete Sequence Diagram Example
 
 Here's a sequence diagram for a user login process:
 
-```         
-┌──────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  :User   │     │:LoginController│    │:AuthService  │     │  :Database   │
-└────┬─────┘     └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
-     │                  │                    │                    │
-     │  enterCredentials(username, password) │                    │
-     │─────────────────►│                    │                    │
-     │                  │                    │                    │
-     │                  │  authenticate(username, password)       │
-     │                  │───────────────────►│                    │
-     │                  │                    │                    │
-     │                  │                    │  findUser(username)│
-     │                  │                    │───────────────────►│
-     │                  │                    │                    │
-     │                  │                    │    user            │
-     │                  │                    │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ┤
-     │                  │                    │                    │
-     │                  │                    │                    │
-     │    ┌─────────────────────────────────────────────────────────────┐
-     │    │ alt  [user exists]                                         │
-     │    │             │                    │                         │
-     │    │             │                    │  verifyPassword(        │
-     │    │             │                    │    password,            │
-     │    │             │                    │    user.hashedPassword) │
-     │    │             │                    │────┐                    │
-     │    │             │                    │    │                    │
-     │    │             │                    │◄───┘                    │
-     │    │             │                    │                         │
-     │    │   ┌────────────────────────────────────────────────────┐   │
-     │    │   │ alt  [password valid]                              │   │
-     │    │   │         │                    │                     │   │
-     │    │   │         │                    │  createSession(user)│   │
-     │    │   │         │                    │────┐                │   │
-     │    │   │         │                    │    │                │   │
-     │    │   │         │                    │◄───┘                │   │
-     │    │   │         │                    │                     │   │
-     │    │   │         │   sessionToken     │                     │   │
-     │    │   │         │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                     │   │
-     │    │   │         │                    │                     │   │
-     │    │   │  loginSuccess(token)         │                     │   │
-     │    │   │◄─ ─ ─ ─ │                    │                     │   │
-     │    │   │         │                    │                     │   │
-     │    │   ├─────────────────────────────────────────────────────   │
-     │    │   │ [else]  │                    │                     │   │
-     │    │   │         │                    │                     │   │
-     │    │   │         │  AuthException     │                     │   │
-     │    │   │         │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                     │   │
-     │    │   │         │                    │                     │   │
-     │    │   │  loginFailed("Invalid password")                   │   │
-     │    │   │◄─ ─ ─ ─ │                    │                     │   │
-     │    │   │         │                    │                     │   │
-     │    │   └────────────────────────────────────────────────────┘   │
-     │    │             │                    │                         │
-     │    ├─────────────────────────────────────────────────────────────
-     │    │ [else]      │                    │                         │
-     │    │             │                    │                         │
-     │    │             │  AuthException     │                         │
-     │    │             │◄─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                         │
-     │    │             │                    │                         │
-     │    │  loginFailed("User not found")   │                         │
-     │    │◄─ ─ ─ ─ ─ ─ │                    │                         │
-     │    │             │                    │                         │
-     │    └─────────────────────────────────────────────────────────────┘
-     │                  │                    │                    │
-     │  displayResult() │                    │                    │
-     │◄─ ─ ─ ─ ─ ─ ─ ─ ─│                    │                    │
-     │                  │                    │                    │
-```
+![Sequence Diagram Example](../assets/images/ch3_fig7_sequence_example.svg)
 
 ### 3.5.4 Object Creation and Destruction
 
@@ -1005,6 +731,8 @@ Examples:
 + addItem(product: Product, quantity: int): void
 ```
 
+![Class Notation](../assets/images/ch3_fig8_class_notation.svg)
+
 ### 3.6.2 Relationships Between Classes
 
 **Association**: A general relationship between classes. Objects of one class know about objects of the other.
@@ -1124,74 +852,13 @@ Sometimes a relationship itself has attributes. An **association class** capture
 
 The Enrollment class captures attributes of the student-course relationship (grade, enrollment date).
 
+![Class Relationships](../assets/images/ch3_fig9_class_relationships.svg)
+
 ### 3.6.4 Complete Class Diagram Example
 
 Here's a class diagram for a simplified e-commerce system:
 
-```         
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                             │
-│    ┌─────────────────────┐              ┌─────────────────────┐             │
-│    │     «interface»     │              │     «abstract»      │             │
-│    │      Payable        │              │       User          │             │
-│    ├─────────────────────┤              ├─────────────────────┤             │
-│    │                     │              │ - id: int           │             │
-│    ├─────────────────────┤              │ - email: String     │             │
-│    │ + pay(): Boolean    │              │ - password: String  │             │
-│    │ + getAmount(): Dec  │              │ - createdAt: Date   │             │
-│    └──────────△──────────┘              ├─────────────────────┤             │
-│               ┊                         │ + login(): Boolean  │             │
-│               ┊                         │ + logout(): void    │             │
-│               ┊                         └──────────△──────────┘             │
-│               ┊                                    │                        │
-│               ┊                    ┌───────────────┼───────────────┐        │
-│               ┊                    │               │               │        │
-│    ┌──────────┴──────────┐  ┌──────┴──────┐ ┌──────┴──────┐ ┌──────┴──────┐ │
-│    │       Order         │  │  Customer   │ │    Admin    │ │   Vendor    │ │
-│    ├─────────────────────┤  ├─────────────┤ ├─────────────┤ ├─────────────┤ │
-│    │ - id: int           │  │- firstName  │ │- department │ │- companyName│ │
-│    │ - orderDate: Date   │  │- lastName   │ │- role       │ │- rating     │ │
-│    │ - status: Status    │  │- address    │ ├─────────────┤ ├─────────────┤ │
-│    │ - total: Decimal    │  ├─────────────┤ │+manageUsers │ │+addProduct  │ │
-│    ├─────────────────────┤  │+placeOrder()│ │+viewReports │ │+viewSales   │ │
-│    │ + pay(): Boolean    │  │+getOrders() │ └─────────────┘ └─────────────┘ │
-│    │ + getAmount(): Dec  │  └──────┬──────┘                                 │
-│    │ + cancel(): void    │         │ places                                 │
-│    │ + ship(): void      │         │ 1                                      │
-│    └─────────┬───────────┘         │                                        │
-│              │◆                    │                                        │
-│              │ contains            │                                        │
-│              │ 1..*         ┌──────┴──────────────────┐                     │
-│    ┌─────────┴───────────┐  │                         │                     │
-│    │     OrderLine       │  │                         │ 0..*                │
-│    ├─────────────────────┤  │                         │                     │
-│    │ - quantity: int     │  │  ┌─────────────────────────────────────┐      │
-│    │ - unitPrice: Decimal│  │  │              Product                │      │
-│    ├─────────────────────┤  │  ├─────────────────────────────────────┤      │
-│    │ + getSubtotal(): Dec│  │  │ - id: int                           │      │
-│    └─────────┬───────────┘  │  │ - name: String                      │      │
-│              │              │  │ - description: String               │      │
-│              │ 1            │  │ - price: Decimal                    │      │
-│              │              │  │ - stock: int                        │      │
-│              └──────────────┼─►├─────────────────────────────────────┤      │
-│                             │  │ + updateStock(qty: int): void       │      │
-│                             │  │ + isAvailable(): Boolean            │      │
-│                             │  └─────────────────┬───────────────────┘      │
-│                             │                    │                          │
-│                             │                    │ belongsTo                │
-│                             │                    │ *                        │
-│                             │         ┌──────────┴──────────┐               │
-│                             │         │      Category       │               │
-│                             │         ├─────────────────────┤               │
-│                             │         │ - id: int           │               │
-│                             │         │ - name: String      │               │
-│                             │         │ - parent: Category  │               │
-│                             │         ├─────────────────────┤               │
-│                             │         │ + getProducts(): [] │               │
-│                             │         └─────────────────────┘               │
-│                             │                                               │
-└─────────────────────────────┴───────────────────────────────────────────────┘
-```
+![Class Diagram Example](../assets/images/ch3_fig10_class_example.svg)
 
 ### 3.6.5 Domain Models vs. Design Class Diagrams
 
@@ -1217,33 +884,11 @@ Class diagrams serve different purposes at different project stages:
 
 **Example: Domain Model**
 
-```         
-┌─────────────┐        places         ┌─────────────┐
-│  Customer   │───────────────────────│    Order    │
-├─────────────┤ 1                0..* ├─────────────┤
-│ name        │                       │ date        │
-│ address     │                       │ total       │
-└─────────────┘                       │ status      │
-                                      └─────────────┘
-```
+![Domain Model Example](../assets/images/ch3_fig12_domain_model.svg)
 
 **Example: Design Class Diagram**
 
-```         
-┌─────────────────────────────┐        ┌─────────────────────────────┐
-│         Customer            │        │           Order             │
-├─────────────────────────────┤        ├─────────────────────────────┤
-│ - id: Long                  │        │ - id: Long                  │
-│ - firstName: String         │ 1    * │ - orderDate: LocalDate      │
-│ - lastName: String          │◄───────│ - total: BigDecimal         │
-│ - email: String             │        │ - status: OrderStatus       │
-│ - addresses: List<Address>  │        │ - customerId: Long          │
-├─────────────────────────────┤        ├─────────────────────────────┤
-│ + getFullName(): String     │        │ + calculateTotal(): void    │
-│ + addAddress(a: Address)    │        │ + cancel(): Boolean         │
-│ + getOrders(): List<Order>  │        │ + ship(): Boolean           │
-└─────────────────────────────┘        └─────────────────────────────┘
-```
+![Design Class Diagram Example](../assets/images/ch3_fig13_design_class.svg)
 
 ### 3.6.6 Best Practices for Class Diagrams
 
@@ -1327,40 +972,7 @@ With multiple diagram types available, how do you decide which to use?
 
 ### 3.7.3 Diagram Selection Guide
 
-```         
-                        ┌─────────────────────────┐
-                        │ What do you want to     │
-                        │ model?                  │
-                        └───────────┬─────────────┘
-                                    │
-              ┌─────────────────────┼─────────────────────┐
-              │                     │                     │
-              ▼                     ▼                     ▼
-    ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
-    │ System          │   │ Dynamic         │   │ Static          │
-    │ Functionality   │   │ Behavior        │   │ Structure       │
-    └────────┬────────┘   └────────┬────────┘   └────────┬────────┘
-             │                     │                     │
-             ▼                     │                     ▼
-    ╭─────────────────╮            │            ╭─────────────────╮
-    │ Use Case        │            │            │ Class           │
-    │ Diagram         │            │            │ Diagram         │
-    ╰─────────────────╯            │            ╰─────────────────╯
-                                   │
-                   ┌───────────────┼───────────────┐
-                   │               │               │
-                   ▼               ▼               ▼
-         ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-         │ Process/    │  │ Object      │  │ Object      │
-         │ Workflow    │  │ Interactions│  │ Lifecycle   │
-         └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-                │                │                │
-                ▼                ▼                ▼
-       ╭─────────────────╮╭─────────────────╮╭─────────────────╮
-       │ Activity        ││ Sequence        ││ State Machine   │
-       │ Diagram         ││ Diagram         ││ Diagram         │
-       ╰─────────────────╯╰─────────────────╯╰─────────────────╯
-```
+![Diagram Selection Guide](../assets/images/ch3_fig14_diagram_selection.svg)
 
 ------------------------------------------------------------------------
 
