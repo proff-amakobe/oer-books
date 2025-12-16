@@ -1,0 +1,100 @@
+project:
+  type: book
+  output-dir: _book
+  resources:
+    - assets
+    - styles
+
+book:
+  title: Introduction to Generative AI with Large Language Models
+  subtitle: Build Intelligent Applications Using Prompt Engineering, RAG, and Multimodal Tools
+  author: Moody Amakobe
+  publisher: Global Data Science Institute
+  date: '2025'
+  cover-image: assets/images/cover.png
+  license: CC BY 4.0
+  chapters:
+    - index.qmd
+    - preface.qmd
+    - acknowledgments.qmd
+    - chapters/01-foundations.qmd
+    - chapters/02-llms.qmd
+    - chapters/03-prompt-engineering.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    number-sections: false
+
+  pdf:
+    documentclass: scrbook
+    papersize: 7in,10in
+    fontsize: 11pt
+    geometry:
+      - top=0.75in
+      - bottom=0.75in
+      - inner=0.9in
+      - outer=0.6in
+    linestretch: 1.15
+    pdf-engine: xelatex
+
+    # KDP-friendly links (no colored link text/boxes)
+    colorlinks: false
+
+    toc: true
+    toc-depth: 3
+    number-sections: false
+    classoption:
+      - openany
+    titlepage: true
+
+    include-in-header:
+      text: |
+        % --- Core packages you already use ---
+        \usepackage{setspace}
+        \AtBeginEnvironment{verbatim}{\singlespacing}
+        \usepackage{algorithm}
+        \usepackage{algpseudocode}
+
+        % --- KDP polish / cleaner pagination ---
+        \usepackage{etoolbox}
+        \usepackage{xstring}
+        \usepackage{needspace}
+
+        % Reduce "hanging" headings at page bottoms
+        \pretocmd{\chapter}{\Needspace{10\baselineskip}}{}{}
+        \pretocmd{\section}{\Needspace{6\baselineskip}}{}{}
+        \pretocmd{\subsection}{\Needspace{4\baselineskip}}{}{}
+
+        % Force "Key Terminologies and Concepts" to start on a new page automatically
+        \let\oldsection\section
+        \renewcommand{\section}[1]{%
+          \IfStrEq{#1}{Key Terminologies and Concepts}{\clearpage\oldsection{#1}}{\oldsection{#1}}%
+        }
+
+        % Keep vertical spacing natural (avoids stretched pages)
+        \raggedbottom
+
+        % --- Story box (PDF-perfect) ---
+        \usepackage{tcolorbox}
+        \tcbuselibrary{breakable}
+        \newtcolorbox{storybox}{
+          breakable,
+          colback=gray!10,
+          colframe=gray!50,
+          arc=3mm,
+          boxrule=0.5pt,
+          left=4mm,right=4mm,top=2mm,bottom=2mm
+        }
+        \usepackage{graphicx}
+        \usepackage{wrapfig}
+
+
+  epub:
+    number-sections: true
+
+editor: visual
