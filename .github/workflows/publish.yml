@@ -42,6 +42,13 @@ jobs:
           quarto render
           cd ..
 
+          # ---- Introduction to GenAI Book ----
+          cd intro-genai-llm-oer-book
+          quarto render
+          cd ..
+
+          
+
           # ---- Prepare public directory ----
           rm -rf public && mkdir -p public
 
@@ -52,6 +59,10 @@ jobs:
           # Copy Software Engineering Lifecycle Book
           mkdir -p public/se_lifecycle_book
           cp -r se_lifecycle_book/_book/* public/se_lifecycle_book/
+
+          # Copy Introduction to GenAI Book
+          mkdir -p public/intro-genai-llm-oer-book
+          cp -r intro-genai-llm-oer-book/_book/* public/intro-genai-llm-oer-book/
 
           echo "----- Deployed tree -----"
           ls -R public
