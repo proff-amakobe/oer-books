@@ -7,7 +7,7 @@ project:
 book:
   title: "The Complete Software Engineering Lifecycle"
   subtitle: "Methods, Patterns, and Implementation"
-  author: "Dr. Moody Amakobe"
+  author: "Moody Amakobe"
   publisher: "Global Data Science Institute"
   license: "CC BY 4.0"
   date: today
@@ -23,6 +23,7 @@ book:
     - chapters/05-ui-ux.qmd
     - chapters/06-agile-methodologies.qmd
     - chapters/07-version-control.qmd
+    - chapters/08-testing-quality.qmd
     - chapters/09-cicd.qmd
     - chapters/10-data-management.qmd
     - chapters/11-cloud-services.qmd
@@ -33,7 +34,6 @@ book:
     - chapters/glossary.qmd
 
 bibliography: references.bib
-license: "CC BY-NC 4.0"
 
 format:
   html:
@@ -44,26 +44,83 @@ format:
 
   pdf:
     documentclass: scrbook
-    papersize: "7in,10in"
+    pdf-engine: lualatex
+
+    # --- CLRS-like textbook trim ---
+    papersize: "8.5in,11in"
+
     fontsize: 11pt
+    linestretch: 1.12
+
+    # --- KDP safe margins for thick books (still generous) ---
     geometry:
-      - top=0.75in
-      - bottom=0.75in
-      - inner=0.9in
-      - outer=0.6in
-    linestretch: 1.15
-    include-in-header:
-      text: |
-        \usepackage{setspace}
-        \AtBeginEnvironment{verbatim}{\singlespacing}
-        \usepackage{algorithm}
-        \usepackage{algpseudocode}
+      - paperwidth=8.5in
+      - paperheight=11in
+      - inner=1.15in
+      - outer=0.85in
+      - top=0.85in
+      - bottom=0.9in
+      - includeheadfoot
+
     toc: true
     toc-depth: 3
     number-sections: true
+
     colorlinks: true
-    linkcolor: blue
-    urlcolor: blue
+    linkcolor: GDSIBlue
+    urlcolor: GDSIBlue
+
+    # Figures: keep them inside margins; allow wider content on 8.5x11
+    fig-align: center
+    fig-width: 7.0
+
+    include-in-header:
+      text: |
+        % ---------- FONTS (KDP-safe) ----------
+        \usepackage[T1]{fontenc}
+        \usepackage{lmodern}
+        \usepackage{microtype}
+
+        % ---------- BRAND COLOR ----------
+        \usepackage{xcolor}
+        \definecolor{GDSIBlue}{HTML}{008FA1}
+
+        % ---------- SECTION/CHAPTER COLOR ----------
+        \usepackage{sectsty}
+        \chapterfont{\color{GDSIBlue}}
+        \sectionfont{\color{GDSIBlue}}
+        \subsectionfont{\color{GDSIBlue}}
+
+        % ---------- CHAPTER TITLE FORMAT (avoid wrapping) ----------
+        \usepackage{titlesec}
+        \titleformat{\chapter}[display]
+          {\normalfont\bfseries\LARGE\color{GDSIBlue}} % was Huge; reduced to prevent wrap
+          {\chaptername\ \thechapter}{14pt}{\LARGE}
+
+        % Tighter spacing around chapter titles (reduces page count too)
+        \titlespacing*{\chapter}{0pt}{-5pt}{18pt}
+
+        % ---------- GRAPHICS: never exceed text area ----------
+        \usepackage{graphicx}
+        \setkeys{Gin}{width=\linewidth,height=0.9\textheight,keepaspectratio}
+
+        % ---------- TABLES ----------
+        \usepackage{colortbl}
+        \rowcolors{2}{GDSIBlue!5}{white}
+        \usepackage{adjustbox}
+
+        % ---------- CALLOUT BOX ----------
+        \usepackage{tcolorbox}
+        \newtcolorbox{gdsiNote}{
+          colback=GDSIBlue!10,
+          colframe=GDSIBlue!70!black,
+          title=Key Insight,
+          fonttitle=\bfseries
+        }
+
+        % ---------- ALGORITHMS ----------
+        \usepackage{algorithm}
+        \usepackage{algpseudocode}
 
   epub:
     number-sections: true
