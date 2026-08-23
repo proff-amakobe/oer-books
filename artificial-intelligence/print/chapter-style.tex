@@ -1,0 +1,180 @@
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% The print interior supplies its own half-title and full-title pages.
+\AtBeginDocument{\renewcommand{\maketitle}{}}
+
+% Subtle original network artwork, anchored to a tcolorbox frame.
+\newcommand{\EISBoxNetwork}{%
+  \draw[EISCyan,opacity=.20,line width=.7pt]
+    ([xshift=-2.8in,yshift=-.75in]frame.north east) coordinate (a)
+    --++(-.75in,-.55in) coordinate (b)
+    --++(-.85in,-.65in) coordinate (c);
+  \draw[EISCyan,opacity=.20,line width=.7pt]
+    (a)--++(-.2in,-1.35in) coordinate (d)--(c) (b)--++(.75in,-1.15in) coordinate (e)--(d);
+  \foreach \p in {a,b,c,d,e}{\fill[EISCyan,opacity=.24] (\p) circle (3pt);}%
+}
+
+% Exact learning objectives are supplied by the print-only Lua filter.
+\newcommand{\EISChapterOpener}[4]{%
+  \cleardoublepage
+  \refstepcounter{chapter}%
+  \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#2}%
+  \chaptermark{#2}%
+  \thispagestyle{empty}%
+  \noindent\begin{tcolorbox}[
+    enhanced,
+    width=\textwidth,
+    height=5.55in,
+    colback=EISNavy,
+    colframe=EISNavy,
+    boxrule=0pt,
+    arc=0pt,
+    left=7mm,right=7mm,top=7mm,bottom=6mm,
+    overlay={\EISBoxNetwork}]
+    {\sffamily\bfseries\fontsize{9}{11}\selectfont\color{EISCyan}CHAPTER\par}
+    \vspace{-.1em}
+    {\sffamily\bfseries\fontsize{56}{58}\selectfont\color{white}\ifnum\value{chapter}<10 0\fi\thechapter\par}
+    \vspace{.25em}
+    {\sffamily\bfseries\fontsize{9}{11}\selectfont\color{EISCyan}\MakeUppercase{#1}\par}
+    \vfill
+    {\sffamily\bfseries\fontsize{27}{31}\selectfont\color{white}#2\par}
+    \vspace{.45em}
+    {\fontsize{11.5}{14.5}\selectfont\color{EISLightGray}#3\par}
+    \vspace{.5em}
+    {\color{EISCyan}\rule{1.15in}{2pt}\par}
+  \end{tcolorbox}
+  \vspace{-.42in}
+  \begin{tcolorbox}[
+    enhanced,
+    colback=white,
+    colframe=EISMidGray,
+    boxrule=.45pt,
+    arc=1.5mm,
+    left=5mm,right=5mm,top=4mm,bottom=3.5mm,
+    borderline west={2.2pt}{0pt}{EISCyan},
+    drop shadow={black!18!white},
+    title={LEARNING OBJECTIVES},
+    coltitle=EISDeepBlue,
+    fonttitle=\sffamily\bfseries\fontsize{9}{11}\selectfont,
+    before skip=0pt,after skip=0pt]
+    \begin{itemize}[leftmargin=1.6em,itemsep=2pt,topsep=1pt,label=\textcolor{EISRoyalBlue}{\small$\blacktriangleright$}]
+      #4
+    \end{itemize}
+  \end{tcolorbox}
+  \clearpage
+}
+
+\newcommand{\EISPartOpener}[2]{%
+  \cleardoublepage
+  \refstepcounter{part}%
+  \addcontentsline{toc}{part}{\protect\numberline{\Roman{part}}#1}%
+  \thispagestyle{empty}%
+  \noindent\begin{tcolorbox}[
+    enhanced,
+    width=\textwidth,
+    height=\textheight,
+    colback=EISNavy,
+    colframe=EISNavy,
+    boxrule=0pt,
+    arc=0pt,
+    left=9mm,right=9mm,top=10mm,bottom=10mm,
+    overlay={\EISBoxNetwork}]
+    {\sffamily\bfseries\fontsize{12}{14}\selectfont\color{EISCyan}PART\par}
+    {\sffamily\bfseries\fontsize{78}{82}\selectfont\color{white}\Roman{part}\par}
+    \vspace{1.1in}
+    {\sffamily\bfseries\fontsize{29}{34}\selectfont\color{white}#1\par}
+    \vspace{.65em}{\color{EISCyan}\rule{1.35in}{2.2pt}\par}
+    \vspace{.8em}
+    {\fontsize{13}{17}\selectfont\color{EISLightGray}#2\par}
+  \end{tcolorbox}
+  \clearpage
+}
+
+% Quarto emits book parts directly as \part commands. Route those commands
+% through the designed divider while retaining numbering and TOC entries.
+\AtBeginDocument{\renewcommand{\part}[1]{\EISPartOpener{#1}{}}}
+
+\newcommand{\EISHalfTitle}{%
+  \cleardoublepage\thispagestyle{empty}
+  \vspace*{2.2in}
+  {\centering\sffamily\bfseries\fontsize{30}{35}\selectfont\color{EISNavy}Engineering Intelligent Systems\par}
+  \clearpage
+}
+
+\newcommand{\EISFullTitle}{%
+  \thispagestyle{empty}%
+  \noindent\begin{tcolorbox}[
+    enhanced,
+    width=\textwidth,
+    height=\textheight,
+    colback=EISNavy,
+    colframe=EISNavy,
+    boxrule=0pt,
+    arc=0pt,
+    left=9mm,right=9mm,top=12mm,bottom=11mm,
+    overlay={\EISBoxNetwork}]
+    \vspace{.7in}
+    {\sffamily\bfseries\fontsize{34}{39}\selectfont\color{white}Engineering\\Intelligent Systems\par}
+    \vspace{.75em}{\color{EISCyan}\rule{1.5in}{2.5pt}\par}
+    \vspace{.7em}
+    {\fontsize{16}{20}\selectfont\color{EISLightGray}Designing, Building, and Deploying\\Modern Artificial Intelligence\par}
+    \vfill
+    {\sffamily\bfseries\fontsize{15}{18}\selectfont\color{white}Moody Amakobe\par}
+    \vspace{.55em}
+    {\sffamily\fontsize{9}{11}\selectfont\color{EISCyan}FIRST OPEN EDITION · 2026 · CC BY 4.0\par}
+  \end{tcolorbox}
+  \clearpage
+}
+
+\newcommand{\EISCopyrightPage}{%
+  \thispagestyle{empty}
+  \vspace*{1.1in}
+  {\sffamily\bfseries\fontsize{18}{22}\selectfont\color{EISNavy}Engineering Intelligent Systems\par}
+  \vspace{.25em}
+  {\itshape Designing, Building, and Deploying Modern Artificial Intelligence\par}
+  \vspace{1.1em}
+  Moody Amakobe\par
+  \vspace{1.4em}
+  Copyright © 2026 Moody Amakobe\par
+  \vspace{1em}
+  \textbf{First Open Edition}\par
+  Published as an independent Open Educational Resource.\par
+  \vspace{1em}
+  This work is licensed under the Creative Commons Attribution 4.0 International License unless otherwise indicated. You may share and adapt the work with appropriate attribution, a link to the license, and an indication of changes.\par
+  \vspace{1em}
+  ISBN — Print: To be assigned\\
+  ISBN — PDF: To be assigned\\
+  ISBN — EPUB: To be assigned\par
+  \vspace{1em}
+  This book is provided for educational purposes. Artificial intelligence technologies, software libraries, standards, APIs, and deployed systems change over time. Readers should verify current documentation and professional guidance before applying material in operational or high-stakes settings.\par
+  \vfill
+  {\small Recommended citation: Amakobe, M. (2026). \textit{Engineering intelligent systems: Designing, building, and deploying modern artificial intelligence} (First Open Edition).}\par
+  \clearpage
+}
+
+% Fallback styling for nontechnical unnumbered chapters.
+\titleformat{name=\chapter,numberless}[display]
+  {\sffamily\bfseries\color{EISNavy}\Huge}
+  {}{0pt}{}
+  [\vspace{.35em}{\color{EISCyan}\titlerule[1.6pt]}]
+\titlespacing*{\chapter}{0pt}{0pt}{2.2em}
+
+\titleformat{\section}[display]
+  {\needspace{5\baselineskip}\sffamily\bfseries\color{EISNavy}\Large}
+  {\color{EISRoyalBlue}\fontsize{10}{12}\selectfont\thesection}
+  {.22em}{}
+  [\vspace{.25em}{\color{EISCyan}\titlerule[1.25pt]}]
+\titlespacing*{\section}{0pt}{2.4em}{1.0em}
+
+\titleformat{\subsection}[hang]
+  {\needspace{3\baselineskip}\sffamily\bfseries\color{EISCharcoal}\large}
+  {\color{EISRoyalBlue}\thesubsection}{.55em}{}
+\titlespacing*{\subsection}{0pt}{1.65em}{.55em}
+
+\titleformat{\subsubsection}[hang]
+  {\needspace{3\baselineskip}\sffamily\bfseries\color{EISCharcoal}\normalsize}
+  {\color{EISRoyalBlue}\thesubsubsection}{.55em}{}

@@ -28,7 +28,7 @@ The book is intended for graduate and advanced undergraduate students, AI instru
 
 The Quarto project publishes HTML, PDF, and EPUB editions. The HTML edition is deployed automatically with GitHub Pages.
 
-## Building Locally
+## Build the Web Edition
 
 Install [Quarto](https://quarto.org), then run from this directory:
 
@@ -42,6 +42,24 @@ To build only the deployed HTML edition:
 ```bash
 quarto render --to html
 ```
+
+## Build the Print Edition
+
+The print interior uses LuaLaTeX, open fonts supplied by TeX Live, and reusable components in `print/`:
+
+```bash
+quarto render --profile print --to pdf
+```
+
+This creates `_book/Engineering-Intelligent-Systems-Print.pdf` with letter-size pages, mirrored margins, and recto Part and chapter starts.
+
+To create the closely matched, screen-oriented digital PDF with symmetric margins:
+
+```bash
+quarto render --profile digital,print --to pdf
+```
+
+TinyTeX or another current TeX Live installation with LuaLaTeX, TikZ, `tcolorbox`, `titlesec`, `fancyhdr`, `booktabs`, and `longtable` is required.
 
 ## Contributing
 
