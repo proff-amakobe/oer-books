@@ -1,4 +1,4 @@
-# Chapter 4: Planning Intelligently
+# Planning Intelligently
 
 **From Goals to Actions — Classical and Probabilistic Planning**
 

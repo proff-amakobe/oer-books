@@ -1,4 +1,4 @@
-# Chapter 14: Building AI We Can Live With
+# Building AI We Can Live With
 
 **AI Safety, Ethics, and Governance in a Complex World**
 

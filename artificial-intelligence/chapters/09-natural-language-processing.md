@@ -1,4 +1,4 @@
-# Chapter 9: Machines That Read
+# Machines That Read
 
 **Natural Language Processing and the Transformer Revolution**
 

@@ -1,4 +1,4 @@
-# Chapter 3: The Language of Thought
+# The Language of Thought
 
 **Knowledge Representation, Logic, and Machine Reasoning**
 

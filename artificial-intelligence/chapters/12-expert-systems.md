@@ -1,4 +1,4 @@
-# Chapter 12: The Return of Rules
+# The Return of Rules
 
 **Expert Systems, Knowledge Engineering, and the Neuro-Symbolic Synthesis**
 

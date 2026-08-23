@@ -1,4 +1,4 @@
-# Chapter 6: Learning From Examples
+# Learning From Examples
 
 **Supervised Machine Learning — From Data to Decisions**
 

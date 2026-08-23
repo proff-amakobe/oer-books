@@ -1,4 +1,4 @@
-# Chapter 10: Machines That See
+# Machines That See
 
 **Computer Vision and the Spatial Intelligence of Deep Networks**
 

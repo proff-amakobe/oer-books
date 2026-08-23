@@ -1,4 +1,4 @@
-# Chapter 7: Finding Structure in the Dark
+# Finding Structure in the Dark
 
 **Unsupervised Learning, Clustering, and Anomaly Detection**
 

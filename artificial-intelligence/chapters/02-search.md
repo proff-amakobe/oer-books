@@ -1,4 +1,4 @@
-# Chapter 2: Navigating the Space of Possibilities
+# Navigating the Space of Possibilities
 
 **Search Algorithms, Problem Solving, and the Architecture of Rational Action**
 

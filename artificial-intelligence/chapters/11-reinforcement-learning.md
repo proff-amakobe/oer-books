@@ -1,4 +1,4 @@
-# Chapter 11: Learning by Doing
+# Learning by Doing
 
 **Reinforcement Learning, Reward, and the Agent That Teaches Itself**
 

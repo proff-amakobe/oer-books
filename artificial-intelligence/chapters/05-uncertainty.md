@@ -1,4 +1,4 @@
-# Chapter 5: Reasoning Under Uncertainty
+# Reasoning Under Uncertainty
 
 **Probability, Bayesian Networks, and Calibrated Belief**
 

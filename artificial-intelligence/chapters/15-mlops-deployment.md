@@ -1,4 +1,4 @@
-# Chapter 15: From Lab to Life
+# From Lab to Life
 
 **MLOps, Systems Architecture, Deployment, and the IAAIS Full Integration Sprint**
 

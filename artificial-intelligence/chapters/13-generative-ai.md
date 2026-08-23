@@ -1,4 +1,4 @@
-# Chapter 13: Machines That Create
+# Machines That Create
 
 **Generative AI, Large Language Models, and the Frontier of Artificial Creativity**
 

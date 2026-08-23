@@ -1,51 +1,60 @@
-# Artificial Intelligence
+# Engineering Intelligent Systems
 
-An open textbook covering the foundations, methods, applications, deployment, and responsible practice of artificial intelligence.
+**Designing, Building, and Deploying Modern Artificial Intelligence**
 
-## About the book
+First Open Edition · 2026 · Moody Amakobe
 
-The 16 chapters progress from classical AI and reasoning through machine learning, neural networks, language, vision, reinforcement learning, expert systems, generative AI, ethics, MLOps, and future directions. The source preserves the original chapter content while using Quarto Book for navigation and publication.
+## About the Book
 
-## Read online
+*Engineering Intelligent Systems* is a systems-oriented open textbook connecting artificial intelligence theory with implementation, deployment, and responsible practice. Its 16 chapters move from agents, search, knowledge, planning, and uncertainty through modern learning, language, vision, generative AI, ethics, and MLOps.
 
-Read the deployed book at <https://proff-amakobe.github.io/oer-books/artificial-intelligence/>.
+## Read Online
+
+Read the published book at <https://proff-amakobe.github.io/oer-books/artificial-intelligence/>.
+
+## Contents
+
+1. Foundations of Intelligent Systems
+2. Search, Reasoning, and Decision Making
+3. Machine Learning Systems
+4. Perceptual, Adaptive, and Generative Systems
+5. Engineering, Deployment, and Responsible AI
+
+## Audience
+
+The book is intended for graduate and advanced undergraduate students, AI instructors, technical professionals, and self-directed learners. Basic programming literacy is expected; introductory probability, statistics, and algebra are helpful.
 
 ## Formats
 
-The project configures HTML, EPUB, and PDF output. HTML is the deployment format. PDF generation requires a working LaTeX installation.
+The Quarto project publishes HTML, PDF, and EPUB editions. The HTML edition is deployed automatically with GitHub Pages.
 
-## Building locally
+## Building Locally
 
 Install [Quarto](https://quarto.org), then run from this directory:
 
 ```bash
 quarto preview
-```
-
-To build all configured formats:
-
-```bash
 quarto render
 ```
 
-To build the deployable HTML edition only:
+To build only the deployed HTML edition:
 
 ```bash
 quarto render --to html
 ```
 
-## Repository structure
-
-- `_quarto.yml` defines book metadata, chapter order, formats, and navigation.
-- `index.qmd` and `preface.qmd` contain the front matter.
-- `chapters/` contains the 16 source chapters in reading order.
-- `references.qmd` documents the current references approach.
-- `.github/workflows/publish.yml` is a standalone Pages workflow template; in this monorepo, the root workflow must include this book.
-
 ## Contributing
 
-Please report corrections through [GitHub issues](https://github.com/proff-amakobe/oer-books/issues) or submit a pull request. Preserve source meaning, identify sources for factual changes, use accessible Markdown, and confirm that the HTML edition renders successfully.
+Corrections, accessibility improvements, examples, and carefully sourced updates are welcome through [pull requests](https://github.com/proff-amakobe/oer-books/pulls). Preserve the author's substantive meaning and confirm that the book renders successfully before submitting changes.
+
+## Reporting Errors
+
+Report technical or editorial problems through the repository's [issue tracker](https://github.com/proff-amakobe/oer-books/issues). Include the chapter, section, and enough context to reproduce the problem.
+
+## Citation
+
+Amakobe, M. (2026). *Engineering intelligent systems: Designing, building, and deploying modern artificial intelligence* (First Open Edition). https://proff-amakobe.github.io/oer-books/artificial-intelligence/
 
 ## License
 
-This OER is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). See `LICENSE` for the attribution requirements. The author name remains explicitly pending confirmation from the source owner.
+Except where otherwise indicated, this Open Educational Resource is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). See [LICENSE](LICENSE).

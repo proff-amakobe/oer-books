@@ -1,4 +1,4 @@
-# Chapter 16: What Comes Next
+# What Comes Next
 
 **Frontier AI, Open Problems, and the Future We Are Building**
 

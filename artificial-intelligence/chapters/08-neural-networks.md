@@ -1,4 +1,4 @@
-# Chapter 8: The Architecture of Learning
+# The Architecture of Learning
 
 **Neural Networks, Backpropagation, and the Rise of Deep Learning**
 
