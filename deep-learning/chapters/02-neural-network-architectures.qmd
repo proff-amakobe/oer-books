@@ -3,6 +3,8 @@ title: "Neural Network Architectures"
 subtitle: "The Blueprint of Artificial Minds"
 ---
 
+<p class="chapter-part">Part I · Foundations of Deep Learning</p>
+
 A Sunday Afternoon That Changed Everything
 
 It was September 2012. Researchers from around the world had gathered --- in person and online --- to watch the results of the ImageNet Large Scale Visual Recognition Challenge, an annual competition that asked a deceptively simple question: can your computer look at a photograph and tell us what is in it?
@@ -219,7 +221,7 @@ ReLU stands for Rectified Linear Unit, but the name matters less than the rule: 
 
 In the nightclub analogy: this bouncer checks one thing. Positive energy? Come in, exactly as you are. Negative energy? The door is closed.
 
-The mathematical expression is just: f(x) = max(0, x). Nothing more. And yet this elegant simplicity is the reason ReLU has become the default activation function in the hidden layers of most modern neural networks.
+The mathematical expression is just: $f(x) = \max(0, x)$. Nothing more. And yet this elegant simplicity is the reason ReLU has become the default activation function in the hidden layers of most modern neural networks.
 
 Why has something so simple become so dominant? Several reasons:
 
@@ -235,7 +237,7 @@ Sigmoid: The Confidence Meter
 
 Sigmoid takes the bouncer metaphor in a different direction. This bouncer does not make binary decisions --- in or out. Instead, the bouncer expresses a **probability**: \"I am 78 percent confident you belong here.\" The Sigmoid function maps any input, no matter how large or small, to a value between 0 and 1. It is shaped like the letter S: flat near 0 for very negative inputs, flat near 1 for very large positive inputs, and steeply rising in between.
 
-The formula is: f(x) = 1 / (1 + e\^−x). The key property is that the output is always a number between 0 and 1, which makes it naturally interpretable as a probability. If a network needs to answer a yes-or-no question --- \"is this email spam?\" or \"does this X-ray show signs of pneumonia?\" --- Sigmoid at the output layer converts the network\'s raw score into a clean probability estimate.
+The formula is: $f(x) = \dfrac{1}{1 + e^{-x}}$. The key property is that the output is always a number between 0 and 1, which makes it naturally interpretable as a probability. If a network needs to answer a yes-or-no question --- \"is this email spam?\" or \"does this X-ray show signs of pneumonia?\" --- Sigmoid at the output layer converts the network\'s raw score into a clean probability estimate.
 
 Sigmoid\'s strengths:
 
@@ -314,7 +316,7 @@ The Flattening Problem
 
 Now consider what happens when you try to give an FNN an image. A 224×224 color photograph contains 150,528 numbers (224 × 224 × 3 color channels). To feed this into an FNN, you must flatten that three-dimensional grid into a single long list of 150,528 inputs. And in doing so, you destroy something important: the spatial relationships between pixels.
 
-Consider a simple example. Imagine a 2×2 image: pixel A is in the top-left corner, pixel B is directly to its right, pixel C is directly below it, and pixel D is in the bottom-right corner. When you flatten this into a list --- \[A, B, C, D\] --- the network knows A comes before B, but it has no idea that A and C were vertically adjacent, or that A and D were diagonally opposite. The *neighborhood structure* of the image --- the fact that nearby pixels tend to carry related visual information --- is completely lost.
+Consider a simple example. Imagine a 2×2 image: pixel A is in the top-left corner, pixel B is directly to its right, pixel C is directly below it, and pixel D is in the bottom-right corner. When you flatten this into a list --- `[A, B, C, D]` --- the network knows A comes before B, but it has no idea that A and C were vertically adjacent, or that A and D were diagonally opposite. The *neighborhood structure* of the image --- the fact that nearby pixels tend to carry related visual information --- is completely lost.
 
 It is like shredding a map and asking someone to navigate using the paper strips. The information is technically all still there, but the spatial organization that gives it meaning has been destroyed. For images, language, time series, and any data where *where something is* matters as much as *what something is*, a Feedforward Network is the wrong architecture. The limitations of FNNs are, in fact, the best explanation of *why* the other architectures were invented.
 
@@ -616,7 +618,7 @@ AlexNet required two high-end GPUs and weeks of training time in 2012. Today, a 
 
 ### 8. Confidence vs. Accuracy
 
-A Softmax output of \[0.97, 0.02, 0.01\] tells you the network assigns 97% probability to the first class. But high predicted probability is not the same as high accuracy --- networks can be confidently wrong. In what real-world deployment scenarios is this gap between expressed confidence and actual reliability most dangerous? How would you communicate this distinction to a non-technical decision-maker who sees \"97% confidence\" and considers the matter settled?
+A Softmax output of `[0.97, 0.02, 0.01]` tells you the network assigns 97% probability to the first class. But high predicted probability is not the same as high accuracy --- networks can be confidently wrong. In what real-world deployment scenarios is this gap between expressed confidence and actual reliability most dangerous? How would you communicate this distinction to a non-technical decision-maker who sees \"97% confidence\" and considers the matter settled?
 
 ## Further Reading
 

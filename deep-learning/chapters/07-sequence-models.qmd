@@ -3,6 +3,8 @@ title: "The Memory Problem"
 subtitle: "Sequence Models and the Road to Attention"
 ---
 
+<p class="chapter-part">Part III · Sequence, Language, and Multimodal Learning</p>
+
 ## Opening Narrative
 
 Dr. Amara Osei is a hospitalist physician at a teaching hospital in Accra. On a busy Tuesday morning, she reviews the discharge summary for a patient who has been on her floor for eleven days. The summary is three pages long. It describes an admission for a pulmonary embolism, a course complicated by a suspected drug reaction on day four, a medication adjustment on day six, and a gradual stabilization over the following days. Near the end of the third page, the summary reads: *\"The patient tolerated the procedure well, though she remained anxious throughout the recovery period.\"*
@@ -110,6 +112,13 @@ This is fine for image patches, for classification labels, for fixed-format reco
 The first architecture designed to solve this problem was the Recurrent Neural Network.
 
 ### The Recurrent Neural Network: A Network with a Memory
+
+For a standard RNN, the hidden state and output can be written as:
+
+$$
+h_t = \tanh\!\left(W_x x_t + W_h h_{t-1} + b_h\right),
+\qquad y_t = W_y h_t + b_y
+$$
 
 The core idea of the RNN is surprisingly elegant. Instead of discarding the network\'s previous state after each computation, why not feed it back in? At every time step, the network takes two inputs: the current token, and its own previous output. It combines them, applies a transformation, and produces a new output that represents its current understanding of the sequence so far.
 

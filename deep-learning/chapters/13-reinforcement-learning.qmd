@@ -3,6 +3,8 @@ title: "Learning to Act"
 subtitle: "Reinforcement Learning and the Alignment Problem"
 ---
 
+<p class="chapter-part">Part IV · Generative and Adaptive Systems</p>
+
 ## Opening Narrative
 
 Dr. Amara Okonkwo completed her medical degree at the top of her class. She had read every textbook, memorized every drug interaction, scored perfectly on every exam. She knew the diagnostic criteria for thousands of conditions, the dosing protocols for hundreds of medications, the contraindications and the edge cases and the rare presentations that appeared once in a generation.
@@ -189,7 +191,12 @@ When the Markov property is violated, RL agents can still perform well if the st
 
 ### The Goal: Optimal Policy
 
-The agent\'s objective is to find a policy π\* that maximizes the expected cumulative discounted reward --- the sum of future rewards, with each reward discounted by the discount factor raised to the power of how many steps in the future it arrives.
+The agent\'s objective is to find a policy $\pi^*$ that maximizes the expected cumulative discounted reward --- the sum of future rewards, with each reward discounted by the discount factor raised to the power of how many steps in the future it arrives.
+
+$$
+\pi^* = \arg\max_\pi\;
+\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_{t+1}\right]
+$$
 
 This objective captures something important: we want the agent to make good decisions over time, not just in the next step. A chess player who wins the next few moves but loses the game has pursued the wrong objective. A doctor who improves immediate test results but harms long-term health has optimized the wrong metric. The RL objective, properly specified, asks for long-run performance --- which is both the source of its power and the origin of many of its most concerning failure modes.
 
@@ -203,7 +210,12 @@ The central insight is the Bellman equation: a self-consistency condition that a
 
 The doctor\'s position evaluation analogy is the most direct. An experienced clinician, looking at a patient presentation, can estimate --- without explicitly calculating every possible future decision --- how good this clinical situation is. They have internalized, through years of practice, a value function over patient states. They know that stable vitals after a procedure is a better state than unstable ones, that confirmed diagnosis is better than diagnostic uncertainty, that a patient with good social support is better positioned than one without. This internalized evaluation guides their decisions even when they cannot trace every reasoning step explicitly.
 
-Q-learning is the most important value-based algorithm, and it learns precisely this kind of evaluation. It estimates Q(s, a) --- the value of taking action a in state s --- by iteratively updating toward the self-consistency implied by the Bellman equation: the Q-value of (s, a) should equal the immediate reward plus the discounted maximum Q-value achievable from the next state.
+Q-learning is the most important value-based algorithm, and it learns precisely this kind of evaluation. It estimates $Q(s,a)$ --- the value of taking action $a$ in state $s$ --- by iteratively updating toward the self-consistency implied by the Bellman equation: the Q-value of $(s,a)$ should equal the immediate reward plus the discounted maximum Q-value achievable from the next state.
+
+$$
+Q^*(s,a)
+= \mathbb{E}\!\left[r + \gamma\max_{a'}Q^*(s',a')\mid s,a\right]
+$$
 
 ### Deep Q-Networks: Scaling to High Dimensions
 
@@ -211,7 +223,7 @@ Tabular Q-learning maintains a separate Q-value estimate for each state-action p
 
 Deep Q-Networks, introduced by DeepMind in 2015, solve this by replacing the table with a neural network. The network takes a state as input and outputs Q-value estimates for all possible actions simultaneously. Rather than looking up a value, the agent computes it. The network generalizes across similar states --- two frames that look similar should have similar Q-values --- in the same way that any neural network generalizes across similar inputs.
 
-The training target for the network is produced by the Bellman equation: for each observed transition (s, a, r, s\'), the target Q-value for (s, a) is r + γ × max\_{a\'} Q(s\', a\'). The network is updated to bring its output closer to this target.
+The training target for the network is produced by the Bellman equation: for each observed transition $(s,a,r,s')$, the target Q-value for $(s,a)$ is $r + \gamma\max_{a'}Q(s',a')$. The network is updated to bring its output closer to this target.
 
 Two architectural details make DQN training stable in practice, and understanding them illuminates a general challenge in RL.
 

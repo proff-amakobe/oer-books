@@ -3,6 +3,8 @@ title: "Visual Tasks Beyond Classification"
 subtitle: "Detection, Segmentation, and the Backbone as Universal Tool"
 ---
 
+<p class="chapter-part">Part II · Vision Systems</p>
+
 ## Opening Narrative
 
 ### The Doctor Who Could Not Point
@@ -143,7 +145,9 @@ At inference time, a detection model produces thousands of candidate boxes --- o
 
 IoU is the universal currency of detection evaluation. Given two boxes A and B:
 
-IoU = Area(A ∩ B) / Area(A ∪ B)
+$$
+\operatorname{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|}
+$$
 
 An IoU of 1.0 means the boxes are identical. An IoU of 0 means they do not overlap at all. During training, an anchor is considered a positive match for a ground-truth box if their IoU exceeds a threshold (commonly 0.5). A detection is considered correct at evaluation time under the same criterion.
 
@@ -299,7 +303,7 @@ As you vary the confidence threshold for what counts as a detection (from low, w
 
 Most detection datasets contain multiple classes. Mean Average Precision (mAP) is simply the average of AP values across all classes. This single number is the primary metric used in detection benchmarks like PASCAL VOC and COCO.
 
-COCO\'s evaluation protocol averages AP across ten IoU thresholds (0.50, 0.55, \..., 0.95), denoted AP@\[0.5:0.95\] or simply AP. This is a more stringent evaluation than VOC\'s AP@0.5, because it rewards models that localize precisely rather than just approximately. A model that detects the right class with a loose bounding box will score well at IoU 0.5 but poorly at IoU 0.9.
+COCO\'s evaluation protocol averages AP across ten IoU thresholds (0.50, 0.55, \..., 0.95), denoted `AP@[0.5:0.95]` or simply AP. This is a more stringent evaluation than VOC\'s AP@0.5, because it rewards models that localize precisely rather than just approximately. A model that detects the right class with a loose bounding box will score well at IoU 0.5 but poorly at IoU 0.9.
 
 COCO also reports AP separately for small, medium, and large objects (AP_S, AP_M, AP_L). This decomposition is diagnostically valuable: a model that scores well overall but poorly on AP_S has difficulty with small objects and likely benefits from FPN improvements or higher-resolution input. A model with poor AP_L may have anchor scale mismatches or insufficient receptive field at deep layers.
 

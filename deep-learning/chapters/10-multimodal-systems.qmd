@@ -3,6 +3,8 @@ title: "When Vision Meets Language"
 subtitle: "Multimodal Systems and the Architecture of Shared Understanding"
 ---
 
+<p class="chapter-part">Part III · Sequence, Language, and Multimodal Learning</p>
+
 ## Opening Narrative
 
 Dr. Yemi Adeyemi is a radiologist at a teaching hospital in Lagos. On a Tuesday morning she reviews a chest CT for a fifty-three-year-old patient. The scan shows a small nodule in the right upper lobe --- subtle, easy to miss, roughly eight millimeters in diameter. By itself, the image is ambiguous. Nodules of this size appear in plenty of healthy lungs. They also appear in early-stage malignancies.
@@ -140,6 +142,16 @@ The difficulty of the task scales with batch size. A small batch of ten examples
 ### The InfoNCE Loss
 
 The loss function that formalizes this training objective is called InfoNCE --- Information Noise-Contrastive Estimation. For each image in the batch, it computes the softmax of that image\'s similarity scores against all texts, and trains the model to maximize the probability assigned to the correct text. For each text, it does the same in the other direction.
+
+For an image embedding $v_i$, matching text embedding $t_i$, similarity function $s(\cdot,\cdot)$, and temperature $\tau$, the image-to-text direction is:
+
+$$
+L_{i\rightarrow t}
+= -\frac{1}{N}\sum_{i=1}^{N}
+\log
+\frac{\exp\!\left(s(v_i,t_i)/\tau\right)}
+{\sum_{j=1}^{N}\exp\!\left(s(v_i,t_j)/\tau\right)}
+$$
 
 The combined loss pulls matched pairs together and pushes every other pair apart, simultaneously, in both directions. The signal is always comparative: not \"this image embedding should look like X\" but \"this image embedding should be closer to its matching text than to any other text in this batch.\"
 

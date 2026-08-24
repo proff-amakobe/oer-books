@@ -3,6 +3,8 @@ title: "The Architecture That Changed Everything"
 subtitle: "Understanding the Transformer"
 ---
 
+<p class="chapter-part">Part III · Sequence, Language, and Multimodal Learning</p>
+
 ## Opening Narrative
 
 Fatima Al-Amin has been a professional interpreter for fourteen years. She specializes in simultaneous interpretation --- the kind you see at international summits and United Nations proceedings, where the interpreter listens through headphones and speaks into a microphone in real time, translating as the speaker speaks, with only a few seconds of lag.
@@ -149,7 +151,11 @@ In a Transformer, every token simultaneously plays all three roles. For a given 
 
 -   A **Value vector**: what information this token contributes when attended to
 
-These three vectors are not the token\'s original embedding. They are separate learned linear projections of that embedding --- the original representation multiplied by three different learned weight matrices (W_Q, W_K, W_V). This means the model can learn to separate the \"what-am-I-searching-for\" function from the \"what-do-I-contain\" function from the \"what-do-I-contribute\" function, even though all three originate from the same token representation. This separation is what makes the mechanism flexible.
+These three vectors are not the token\'s original embedding. They are separate learned linear projections of that embedding --- the original representation multiplied by three different learned weight matrices ($W_Q$, $W_K$, $W_V$). This means the model can learn to separate the \"what-am-I-searching-for\" function from the \"what-do-I-contain\" function from the \"what-do-I-contribute\" function, even though all three originate from the same token representation. This separation is what makes the mechanism flexible.
+
+$$
+Q = XW_Q, \qquad K = XW_K, \qquad V = XW_V
+$$
 
 ### Computing Attention: Step by Step
 
@@ -166,6 +172,11 @@ After scaling, a softmax converts the scores for each query into a probability d
 The final output is a new representation for every token in the sequence, where each representation reflects that token\'s relationships to all other tokens. The word \"it\" in our earlier example will now have a representation that has absorbed information strongly from \"trophy\" (high attention weight) and weakly from \"suitcase\" and other tokens (lower attention weights).
 
 This operation is called **Scaled Dot-Product Attention**, and it is the single most important computation in the Transformer.
+
+$$
+\operatorname{Attention}(Q,K,V)
+= \operatorname{softmax}\!\left(\frac{QK^{\mathsf T}}{\sqrt{d_k}}\right)V
+$$
 
 ### The Remarkable Property: Full Parallelism
 
@@ -227,7 +238,7 @@ The sequence enters the multi-head attention sublayer. Every token computes its 
 
 Here is where we encounter two design choices that are easy to overlook but essential to the architecture\'s depth.
 
-The **residual connection** adds the input of the sublayer directly to the sublayer\'s output. If we call the attention sublayer\'s transformation F, the output is: F(x) + x, not just F(x). The original representation is preserved and combined with what attention learned.
+The **residual connection** adds the input of the sublayer directly to the sublayer\'s output. If we call the attention sublayer\'s transformation $F$, the output is $F(x) + x$, not just $F(x)$. The original representation is preserved and combined with what attention learned.
 
 Why does this matter? Consider what happens during backpropagation in a deep network. Gradients must travel backward through every layer to update the early layers\' parameters. In a deep network without residual connections, each layer becomes a multiplicative barrier --- gradients are transformed at every step, and they can vanish (as we saw in Chapter 7\'s discussion of deep feedforward networks). With residual connections, there is a direct path --- a highway --- through which gradients can flow backward without passing through any transformation. The gradient can travel dozens of layers without attenuation.
 

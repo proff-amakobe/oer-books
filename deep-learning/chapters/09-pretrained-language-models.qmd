@@ -3,6 +3,8 @@ title: "Learning from Everything"
 subtitle: "Pre-trained Language Models and the Power of Transfer"
 ---
 
+<p class="chapter-part">Part III · Sequence, Language, and Multimodal Learning</p>
+
 ## Opening Narrative
 
 Dr. Priya Mehta has spent twenty-two years studying linguistics. She has read deeply across multiple languages --- not as a native speaker of each, but as someone who has spent decades immersed in how language works: the logic of grammar, the way context shapes meaning, the patterns that make an argument feel coherent or a sentence feel off. She knows how relative clauses are structured in half a dozen languages. She understands the pragmatics of implication, the way a question can be a polite form of a command, the way a pause in conversation carries as much information as the words surrounding it.
@@ -123,7 +125,7 @@ Imagine a fill-in-the-blank exercise. You are given the sentence:
 
 To fill in the blank correctly, you need to read in both directions simultaneously. The word before the blank tells you the structure: \"admitted to the.\" The words after tell you the context: \"with severe chest pain.\" Together, they make \"hospital\" the obvious answer. Neither direction alone is sufficient; the correct fill requires integrating both.
 
-This is **Masked Language Modeling**, the pre-training objective at the heart of BERT. A random subset of tokens --- typically around 15% --- is replaced with a special \[MASK\] token. The model is then trained to predict the original tokens at each masked position, using the full surrounding context in both directions. Because the model must look both ways to solve the task, it is forced to build genuinely bidirectional representations of each token.
+This is **Masked Language Modeling**, the pre-training objective at the heart of BERT. A random subset of tokens --- typically around 15% --- is replaced with a special `[MASK]` token. The model is then trained to predict the original tokens at each masked position, using the full surrounding context in both directions. Because the model must look both ways to solve the task, it is forced to build genuinely bidirectional representations of each token.
 
 The thing that makes this beautiful is the breadth of knowledge it requires. Predicting a masked token correctly demands understanding of syntax (what grammatical category fits here?), semantics (what concepts are appropriate in this context?), world knowledge (what entity names are plausible?), and discourse structure (what does the surrounding paragraph tell us about this sentence\'s content?). A model that learns to do this well across billions of sentences has absorbed something substantial about how language works.
 
@@ -153,7 +155,7 @@ The model consists of a stack of Transformer encoder layers. The base variant us
 
 Several details of BERT\'s input format are worth understanding, because they recur throughout the encoder-only family.
 
-Every input begins with a special \[CLS\] token --- a classification token that serves no linguistic purpose in the input but whose final-layer representation is used as an aggregate summary of the entire sequence for tasks like classification. Sentence pairs (used in tasks like entailment, where you need to compare two texts) are separated by a \[SEP\] token. The model learns, during pre-training, that the \[CLS\] representation should carry information useful for whole-sequence classification tasks.
+Every input begins with a special `[CLS]` token --- a classification token that serves no linguistic purpose in the input but whose final-layer representation is used as an aggregate summary of the entire sequence for tasks like classification. Sentence pairs (used in tasks like entailment, where you need to compare two texts) are separated by a `[SEP]` token. The model learns, during pre-training, that the `[CLS]` representation should carry information useful for whole-sequence classification tasks.
 
 This is an elegant design: rather than pooling all token representations or taking the average, BERT provides a single dedicated slot whose learned function is to summarize the input. The downstream task simply reads from that slot.
 
@@ -161,13 +163,13 @@ This is an elegant design: rather than pooling all token representations or taki
 
 The power of BERT is most visible in how little needs to change to adapt it to diverse tasks. Consider four different NLP tasks:
 
-**Sequence classification** (sentiment analysis, topic classification): Add a linear layer on top of the \[CLS\] token representation. Fine-tune the entire model on labeled examples. The \[CLS\] representation, already rich from pre-training, adjusts to reflect task-relevant distinctions.
+**Sequence classification** (sentiment analysis, topic classification): Add a linear layer on top of the `[CLS]` token representation. Fine-tune the entire model on labeled examples. The `[CLS]` representation, already rich from pre-training, adjusts to reflect task-relevant distinctions.
 
 **Token classification** (named entity recognition, part-of-speech tagging): Add a linear layer on top of each token\'s final-layer representation. Fine-tune on labeled sequences. Every token\'s contextual representation provides the input for its own classification.
 
-**Reading comprehension** (answering questions about a provided passage): Provide both the question and passage as input, separated by \[SEP\]. Add two linear layers that predict the start and end positions of the answer span within the passage. The model\'s bidirectional representations make it effective at finding the relevant span.
+**Reading comprehension** (answering questions about a provided passage): Provide both the question and passage as input, separated by `[SEP]`. Add two linear layers that predict the start and end positions of the answer span within the passage. The model\'s bidirectional representations make it effective at finding the relevant span.
 
-**Sentence pair tasks** (textual entailment, semantic similarity): Provide both sentences as input. Use the \[CLS\] representation to drive the output.
+**Sentence pair tasks** (textual entailment, semantic similarity): Provide both sentences as input. Use the `[CLS]` representation to drive the output.
 
 In all four cases, the core architecture is identical. What changes is only the output head --- typically a single linear layer or a small classification network --- and the labeled data used to train it. This is the transfer learning value proposition made concrete: one architecture, one pre-trained checkpoint, four different tasks.
 

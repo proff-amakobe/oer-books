@@ -3,6 +3,8 @@ title: "The Art of Controlled Noise"
 subtitle: "Diffusion Models and Advanced Generative Systems"
 ---
 
+<p class="chapter-part">Part IV · Generative and Adaptive Systems</p>
+
 ## Opening Narrative
 
 Chiara Colombo has spent fifteen years restoring damaged paintings at a museum conservation laboratory in Florence. Her work is not dramatic --- it is painstaking, incremental, and deeply uncertain. A seventeenth-century oil painting arrives with centuries of grime obscuring the original surface, with later over-painting covering damaged areas, with yellowed varnish distorting the original color relationships. She does not restore it in one decisive act. She works in passes.
@@ -119,11 +121,11 @@ Not by computing the exact trajectory of every noise element --- that would requ
 
 ### Adding Noise, Step by Step
 
-The forward process is mathematically simple and contains no learnable parameters. Starting from a clean data point x₀ --- a real image from the training set --- noise is added incrementally over T timesteps. At each step t, a small amount of Gaussian noise is mixed into the current sample, producing x₁, x₂, \..., x_T.
+The forward process is mathematically simple and contains no learnable parameters. Starting from a clean data point $x_0$ --- a real image from the training set --- noise is added incrementally over T timesteps. At each step t, a small amount of Gaussian noise is mixed into the current sample, producing x₁, x₂, \..., x_T.
 
 The amount of noise added at each step is controlled by the noise schedule --- a sequence of values specifying how quickly the signal is destroyed. A common choice is a linear schedule that starts with very small noise and gradually increases to large noise. More recent work has found that cosine schedules, which add noise slowly at first and faster in the middle, produce better training dynamics for images.
 
-Crucially, the forward process can be computed in closed form for any timestep t without simulating all the intermediate steps. You can jump directly from x₀ to x_t by computing a single Gaussian perturbation whose variance depends only on t and the noise schedule. This mathematical shortcut is what makes training efficient: you do not need to simulate the full noising chain to produce a training example at any noise level.
+Crucially, the forward process can be computed in closed form for any timestep t without simulating all the intermediate steps. You can jump directly from $x_0$ to $x_t$ by computing a single Gaussian perturbation whose variance depends only on t and the noise schedule. This mathematical shortcut is what makes training efficient: you do not need to simulate the full noising chain to produce a training example at any noise level.
 
 Visualize what the forward process looks like for an image. At t=0, you have the original photograph --- sharp, detailed, fully coherent. At t=250, the image is noticeably noisy but the content is still recognizable. At t=500, the original content is visible but substantially obscured. At t=750, only the faintest ghost of the original remains. At t=1000 --- or whatever the final timestep is --- you have pure Gaussian noise, indistinguishable from a random draw from a normal distribution.
 
@@ -139,11 +141,25 @@ The noise schedule and T together determine the difficulty of the reverse proble
 
 ### What the Network Learns
 
-The reverse process is the learned counterpart to the forward process. At each timestep t, a neural network receives a noisy image x_t and attempts to estimate what noise was added to produce x_t from x\_{t-1}. If it can do this accurately, then given x_t, it can produce an estimate of x\_{t-1} --- a slightly less noisy version. Apply this operation repeatedly, from t=T down to t=0, and you have a generator: starting from pure noise, produce a coherent image.
+The forward process can be sampled directly at timestep $t$ as:
 
-The training task, concretely, is this: take a clean training image x₀. Sample a random timestep t. Compute x_t by adding the appropriate amount of noise for that timestep. Train the network to predict the noise that was added.
+$$
+x_t = \sqrt{\bar{\alpha}_t}\,x_0
++ \sqrt{1-\bar{\alpha}_t}\,\varepsilon,
+\qquad \varepsilon \sim \mathcal{N}(0,I)
+$$
+
+The reverse process is the learned counterpart to the forward process. At each timestep t, a neural network receives a noisy image $x_t$ and attempts to estimate what noise was added to produce $x_t$ from $x_{t-1}$. If it can do this accurately, then given $x_t$, it can produce an estimate of $x_{t-1}$ --- a slightly less noisy version. Apply this operation repeatedly, from t=T down to t=0, and you have a generator: starting from pure noise, produce a coherent image.
+
+The training task, concretely, is this: take a clean training image $x_0$. Sample a random timestep t. Compute $x_t$ by adding the appropriate amount of noise for that timestep. Train the network to predict the noise that was added.
 
 This is the denoising training objective. The loss function is the mean squared error between the true noise and the network\'s predicted noise. It is, in implementation, a simple regression problem. What makes it profound is what the network must internalize to solve it well.
+
+$$
+L_{\text{simple}}
+= \mathbb{E}_{x_0,\varepsilon,t}
+\left[\left\|\varepsilon-\varepsilon_\theta(x_t,t)\right\|_2^2\right]
+$$
 
 To accurately predict the noise in an image at noise level t, the network must implicitly know what real images look like at that noise level --- what structures, textures, and patterns would be present in a real image with this much noise added. It must, in other words, have internalized the statistics of real images at every noise level. A network that solves this regression problem well has learned a deep model of image structure.
 
@@ -207,7 +223,11 @@ The CFG training procedure is simple. During training, the conditioning signal i
 
 At inference time, CFG exploits this dual capability through interpolation. At each denoising step, the network is run twice: once with the conditioning signal, producing a conditioned prediction of the noise, and once without, producing an unconditioned prediction. The actual update applied at that step is not either prediction alone but a linear extrapolation:
 
-**Update = unconditioned prediction + guidance_scale × (conditioned − unconditioned prediction)**
+$$
+\hat{\varepsilon}_{\text{cfg}}
+= \hat{\varepsilon}_{\text{uncond}}
++ s\left(\hat{\varepsilon}_{\text{cond}}-\hat{\varepsilon}_{\text{uncond}}\right)
+$$
 
 When guidance_scale is 1, the update is exactly the conditioned prediction --- standard conditional generation. When guidance_scale is higher than 1, the update is an extrapolation beyond the conditioned prediction, in the direction that the condition is pulling relative to the unconditioned baseline. The conditioning is amplified beyond what the model would produce naturally.
 

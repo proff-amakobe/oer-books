@@ -3,6 +3,8 @@ title: "The Architecture of Sight"
 subtitle: "How Researchers Redesigned the CNN—and What They Built Instead"
 ---
 
+<p class="chapter-part">Part II · Vision Systems</p>
+
 ## Opening Narrative
 
 ### The Day Deeper Got Worse
@@ -19,7 +21,7 @@ He\'s team called this the **degradation problem**, and it was genuinely puzzlin
 
 The insight that resolved this came from a deceptively simple question: what if, instead of asking each layer to learn the full transformation from its input to its output, we asked it to learn only the *correction* --- the difference between where the network currently is and where it needs to be?
 
-The fix was a small architectural change. Before the output of a block of layers is computed, add a shortcut that bypasses those layers entirely and adds the original input directly to their output. Now each block does not have to learn an arbitrary mapping H(x). It only has to learn the residual F(x) = H(x) − x --- the adjustment on top of what was already there. If the optimal adjustment is zero, the block can simply learn to output zeros, and the identity shortcut carries the input forward unchanged. Gradient descent has no trouble finding this solution.
+The fix was a small architectural change. Before the output of a block of layers is computed, add a shortcut that bypasses those layers entirely and adds the original input directly to their output. Now each block does not have to learn an arbitrary mapping $H(x)$. It only has to learn the residual $F(x) = H(x) - x$ --- the adjustment on top of what was already there. If the optimal adjustment is zero, the block can simply learn to output zeros, and the identity shortcut carries the input forward unchanged. Gradient descent has no trouble finding this solution.
 
 The result --- published as \"Deep Residual Learning for Image Recognition\" --- won the 2015 ImageNet competition, the COCO detection competition, the COCO segmentation competition, and the ImageNet localization competition simultaneously. The winning network had 152 layers. Two years earlier, that depth would have been inconceivable.
 
@@ -33,7 +35,7 @@ After completing this chapter, you will be able to:
 
 1.  **Explain the degradation problem** in deep convolutional networks --- what it is, why it happens, and why it is distinct from the vanishing gradient problem explored in Chapter 3.
 
-2.  **Describe residual connections** and explain, both intuitively and mathematically, why learning the residual F(x) = H(x) − x stabilizes training in very deep networks.
+2.  **Describe residual connections** and explain, both intuitively and mathematically, why learning the residual $F(x) = H(x) - x$ stabilizes training in very deep networks.
 
 3.  **Explain the design logic of Inception modules**, including the role of parallel multi-scale processing and the dimensionality-reducing 1×1 convolution.
 
@@ -56,7 +58,7 @@ After completing this chapter, you will be able to:
 
   **Residual Connection (Skip Connection)**   A shortcut pathway in a neural network that adds a layer\'s input directly to its output, bypassing the layer\'s learned transformation. This allows the network to learn corrections on top of what already exists, rather than learning full transformations from scratch.
 
-  **Residual Block**                          A standard building block of ResNets. Contains two or more convolutional layers plus a skip connection from input to output. The output is F(x) + x, where F(x) is what the layers learned and x is the original input.
+  **Residual Block**                          A standard building block of ResNets. Contains two or more convolutional layers plus a skip connection from input to output. The output is $F(x)$ + x, where $F(x)$ is what the layers learned and x is the original input.
 
   **Bottleneck Block**                        A three-layer variant of the residual block (1×1 → 3×3 → 1×1 convolutions) used in deeper ResNets to reduce computational cost while preserving representational capacity. The 1×1 layers compress and then restore the channel dimension around the expensive 3×3 convolution.
 
@@ -137,19 +139,21 @@ From this point forward, we will treat each architecture not as a catalogue entr
 
 Recall the Microsoft Research experiment in our opening narrative. The 56-layer plain network --- with nothing but stacked convolutional layers --- performed worse than the 20-layer network on both training and test data. The deeper network was not overfitting; it was simply failing to optimize. The question was: why can\'t a deeper network at least match a shallower one? After all, the deeper network has strictly more capacity. A worst-case solution would be to learn an identity function in all the extra layers --- pass the input forward unchanged --- and match the shallow network\'s performance exactly. But the optimization could not find that solution.
 
-He et al.\'s insight was to make that worst-case solution easy to find by *construction*. Instead of asking the network to learn H(x) directly, add a skip connection and ask it to learn F(x) = H(x) − x. If the optimal H(x) is close to the identity, then F(x) is close to zero, and learning approximately-zero outputs is far easier for gradient descent than learning an identity transformation through multiple stacked linear-plus-nonlinear operations.
+He et al.\'s insight was to make that worst-case solution easy to find by *construction*. Instead of asking the network to learn $H(x)$ directly, add a skip connection and ask it to learn $F(x) = H(x) - x$. If the optimal $H(x)$ is close to the identity, then $F(x)$ is close to zero, and learning approximately-zero outputs is far easier for gradient descent than learning an identity transformation through multiple stacked linear-plus-nonlinear operations.
 
 This is not just a mathematical trick. It is a change in what each layer is *responsible for*. A standard layer says: \"Given my input, produce the right output.\" A residual layer says: \"Given what\'s already been computed, what correction should I add?\" The second framing is almost always the right framing when you are building on top of a good prior computation.
 
 ### How Residual Blocks Work
 
-A residual block takes an input x, passes it through two (or three) convolutional layers to produce F(x), and then adds x back to F(x) before the final activation. The output is:
+A residual block takes an input x, passes it through two (or three) convolutional layers to produce $F(x)$, and then adds x back to $F(x)$ before the final activation. The output is:
 
-**Output = ReLU(F(x) + x)**
+$$
+y = \operatorname{ReLU}\!\left(F(x) + x\right)
+$$
 
 The critical feature is the addition operation --- it creates two paths through the network during both forward computation and backward gradient flow. Gradients do not have to pass through the convolutional layers to travel backward; they can flow through the skip connection directly. This guarantees that no matter how many layers a ResNet has, there is always a gradient path that doesn\'t diminish through learned transformations.
 
-*Analogy:* Think of writing an essay. A standard convolutional layer is like being asked to write a new essay entirely from scratch using your input as reference material. A residual layer is like being given a first draft (the input x) and asked only to mark what should change (F(x)). The second task is almost always easier --- the corrections are smaller in magnitude, smoother in the optimization landscape, and more stable to learn.
+*Analogy:* Think of writing an essay. A standard convolutional layer is like being asked to write a new essay entirely from scratch using your input as reference material. A residual layer is like being given a first draft (the input x) and asked only to mark what should change ($F(x)$). The second task is almost always easier --- the corrections are smaller in magnitude, smoother in the optimization landscape, and more stable to learn.
 
 ### The Bottleneck: Efficiency at Depth
 
@@ -217,11 +221,11 @@ Tan and Le at Google Brain asked: is there a principled way to scale all three d
 
 EfficientNet\'s answer begins with a small \"baseline\" network (EfficientNet-B0) discovered through neural architecture search --- a method that uses optimization to automatically find an effective architecture for a given compute budget. This baseline is then scaled up using a **compound coefficient** φ that jointly controls all three dimensions:
 
--   **Depth** scales as α\^φ
+-   **Depth** scales as $\alpha^\phi$
 
--   **Width** scales as β\^φ
+-   **Width** scales as $\beta^\phi$
 
--   **Resolution** scales as γ\^φ
+-   **Resolution** scales as $\gamma^\phi$
 
 The constants α, β, and γ are determined by a constrained grid search on the baseline model such that α × β² × γ² ≈ 2 (ensuring that each increment of φ roughly doubles the compute). The result is a family of eight models (EfficientNet-B0 through EfficientNet-B7) that span a wide range of size and accuracy --- each one the optimal allocation of compute at its scale.
 
@@ -243,11 +247,11 @@ But consider what convolution *cannot* easily do. Relating a feature in the top-
 
 ### The ViT Pipeline
 
-The Vision Transformer begins by cutting the image into a grid of fixed-size patches --- typically 16×16 pixels. Each patch is flattened into a vector of pixel values and linearly projected into an embedding space. A special \[CLS\] (classification) token is prepended to the sequence. These patch embeddings, plus a learned positional encoding that tells the model where each patch sits in the original image, are then fed into a standard Transformer encoder.
+The Vision Transformer begins by cutting the image into a grid of fixed-size patches --- typically 16×16 pixels. Each patch is flattened into a vector of pixel values and linearly projected into an embedding space. A special `[CLS]` (classification) token is prepended to the sequence. These patch embeddings, plus a learned positional encoding that tells the model where each patch sits in the original image, are then fed into a standard Transformer encoder.
 
 The Transformer encoder applies multi-head self-attention across all patch tokens simultaneously. This means that from the very first layer, every patch has direct access to information from every other patch, regardless of how far apart they are in the image. There is no gradual, layer-by-layer accumulation of receptive field --- the receptive field is global immediately.
 
-At the end of the encoder, the \[CLS\] token\'s representation is passed through a linear classification head to produce the final prediction.
+At the end of the encoder, the `[CLS]` token\'s representation is passed through a linear classification head to produce the final prediction.
 
 *Analogy:* A CNN reads a comic strip one panel at a time, building understanding of the story progressively as it moves from panel to panel. A Vision Transformer reads all the panels simultaneously and immediately starts reasoning about how each one relates to all the others. For simple, locally-structured images, the panel-by-panel approach works just fine. But for images where the meaning depends on relationships between distant regions --- a radiological scan where the significance of a shadow in one lung depends on what is happening in the other, or a scene where the relevance of an object depends on what it is positioned near --- the global view is a genuine advantage.
 
@@ -497,7 +501,7 @@ The architectures in this chapter will reappear throughout the course --- as bac
 
 7.  **Consider a scenario:** a hospital in a low-resource setting needs to deploy a chest X-ray triage system. Their radiologist workload is 10× their capacity, and false negatives (missed diagnoses) are more costly than false positives. Which architecture would you recommend --- and why? How would your recommendation change if they had intermittent internet access and hardware that is five years old?
 
-8.  **The residual connection\'s insight --- learning a correction F(x) rather than a full transformation H(x) --- is a principle that shows up in many places beyond CNNs.** Can you think of analogies in human learning, scientific method, or engineering where incremental correction outperforms starting from scratch? What does this suggest about why the residual connection worked so well?
+8.  **The residual connection\'s insight --- learning a correction $F(x)$ rather than a full transformation $H(x)$ --- is a principle that shows up in many places beyond CNNs.** Can you think of analogies in human learning, scientific method, or engineering where incremental correction outperforms starting from scratch? What does this suggest about why the residual connection worked so well?
 
 ## Further Reading
 

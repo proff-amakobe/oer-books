@@ -3,6 +3,8 @@ title: "Learning to Create"
 subtitle: "Variational Autoencoders and Generative Adversarial Networks"
 ---
 
+<p class="chapter-part">Part IV · Generative and Adaptive Systems</p>
+
 ## Opening Narrative
 
 Elif Şahin has been writing fiction for twenty years. She has read thousands of novels --- literary fiction, genre fiction, translated work from a dozen languages, canonical texts and obscure debuts. She has absorbed, through that reading, an understanding of how stories are structured: how tension builds and releases, how characters are introduced and complicated, how a first sentence can establish a world\'s entire mood. She has internalized the patterns so thoroughly that she no longer thinks about them consciously. They have become, in a sense, part of how she perceives narrative.
@@ -159,7 +161,10 @@ There is an obstacle to training this system with standard backpropagation. The 
 
 The reparameterization trick resolves this with an elegant reformulation. Instead of sampling a latent vector z directly from the encoder\'s output distribution --- which is a random operation that blocks gradients --- we express z as a deterministic function of the encoder\'s outputs plus independently sampled noise:
 
-z = μ + σ · ε, where ε \~ N(0, 1)
+$$
+z = \mu + \sigma \odot \varepsilon,
+\qquad \varepsilon \sim \mathcal{N}(0, I)
+$$
 
 The source of randomness --- ε --- is now independent of the encoder\'s parameters. Gradients flow from the decoder through the deterministic function μ + σ · ε, back to μ and σ (the encoder\'s outputs), and back through the encoder. The noise is outside the computation graph; everything else is differentiable.
 
@@ -176,6 +181,12 @@ The ideal objective would be to maximize the probability that the decoder assign
 The problem is that this ideal objective requires integrating over all possible latent codes that could have produced the observed data --- a computation that is intractable for continuous, high-dimensional latent spaces. The VAE instead maximizes a lower bound on this log-likelihood, called the Evidence Lower Bound or ELBO.
 
 The ELBO has two terms, and understanding both --- and the tension between them --- is essential to understanding how VAEs work.
+
+$$
+\mathcal{L}_{\mathrm{ELBO}}(x)
+= \mathbb{E}_{q_\phi(z\mid x)}\!\left[\log p_\theta(x\mid z)\right]
+- D_{\mathrm{KL}}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right)
+$$
 
 **The reconstruction term** measures how well the decoder reconstructs the input from the sampled latent code. A higher reconstruction quality means the latent code is carrying useful information about the input, and the decoder is using it well. Maximizing this term pushes the encoder to produce informative latent representations and the decoder to use them faithfully.
 
