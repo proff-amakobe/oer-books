@@ -1,0 +1,460 @@
+---
+title: "Learning to Create"
+subtitle: "Variational Autoencoders and Generative Adversarial Networks"
+---
+
+## Opening Narrative
+
+Elif Şahin has been writing fiction for twenty years. She has read thousands of novels --- literary fiction, genre fiction, translated work from a dozen languages, canonical texts and obscure debuts. She has absorbed, through that reading, an understanding of how stories are structured: how tension builds and releases, how characters are introduced and complicated, how a first sentence can establish a world\'s entire mood. She has internalized the patterns so thoroughly that she no longer thinks about them consciously. They have become, in a sense, part of how she perceives narrative.
+
+When Elif sits down to write a new story, she is not copying anything she has read. She is not selecting from a database of remembered sentences. She is doing something harder to describe: drawing on a deep understanding of what stories can be, and producing something that did not exist before --- something consistent with the patterns she has internalized, but genuinely new.
+
+This is what it means to generate rather than recognize. And it is a fundamentally different capability from anything we have built in this course so far.
+
+Every model examined in the preceding ten chapters has been, in an important sense, a model of recognition. Convolutional networks recognize objects. Transformers recognize linguistic patterns and grammatical structure. CLIP recognizes the semantic relationship between an image and a description. Even the language models of Chapter 9 --- which produce text --- were trained on recognition objectives: predict the masked token, predict the next word. Their generation was a downstream consequence of learning to recognize what comes next.
+
+To build a model that generates the way Elif writes --- that has internalized the distribution of its training data deeply enough to produce new instances that are statistically consistent with it but did not exist before --- requires a different kind of architecture and a different kind of training objective. It requires, fundamentally, that the model understand not just the labels of data or the boundaries between categories, but the underlying structure of the data itself. What makes a face look like a face? What makes an image look photorealistic? What patterns make a sentence grammatical, coherent, evocative?
+
+Two architectures, developed within a year of each other in 2013 and 2014, gave the field its first convincing answers to these questions. They answered differently, starting from different assumptions and arriving at different tradeoffs. And together, they define the conceptual landscape that all modern generative systems --- including the diffusion models of Chapter 12 --- are built on.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain the conceptual distinction between discriminative and generative models, and what it means for a model to understand data well enough to produce new instances of it
+
+-   Describe the VAE architecture --- encoder, latent space, decoder --- and explain what each component does
+
+-   Explain the reparameterization trick and why it is necessary for training VAEs with gradient descent
+
+-   Describe the GAN training dynamic --- generator, discriminator, minimax objective --- and explain why competitive training drives the generator toward realism
+
+### Analyze and Evaluate
+
+-   Analyze the ELBO training objective, explaining what the reconstruction term and the KL divergence term each contribute and how they pull in opposite directions
+
+-   Evaluate the characteristic failure modes of GANs --- mode collapse, training instability, vanishing gradients --- explaining what causes each and how specific GAN variants address them
+
+-   Compare VAEs and GANs as generative paradigms, mapping each to its characteristic strengths, limitations, and most suitable application contexts
+
+-   Assess the ethical implications of photorealistic synthetic media --- deepfakes, non-consensual use of training data, the asymmetry between generation and detection
+
+### Apply and Create
+
+-   Connect the latent space concept to the broader theme of representation learning running through the course, recognizing VAEs as a form of self-supervised structure discovery
+
+-   Select and justify a generative architecture for MIPDS, specifying the conditioning mechanism and documenting the design rationale
+
+## Key Terms and Concepts
+
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                                   **Definition**
+  ------------------------------------------ -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Generative Model**                       A model trained to understand the underlying distribution of its training data well enough to produce new samples from that distribution --- learning what data looks like in order to create it, not merely classify it.
+
+  **Latent Space**                           A lower-dimensional vector space in which the essential structure of data is encoded. A point in latent space represents a compressed specification of a data example; decoding that point produces the full example.
+
+  **Latent Variable**                        A hidden variable not directly observed in the data --- a factor of variation, like \"degree of smile\" or \"camera angle,\" that combines with other factors to produce an observed example. Generative models learn to represent and manipulate these factors.
+
+  **Encoder**                                In a VAE, the neural network that maps an observed input to a distribution in latent space. It compresses the input into a structured representation characterized by a mean and variance.
+
+  **Decoder**                                In a VAE, the neural network that maps a latent vector back into the data space. It reconstructs an output from a latent code, or generates new outputs from sampled codes.
+
+  **Variational Autoencoder (VAE)**          A generative model that learns to encode inputs as distributions in latent space and decode samples from those distributions. Training optimizes the ELBO --- balancing reconstruction quality against latent space regularity.
+
+  **Evidence Lower Bound (ELBO)**            The VAE\'s training objective: a lower bound on the log-likelihood of the data. Composed of a reconstruction term (how well does the decoded output match the input?) and a KL divergence term (how close is the learned latent distribution to a standard Gaussian?).
+
+  **KL Divergence**                          Kullback-Leibler divergence --- a measure of how different one probability distribution is from a reference distribution. In VAEs, it penalizes the encoder for mapping inputs to latent distributions that deviate far from a standard Gaussian, enforcing latent space organization.
+
+  **Reparameterization Trick**               A technique that rewrites sampling from the encoder\'s output distribution as a deterministic function of the encoder\'s outputs plus independently sampled noise. Allows gradients to flow through the sampling operation during backpropagation.
+
+  **Posterior Collapse**                     A VAE failure mode in which the encoder learns to ignore the input and maps all inputs to the prior distribution. The KL term goes to zero; the decoder learns to generate plausible outputs from prior samples alone, but the latent representation carries no input-specific information.
+
+  **Generative Adversarial Network (GAN)**   A generative framework in which a generator and a discriminator are trained simultaneously in a competitive game. The generator tries to produce outputs indistinguishable from real data; the discriminator tries to identify which inputs are generated. Each improves specifically because of the other.
+
+  **Generator**                              The GAN network that maps samples of random noise to synthetic data. It learns to produce outputs that the discriminator cannot distinguish from real examples.
+
+  **Discriminator**                          The GAN network that receives data samples --- real or generated --- and outputs a score indicating how likely the input is real. It is trained to maximize its accuracy; the generator is trained to minimize it.
+
+  **Minimax Objective**                      The GAN training objective expressed as a two-player game: the discriminator maximizes the probability of correctly classifying real and generated inputs; the generator minimizes the same probability. At Nash equilibrium, the generator\'s distribution matches the real data distribution.
+
+  **Mode Collapse**                          A GAN failure mode in which the generator learns to produce a narrow subset of possible outputs --- achieving high discriminator scores on a limited set of examples --- rather than covering the full diversity of the real distribution.
+
+  **Wasserstein GAN (WGAN)**                 A GAN variant that replaces the discriminator with a critic that computes a different distance measure --- the Wasserstein distance --- between real and generated distributions. Produces more informative gradients and more stable training, especially when distributions overlap poorly.
+
+  **Conditional GAN (cGAN)**                 A GAN variant in which both generator and discriminator receive additional conditioning information --- class labels, text descriptions, or another image --- allowing the generation process to be steered toward specific outputs.
+
+  **StyleGAN**                               A GAN architecture that separates coarse structure from fine detail through a style-based generator, enabling fine-grained independent control of different aspects of the generated output.
+
+  **Fréchet Inception Distance (FID)**       A metric for evaluating generative models that compares the statistics of generated images to real images in a feature space extracted by a pretrained classifier. Lower FID indicates more realistic and diverse generation.
+
+  **Disentanglement**                        The property of a latent space in which different dimensions independently control different interpretable factors of variation, without entangling them. A disentangled space allows targeted attribute manipulation.
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## The Generative Turn --- What It Means to Create
+
+### From Recognition to Generation
+
+For most of this course, the question has been some version of: *what is this?* Give the model an image; it produces a label. Give the model a sentence; it produces a representation. Give the model two inputs; it tells you whether they match. The architecture processes what already exists.
+
+A generative model asks a different question: *what could exist?*
+
+The shift sounds simple. It is not. Recognition requires learning to map from observations to categories or representations. Generation requires learning the underlying structure of the observations themselves --- the patterns, regularities, and distributions that make data look the way it does. You cannot generate a convincing face without understanding, at some level, what makes a face look like a face. You cannot generate a coherent sentence without encoding, implicitly, the constraints that make sentences grammatical and meaningful.
+
+Consider the difference between two skills. The first: given a piece of music, identify whether it was composed in the Baroque or Romantic period. The second: compose a new piece of music that could plausibly have been written in the Romantic period. The first requires learning discriminative features --- what distinguishes one distribution from another. The second requires internalizing the generative process --- learning how Romantic-era music is constructed deeply enough to produce new instances of it.
+
+Discriminative models are extraordinarily powerful. They have transformed computer vision, language processing, and many other fields. But they cannot generate. They are, by design, consumers of data, not producers.
+
+Generative models are something different. They must learn the data distribution itself.
+
+### What Does It Mean to Learn a Distribution?
+
+Probability theory gives us precise language for what generative models are trying to do. Real data --- photographs, sentences, molecules, audio waveforms --- was produced by some process. That process has a distribution: some images are far more probable than others (a photograph of a street scene is more probable than a photograph of pure noise), and a model that understands this distribution can tell, for any candidate image, roughly how probable it is.
+
+A generative model learns to approximate this distribution. Once learned, it can do two things: assign a probability to any given data point (is this image plausible?), and sample new data points from the distribution (produce a new plausible image).
+
+The challenge is that real data distributions are extraordinarily complex. The distribution of natural images is defined over a space with millions of dimensions (one per pixel), and virtually all points in that space correspond to images that look like noise. The slice of that space containing photographs of recognizable scenes is a thin, convoluted manifold --- a low-dimensional surface threading through high-dimensional space. Learning to sample from that surface, without ever seeing it explicitly, is the generative modeling problem.
+
+Two architectures, developed within a year of each other in the early 2010s, offered the first tractable answers to this problem at scale. They approached it from opposite directions and arrived at complementary solutions.
+
+### The Latent Space --- A Shared Concept
+
+Before examining either architecture, it is worth establishing the concept at the heart of both: the latent space.
+
+A latent space is a lower-dimensional representation space in which the essential structure of data is encoded. The premise is that high-dimensional data --- images, audio, text --- contains far less independent variation than its raw dimensionality suggests. A photograph of a human face has millions of pixels, but most of the variation in human faces can be described by far fewer underlying factors: age, expression, pose, lighting, skin tone, facial structure. If you could identify these factors and represent each face as a combination of them, you would have a compact, structured, manipulable representation.
+
+The genome-to-organism analogy is illuminating here. A genome is a compressed specification --- a few billion base pairs encoding instructions for a complex biological system. The organism that develops from that genome is vastly more complex than the specification itself. Small changes to the genome produce small, coherent changes to the organism. The genome is, in a sense, the organism\'s latent code.
+
+A latent space does something analogous for data. Each data point is encoded as a compact latent vector. The decoder maps that vector back to the full data space. Small changes to the latent vector should produce small, semantically coherent changes to the output --- slide the \"age\" dimension and the face gradually ages, change the \"expression\" dimension and the smile appears or fades. This property --- smoothness of the latent space --- is not automatic. It must be enforced by the training objective. The VAE enforces it explicitly. The GAN encourages something like it implicitly.
+
+With this foundation, we can examine each architecture as a different strategy for learning a structured latent space and using it to generate new data.
+
+## Variational Autoencoders
+
+### The Core Idea
+
+The Variational Autoencoder, introduced by Kingma and Welling in 2013, approaches generation as a problem of structured compression. Its fundamental question: if you want to generate new data by sampling from a latent space, what properties must that latent space have, and how do you train a network to produce them?
+
+The ordinary autoencoder offers a starting point. An autoencoder consists of two networks trained together: an encoder that compresses an input to a lower-dimensional representation, and a decoder that reconstructs the input from that representation. Trained to minimize reconstruction error, an autoencoder learns to preserve the information most critical for reconstruction. The latent space it produces is compact.
+
+But an ordinary autoencoder\'s latent space has a critical limitation for generation: it is not organized in any principled way. The encoder maps each training example to a specific point in latent space, but there is no guarantee about what lies between those points. A face image encodes to one location; another face encodes nearby; but the point halfway between them might decode to something that looks like noise --- because no training example ever lived there, and the decoder was never trained to produce anything meaningful for that region.
+
+For generation, you need to sample from the latent space. For sampling to produce useful results, every region of the latent space must decode to something plausible. The latent space must be smooth, organized, and fully populated with meaning. A VAE is precisely the mechanism that enforces this.
+
+### Architecture: Encoder, Latent Distribution, Decoder
+
+The VAE modifies the autoencoder in one critical way: the encoder does not map an input to a single point in latent space. It maps an input to a *distribution* --- specifically, to the mean and variance of a Gaussian distribution over latent space.
+
+When the model needs a latent code to pass to the decoder, it samples from this distribution rather than using a fixed point. The result is that each input is represented not as a location but as a cloud --- a region of latent space from which the model draws its encoding.
+
+This probabilistic encoding has an immediate consequence for the latent space\'s geometry. Because the encoder represents each input as a distribution rather than a point, nearby inputs in data space will produce overlapping distributions in latent space. The clouds of neighboring inputs interpenetrate. The regions between training examples are not empty --- they are filled with the tails of the surrounding distributions. When the decoder is trained to produce sensible outputs for all of these samples, it is forced to produce sensible outputs across the full populated region of latent space, not just at the specific points where training examples live.
+
+The effect is exactly what we want: a smooth, fully populated latent space where any sample produces a coherent output.
+
+### The Reparameterization Trick
+
+There is an obstacle to training this system with standard backpropagation. The training loop requires gradients to flow from the decoder\'s reconstruction loss all the way back through the sampling operation to the encoder. But sampling is not a differentiable operation --- you cannot take the gradient of \"draw a random number.\" The gradient of randomness is undefined.
+
+The reparameterization trick resolves this with an elegant reformulation. Instead of sampling a latent vector z directly from the encoder\'s output distribution --- which is a random operation that blocks gradients --- we express z as a deterministic function of the encoder\'s outputs plus independently sampled noise:
+
+z = μ + σ · ε, where ε \~ N(0, 1)
+
+The source of randomness --- ε --- is now independent of the encoder\'s parameters. Gradients flow from the decoder through the deterministic function μ + σ · ε, back to μ and σ (the encoder\'s outputs), and back through the encoder. The noise is outside the computation graph; everything else is differentiable.
+
+The physical analogy is clarifying. Imagine measuring a person\'s height as \"their average height plus some random variation.\" The randomness is not in the person\'s average height --- that is a deterministic quantity you can differentiate with respect to. The randomness is in the variation term, which is independent. By separating the signal (μ, σ) from the noise (ε), you make the signal differentiable while preserving the stochasticity that gives the latent space its probabilistic character.
+
+This trick is the technical foundation that makes VAE training possible. Without it, the encoder would be on the wrong side of a non-differentiable operation, and no gradient could reach it.
+
+### The ELBO: Two Forces in Tension
+
+With the architecture and training mechanism established, we can examine the training objective --- the loss function that shapes what the VAE learns.
+
+The ideal objective would be to maximize the probability that the decoder assigns to the training data: show the model a face, and after training, the probability that the decoder produces that face (or something like it) should be high. This is maximum likelihood estimation, the standard training objective for generative models.
+
+The problem is that this ideal objective requires integrating over all possible latent codes that could have produced the observed data --- a computation that is intractable for continuous, high-dimensional latent spaces. The VAE instead maximizes a lower bound on this log-likelihood, called the Evidence Lower Bound or ELBO.
+
+The ELBO has two terms, and understanding both --- and the tension between them --- is essential to understanding how VAEs work.
+
+**The reconstruction term** measures how well the decoder reconstructs the input from the sampled latent code. A higher reconstruction quality means the latent code is carrying useful information about the input, and the decoder is using it well. Maximizing this term pushes the encoder to produce informative latent representations and the decoder to use them faithfully.
+
+**The KL divergence term** measures how different the encoder\'s output distribution is from a standard Gaussian --- a normal distribution with mean zero and variance one. Minimizing this term pushes the encoder to map inputs to latent distributions that stay close to the standard Gaussian.
+
+Why enforce this? Because the standard Gaussian is our sampling distribution. When we generate new data --- not reconstructing an existing input, but creating something new --- we sample a random latent code from a standard Gaussian and pass it to the decoder. If the encoder has pushed the training data\'s latent distributions far from the Gaussian, then our random samples will land in regions the decoder was never trained on, producing incoherent outputs. By keeping the latent distributions close to the Gaussian through the KL term, we ensure that the decoder works well across the entire sampling distribution.
+
+The two terms pull in opposite directions. The reconstruction term wants the encoder to concentrate each input\'s distribution at a specific, informative point in latent space --- to be as precise as possible about where each input lives. The KL term wants the encoder to spread distributions out and pull them toward the center --- to be as regular and diffuse as possible. The optimum is a productive tension: latent distributions that are informative enough to support good reconstruction but regular enough to produce coherent samples.
+
+This tension is not a design flaw. It is the mechanism that produces the organized latent space we want. The analogy of a spring is useful: reconstruction loss stretches the spring toward expressiveness; KL divergence pulls it back toward regularity. The spring\'s stable length --- where the two forces balance --- is the structured latent space in which generation works.
+
+### What VAEs Produce --- And Their Limitations
+
+A well-trained VAE has a latent space with two important properties. First, it is smooth: nearby points decode to visually similar outputs, and interpolating between two points in latent space produces a coherent visual progression between the corresponding images. Second, it is fully populated: random samples from the prior distribution produce plausible outputs, because the KL term has ensured that the prior and the encoder\'s output distributions are well-aligned.
+
+These properties make VAEs excellent for tasks requiring navigable latent spaces: image interpolation, attribute manipulation (adjusting specific visual properties by moving along interpretable dimensions in latent space), data augmentation, and anomaly detection.
+
+VAEs have a characteristic limitation: the outputs they generate tend to be blurry relative to the real data distribution. This blurriness is a consequence of the reconstruction loss used in most implementations --- typically mean squared error over pixels. MSE is minimized not by producing the single most plausible reconstruction, but by averaging over all plausible reconstructions, which produces a blurry, desaturated mean. The VAE has learned what is plausible but not how to commit to a specific plausible output.
+
+There is also a failure mode called posterior collapse. In some training conditions --- particularly when the decoder is sufficiently powerful --- the decoder learns to generate plausible outputs from the prior distribution alone, without using the latent code at all. The encoder responds by collapsing to the prior (minimizing the KL term to zero), and the latent space becomes uninformative. The model generates, but it has lost the ability to reconstruct specific inputs. Addressing posterior collapse requires architectural care --- weaker decoders, KL annealing schedules, or hybrid loss designs.
+
+## Generative Adversarial Networks
+
+### The Adversarial Insight
+
+In 2014, Ian Goodfellow and colleagues proposed a completely different answer to the generative modeling problem. Rather than training a model to compress and reconstruct data through a probabilistic objective, why not define quality through competition?
+
+The Generative Adversarial Network introduces two networks that are trained simultaneously against each other. The generator takes random noise as input and produces synthetic data. The discriminator takes data samples --- some real, some generated --- and tries to determine which is which. The generator improves by getting better at fooling the discriminator; the discriminator improves by getting better at catching the generator. Each network\'s improvement is driven entirely by the other\'s competence. Neither can plateau as long as the other keeps improving.
+
+The analogy to a counterfeiter and a detective is nearly perfect, and it is worth dwelling on. A counterfeiter produces fake currency. A detective examines currency and identifies fakes. The counterfeiter gets better specifically because the detective gets better --- they need to fool a more discerning examiner, so they refine their technique. The detective gets better because the counterfeiter gets better --- they need to catch more convincing fakes, so they develop more sophisticated analysis. Neither would improve in isolation. The competition is the mechanism of learning.
+
+At the theoretical endpoint of this game --- the Nash equilibrium --- the generator produces data statistically indistinguishable from the real distribution, and the discriminator cannot do better than random guessing for any sample. In practice, perfect equilibrium is rarely reached. But the competitive pressure produces generative quality that, at its best, exceeds what reconstruction-based objectives can achieve.
+
+### Architecture and Training
+
+The generator is a neural network --- typically a deep convolutional network for image generation --- that maps a random noise vector z sampled from a simple prior distribution (typically a standard Gaussian) to a synthetic output. Nothing constrains the shape of the generated output except the training signal from the discriminator. The generator has no direct access to real data; it only learns from the discriminator\'s feedback.
+
+The discriminator is a separate neural network --- typically a convolutional classifier for image tasks --- that takes a data sample and outputs a single number: the probability that the input is real rather than generated. It is trained on a binary classification task with two types of input: real examples from the training dataset and fake examples produced by the current generator.
+
+Training alternates between the two networks. In one step, the discriminator is updated: it receives real examples labeled real and generated examples labeled fake, and its weights are adjusted to improve classification accuracy. In the next step, the generator is updated: it produces new examples, passes them through the current discriminator, and adjusts its weights to increase the probability that the discriminator labels them as real. This alternating update continues throughout training.
+
+The formal objective is the minimax game. The discriminator maximizes its ability to distinguish real from fake. The generator minimizes the discriminator\'s ability to do so. Mathematically, this is expressed as a min-max optimization where the discriminator maximizes the log probability of correctly labeling real data and the log probability of correctly labeling generated data, while the generator minimizes the same quantity. At equilibrium, the generator\'s distribution matches the real data distribution exactly.
+
+### The Training Dynamics --- And Why They Break
+
+The adversarial training dynamic is more unstable than it appears on paper. Several failure modes are endemic to GAN training, and understanding them is as important as understanding the architecture itself.
+
+**Mode collapse** is the most common and most discussed failure. The generator discovers that a small set of outputs --- perhaps a few dozen face archetypes out of the full possible distribution --- reliably fool the current discriminator. It concentrates all of its output probability on these modes, abandoning the rest of the real distribution. The discriminator cannot easily punish this: once the generator produces only realistic-looking outputs, the discriminator cannot distinguish \"realistic but not diverse\" from \"realistic and diverse.\" The generator has found a local optimum that satisfies the training objective without capturing the distribution.
+
+Mode collapse is the GAN\'s equivalent of a musician who, asked to improvise freely, plays the same four-bar phrase repeatedly because it always gets applause. Technically correct, zero creative range.
+
+**Vanishing gradients** emerge when the discriminator becomes too powerful too quickly. If the discriminator can distinguish real from generated with near-perfect accuracy early in training, the gradient it provides to the generator is essentially zero --- the discriminator is so confident in its rejection that the loss surface becomes flat, and the generator receives no meaningful update signal. Training stalls.
+
+**Training instability** --- oscillations, divergence, sensitivity to hyperparameters --- reflects the fundamental difficulty of jointly optimizing two networks with opposing objectives. A learning rate that works for the discriminator may be too large for the generator, causing the discriminator to permanently outpace it. Small changes in architecture, initialization, or learning rate schedule can produce dramatically different results.
+
+These challenges are not theoretical. GAN training in practice requires careful monitoring, frequent adjustment, and a tolerance for runs that simply fail to converge.
+
+### GAN Variants --- Solutions to Named Problems
+
+Much of GAN research since 2014 has been directed at these training pathologies. Each major variant can be understood as addressing a specific named failure mode.
+
+**DCGAN** (Deep Convolutional GAN, Radford et al., 2015) established a set of architectural guidelines --- batch normalization, specific convolutional strides, removal of fully connected layers --- that dramatically stabilized training. It was less a theoretical advance than a careful empirical characterization of what works. Many subsequent GAN architectures built directly on its guidelines.
+
+**Wasserstein GAN** (Arjovsky et al., 2017) addressed the vanishing gradient problem at its source. The original GAN uses a discriminator that outputs a probability --- saturating near zero or one when distributions are well-separated, producing flat gradients in both cases. WGAN replaces the discriminator with a critic that estimates the Wasserstein distance between distributions --- a measure that does not saturate and provides meaningful gradients even when generator and real distributions barely overlap. The training signal is richer, more informative, and the training dynamics are substantially more stable.
+
+**Conditional GAN** (cGAN, Mirza and Osindero, 2014) addresses a different limitation: the original GAN generates samples randomly from the learned distribution, with no mechanism for the user to specify what is generated. cGAN conditions both the generator and discriminator on additional information --- class labels, text descriptions, or other structured inputs. The generator learns to produce outputs consistent with the conditioning signal; the discriminator learns to evaluate not just whether an output looks real, but whether it looks real given the condition. This enables controllable generation: ask for a specific category, style, or attribute, and the generator produces it.
+
+**StyleGAN** (Karras et al., 2019) represents the state of the art in photorealistic image synthesis. Rather than feeding noise directly into a convolutional generator, StyleGAN processes the noise through a mapping network --- a series of fully connected layers --- to produce a style vector. This style vector modulates the generator\'s layers through adaptive instance normalization, with different layers controlling different levels of detail: early layers control coarse structure (face shape, pose, age), middle layers control medium features (hair style, facial features), and late layers control fine texture (skin detail, color variation). The result is a clean separation of levels of control that enables unprecedented fine-grained manipulation of generated outputs.
+
+Each variant solves a problem the original formulation left open. Understood as a progression rather than a catalog, they illustrate how a field iterates: identify a specific failure mode, characterize it precisely, design a targeted solution, and validate empirically.
+
+### What GANs Produce --- And Their Limitations
+
+At their best, GANs produce outputs of striking photorealism --- images that human evaluators cannot reliably distinguish from photographs. StyleGAN faces are the canonical example: high-resolution, detailed, fully consistent with the visual statistics of real photographs, indistinguishable from reality in casual inspection. FID scores on standard benchmarks substantially below what VAEs achieve at equivalent scale.
+
+The tradeoffs are significant. GAN training is fragile. Mode collapse is a persistent risk. The generator has no explicit probability model --- there is no simple way to assess how probable a given output is, or to perform tasks like computing a latent representation for a given input. The latent space, while navigable in practice, does not have the principled structure of the VAE latent space --- interpolation works but the structure is not guaranteed. And the absence of an encoder makes GAN inversion --- finding the latent code corresponding to a given real image --- a separate, nontrivial problem.
+
+The sharpness-structure tradeoff between GANs and VAEs is real and fundamental: GANs produce sharper, more photorealistic outputs but with less controlled latent organization; VAEs produce more structured, navigable latent spaces but with blurrier outputs. Neither approach fully dominates. For applications where perceptual realism is paramount, GANs are the natural choice. For applications requiring structured manipulation, interpolation, or probabilistic reasoning about the latent space, VAEs have the advantage.
+
+This tradeoff is not merely an artifact of current implementations. It reflects something deep about the two training objectives. The adversarial objective rewards outputs that look real to a discriminator --- it has strong opinions about realism and no mechanism for uncertainty. The ELBO objective rewards the average plausible reconstruction --- it explicitly represents uncertainty and pays a smoothing cost for doing so. Chapter 12 introduces diffusion models, which resolve this tradeoff in a new way: by approaching generation through iterative denoising rather than direct latent sampling.
+
+## Evaluating Generative Models --- A Harder Problem Than It Looks
+
+Evaluating discriminative models is conceptually straightforward. You have a test set, you have ground truth labels, and accuracy (or some close relative) measures how well the model performs. Evaluating generative models is harder in a way that reveals something fundamental about what generation is.
+
+What does it mean for a generated image to be good? Faithfulness to the training distribution is one criterion --- do generated images look like they could have come from the same source as real images? Diversity is another --- do generated images cover the full range of variation in the real distribution, or do they collapse to a narrow subset? These two criteria are in tension: a model that generates only the single most average image is perfectly faithful but catastrophically non-diverse.
+
+Human evaluation is the gold standard and the most direct measure of perceptual quality. But it is expensive, slow, and not reproducible. Automatic metrics are practical but imperfect.
+
+**Fréchet Inception Distance (FID)** is the most widely used automatic metric. It computes the statistical distance between the distribution of real images and generated images in a feature space extracted by a pretrained classifier (Inception). Lower FID indicates that the two distributions are more similar --- the generated images resemble real images in the feature space that discriminates image content. FID captures both quality (do generated images look realistic?) and diversity (do they cover the real distribution?), but it depends on the pretrained classifier and can be gamed by generators that produce images that happen to look good in Inception\'s feature space.
+
+**Inception Score (IS)** measures whether generated images are recognizable as belonging to specific categories (high quality) and whether the set of generated images covers many categories (high diversity). It is less robust than FID and has been largely superseded by it.
+
+Both metrics have a fundamental limitation: they are proxies for human perceptual quality, and proxies can be fooled. A model that has memorized the training set would achieve perfect FID --- the generated distribution would be identical to the real distribution --- but would produce no novel content. A model that generates visually striking images that no human would find useful could score well on automatic metrics while failing on the actual task.
+
+The honest position is that evaluating generative models is an open problem. The best evaluations combine automatic metrics with human evaluation and task-specific probes --- does the generated data help when used as training augmentation? Does it fool domain experts? Does it transfer to downstream tasks? --- rather than relying on any single number.
+
+## VAEs and GANs Together --- A Map of the Landscape
+
+Having examined each architecture in depth, it is worth stepping back to see them as a pair of complementary answers to the same fundamental question.
+
+VAEs and GANs both learn to generate new data by learning from real data. They both use a latent space as the medium of generation. They both use neural networks as the generative mechanism. But their training objectives --- and the tradeoffs those objectives impose --- are completely different.
+
+The VAE is fundamentally probabilistic. It explicitly models the distribution of the data through the ELBO objective. It maintains uncertainty --- the encoder maps inputs to distributions, not points, and the decoder must handle that uncertainty. This probabilistic character gives the VAE its structured, navigable latent space and its ability to compute likelihoods. It also produces blurry outputs --- the price of averaging over uncertainty.
+
+The GAN is fundamentally adversarial. It has no explicit probability model. It defines quality through a discriminator\'s judgment rather than through a likelihood calculation. This adversarial character produces sharp, photorealistic outputs at the cost of training instability, mode collapse risk, and a latent space that lacks the principled structure of the VAE.
+
+The analogy of two different approaches to understanding a city is helpful. The VAE is like a careful cartographer: it produces a complete, accurate map with well-defined neighborhoods and smooth transitions between them. You know exactly where you are and where neighboring points are. But the map is an abstraction --- it captures structure but not texture, organization but not detail. The GAN is like a photorealistic painter: it produces images of stunning detail and realism that no map could capture. But the painter works from impression rather than precise measurement, and the resulting images, however beautiful, do not have the navigable structure of a map.
+
+Which do you need? It depends on what you are building. For applications requiring structured manipulation of latent factors --- image editing, style transfer, data augmentation, anomaly detection --- the VAE\'s map is more useful. For applications where perceptual realism is the primary goal --- face synthesis, image generation for human consumption, creative tools --- the GAN\'s paintings are more compelling.
+
+For many of the most impactful modern applications --- text-to-image generation, video synthesis, high-resolution creative tools --- neither architecture alone is fully satisfying. This is precisely the gap that diffusion models, discussed in Chapter 12, were built to fill.
+
+## The Ethics of Generating Reality
+
+### Deepfakes and the Economics of Deception
+
+The capabilities discussed in this chapter --- photorealistic face synthesis, attribute manipulation, identity-preserving style transfer --- did not emerge without consequence. They created, for the first time, the ability to generate realistic visual depictions of real people doing things they never did, at low cost, at scale, with plausible deniability.
+
+Deepfakes --- synthetic media using GAN-based techniques to replace one person\'s face or voice with another\'s in video or audio --- existed in limited forms before StyleGAN. StyleGAN-class models made them accessible to individuals without specialized expertise. The barrier dropped from months of skilled work to hours of automated processing.
+
+The harms are documented and ongoing. Non-consensual intimate imagery --- realistic synthetic pornography depicting real, named individuals without their consent --- constitutes the majority of deepfake content circulating online, and the victims are overwhelmingly women. Political disinformation using realistic fake videos of public figures has been deployed in multiple elections. Synthetic audio of executives approving fraudulent financial transfers has been used in corporate fraud cases. The technology produces specific, measurable harms to specific people.
+
+The asymmetry between generation and detection is the structural problem. GAN-based generation improves faster than detection: a detector trained to identify StyleGAN artifacts fails on the next architecture\'s artifacts. Detection requires knowledge of the generation technique; generation requires only creativity. Advances in generation consistently precede advances in detection, and the gap has not closed.
+
+This asymmetry has led to alternative approaches: content provenance systems that authenticate real content at capture rather than trying to detect synthetic content after the fact, cryptographic watermarking, and content authentication standards that allow verified authentic content to be distinguished from unsigned content. These approaches address the problem differently --- rather than proving content is fake, they prove trusted content is genuine. Progress is being made, but adoption is uneven and the landscape remains unsettled.
+
+### Training Data and the Consent Deficit
+
+The other ethical dimension of generative models precedes deepfakes. It sits in the training data.
+
+StyleGAN was trained on FFHQ --- 70,000 face images collected from Flickr. The individuals in those images did not consent to their faces being used to train a model that generates new faces by blending and recombining their visual characteristics. The model absorbed the visual statistics of their faces --- their skin tones, facial structures, age distributions, lighting conditions --- and produces outputs that are, in a statistical sense, derived from them.
+
+Whether this constitutes a use of someone\'s likeness without consent is contested. The legal framework differs by jurisdiction: some countries have image rights or likeness rights that might apply; others have only limited protection. The ethical question seems clearer: a person who shared a photograph on a photo-sharing platform was consenting to its viewing, not to its use as training data for a generative model that produces derivative synthetic faces. The use is categorically different from what was consented to.
+
+This pattern --- using publicly accessible data for purposes its creators did not consent to --- is not unique to generative models. It has arisen throughout this course in discussion of training data for language models, for CLIP, for object detection benchmarks. But it takes a specific form with generative models: the output of the generative process has a direct visual or auditory resemblance to the people in the training data. The connection between the training data and the model\'s outputs is not abstract --- it is perceptual.
+
+Emerging legal and policy responses include data provenance requirements, opt-out mechanisms, and legal frameworks for synthetic media disclosure. The technical community\'s contribution is to characterize these connections clearly --- to document what training data was used, to acknowledge the relationship between training data and outputs, and to support the development of consent mechanisms that are practical rather than nominal.
+
+### Who Creates --- and Who Is Depicted
+
+There is a final dimension worth naming. The most commercially successful generative image models have been trained predominantly on images produced by human visual artists --- painters, illustrators, photographers, designers --- whose work constitutes the stylistic and perceptual knowledge these models have internalized. The commercial value of the resulting models derives substantially from this absorbed expertise.
+
+The people whose work trained the models have, in most cases, received no compensation and were not asked for consent. Some have been materially harmed: generative models can now produce work in their specific visual style at negligible cost, competing directly with the artists whose work trained the capability.
+
+This is a contested area --- legally, ethically, and practically --- and it will remain contested for years. What is clear is that the development of generative models creates value from creative human labor in ways that do not currently redistribute that value to the people who produced it. The question of what an equitable arrangement would look like is one the field, the legal system, and society are actively working through.
+
+## Hands-On Exploration
+
+### Overview
+
+This exploration builds direct intuition for what a structured latent space looks like, how interpolation in latent space produces interpretable visual transitions, and how the VAE\'s organization differs from unstructured encoding.
+
+**Time estimate:** 45--60 minutes **Tools:** Google Colab (provided notebook), pre-trained VAE on a face or handwritten digit dataset. No training required.
+
+### Part 1 --- Random Sampling from the Prior (10 minutes)
+
+Sample 20 random vectors from a standard Gaussian (mean 0, variance 1) in the latent space dimensionality of the pre-trained VAE. Decode each to an image. Observe: are the outputs coherent? Do they resemble the training data? What is the range of variation across the 20 samples?
+
+Record your observations. These samples test whether the KL training has succeeded: if the prior distribution and the encoder\'s learned distribution are well-aligned, random prior samples should decode to plausible outputs. If the outputs look like noise, the alignment has failed.
+
+### Part 2 --- Latent Space Interpolation (20 minutes)
+
+Select two real images from the test set --- for best results, choose images that differ in a visually obvious way (a smiling face and a neutral face, a five and a nine, a daytime image and a nighttime image). Encode each image to its latent representation --- specifically, the mean vector output by the encoder.
+
+Generate 8 intermediate latent vectors by linearly interpolating between the two means: starting at the first mean, ending at the second, with equal spacing. Decode each intermediate vector to an image.
+
+Observe the progression: does the visual transition between the two images look smooth and semantically meaningful? Then compare to pixel-space interpolation: compute the linear interpolation between the two raw images directly. Display both progressions side by side.
+
+The difference between the two transitions is the whole story of why latent space matters: pixel interpolation crosses regions that look like ghosted, doubled images; latent space interpolation crosses regions that look like coherent intermediate states.
+
+### Part 3 --- Dimension Probing (15 minutes)
+
+Take a single real image and encode it to its mean latent vector. Select three latent dimensions at random. For each selected dimension, vary that dimension across a range of values (from −3 to +3 in 0.5-unit steps) while holding all other dimensions at their encoded values. Decode each variant.
+
+For each varied dimension, observe: does it appear to control a single interpretable factor (face angle, brightness, expression, hair length), or does it produce changes that affect multiple aspects simultaneously, or does it produce incoherent changes?
+
+Record which (if any) dimensions appear to have interpretable single-factor control, and which appear entangled or uninterpretable.
+
+### Reflection (200--300 words)
+
+\"You observed that the VAE\'s latent space is organized --- random prior samples produce coherent outputs, interpolation produces smooth transitions, and some individual dimensions appear to control interpretable factors. This organization is not free: it is the consequence of the KL divergence term in the ELBO.
+
+Now consider what would happen without the KL term. An autoencoder trained only on reconstruction loss would likely encode the training data just as accurately --- possibly more accurately --- but the latent space would not be organized in a way that supports sampling or interpolation. The encoder would map each input to a specific point, with no structure constraining where those points are or what lies between them.
+
+What does this suggest about the relationship between the training objective and the properties of the learned representation? And from the dimension probing in Part 3 --- were any of the dimensions you varied fully interpretable, controlling exactly one semantic factor without entangling others? What would it mean for a latent space to be fully disentangled, and why might that property be both difficult to achieve and valuable for your MIPDS generative component?\"
+
+### Case Study: StyleGAN and the Photorealism Threshold
+
+### The Problem
+
+By 2018, GAN-generated images had improved substantially over the blurry, artifact-prone outputs of early architectures. But control remained limited. Generating a face with a specific combination of attributes --- a particular age, expression, hair color, and camera angle --- required complex conditional training setups, and the relationship between the noise input and the visual properties of the output was opaque. Researchers could generate realistic faces; they could not easily specify what faces to generate.
+
+### The Architecture
+
+NVIDIA\'s StyleGAN, introduced by Karras and colleagues in 2019, redesigned the generator around the concept of style --- the idea that visual properties can be separated into a hierarchy of levels, each controllable independently.
+
+The key innovation was the mapping network: rather than feeding the input noise vector z directly into the convolutional synthesis network, StyleGAN first passes z through a series of fully connected layers that transform it into an intermediate latent vector w in what the authors call W-space. This intermediate representation is then injected at each layer of the synthesis network through a technique called adaptive instance normalization: the style vector w parameterizes the mean and variance of the normalization applied at each convolutional layer, effectively modulating the visual style at that level of the processing hierarchy.
+
+The consequence of this design is a clean separation of levels of control. Early layers in the synthesis network --- which process coarse, low-resolution feature maps --- are modulated by the style vector in ways that affect high-level structure: face shape, overall pose, age. Later layers --- processing higher-resolution feature maps --- are modulated in ways that affect medium-level features: hair style, eye shape, facial expression. The final layers affect fine-grained texture and coloration.
+
+By injecting different style vectors at different levels, StyleGAN enables style mixing: take the coarse structure from one generated face and the fine texture from another, and produce a face that combines them. This was the first architecture to make the hierarchical structure of visual generation explicit and directly controllable.
+
+### The Results
+
+StyleGAN faces achieved FID scores substantially lower than previous architectures on the FFHQ benchmark. In perceptual studies, human evaluators had difficulty distinguishing StyleGAN-generated faces from photographs of real people. The quality was, for practical purposes, at the photorealism threshold.
+
+The control enabled by the style-based architecture was equally significant. Attributes controllable through the style vector included age, sex, hair style, expression, face shape, lighting condition, and image quality --- all independently and continuously adjustable without retraining.
+
+StyleGAN2 addressed characteristic artifacts --- blob-like visual anomalies that appeared in some StyleGAN outputs --- by redesigning the normalization mechanism, producing cleaner outputs at equivalent quality.
+
+### What Came Next
+
+StyleGAN established the quality bar against which subsequent generative architectures were measured. It also served as the direct ancestor of several commercial creative tools --- face generation applications, avatar creation systems, and artistic synthesis tools that entered broad consumer use after 2019.
+
+The faces generated by StyleGAN became the canonical example of photorealistic synthetic media. The website thispersondoesnotexist.com, which generates a new StyleGAN face on each page load, made the capability viscerally understandable to non-technical audiences in a way that academic papers had not. A face that looks completely real, that no person owns, that the model created. The implications --- for identity, for authenticity, for trust in visual media --- are immediate and obvious.
+
+### The Ethical Dimension
+
+FFHQ contains 70,000 face images collected from Flickr. The individuals depicted did not consent to this use. The model learned the visual characteristics of those faces --- including demographic distributions, lighting conditions, and stylistic properties that reflect who takes and shares photographs on Flickr --- and produced outputs derived from those characteristics.
+
+StyleGAN\'s photorealism threshold coincided with the emergence of non-consensual deepfake pornography as a documented harm. The tools required to create realistic synthetic faces of real named individuals --- overlaying the synthetic face onto video footage --- became accessible at approximately the same time StyleGAN outputs became reliably photorealistic. The victims of this harm are disproportionately women and overwhelmingly did not consent.
+
+Detection methods trained on StyleGAN artifacts were rendered partially obsolete by StyleGAN2, which modified the architecture in ways that changed the artifact fingerprint. This pattern --- generation advancing, detection lagging --- has characterized the field since GANs became capable of photorealistic output.
+
+The debate about responsible publication of generative models capable of photorealistic synthesis has not been resolved. Arguments for open publication emphasize scientific progress and equitable access; arguments for restricted publication emphasize the documented harms enabled by accessibility. The field is actively working through this tension, with no consensus position.
+
+## Chapter Summary
+
+Generative models represent a fundamental shift in what deep learning systems can do. Rather than recognizing or classifying existing data, they learn the underlying structure of the data distribution and produce new instances that are statistically consistent with it.
+
+The latent space is the central concept shared by all the architectures in this chapter and the next. It is a lower-dimensional representation space in which the essential factors of variation in the data are encoded. Learning a smooth, organized, fully populated latent space is the technical challenge that differentiates generative architectures from each other.
+
+The Variational Autoencoder approaches this challenge probabilistically. Its encoder maps inputs to distributions in latent space; the decoder maps latent samples back to data space. The ELBO training objective balances reconstruction quality against latent space regularity through two opposing terms: the reconstruction term rewards informativeness, the KL divergence term rewards organization. The reparameterization trick makes the sampling operation differentiable, allowing the full system to be trained with backpropagation. VAEs produce structured, navigable latent spaces and coherent samples from the prior --- at the cost of blurry outputs caused by the averaging inherent in their reconstruction objective.
+
+The Generative Adversarial Network approaches generation through competition. A generator and a discriminator are trained simultaneously in a minimax game: the generator tries to produce outputs the discriminator cannot distinguish from real data; the discriminator tries to catch the generator. The competitive pressure drives the generator toward photorealistic outputs without any explicit probability model. GANs produce sharper, more realistic outputs than VAEs at equivalent scale, but are susceptible to mode collapse, training instability, and the absence of an encoder for computing latent representations of given inputs. GAN variants --- WGAN, cGAN, StyleGAN --- address specific named failure modes and have progressively expanded what GANs can produce and control.
+
+The central tradeoff between the two paradigms --- structured latent space against output realism --- reflects something deep about their training objectives rather than a contingent implementation difference. The resolution of this tradeoff, through a completely different approach to the generative problem, is the subject of Chapter 12.
+
+The ethical implications of photorealistic generative models are not hypothetical. Deepfakes cause documented, measurable harm. The training data consent deficit is a structural feature of how generative models have been developed. The asymmetry between generation quality and detection capability has not closed. These are design constraints and deployment responsibilities that accompany the technical capabilities.
+
+## Review Questions
+
+1.  A VAE trained on faces produces a latent space where nearby points decode to similar faces, and interpolation produces smooth visual transitions. Does this organization suggest that the VAE has learned something meaningful about the concept \"face,\" or only about the statistical regularities in the training images? Is there a meaningful distinction between these two descriptions?
+
+2.  GAN mode collapse occurs when the generator discovers that producing a narrow set of high-quality outputs is sufficient to fool the discriminator. The discriminator cannot distinguish \"realistic and narrow\" from \"realistic and diverse.\" What does this reveal about the limitations of the adversarial training objective as a proxy for learning the full data distribution? Can you think of a modification to the training setup that would specifically penalize mode collapse?
+
+3.  The reparameterization trick makes sampling differentiable by moving the source of randomness outside the computation graph. This is a technical solution to a mathematical problem, but it also has a conceptual interpretation: the model learns the signal (mean and variance) separately from the noise. What does this separation suggest about how VAEs represent knowledge versus uncertainty?
+
+4.  StyleGAN can generate photorealistic faces of people who do not exist, trained on images of people who did not consent. A separate question is whether the generated faces \"belong\" to anyone --- are they the property of the model\'s creators, of the people whose images trained the model, or of no one? How should intellectual property and likeness rights frameworks adapt to generative models?
+
+5.  Detection systems for GAN-generated faces are rendered partially obsolete each time a new GAN architecture is released. This creates a structural asymmetry: generation advances faster than detection. What are the implications for policy approaches that rely on detection as the primary safeguard against synthetic media harms? What alternative approaches do not depend on detection keeping pace with generation?
+
+6.  VAEs produce blurry outputs because their reconstruction loss averages over all plausible reconstructions. GANs produce sharp outputs because their adversarial loss specifically rewards perceptual realism. These objectives reflect different assumptions about what \"good generation\" means. Which assumption is more appropriate for your MIPDS generative component? Would you want your system to produce conservative, uncertain outputs, or committed, realistic ones?
+
+7.  Generative models trained on artistic work produced by human artists can now reproduce those artists\' visual styles at negligible cost, creating direct commercial competition with the artists whose work made the training possible. What obligations, if any, do the developers of such models have to those artists? What would an equitable arrangement look like in practice?
+
+## Further Reading
+
+### Foundational Papers
+
+Kingma, D. P., & Welling, M. (2013). Auto-encoding variational Bayes. In *Proceedings of ICLR 2014*. https://arxiv.org/abs/1312.6114 *The original VAE paper. The introduction and the derivation of the ELBO (Section 2) are essential. The reparameterization trick is introduced in Section 2.4. Denser than most papers in this course but worth working through slowly --- the derivation is elegant and the intuition rewards the effort.*
+
+Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., \... & Bengio, Y. (2014). Generative adversarial nets. In *Advances in Neural Information Processing Systems, 27*. https://arxiv.org/abs/1406.2661 *The original GAN paper. Only eight pages. Section 4 (the theoretical analysis of the minimax game) is worth reading carefully for the Nash equilibrium argument. The experimental results are now primarily of historical interest --- the field has advanced far beyond them --- but the framing and the theoretical motivation remain foundational.*
+
+Arjovsky, M., Chintala, S., & Bottou, L. (2017). Wasserstein GAN. In *Proceedings of ICML 2017*. https://arxiv.org/abs/1701.07875 *The WGAN paper. The introduction\'s diagnosis of why GAN training fails --- saturating discriminator, vanishing gradients, mode collapse --- is one of the clearest analyses of GAN pathologies available. The proposed solution (Wasserstein distance) is technically motivated and the paper is unusually readable for a paper with significant mathematical content.*
+
+### For Conceptual Depth
+
+Karras, T., Laine, S., & Aila, T. (2019). A style-based generator architecture for generative adversarial networks. In *Proceedings of CVPR 2019* (pp. 4401--4410). https://arxiv.org/abs/1812.04948 *The StyleGAN paper. The architecture section is essential for understanding how style injection separates levels of visual control. The interpolation and style-mixing experiments (Section 3) are the clearest demonstration of what disentangled generation looks like in practice.*
+
+Higgins, I., Matthey, L., Pal, A., Burgess, C., Glorot, X., Botvinick, M., \... & Lerchner, A. (2017). beta-VAE: Learning basic visual concepts with a constrained variational framework. In *Proceedings of ICLR 2017*. https://openreview.net/forum?id=Sy2fchgcx *Introduces beta-VAE, which modifies the VAE objective by weighting the KL term more heavily to encourage disentanglement. The paper provides the clearest empirical demonstration of what disentangled latent representations look like and how to evaluate them. Directly relevant to the dimension probing in the hands-on exploration.*
+
+Heusel, M., Ramsauer, H., Unterthiner, T., Nessler, B., & Hochreiter, S. (2017). GANs trained by a two time-scale update rule converge to a local Nash equilibrium. In *Advances in Neural Information Processing Systems, 30*. https://arxiv.org/abs/1706.08500 *Introduces Fréchet Inception Distance (FID). Worth reading for the motivation section, which articulates clearly why prior evaluation metrics for GANs were insufficient and what properties a better metric should have.*
+
+### On Ethics and Synthetic Media
+
+Chesney, R., & Citron, D. (2019). Deep fakes: A looming challenge for privacy, democracy, and national security. *California Law Review, 107*(6), 1753--1819. https://scholarship.law.uc.edu/cgi/viewcontent.cgi?article=1491&context=uclr *A thorough legal and policy analysis of deepfake harms, written before StyleGAN-class systems were widely deployed. The taxonomy of harm types --- political disinformation, non-consensual intimate imagery, fraud, harassment --- remains the most systematic treatment of the problem available and directly relevant to this chapter\'s ethical discussion.*
+
+Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? In *Proceedings of FAccT 2021* (pp. 610--623). https://dl.acm.org/doi/10.1145/3442188.3445922 *Though focused on language models, the analysis of training data provenance and the relationship between data creators and model developers applies directly to generative image models and the consent issues discussed in this chapter.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 11: Learning to Create --- Variational Autoencoders and Generative Adversarial Networks*

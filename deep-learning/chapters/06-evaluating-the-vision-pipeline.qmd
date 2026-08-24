@@ -1,0 +1,586 @@
+---
+title: "Midpoint Integration"
+subtitle: "Evaluating, Auditing, and Completing the Vision Pipeline"
+---
+
+## Opening Narrative
+
+### The Bridge at Halftime
+
+There is a particular kind of pause that the best engineers build into their process --- not because they have run out of ideas, but because forward progress without assessment is just running faster in a direction you have not confirmed is right.
+
+Imagine a team of architects who have spent the first half of a project designing and constructing the structural frame of a large building. They have the foundation poured, the steel skeleton standing, the load-bearing walls in place. They could push forward immediately: start on the interior, run the electrical, plan the facade. The momentum is there. The schedule is pressing. But the best teams stop first. They walk the structure. They measure. They ask whether what is standing matches what was designed, whether the tolerances are within acceptable bounds, whether there are weaknesses that will become catastrophic failures later if left unaddressed now. They write a report. Only then do they proceed.
+
+You are at that moment in this course.
+
+Over the past five weeks, you have built the visual half of the Multimodal Intelligent Perception and Decision System. You started with the foundations of how neural networks are structured (Chapter 2) and trained (Chapter 3). You studied convolutional architectures in depth --- understanding not just what they are but why they were designed the way they were (Chapter 4). You extended that understanding into the richer, spatially-demanding tasks of detection and segmentation (Chapter 5). You have installed a pre-trained backbone, run transfer learning, attached detection heads, and produced outputs that look remarkably like what a professional vision system produces.
+
+But looking like a professional vision system and being one are different things.
+
+This chapter is the walk-through. Before we move into the language half of the course --- Transformers, language models, and multimodal fusion --- we need to ask, rigorously, whether what we have built actually works. Not on the examples we tested during development, but on new data. Not for the objects it was shown most often, but for the rare cases and the edge cases. Not with the confidence of someone who built the system, but with the skepticism of someone who has to rely on it.
+
+This chapter introduces the skills and frameworks that separate practitioners who build models from practitioners who build systems: evaluation discipline, dataset construction, representation analysis, experiment tracking, and ethical auditing. These are not supplementary skills. They are the difference between a system that performs well in a demonstration and one that performs well in the world.
+
+We will close this chapter --- and the vision half of the course --- with a formal audit of the MIPDS vision pipeline. By the end of this week, the vision module will be a documented, evaluated, version-controlled component with known strengths, known limitations, and a clear specification of what it produces. That specification is what allows us to confidently plug it into the language half of the system in the chapters that follow.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+1.  Distinguish between training performance, validation performance, and held-out test performance --- and explain why each measures something different about a model\'s real-world capability.
+
+2.  Design and implement a rigorous evaluation framework for a vision system, including disaggregated performance analysis across relevant subgroups and failure modes.
+
+3.  Apply data discipline principles --- train/validation/test splitting, class imbalance handling, data augmentation strategy, and distribution shift analysis --- to a real dataset.
+
+4.  Explain what a neural network\'s intermediate representations contain, why they are transferable, and how representation quality can be evaluated independently of task performance.
+
+5.  Use experiment tracking tools and practices to organize model training runs, compare results reproducibly, and maintain a meaningful model version history.
+
+6.  Conduct a systematic audit of a deployed or near-deployed vision model, identifying performance disparities, failure modes, and limitations that must be disclosed to users of the system.
+
+7.  Write a model card --- a structured documentation artifact --- for a trained vision model, capturing its intended use, performance characteristics, limitations, and ethical considerations.
+
+8.  Articulate why the representation produced by a vision backbone is the appropriate interface point for multimodal fusion, and what properties of that representation matter for downstream language integration.
+
+## Key Terms and Concepts
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                       Plain-Language Definition
+  ------------------------------ ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Training Set**               The portion of data the model learns from during gradient descent. Performance here is the least informative measure of generalization --- the model has directly optimized for this data.
+
+  **Validation Set**             A held-out portion of data used to tune hyperparameters and make architecture decisions during development. The model does not train on this data, but development choices are influenced by it.
+
+  **Test Set**                   A held-out portion of data used only once, after all development decisions are finalized, to estimate true generalization performance. Using the test set during development invalidates it.
+
+  **Generalization Gap**         The difference between training performance and validation/test performance. A large gap signals overfitting. A small gap with poor performance on both signals underfitting.
+
+  **Overfitting**                When a model learns the training data too specifically --- capturing noise and idiosyncrasies --- and fails to generalize to new examples.
+
+  **Underfitting**               When a model is insufficiently expressive or undertrained to capture the true patterns in the data, producing poor performance on both training and test sets.
+
+  **Distribution Shift**         The condition in which the data a model encounters during deployment differs statistically from the data it was trained on. One of the most common causes of production failures.
+
+  **Covariate Shift**            A specific type of distribution shift in which the input distribution P(X) changes between training and deployment, while the relationship between input and output P(Y\|X) remains the same.
+
+  **Disaggregated Evaluation**   Reporting model performance separately for meaningful subgroups --- demographic groups, object sizes, lighting conditions, etc. --- rather than only as a single aggregate metric. Reveals disparities that aggregate metrics obscure.
+
+  **Confusion Matrix**           A table showing the counts of true positives, false positives, true negatives, and false negatives for a classification model, organized by predicted class versus actual class. Reveals which specific class pairs are most frequently confused.
+
+  **Class Imbalance**            A dataset condition in which some classes have far more training examples than others. Can cause models to become biased toward majority classes while performing poorly on rare but potentially important minority classes.
+
+  **Data Augmentation**          Artificially expanding a training dataset by applying label-preserving transformations --- rotation, flipping, cropping, color jitter, noise --- to existing examples. Improves generalization and reduces overfitting.
+
+  **Representation**             The internal encoding a neural network produces for an input --- the vector of activations at a specific layer. Representations capture the learned structure of the input in a form useful for downstream tasks.
+
+  **Embedding Space**            The high-dimensional vector space in which a model\'s representations live. Semantically similar inputs tend to be close together in this space, a property that makes representations transferable and composable.
+
+  **t-SNE / UMAP**               Dimensionality reduction techniques used to visualize high-dimensional embeddings in 2D or 3D. Used to inspect the structure of representation spaces --- whether similar examples cluster together and different examples separate.
+
+  **Experiment Tracking**        The systematic recording of training configurations, hyperparameters, metrics, and artifacts across multiple training runs, enabling reproducible comparison and selection of model versions.
+
+  **Model Card**                 A structured documentation artifact for a trained machine learning model. Captures: intended use cases, training data, evaluation results (including disaggregated), known limitations, and ethical considerations.
+
+  **Model Versioning**           The practice of assigning unique identifiers to trained model artifacts, recording what training data and configuration produced each version, and maintaining a history of changes.
+
+  **Calibration**                The alignment between a model\'s predicted confidence scores and its actual accuracy. A perfectly calibrated model that predicts 80% confidence is correct exactly 80% of the time on average.
+
+  **Reliability Diagram**        A plot used to visualize model calibration: predicted confidence on the x-axis, actual accuracy on the y-axis. A perfectly calibrated model lies on the diagonal.
+
+  **Error Analysis**             The systematic examination of a model\'s failures --- not just how many errors it makes, but which inputs it fails on, what failure modes recur, and what patterns appear in the mistakes.
+
+  **Pipeline Specification**     A formal description of a system component\'s interface: what inputs it accepts (format, size, type), what outputs it produces (format, structure, meaning), and what performance guarantees it makes.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## What Does It Mean for a Model to Be Good?
+
+### 1.1 The Difference Between Training and the World
+
+There is a version of machine learning evaluation that sounds rigorous but is not: train a model, measure its accuracy on the training data, report a high number, and call it done. This version of evaluation is unfortunately common --- not because practitioners are careless, but because training performance is easy to measure, usually high, and feels like evidence of success.
+
+It is evidence of something. It is evidence that the model can reproduce the patterns in the training data. That is not nothing --- but it is far short of what we actually care about, which is whether the model generalizes: whether it produces correct outputs on data it has never seen, in conditions it was not specifically trained for, on examples drawn from the real distribution of the deployment environment.
+
+Generalization is the fundamental question of machine learning, and evaluation discipline is the practice of actually measuring it --- honestly, rigorously, and with an awareness of all the ways it can be inadvertently undermined.
+
+### 1.2 The Three-Way Data Split
+
+The standard answer to the generalization measurement problem is to partition your data into three non-overlapping sets before any model development begins.
+
+### Training Set
+
+The data the model learns from. Gradient descent operates on this data. Feature statistics (for normalization) are computed from this data. Data augmentation is applied to this data. Nothing about the validation or test sets should influence these computations. A typical allocation is 70-80% of available data, depending on total dataset size.
+
+### Validation Set
+
+Data the model never trains on, used to evaluate performance during development and guide decisions: which architecture to use, which learning rate schedule, when to stop training, which augmentation strategy works best. The validation set is used repeatedly --- but only for monitoring, not for gradient updates. Because development decisions are influenced by validation performance, the validation set is not a true estimate of generalization. A typical allocation is 10-15%.
+
+### Test Set
+
+Data the model never trains on and development decisions are never influenced by. It is used exactly once --- after all development is complete and the final model has been selected --- to produce the honest estimate of real-world performance that will be reported and on which deployment decisions will be based. Touching the test set before this moment is called data snooping, and it produces optimistic performance estimates that will not hold in deployment. A typical allocation is 10-15%.
+
+The test set is a one-shot instrument. Once you evaluate on it, any subsequent changes to the model invalidate it as an honest performance estimate. This is why the discipline of truly reserving the test set is important --- and why published benchmark results should be scrutinized when the same test set has been used by many teams tuning their models over time.
+
+The key principle: *the degree of independence between a dataset and model development decisions determines the degree to which performance on that dataset estimates real-world performance.*
+
+### 1.3 Why High Validation Accuracy Is Not Enough
+
+Passing the three-way split evaluation is necessary but not sufficient. Even a model that generalizes well on its validation set can fail in deployment for reasons that the standard evaluation framework does not capture.
+
+### Distribution Shift
+
+Your validation set was drawn from the same distribution as your training set --- the same camera, the same lighting conditions, the same geographic region, the same patient population, the same time period. The real world is different. It contains variations you did not sample. A pedestrian detection system trained on daytime images will encounter nighttime images. A medical classifier trained on images from a single hospital will encounter images from different scanners with different calibrations. A crop monitoring system trained on one growing season will face weather patterns from subsequent seasons.
+
+Distribution shift is not an edge case --- it is the normal condition of deploying a model in the world. Evaluation discipline includes explicitly testing for distribution shift: gathering out-of-distribution examples, testing on data from different sources than the training set, and documenting the expected performance degradation under realistic deployment conditions.
+
+### Aggregate Metrics Hide Subgroup Failures
+
+A model that achieves 92% accuracy on a test set with nine classes at 10% prevalence each is doing something quite different from a model that achieves 95% accuracy on five majority classes and 60% accuracy on five minority classes --- even though their aggregate accuracy might be similar. Aggregate metrics systematically obscure per-class and per-subgroup performance.
+
+For vision systems deployed in the real world, the subgroups that matter include: object size (does the detector find small objects as reliably as large ones?), demographic groups (does the face analysis system perform equally well across skin tones?), environmental conditions (does the segmentation system work as well in fog and rain as in clear weather?), and domain-specific subpopulations relevant to the application.
+
+Disaggregated evaluation --- reporting performance separately for meaningful subgroups --- is not optional for responsible deployment. It is how you find out what your model does not know.
+
+### Calibration: Is Confidence Meaningful?
+
+A model\'s confidence score is supposed to mean something: a prediction made with 90% confidence should be correct 90% of the time. In practice, modern deep neural networks tend to be overconfident --- they produce high confidence scores on examples they get wrong and on examples that are far from the training distribution. This is called miscalibration.
+
+Miscalibration matters enormously in high-stakes applications. A medical diagnosis system that reports 95% confidence on a wrong prediction is more dangerous than one that correctly reports 60% confidence on the same prediction, because the high-confidence prediction encourages inappropriate certainty in the clinician reviewing it. Measuring and reporting calibration --- using reliability diagrams or Expected Calibration Error --- should be part of every vision system evaluation.
+
+## Error Analysis --- Learning From What Goes Wrong
+
+### 2.1 The Confusion Matrix as a Diagnostic Tool
+
+For classification tasks, the confusion matrix is the most informative single artifact produced by evaluation. It shows, for every pair of (predicted class, true class), how many examples fell into that cell. The diagonal contains the correct predictions. Off-diagonal cells contain errors, and the specific pattern of off-diagonal errors tells you something about what the model is confused by.
+
+A model that frequently confuses golden retrievers with labrador retrievers is making a different kind of mistake than one that frequently confuses dogs with cats. The first confusion is about fine-grained within-category discrimination --- the model has learned to distinguish dogs from non-dogs, but cannot distinguish breeds. The second confusion is about coarser category boundaries --- the model has not learned the features that separate these broad categories. These different failure modes have different remedies: more fine-grained training examples with breed diversity in the first case, more training data spanning the cat-dog boundary in the second.
+
+For the MIPDS system, building and carefully reading the confusion matrix is not an administrative exercise. It is diagnostic reasoning --- the same kind of spatial and pattern-based reasoning the radiologist in our opening narrative applies to chest X-rays. The question is: what is the model confused about, and why?
+
+### 2.2 Systematic Error Analysis
+
+Error analysis is the practice of not just counting errors but examining them. For a sample of misclassified examples --- at minimum 50 to 100 --- the following questions are worth asking:
+
+-   Is there a consistent visual pattern in the errors? (All errors happen in low-light conditions. All errors involve partially occluded objects. All errors involve a specific color or texture combination.)
+
+-   Are errors clustered by source? (All errors come from images taken with a specific camera type. All errors come from one geographic region. All errors come from a particular annotator whose labels may be inconsistent.)
+
+-   Are errors symmetric? (Does the model confuse class A with class B at the same rate it confuses class B with class A, or is the confusion asymmetric? Asymmetry often reveals something about the visual similarity structure of the classes.)
+
+-   What is the model\'s confidence on its errors? (Overconfident errors --- high-confidence wrong predictions --- are more dangerous and more diagnostic than uncertain errors. They suggest the model has learned a spurious feature that happens to correlate with the wrong class in the training distribution.)
+
+-   Are there systematic demographic or subgroup patterns? (Errors concentrated in images of people from a particular demographic group indicate a bias that must be addressed before deployment.)
+
+This analysis should produce a prioritized list of failure modes. Not all failure modes are equally important --- the priority should reflect both frequency (how often does this error type occur?) and consequence (what is the cost when this error type occurs?).
+
+### 2.3 GradCAM for Feature Attribution
+
+Knowing that a model made a wrong prediction does not immediately tell you why. GradCAM --- Gradient-weighted Class Activation Mapping --- provides one window into the \'why\' by visualizing which regions of the input image most influenced the model\'s prediction. We used GradCAM descriptively in the hands-on explorations of Chapters 4 and 5. Here, we use it analytically: as a diagnostic tool for understanding failure modes.
+
+When a model misclassifies an image, the GradCAM visualization can reveal whether the model was attending to a reasonable region (it looked at the right place but drew the wrong conclusion --- a knowledge failure) or an unreasonable region (it looked at the wrong place entirely --- a feature attribution failure). The second case is diagnostically more serious: it suggests the model has learned a spurious correlation between a non-diagnostic image region and a class label.
+
+Classic examples of spurious correlations in vision systems include: a model that classifies photographs as \'outdoor\' because the training data had a strong correlation between green grass and outdoor settings, causing it to misclassify indoor photographs with plants; a model that predicts \'healthy\' lung tissue because the training images of healthy tissue were taken with a different scanner than the diseased tissue images, and the model learned scanner signature rather than tissue signature; a model that identifies people in images based on background context rather than the people themselves, because certain demographic groups were overrepresented in certain contextual backgrounds in the training data.
+
+GradCAM-based error analysis can surface these spurious correlations. When the model\'s attention falls on the wrong region, that is a signal to examine what the training data contains and what correlations exist between label and non-diagnostic features.
+
+## Dataset Discipline --- Building Reliable Training Data
+
+### 3.1 The Dataset Is the Model
+
+There is a saying in machine learning that has earned its status as a cliché through repeated empirical vindication: the quality of your dataset determines the ceiling of your model\'s performance. An architecture can be elegant, a training procedure can be carefully tuned, a compute budget can be unlimited --- but if the dataset contains systematic errors, biases, or distribution mismatches, the model will inherit them. This is not a fixable problem downstream. The model cannot be more accurate than the labels it was trained on. It cannot generalize to distributions not represented in the training data. It will reflect the assumptions and biases of whoever collected and annotated it.
+
+Taking dataset quality seriously is therefore not a preliminary task separate from \'real\' model development --- it is central to it.
+
+### 3.2 Annotation Quality and Consistency
+
+For supervised learning, labels are the ground truth against which the model is evaluated. But labels are produced by humans --- by annotators who may disagree, who may make mistakes, who may interpret ambiguous examples differently, and whose errors may be systematic rather than random.
+
+### Inter-Annotator Agreement
+
+For any annotation task, it is worth measuring how consistently multiple annotators label the same examples. The standard metric is Cohen\'s Kappa, which corrects raw agreement for the level of agreement expected by chance. Kappa above 0.8 is considered strong agreement; below 0.6 suggests the labeling task is genuinely ambiguous or the annotation guidelines are insufficiently clear.
+
+Low inter-annotator agreement is diagnostic information. It tells you that the labeling task is harder than it appears, that your annotation guidelines need refinement, or that the category distinctions you are asking annotators to make are not reliably visible in the data. A model trained on labels with low inter-annotator agreement cannot be expected to perform better than the annotators themselves --- because it has nothing more reliable to learn from.
+
+### Label Noise
+
+Even with good annotators and clear guidelines, a non-trivial fraction of labels in any large dataset will be wrong. Label noise is not catastrophic at small proportions --- neural networks have some robustness to random label errors --- but it degrades performance, and systematic label noise (where errors are correlated with a class or subgroup) can introduce biases that are difficult to detect and correct.
+
+Strategies for managing label noise include: double-annotation with adjudication for ambiguous examples, active learning to identify and re-annotate the examples the model is most uncertain about, and label smoothing as a training-time regularizer that prevents the model from becoming overconfident on potentially-noisy labels.
+
+### 3.3 Class Imbalance: When Rare Matters Most
+
+The classes that are rarest in a dataset are frequently the classes that matter most. Rare cancer subtypes. Unusual object configurations that represent edge cases for safety. Demographic subgroups underrepresented in the overall population of collected images.
+
+A model trained on an imbalanced dataset without compensation will learn, quite rationally from a loss-minimization perspective, to predict the majority class aggressively. This is optimal for minimizing average loss --- but catastrophic for performance on the minority class, which is often the class where correct prediction matters most.
+
+### Strategies for Handling Imbalance
+
+**Oversampling:** Duplicate or up-weight minority class examples during training. Simple but can cause overfitting on the minority class if done naively.
+
+**Undersampling:** Reduce majority class examples to match minority class sizes. Simple but wastes available training data.
+
+**Class-weighted loss:** Assign higher loss weights to minority class errors during training, making the optimizer penalize misclassifications of rare classes more heavily.
+
+**Data augmentation targeting minority classes:** Apply augmentation more aggressively to minority class examples to expand their effective training set size.
+
+**Synthetic data generation:** Use generative models (covered in Chapters 11-12) to synthesize additional minority class examples --- a powerful approach that we will revisit in those chapters.
+
+Beyond handling imbalance in training, evaluation should always report performance separately on minority classes. A single aggregate accuracy metric that hides 30% accuracy on a rare but important class is not informative --- it is misleading.
+
+### 3.4 Data Augmentation: Expanding the Distribution
+
+Data augmentation is the practice of creating new training examples by applying label-preserving transformations to existing ones. Its purpose is twofold: expanding the effective size of the training set (which reduces overfitting) and exposing the model to a wider range of input variations (which improves generalization).
+
+### Standard Vision Augmentations
+
+The following augmentations are standard for image classification and detection, each encoding a specific prior belief about what kinds of variation should not change the label:
+
+-   Random horizontal flip --- most natural images are approximately horizontally symmetric. A dog facing left and a dog facing right are both dogs.
+
+-   Random crop and resize --- objects appear at different scales and positions. Training on random crops teaches the model to find objects regardless of their location.
+
+-   Color jitter (brightness, contrast, saturation, hue) --- lighting conditions vary dramatically. Training on color-jittered images reduces sensitivity to illumination.
+
+-   Gaussian noise --- real images contain sensor noise. Augmenting with noise improves robustness to noisy deployment conditions.
+
+-   Random rotation --- for tasks where orientation is not diagnostic (general object recognition), random rotation teaches rotation invariance.
+
+### Task-Specific Augmentation Cautions
+
+Not every augmentation is appropriate for every task. Horizontal flipping is wrong for tasks where left-right orientation matters --- reading text in images, medical scans where laterality is diagnostically significant, directional traffic signs. Aggressive color jitter is wrong for tasks where specific color combinations are diagnostic --- histological stain colors encode pathological information that should not be randomized. The choice of augmentation strategy should follow from the task\'s semantics, not from a default template.
+
+For detection and segmentation, augmentations must be applied consistently to both the image and its annotations --- if you flip an image horizontally, you must also flip the bounding boxes and segmentation masks. Applying image augmentation without corresponding annotation augmentation produces training data where images and labels are misaligned --- a subtle but catastrophic data quality failure.
+
+## Representations --- What the Backbone Is Actually Producing
+
+### 4.1 The Hidden Structure of Embeddings
+
+When we load a pre-trained ResNet-50, strip its classification head, and feed an image through the remaining layers, what comes out is a vector --- typically 2048 numbers for ResNet-50. We call this the image\'s embedding, or representation, or feature vector. We have been treating this vector as a black box: a summary of the image that is useful for classification, detection, and segmentation without needing to understand what the individual numbers mean.
+
+But this vector has structure that is worth understanding --- because that structure is what makes transfer learning work, what makes multimodal fusion possible, and what determines the ceiling of any downstream task that reads these features.
+
+The key property: images that are semantically similar --- that show similar objects, in similar contexts, with similar poses --- produce feature vectors that are close together in the 2048-dimensional embedding space. Images that are semantically different produce feature vectors that are far apart. This clustering-by-meaning is not explicitly programmed. It emerges from training on a large classification task: to distinguish 1000 different object categories, the network must learn to bring examples of the same category together and push examples of different categories apart.
+
+### 4.2 Visualizing Representation Space
+
+High-dimensional vectors cannot be directly visualized, but dimensionality reduction techniques allow us to project them into 2D or 3D while approximately preserving their neighborhood structure.
+
+### t-SNE and UMAP
+
+t-SNE (t-distributed Stochastic Neighbor Embedding) and UMAP (Uniform Manifold Approximation and Projection) are the two most commonly used tools for this purpose. Both produce 2D scatter plots where nearby points are images with similar representations. If the backbone has learned good features, you will see recognizable clusters: all the dogs grouped together, all the cars grouped together, all the outdoor scenes grouped together. If the backbone has learned poor or biased features, the clusters will be unexpected --- demographic groups separated instead of object categories, background scenes dominating over foreground objects.
+
+Visualizing your model\'s representation space on your specific dataset is one of the most informative diagnostic steps available before deployment. It answers: what does the model think is similar? Are similar things similar for the right reasons?
+
+### The Geometry of Analogy
+
+A deeper property of well-trained representation spaces is that geometric relationships between embeddings encode semantic relationships. The vector from \'cat\' embedding to \'kitten\' embedding is similar to the vector from \'dog\' embedding to \'puppy\' embedding --- the representation has learned that the concept of \'baby version of an animal\' is a consistent geometric direction. This property --- semantic relationships encoded as geometric structure --- is what makes representations composable and transferable. It is also what makes multimodal fusion possible: if you can train a language model to produce text representations in the same geometric structure as visual representations, you can directly compare an image and a sentence by their positions in the shared space.
+
+We will return to this idea at length in Chapter 10. For now, the key takeaway is that representation quality is not a single number --- it is a structural property of the embedding space that can be evaluated visually and analytically.
+
+### 4.3 Measuring Representation Quality
+
+Beyond visualization, representation quality can be measured more formally. Three complementary approaches:
+
+### Linear Probe Accuracy
+
+Freeze the backbone and train a simple linear classifier (just a dense layer with softmax, no hidden layers) on top of its representations for a target task. The accuracy of this linear classifier --- called the linear probe accuracy --- measures how linearly separable the representations are for the target task. A good representation for a given task makes that task easily solvable with a linear model. This is a cleaner measure of representation quality than fine-tuning accuracy, because fine-tuning accuracy conflates representation quality with the expressiveness of the head.
+
+### Nearest-Neighbor Retrieval
+
+For each image in a validation set, find its k nearest neighbors in the representation space (the k images whose embeddings are closest by Euclidean or cosine distance). If the representation is good, the nearest neighbors should be semantically similar images --- same class, similar pose, similar context. Manually inspecting nearest-neighbor galleries for a sample of validation images is one of the most intuitive ways to assess what the backbone has learned.
+
+### Representation Alignment Across Domains
+
+If you plan to use the representation for transfer learning to a new domain, you can measure how well the representation space from the source domain (ImageNet) aligns with the target domain (medical images, satellite imagery, etc.) by comparing the cluster structure of the two domains\' embeddings. Poor alignment --- when the target domain images cluster differently from the source domain images --- predicts that transfer learning will require more fine-tuning and produce less reliable results.
+
+## Experiment Tracking and Model Versioning
+
+### 5.1 The Reproducibility Problem
+
+Consider a common scenario: you have run fifteen training experiments over three weeks --- varying the learning rate, the augmentation strategy, the backbone depth, the fine-tuning schedule. One of them produced a notably better model than the others. You want to deploy it. But which one was it? What exactly were the hyperparameters? Was the training data the same as in the last experiment, or had you updated the annotation schema in the interim? Is the model you saved from that run the correct checkpoint, or did you overwrite it with a subsequent run?
+
+If you cannot answer these questions with certainty, you do not have a deployable model --- you have a promising experiment whose conditions you may not be able to reproduce.
+
+This is the reproducibility problem, and it is not a problem that affects only careless practitioners. As experiments multiply and projects extend over weeks or months, the information needed to reconstruct any specific experiment grows beyond what human memory or informal notes can reliably track.
+
+### 5.2 What to Track
+
+Experiment tracking means recording, automatically and completely, everything that distinguishes one training run from another. The minimum set:
+
+-   Hyperparameters: learning rate, batch size, optimizer type, scheduler type and parameters, regularization coefficients, augmentation parameters.
+
+-   Architecture: backbone type and depth, head architecture, number of parameters, any frozen/unfrozen layer configuration.
+
+-   Dataset: dataset version or hash, train/val/test split sizes and random seed, class distribution, augmentation seed.
+
+-   Training metrics: training loss, validation loss, and key evaluation metrics at every epoch. Learning curves, not just final numbers.
+
+-   Artifacts: saved model checkpoints (ideally the best checkpoint and the final checkpoint), any generated visualizations, confusion matrices, or evaluation reports.
+
+-   Environment: framework version, GPU type, random seeds for reproducibility.
+
+Tools like Weights & Biases, MLflow, and Neptune automate much of this tracking with minimal code changes. The investment in setting up tracking at the start of a project pays compounding returns as the project grows in complexity.
+
+### 5.3 Model Versioning
+
+Beyond tracking individual experiments, model versioning is the practice of assigning meaningful identifiers to trained model artifacts and maintaining a history of how they changed.
+
+A useful model version identifier encodes: what task the model was trained for, the backbone architecture, the training data version, and the training date or run number. A model named \'mipds_vision_resnet50_coco-finetune_v2_20240315\' is unambiguous. A model named \'best_model.pt\' is not.
+
+Model versioning also means maintaining a changelog: what changed between version 1 and version 2, why the change was made, and what the performance impact was. This changelog is not just organizational hygiene --- it is the audit trail that allows you to diagnose production failures (\'the error rate increased after the October update --- what changed in v3?\') and to roll back to a previous version when necessary.
+
+For the MIPDS system, model versioning is especially important because the vision pipeline is a component in a larger multimodal system. Changes to the vision backbone will propagate downstream --- affecting the representations available to the language encoder and the multimodal fusion layer. Versioning the vision component carefully, with explicit interface specifications, is what makes the system upgradeable without requiring simultaneous changes to all downstream components.
+
+### 5.4 The Model Card: Documenting What You Built
+
+A model card is a structured document --- typically one to three pages --- that accompanies a trained model and describes it comprehensively to anyone who might use or rely on it. The concept was introduced by Mitchell et al. (2019) and has since been adopted as a standard documentation practice by major AI organizations including Google, Hugging Face, and the Partnership on AI.
+
+A complete model card contains:
+
+-   Model description: what task it performs, what architecture it uses, what data it was trained on, when it was trained.
+
+-   Intended use: what applications the model is designed for, what applications it should not be used for.
+
+-   Performance: evaluation results on the primary benchmark, including aggregate metrics and disaggregated results for relevant subgroups.
+
+-   Limitations: known failure modes, distribution conditions under which performance degrades, classes or subgroups where performance is lower.
+
+-   Ethical considerations: potential for misuse, documented performance disparities, data sources and their known biases, recommended safeguards.
+
+-   Training details: data preprocessing, augmentation strategy, training configuration, number of parameters.
+
+Writing a model card is not a bureaucratic exercise. It is the most honest accounting you can give of what you actually built versus what you intended to build. The discipline of writing it forces you to engage with the difference between training performance and real-world reliability --- and to acknowledge publicly the gaps between them.
+
+## The MIPDS Vision Pipeline Audit
+
+### 6.1 What an Audit Is
+
+An audit is a structured, systematic review of a system\'s performance, properties, and limitations --- conducted with the skepticism of an external reviewer rather than the confidence of the builder. In the context of the MIPDS vision pipeline, the audit is the formal activity that closes the vision half of the course and produces the documented specification that the language and multimodal components will build on.
+
+The audit is not a celebration of what works. It is a rigorous accounting of what works, what works imperfectly, what does not work at all, and under what conditions each of these holds. A system whose limitations are clearly documented is more trustworthy and more safely deployable than one whose limitations are unknown --- because known limitations can be guarded against.
+
+### 6.2 The Five Audit Questions
+
+### Question 1: What is the system\'s actual performance on held-out test data?
+
+Run the final model on the test set that has been held out since the beginning of development. Report: overall accuracy, per-class accuracy, confusion matrix, calibration curve, and (for detection) mAP at IoU 0.5 and 0.75. This is the honest performance estimate. If it differs significantly from validation performance, investigate why before proceeding.
+
+### Question 2: Where does the system fail, and why?
+
+Conduct systematic error analysis on a sample of at least 50 test set failures. Identify recurring patterns. Produce a prioritized list of failure modes ranked by frequency and consequence. For each major failure mode, describe what would need to change --- in the data, the architecture, or the training procedure --- to address it.
+
+### Question 3: What does the system know, and does it know it for the right reasons?
+
+Use GradCAM visualization on 20 correct predictions and 20 incorrect predictions. For correct predictions: is the model attending to semantically meaningful regions? For incorrect predictions: is the model attending to irrelevant regions, suggesting spurious correlations? Report any systematic attention failures discovered.
+
+### Question 4: What is the quality and structure of the representations?
+
+Generate a t-SNE or UMAP visualization of the backbone\'s embeddings for the test set. Inspect the cluster structure: do semantically similar images cluster together? Are there unexpected clusters that suggest the model has learned a surrogate feature rather than the target concept? Report what the visualization reveals about the representation space.
+
+### Question 5: What are the system\'s limitations, and who should know about them?
+
+Write a complete model card for the MIPDS vision module. Include: intended use, performance metrics (aggregate and disaggregated), known failure modes, data distribution assumptions, ethical considerations specific to the use case. The model card is a document you would be comfortable sharing with a non-technical stakeholder who was considering relying on this system.
+
+### 6.3 The Interface Specification
+
+The final product of the audit is not a report --- it is a specification. The MIPDS vision pipeline is a component in a larger system. For it to be usable by the language and multimodal components that follow, it must have a defined interface: what goes in, what comes out, and with what performance guarantees.
+
+  ------------------------------------------------------------------------------------------------------------
+  **MIPDS Vision Pipeline --- Interface Specification (Example)**
+
+  INPUT: RGB image, minimum 224×224 pixels, normalized to ImageNet mean/std
+
+  OUTPUT (Classification): Class label string + confidence score float \[0,1\]
+
+  OUTPUT (Feature Vector): 2048-dimensional float vector (global average pooled backbone features)
+
+  OUTPUT (Spatial Features): \[7×7×2048\] tensor (pre-pooling backbone features, for detection/fusion heads)
+
+  OUTPUT (Detection): List of {box: \[cx,cy,w,h\], class: string, score: float} dicts
+
+  PERFORMANCE: Top-1 accuracy 87.3% on validation set \| mAP@0.5 = 0.71 on held-out detection set
+
+  KNOWN LIMITATIONS: Performance degrades \>15% on images with heavy motion blur or extreme underexposure
+
+  KNOWN LIMITATIONS: Per-class accuracy ranges from 94% (common classes) to 61% (rare classes)
+
+  BACKBONE VERSION: ResNet-50 pretrained ImageNet + fine-tuned MIPDS_train_v2 \| 2024-03-15
+  ------------------------------------------------------------------------------------------------------------
+
+This specification --- with your actual numbers filled in --- is what you hand to Week 10, when the visual features are connected to the language encoder. The language and multimodal components are designed to consume the 2048-dimensional feature vector and the 7×7×2048 spatial tensor. Everything that happens inside the vision module is encapsulated. The interface is what matters.
+
+## The Ethics Checkpoint
+
+### 7.1 What the Model Learned --- and What You Did Not Intend to Teach It
+
+Every trained model has learned something. The question worth asking at this midpoint is whether what it has learned is what you intended to teach it.
+
+This is not a rhetorical question. Neural networks learn whatever is predictive of the training labels in the training data. If the training data contains spurious correlations --- between a class and an irrelevant background feature, between a demographic group and a contextual surrogate --- the model will learn those correlations alongside the genuine diagnostic features you intended it to learn. The model cannot distinguish between \'useful signal\' and \'spurious signal\' without explicit architectural or training interventions. It just learns what is there.
+
+The GradCAM analysis in the audit (Section 6) is one window into what the model has learned. The disaggregated performance analysis is another. Together, they can surface patterns that suggest the model is relying on features you did not intend --- and that may be unreliable or unfair in deployment.
+
+### 7.2 The Representation Inheritance Problem
+
+When you loaded an ImageNet-pretrained backbone in Week 4, you inherited not just ResNet\'s architecture and its learned weights --- you also inherited the statistical regularities present in ImageNet. Those regularities include genuine visual structure, but they also include the biases and distributional assumptions of whatever population of images and annotators produced ImageNet.
+
+Documented issues with ImageNet include: underrepresentation of certain geographic regions and cultural contexts; annotation biases in how people are labeled and described; class definitions that reflect particular cultural assumptions about object categories. These regularities are encoded in the pre-trained weights and transferred into every model fine-tuned from them.
+
+This inheritance is not a reason to avoid transfer learning --- the benefits are real and substantial. But it is a reason to audit the model you built, not just the model you started from. The fine-tuning data you added has its own distributional properties. The combination of ImageNet pretraining plus your specific fine-tuning dataset produces a model whose behavior you must evaluate empirically --- not assume from the theoretical properties of either data source alone.
+
+### 7.3 Consent, Transparency, and Deployment Context
+
+If the MIPDS vision system is intended for real-world deployment --- which is the capstone premise --- then several questions about consent and transparency arise that technical evaluation cannot answer.
+
+Will the people whose images the system processes know that it is operating? In what contexts is it appropriate to collect and process visual data of individuals without explicit consent? (Public spaces, medical settings, and private residences all have different legal and ethical norms.) Who will have access to the system\'s outputs, and for how long? What accountability mechanisms exist if the system makes consequential errors?
+
+These questions do not have technical answers. They require policy decisions, legal compliance work, and genuine engagement with the affected populations. The model card written in Section 6 should flag these questions explicitly --- not as problems that have been solved, but as considerations that anyone deploying this system must address before doing so.
+
+### 7.4 Preparing to Go Further, Responsibly
+
+In Chapter 7, the MIPDS system will gain its first language capability --- and the ethical surface area will expand. Language models carry their own inherited biases and spurious correlations, drawn from the text data they were trained on. When a language model is connected to a vision backbone, the biases of both modalities interact in ways that can produce failures that neither system would produce alone.
+
+The habits of evaluation and ethical reflection established in this chapter --- disaggregated analysis, error attribution, representation inspection, explicit documentation --- are not just good practice for the vision module. They are the foundation for responsible development of the full multimodal system. They become more important, not less, as the system gains capability.
+
+## Hands-On Exploration
+
+### The Goal
+
+This activity is the practical implementation of the chapter\'s audit framework. You will evaluate your MIPDS vision pipeline systematically --- not to celebrate what it gets right, but to characterize precisely where it works, where it fails, and what those failures reveal. The deliverable is a completed model card and interface specification for the MIPDS vision module.
+
+### Setup
+
+Use Google Colab with your trained ResNet-50 or EfficientNet-B0 from Chapter 4. A starter notebook is provided that sets up the evaluation harness, confusion matrix visualization, calibration plot, and t-SNE projection tools.
+
+### Part 1: Held-Out Test Evaluation
+
+Run the final model on the held-out test set. Collect: overall accuracy, per-class accuracy for every class, confusion matrix, and top-5 error analysis. Produce a reliability diagram by binning predictions into confidence deciles and plotting mean accuracy versus mean confidence for each decile.
+
+Answer: How large is the gap between validation accuracy and test accuracy? Is the model overconfident, underconfident, or approximately calibrated? Which classes have the lowest accuracy, and is there a pattern in their visual similarity to the classes they are most often confused with?
+
+### Part 2: Systematic Error Examination
+
+Collect all test set misclassifications. Sample 30 at random. For each, record: true class, predicted class, confidence score, and one sentence describing what you observe in the image. After examining all 30, identify the three most common error patterns. For each pattern, write one hypothesis about what feature the model may be attending to incorrectly.
+
+Then run GradCAM on 10 of the most confidently-wrong predictions. Do the GradCAM heatmaps support or contradict your hypotheses from the error pattern analysis?
+
+### Part 3: Representation Visualization
+
+Extract 2048-dimensional embedding vectors for the full test set using the backbone (before global average pooling --- use the pre-pooling spatial features, averaged across spatial positions). Run t-SNE with perplexity=30 on these embeddings and produce a 2D scatter plot colored by true class label. Inspect the plot: do same-class images cluster together? Are there any unexpected inter-class or intra-class structures?
+
+Then identify 5 images whose nearest neighbors (in embedding space) surprise you --- images whose closest matches are not from the same class. For each, examine what visual feature the embedding appears to be using to determine similarity.
+
+### Part 4: Write the Model Card
+
+Using the model card template provided in the notebook, write a complete model card for your MIPDS vision module. All fields must be completed with your actual model\'s real characteristics --- no placeholder text. The model card should be honest about limitations: if the model performs poorly on certain classes or under certain conditions, those limitations should be stated clearly.
+
+Exchange model cards with a classmate and review theirs. Identify one limitation they listed that you think is more serious than their framing suggests, and one potential use case they may not have considered.
+
+### Part 5: The Interface Specification
+
+Complete the interface specification template for your MIPDS vision module. Fill in: input format requirements, all output types and their formats, actual performance numbers from Part 1, and the two most important known limitations from Part 2. This specification is the handoff document to Week 10\'s multimodal integration.
+
+### Reflection
+
+Three sentences: (1) What did the error analysis reveal that you did not expect? (2) What would you change about the training data or training procedure if you were to retrain this model? (3) Is there any condition under which you would not feel comfortable deploying this model, even if its overall accuracy were higher than it currently is?
+
+### Case Study: The Failure Nobody Documented --- Lessons from Deployed Medical AI
+
+### The Problem
+
+In 2019, a study published in Nature Medicine described a deep learning system for detecting pneumonia from chest X-rays that achieved radiologist-level performance on its test set --- a headline-generating result that attracted significant attention and optimism about AI-assisted clinical diagnosis. What the initial publications underemphasized was a finding that emerged from subsequent analysis: the model\'s performance was substantially lower on images from hospital systems not represented in the training data.
+
+This is not an isolated case. A systematic review of AI diagnostic systems in medical imaging found that geographic generalization --- performance on data from hospitals, scanners, and patient populations not in the training set --- was rarely evaluated in published studies, and when evaluated, typically showed meaningful performance degradation. The gap between benchmark performance and deployment performance turned out to be large, clinically significant, and poorly understood at the time of deployment in several early systems.
+
+### What Went Wrong Evaluationally
+
+The evaluation failures that contributed to this pattern are precisely the ones this chapter addresses. Test sets were drawn from the same hospital systems as training data --- meaning they measured memorization of a particular site\'s image characteristics as much as genuine diagnostic capability. Disaggregated evaluation across patient demographics, scanner types, and imaging protocols was not reported. Model cards did not exist for most published systems, so clinicians evaluating whether to adopt a system had no structured documentation of its limitations.
+
+The concept of distribution shift --- that a model trained at institution A might perform differently at institution B, not because of any flaw in the model but because institution B\'s scanners produce subtly different images --- was understood theoretically but not operationalized in evaluation practice. The assumption, often implicit, was that medical images are medical images and a model that generalizes within one hospital will generalize across all hospitals.
+
+This assumption was wrong, and its wrongness had real consequences for the credibility of medical AI as a field and for the patients who received care mediated by systems whose limitations were not adequately understood by the clinicians relying on them.
+
+### What Responsible Evaluation Would Have Looked Like
+
+Several principles from this chapter, applied from the beginning, would have substantially improved the situation. External validation --- evaluating on data from hospital systems not present in the training set --- should have been a requirement before deployment, not an afterthought discovered in post-hoc analysis. Disaggregated evaluation by demographic subgroup, scanner manufacturer and model, and image acquisition protocol should have been standard. Model cards with explicit documentation of the training data distribution, known limitations, and recommended use conditions should have accompanied every deployed system.
+
+Some of these practices are now becoming standard in the medical AI community. The FDA\'s guidance on AI-based medical devices now emphasizes the importance of predetermined change control protocols and real-world performance monitoring. The Nature Medicine study itself prompted a wave of methodological reflection that has improved evaluation norms in the field. The progress is real --- but it was driven by observed failures rather than proactive rigor.
+
+### The Broader Lesson
+
+The medical AI case study is a specific instance of a general pattern in the deployment of ML systems: evaluation that looks rigorous --- large test sets, strong aggregate metrics, comparison to human-level performance --- can miss the failures that matter most if it does not include external validation, disaggregated analysis, and honest documentation of limitations.
+
+The lesson is not that deep learning cannot contribute to medicine. It can, and it will. The lesson is that technical performance on a benchmark, even a rigorous one, is a beginning of evaluation rather than an end. The habits of thought and practice introduced in this chapter --- skepticism about aggregate metrics, insistence on disaggregated analysis, commitment to external validation, honesty in documentation --- are not bureaucratic overhead. They are how you build systems that can be trusted.
+
+## Chapter Summary
+
+This chapter was the walk-through --- the structured pause between the visual and language halves of the course where we asked, rigorously, whether what we have built actually works and what it means for it to work well.
+
+We began with the foundational distinction between training performance and generalization: training accuracy measures the model\'s ability to reproduce patterns in seen data; test accuracy on a truly held-out set measures its ability to generalize to unseen data; and neither metric, alone, tells you how the model will perform in deployment under conditions of distribution shift. The three-way train/validation/test split is the minimum structure for honest evaluation, and maintaining the integrity of the test set --- not using it until development is complete --- is the discipline that makes the split meaningful.
+
+We examined the tools of evaluation depth: the confusion matrix as a diagnostic instrument revealing which classes are confused and why; error analysis as the practice of not just counting mistakes but examining them for pattern and cause; GradCAM as a window into whether the model is attending to the right features for the right reasons. We explored calibration --- the alignment between confidence and accuracy --- as a property that matters enormously in high-stakes applications where model confidence scores influence human decisions.
+
+We addressed dataset quality as a first-order concern rather than a preliminary one: annotation consistency, class imbalance, and augmentation discipline are all design decisions that determine the ceiling of model performance before a single gradient is computed. We established that augmentations must be semantically appropriate for the task, consistently applied to annotations as well as images, and chosen to expand the coverage of the training distribution in directions that match realistic deployment variation.
+
+We examined what the backbone\'s representations actually contain --- not a black box to be accepted, but a high-dimensional embedding space with interpretable structure. Linear probe accuracy, nearest-neighbor retrieval, and t-SNE visualization are concrete tools for evaluating representation quality independently of downstream task performance. The representation produced by the vision backbone is the interface point for multimodal fusion in Chapter 10; understanding its properties now is what makes that future connection principled.
+
+Experiment tracking and model versioning transform a collection of training runs into a reproducible, auditable development history. Model cards transform a trained artifact into a communicated system --- one whose properties, limitations, and ethical considerations are accessible to anyone who will rely on it.
+
+The chapter closed with the MIPDS vision pipeline audit: five structured questions that produce, as their joint output, a model card and an interface specification. The interface specification --- what goes in, what comes out, what performance guarantees are made --- is the formal handoff that makes the vision module a composable component in a larger system rather than a monolithic, opaque artifact.
+
+In Chapter 7, we begin the language half of the course with sequence models: the architectural predecessors to Transformers that established the vocabulary of sequential processing and contextual representation. The evaluation habits and ethical commitments of this chapter travel with us. They become more important, not less, as the system gains multimodal capability.
+
+## Review Questions
+
+9.  The chapter argues that the test set must be held out until all development decisions are finalized --- and that evaluating on it before this moment invalidates it as an honest performance estimate. In practice, many published benchmark results come from test sets that have been used repeatedly across many papers and many model iterations. Does this practice undermine the validity of those benchmarks? If so, what should the research community do about it?
+
+10. Disaggregated evaluation requires knowing the demographic or subgroup membership of your evaluation examples --- which may require collecting sensitive information about the people in your dataset. How do you balance the need for disaggregated evaluation (which requires demographic data) against the privacy interests of the people whose images are used for training and evaluation? Are there technical approaches that could enable disaggregated evaluation without collecting sensitive attributes explicitly?
+
+11. Model cards are designed to communicate a model\'s limitations to anyone who might use or rely on it. But in practice, the people who most need to understand a model\'s limitations --- clinicians, judges, loan officers, teachers --- are often not in a position to read and interpret a technical model card. What would a non-technical model card look like? Who is responsible for translating model limitations into forms accessible to decision-makers?
+
+12. The case study described medical AI systems that showed strong benchmark performance but failed on external validation. This failure was discovered post-hoc, after systems had been deployed. Who bears moral responsibility for those failures --- the researchers who published optimistic benchmark results, the institutions that deployed systems without external validation, the regulators who approved deployment, or the clinicians who relied on the systems? Is this a question with a meaningful answer?
+
+13. Distribution shift --- the difference between the distribution a model was trained on and the distribution it encounters in deployment --- is one of the most common causes of production failures. Yet it is rarely measured explicitly before deployment. Why do you think this is? What organizational, incentive, or technical barriers prevent more systematic pre-deployment distribution shift analysis?
+
+14. The chapter recommends that GradCAM be used to verify that models attend to semantically meaningful regions rather than spurious correlations. But GradCAM itself is an approximation --- it provides a post-hoc interpretation of the model\'s behavior, not a direct readout of its internal reasoning. How much trust should you place in GradCAM-based interpretations? What would make you more or less confident that a GradCAM analysis is revealing something real?
+
+15. Class imbalance is often addressed by oversampling minority classes or assigning higher loss weights to minority class errors. Both approaches change what the model is optimizing for --- from minimizing average error across all examples to minimizing error in a way that gives more weight to rare classes. Is this the right thing to optimize for? Under what circumstances should you intentionally optimize for minority class performance at the expense of aggregate accuracy?
+
+16. The chapter introduces representations --- the high-dimensional embeddings produced by a backbone --- as the interface point for multimodal fusion. But representations are also a form of surveillance: given two images, you can determine how similar they are without knowing what either contains, simply by comparing their embeddings. What does this capability enable that is beneficial? What does it enable that is harmful? Who should have access to embedding-based similarity search?
+
+## Further Reading
+
+### Evaluation and Measurement
+
+Sculley, D., Holt, G., Golovin, D., Davydov, E., Phillips, T., Ebner, D., \... & Dennison, D. (2015). Hidden technical debt in machine learning systems. NeurIPS. A landmark paper on the systemic costs of production ML systems --- evaluation debt is among the most insidious.
+
+Recht, B., Roelofs, R., Schmidt, L., & Shankar, V. (2019). Do ImageNet classifiers generalize to ImageNet? ICML. A careful empirical study of what changes when you construct a new test set for the same distribution --- essential reading for anyone who relies on published benchmark numbers.
+
+D\'Amour, A., Heller, K., Moldovan, D., Adlam, B., Alipanahi, B., Beutel, A., \... & Sculley, D. (2020). Underspecification presents challenges for credibility in modern machine learning. arXiv. Makes the case that many models that look equivalent on benchmarks can fail in dramatically different ways in deployment.
+
+### Fairness and Disaggregated Evaluation
+
+Barocas, S., Hardt, M., & Narayanan, A. (2023). Fairness and Machine Learning: Limitations and Opportunities. MIT Press. The most comprehensive treatment of the mathematical frameworks for measuring and addressing unfairness in ML systems. Freely available at fairmlbook.org.
+
+Oakden-Rayner, L., Doshi-Velez, F., & Miller, T. (2020). Hidden stratification causes clinically meaningful failures in machine learning for medical imaging. ACM CHIL. Documents how subgroup performance disparities are systematically missed by standard evaluation in medical AI.
+
+Mitchell, M., Wu, S., Zaldivar, A., Barnes, P., Vasserman, L., Hutchinson, B., \... & Gebru, T. (2019). Model cards for model reporting. ACM FAccT. The paper that introduced model cards --- brief and worth reading in full.
+
+### Representation Learning and Analysis
+
+Yosinski, J., Clune, J., Nguyen, A., Fuchs, T., & Lipson, H. (2015). Understanding neural networks through deep visualization. ICML Deep Learning Workshop. A visual and intuitive introduction to what different layers of CNNs represent.
+
+Chen, T., Kornblith, S., Norouzi, M., & Hinton, G. (2020). A simple framework for contrastive self-supervised learning. ICML. SimCLR --- a highly readable introduction to learning representations without labels.
+
+Van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. Journal of Machine Learning Research. The original t-SNE paper --- worth reading for the intuition about why distance metrics in high-dimensional space behave counterintuitively.
+
+### Calibration and Uncertainty
+
+Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q. (2017). On calibration of modern neural networks. ICML. The foundational study showing that modern deep networks are typically overconfident, with practical methods for correction.
+
+Ovadia, Y., Fertig, E., Ren, J., Nado, Z., Sculley, D., Nowozin, S., \... & Snoek, J. (2019). Can you trust your model\'s uncertainty? Evaluating predictive uncertainty under dataset shift. NeurIPS. Studies how calibration degrades under distribution shift --- highly relevant for deployment.
+
+### Reproducibility and MLOps
+
+Amershi, S., Begel, A., Bird, C., DeLine, R., Gall, H., Kamar, E., \... & Zimmermann, T. (2019). Software engineering for machine learning: A case study. ICSE. Documents the challenges of building and maintaining production ML systems at industrial scale.
+
+Paleyes, A., Urma, R. G., & Lawrence, N. D. (2022). Challenges in deploying machine learning: A survey of case studies. ACM Computing Surveys. A comprehensive review of real-world deployment failures and the evaluation and engineering practices that could have prevented them.

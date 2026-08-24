@@ -1,0 +1,446 @@
+---
+title: "The Memory Problem"
+subtitle: "Sequence Models and the Road to Attention"
+---
+
+## Opening Narrative
+
+Dr. Amara Osei is a hospitalist physician at a teaching hospital in Accra. On a busy Tuesday morning, she reviews the discharge summary for a patient who has been on her floor for eleven days. The summary is three pages long. It describes an admission for a pulmonary embolism, a course complicated by a suspected drug reaction on day four, a medication adjustment on day six, and a gradual stabilization over the following days. Near the end of the third page, the summary reads: *\"The patient tolerated the procedure well, though she remained anxious throughout the recovery period.\"*
+
+She. Who is she? To a human reader, the answer is obvious --- the patient, mentioned by name in the very first sentence. We carry that referent forward effortlessly through paragraphs of clinical detail, through medication names and lab values and nursing notes, without ever losing track of the thread. By the time we encounter the pronoun three pages later, we have not forgotten. We have been holding that connection in memory, silently, the entire time.
+
+Now ask yourself: how does a machine do this?
+
+This is not a rhetorical question. It is the central engineering challenge that defined an entire decade of artificial intelligence research into language. The convolutional networks you built in Weeks 4 and 5 are masterful spatial reasoners --- they ask *what is present, and where?* They scan an image, find edges and textures and objects, and produce a rich description of a frozen moment in space. But language is not a frozen moment. Language is a river. Each word arrives in time, carries meaning forward, and depends for its interpretation on everything that came before.
+
+To teach a machine to read the way Dr. Osei reads --- to hold a thread across a long and complicated document, to know that *she* at the bottom of page three refers to a patient introduced at the top of page one --- researchers needed a completely different kind of architecture. Not networks that map inputs to outputs in a single pass, but networks that *remember*.
+
+This chapter is the story of how that problem was attacked, how far early solutions got, and precisely where they broke down. By the end, you will understand Recurrent Neural Networks, Long Short-Term Memory networks, and Gated Recurrent Units --- not as historical curiosities, but as logical responses to a genuine and difficult problem. And you will feel, from the inside, the specific limitation that each of them could not quite overcome.
+
+That limitation has a name: the information bottleneck. And resolving it, when it finally happened, changed everything.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain what distinguishes a sequence model from the feedforward and convolutional architectures covered in earlier chapters
+
+-   Describe how the RNN hidden state carries information across time steps, and why this mechanism produces the vanishing gradient problem
+
+-   Identify the role of each gate in an LSTM network and explain how gating addresses the limitations of the basic RNN
+
+-   Compare LSTM and GRU architectures and articulate the tradeoff between expressiveness and simplicity
+
+### Analyze and Evaluate
+
+-   Analyze how the information bottleneck emerges in encoder-decoder sequence models, and explain which kinds of inputs are most affected
+
+-   Evaluate the tradeoffs among RNN, LSTM, and GRU architectures for a given language task
+
+-   Assess the practical limitations of sequential processing for large-scale training
+
+### Apply and Create
+
+-   Connect the vanishing gradient problem in sequence models to its earlier appearance in deep feedforward networks, recognizing the shared underlying cause
+
+-   Design the language preprocessing pipeline for your MIPDS system, including tokenization strategy, embedding approach, and sequence length decisions
+
+-   Articulate why the sequence modeling limitations explored in this chapter motivated an entirely different architectural approach --- the Transformer
+
+## Key Terms and Concepts
+
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                                  **Definition**
+  ----------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Sequence Model**                        An architecture that processes inputs in order, where the model\'s interpretation of each element depends on what came before. Unlike feedforward networks, which treat each input independently, sequence models maintain a running context that accumulates over time.
+
+  **Recurrent Neural Network (RNN)**        A neural network with a feedback loop: at each time step, the network takes the current input *and* its own previous output, producing a new output that reflects both. This loop allows the network to carry information forward through a sequence.
+
+  **Hidden State**                          The vector an RNN maintains as a running summary of everything it has processed so far. At each step, the hidden state is updated based on the current input and the previous hidden state. Think of it as a constantly-overwritten notepad.
+
+  **Backpropagation Through Time (BPTT)**   The algorithm for training RNNs, which \"unrolls\" the network across all time steps and computes gradients backward through each one. Because gradients must travel through every time step, long sequences make training unstable.
+
+  **Vanishing Gradient**                    The training problem where gradients shrink exponentially as they are propagated backward through many time steps. By the time they reach early steps, they are so small that those early parameters receive almost no update signal --- the network cannot learn from distant context.
+
+  **Exploding Gradient**                    The opposite instability, where gradients grow uncontrollably across time steps. While addressable through gradient clipping, it reflects the same underlying instability in training very deep or very long recurrent networks.
+
+  **Long Short-Term Memory (LSTM)**         An RNN variant that introduces a separate long-term memory track called the cell state, alongside three learned gates that control what information is stored, what is discarded, and what is read out. Designed specifically to allow gradients to flow across long sequences without vanishing.
+
+  **Cell State**                            The LSTM\'s dedicated long-term memory. Unlike the hidden state, which is modified at every step, the cell state can carry information across many steps with minimal modification --- providing a \"highway\" for gradients to travel through.
+
+  **Forget Gate**                           The first of LSTM\'s three gates. At each step, it decides how much of the existing cell state to retain and how much to erase. The forget gate\'s parameters are learned from data --- the network learns which kinds of information are worth keeping across different contexts.
+
+  **Input Gate**                            The second of LSTM\'s three gates. It decides what new information from the current input should be written into the cell state. Works in tandem with a candidate vector that proposes new content.
+
+  **Output Gate**                           The third of LSTM\'s three gates. It decides what portion of the cell state should be exposed as the hidden state --- the information that gets passed on and used as output at this time step.
+
+  **Gated Recurrent Unit (GRU)**            A streamlined alternative to the LSTM that merges the cell state and hidden state into one and uses two gates instead of three. Empirically comparable to LSTM on many tasks, with fewer parameters and simpler structure.
+
+  **Bidirectional RNN**                     An architecture that processes a sequence twice --- once forward, once backward --- and combines the results at each position. This gives every position access to context from both directions, making it powerful for tasks like named entity recognition where meaning depends on surrounding words.
+
+  **Encoder-Decoder Architecture**          A two-network design where one network (the encoder) processes the input and compresses it into a representation, and a second network (the decoder) generates output from that representation. The standard approach for tasks where input and output are variable-length sequences of different types, such as translation.
+
+  **Information Bottleneck**                The structural limitation of the basic encoder-decoder model: the entire input sequence, regardless of length, must be compressed into a single fixed-size vector before decoding begins. This compression loses information, especially for long inputs.
+
+  **Attention Mechanism (early)**           A modification to the encoder-decoder architecture that allows the decoder to \"look back\" at all of the encoder\'s hidden states at each decoding step, rather than relying solely on the final compressed vector. Dramatically improves performance on long inputs by bypassing the information bottleneck.
+
+  **Word Embedding**                        A learned dense vector representation of a word, where the geometry of the vector space encodes semantic relationships. Words with similar meanings cluster together; operations on embeddings can reflect meaningful relationships.
+
+  **Tokenization**                          The process of breaking raw text into discrete units --- tokens --- that the model can process numerically. Tokens may be words, subword fragments, or individual characters, depending on the chosen strategy.
+
+  **Subword Tokenization**                  A tokenization approach that breaks words into meaningful fragments, allowing the model to handle rare or novel words by decomposing them into known parts. Methods include Byte-Pair Encoding (BPE) and WordPiece. The standard approach in modern language systems.
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## The Problem That Started Everything
+
+### What It Means to Process Language
+
+Before we can appreciate how sequence models work, we need to appreciate why they are necessary. And that requires sitting with a deceptively simple observation: when you read a sentence, you do not process each word in isolation.
+
+Consider this sentence: *\"The bank by the river had high interest rates, but the one downtown was flooded.\"*
+
+The word \"bank\" appears once. But to understand it correctly, you need to register that the sentence contains two different banks --- a riverbank and a financial institution --- and that the pronoun \"one\" in the second clause refers to the financial institution, not the riverbank. You figured that out without effort. You did it by holding the entire first clause in memory while processing the second, by noticing the contrast signal in \"but,\" and by resolving the ambiguity using context.
+
+Now consider a feedforward neural network --- the kind we built and understood in Weeks 1 and 2. A feedforward network maps inputs to outputs in a single pass. It takes a fixed-size input vector, transforms it through layers, and produces a fixed-size output. It has no state, no memory, no sense of what came before. Every input is processed fresh, as if it were the only thing the network has ever seen.
+
+This is fine for image patches, for classification labels, for fixed-format records. It is not fine for language. Language is a process, not a snapshot. Understanding any part of it requires knowing what preceded it.
+
+The first architecture designed to solve this problem was the Recurrent Neural Network.
+
+### The Recurrent Neural Network: A Network with a Memory
+
+The core idea of the RNN is surprisingly elegant. Instead of discarding the network\'s previous state after each computation, why not feed it back in? At every time step, the network takes two inputs: the current token, and its own previous output. It combines them, applies a transformation, and produces a new output that represents its current understanding of the sequence so far.
+
+That output --- called the **hidden state** --- is the network\'s memory. It is a fixed-size vector that is supposed to encode everything relevant about what the network has read up to this point. At step 1, it reflects only the first word. At step 5, it reflects the first five words. At step 50, it is meant to reflect everything the network has seen in the fifty steps since it began.
+
+Imagine a reader keeping a small notepad. As they move through a text, they jot down running notes --- a compressed summary of what they have encountered so far. Each new sentence updates the notes. Old entries get revised or overwritten. The notepad never grows; it always holds the same amount of information. The reader must decide, implicitly, what to keep and what to let go.
+
+This is the RNN hidden state, exactly. And already you can sense the limitation: the notepad is small. There is a fixed amount of space. And since the model writes to that space at every step, early information tends to get overwritten by later information. By step 50, the memory of step 1 may have been revised out of existence.
+
+### Training Recurrent Networks: Backpropagation Through Time
+
+In Week 3, you learned how feedforward networks are trained: gradients are computed through each layer and used to update weights. In an RNN, training works the same way in principle, but with a twist. The network must be \"unrolled\" across time --- treated as a very deep feedforward network where each layer corresponds to one time step.
+
+The gradient must travel backward through all of these layers to reach the weights that govern how early time steps are processed. For a sequence of 50 tokens, that means 50 layers worth of backward propagation. For 100 tokens, 100 layers.
+
+Here is where the trouble begins.
+
+Recall from Week 3 that gradients in deep networks can suffer from the **vanishing gradient problem**: each time a gradient passes through a layer, it is multiplied by the derivative of the activation function. If those derivatives are consistently less than 1 --- as they are for sigmoid and tanh activations at most of their range --- the gradient shrinks. Pass through enough layers, and the gradient approaches zero. The weights in the early layers receive a signal so tiny it might as well be noise. They do not learn.
+
+In a recurrent network, this problem operates across time rather than depth. A gradient trying to carry information from step 50 back to step 1 must survive 50 multiplications. For a long sequence, it almost never does.
+
+The analogy that helps here is the **telephone game**. You have played it: one person whispers a message to the next, who whispers it to the next, and so on across a room of fifty people. By the time the message reaches the last person, it has typically degraded into something unrecognizable. The original content is still there, in principle --- but the transmission was lossy at every step.
+
+That is what happens to gradients in a long RNN. The message that \"this early information mattered\" never reaches the weights responsible for processing that early information. The network cannot form long-range dependencies. It may learn that adjacent words relate to each other, but it cannot reliably learn that a subject introduced in sentence one determines the interpretation of a pronoun in sentence ten.
+
+The exploding gradient is the opposite problem: gradients that multiply repeatedly by values greater than 1 grow uncontrollably, leading to wildly unstable weight updates. This is addressed through a technique called gradient clipping --- simply capping gradients at a maximum value --- but it is a symptom of the same underlying instability.
+
+For short sequences, RNNs work respectably. For the length of text that actually matters --- paragraphs, documents, medical records --- they struggle. Something better was needed.
+
+## Long Short-Term Memory --- Learning What to Remember
+
+### The Insight Behind LSTM
+
+In 1997, Sepp Hochreiter and Jürgen Schmidhuber published a paper that proposed a solution to the vanishing gradient problem in recurrent networks. Their architecture, the Long Short-Term Memory network, introduced two ideas that would define sequence modeling for the next two decades.
+
+The first idea: **separate long-term and short-term memory**. Instead of asking a single hidden state to serve as both an output and a long-term store, the LSTM uses two tracks. The **hidden state** remains the short-term working memory --- updated at every step, used as the current output, passed on to the next step. The **cell state** is the long-term memory --- a parallel track that can carry information across many time steps with minimal modification, acting as a protected channel for information that needs to persist.
+
+The second idea: **learned gating**. Rather than updating both tracks automatically at every step, the LSTM uses learned gates --- small networks that produce values between 0 and 1 --- to decide what to keep, what to add, and what to expose. The gates are not fixed rules. They are trained parameters. The network learns, from data, which kinds of information deserve to be remembered and which deserve to be forgotten.
+
+Think of the difference this way. The basic RNN has a notepad it rewrites at every step. The LSTM has both a notepad (the hidden state) and a filing cabinet (the cell state). The filing cabinet is updated deliberately, not automatically. Before adding new information, the LSTM checks whether old information should be removed first. Before reading from the filing cabinet, it decides which portion to expose. Everything is a choice --- and the choices are learned.
+
+### The Three Gates
+
+The LSTM cell operates through the sequential interaction of three gates. Understanding each one is essential to understanding why the architecture works.
+
+### The Forget Gate
+
+The first decision the LSTM makes at each time step is: *how much of the existing cell state should we retain?*
+
+The forget gate takes the current input and the previous hidden state, combines them, passes them through a sigmoid activation, and produces a vector of values between 0 and 1. Each value corresponds to one dimension of the cell state. A value near 1 means \"keep this.\" A value near 0 means \"erase this.\"
+
+The forget gate is the LSTM\'s editor. Imagine a researcher who takes meticulous notes as they read through a long technical report. When they reach the methodology section, they might decide that the background context they wrote down in the introduction is no longer needed --- the filing cabinet entry for \"research context\" can be cleared to make room for \"experimental procedure.\" The forget gate makes precisely this decision, learned from training data rather than imposed by the engineer.
+
+### The Input Gate
+
+The second decision is: *what new information should we write into the cell state?*
+
+The input gate is actually two components working together. A sigmoid layer --- the input gate proper --- decides *which dimensions* of the cell state to update. A tanh layer produces a *candidate vector* --- a proposed set of new values to write. The actual update is the element-wise product of these two: the input gate controls the degree to which each proposed value is actually incorporated.
+
+Continuing the researcher analogy: the input gate decides which parts of the current page deserve a new entry in the filing cabinet, and the tanh layer drafts what those entries should say. They work together to produce a targeted, controlled update.
+
+### The Output Gate
+
+The third decision is: *what should we expose as the current output?*
+
+Even if the cell state contains a rich store of accumulated information, not all of it is relevant to the current time step\'s output. The output gate takes the current input and previous hidden state, applies a sigmoid, and multiplies the result element-wise against a tanh-transformed version of the cell state. The result is the new hidden state --- what gets passed on and used as the current output.
+
+This is the moment where the long-term memory informs the short-term output. The researcher closes their filing cabinet, reads the current sentence again, and decides what to say in response --- drawing on the filing cabinet as needed, but filtering what they expose.
+
+### Why LSTMs Solve the Vanishing Gradient
+
+The architectural reason LSTMs are more effective than basic RNNs comes down to the cell state highway. Because the cell state is updated through addition --- not multiplication through a saturating activation --- gradients can flow backward along this pathway without being squashed. The forget gate does introduce some multiplicative interaction, but it is a learned gate that can be set close to 1 for important information, preserving the gradient signal.
+
+This is a subtle but crucial point. The LSTM does not eliminate the vanishing gradient problem entirely --- for very long sequences, it still struggles. But it dramatically extends the effective range over which a network can maintain and learn from long-range dependencies. Where a basic RNN might reliably remember five or ten steps back, a well-trained LSTM can maintain useful context over hundreds of steps.
+
+The practical impact was enormous. LSTMs powered the first generation of effective machine translation systems, speech recognition engines, and text generation models. For much of the 2010s, if you encountered a language AI system, there was a good chance it had LSTMs at its core.
+
+## Gated Recurrent Units --- Simplicity as a Virtue
+
+In 2014, Kyunghyun Cho and colleagues proposed a variant of the LSTM that simplified the architecture without sacrificing much of its performance. The **Gated Recurrent Unit** (GRU) merges the cell state and hidden state into a single unified state and reduces the number of gates from three to two.
+
+The two GRU gates are the **reset gate** and the **update gate**. The reset gate controls how much of the previous state to consider when computing a new candidate state --- essentially deciding how much past context to forget. The update gate controls how much of the previous state to retain and how much of the new candidate to incorporate --- performing the combined role of the LSTM\'s forget and input gates in a single operation.
+
+The result is a leaner architecture. Fewer parameters mean faster training and better behavior on smaller datasets, where the risk of overfitting is higher. The LSTM\'s separate cell state provides additional expressiveness that can matter for complex tasks, but on many benchmark datasets, the two architectures perform comparably. Choosing between them is often a practical decision: use GRU when data is limited or speed matters; consider LSTM when maximum expressiveness on complex long-range tasks is the priority.
+
+The deeper lesson here is one about architectural design philosophy. It is tempting to assume that more complex is always better --- more gates, more parameters, more moving parts. But the GRU\'s success suggests otherwise. What matters is whether the architecture captures the essential mechanism. Both LSTM and GRU implement some form of learned selective memory. Beyond that core, additional complexity may add more noise than signal.
+
+## Extending the Architecture
+
+### Bidirectional Recurrent Networks
+
+The architectures we have discussed so far process sequences in a single direction: left to right, one token at a time. This mirrors the experience of speaking or writing --- you encounter words in order, and context accumulates as you go. But reading and understanding are not the same as speaking and writing. When we read to understand, we often know the end before we reread the beginning. We process language bidirectionally.
+
+A **bidirectional RNN** exploits this insight by running two recurrent networks over the same sequence: one forward (from token 1 to token N) and one backward (from token N to token 1). At each position, the representations from both passes are concatenated, giving every token a representation that reflects both its preceding context and its following context.
+
+This matters enormously for tasks like named entity recognition, where determining whether \"Washington\" refers to a person, a city, or a state often depends on words that appear after it: *\"Washington D.C.\"* versus *\"George Washington led\"* versus *\"Washington state\'s rainfall.\"* With a unidirectional model, the representation of \"Washington\" at the time it is processed contains no information about what follows. With a bidirectional model, it does.
+
+Bidirectionality comes at a cost: the model can no longer be used autoregressively for generation, since it requires the entire sequence before it can produce any representation. Bidirectional models are therefore best suited for understanding tasks --- where the full input is available --- rather than generation tasks, where output must be produced token by token.
+
+### The Encoder-Decoder Architecture
+
+The sequence models we have described so far are good at processing a sequence and producing a summary or a classification. But many of the most important language tasks require something different: given an input sequence, produce an *output sequence of different length and possibly different content*. Translation is the canonical example --- map an English sentence to its French equivalent, where the sentences may have different numbers of words. Summarization is another --- map a long article to a short one. Question answering --- map a question plus a passage to an answer.
+
+The **encoder-decoder architecture** was developed to handle these tasks. The design is conceptually simple: a first network (the encoder) reads the entire input and produces a compressed representation. A second network (the decoder) takes that compressed representation and generates the output, one token at a time.
+
+The encoder is typically a bidirectional LSTM, running over the input and producing a hidden state at each step. At the end of the input, the final hidden state --- a single fixed-size vector --- is passed to the decoder as its starting point. The decoder then generates output autoregressively: it produces one token, feeds that token back to itself, and produces the next, and so on until it generates a special end-of-sequence symbol.
+
+This architecture was a genuine breakthrough. The first neural machine translation systems built on encoder-decoder LSTMs demonstrated translation quality that eclipsed years of statistical methods. The field was electrified.
+
+But there was a structural problem lurking inside the elegance. And it would take only slightly longer sequences to expose it.
+
+### The Information Bottleneck
+
+Here is the uncomfortable constraint at the heart of the encoder-decoder model: **regardless of how long or complex the input is, all of its information must pass through a single fixed-size vector before decoding begins.**
+
+Think about what this means in practice. A ten-word sentence and a hundred-word sentence both get compressed into the same vector size. The decoder that translates a haiku and the decoder that translates a technical paragraph receive context vectors of identical dimensions. The network must somehow pack every relevant detail --- every named entity, every syntactic dependency, every semantic relationship --- into the same number of numbers.
+
+For short inputs, this is manageable. For long inputs, it is not. Critical information gets displaced. Early content, which received fewer gradient updates precisely because of the vanishing gradient problem, is underrepresented. The decoder, working only from this compressed vector, produces translations that are coherent in structure but increasingly inaccurate in content as source sentences grow longer.
+
+The analogy that makes this vivid: imagine asking someone to summarize an entire novel in exactly one sentence, then asking a second person to retranslate the novel from that sentence alone. The structure of the summary might survive. The characters\' names might survive. But the texture of the prose, the themes of individual chapters, the arc of character development --- these would be lost. The bottleneck has destroyed them.
+
+Researchers recognized this problem clearly. And in 2015, Bahdanau and colleagues proposed the first solution.
+
+### Early Attention: Bypassing the Bottleneck
+
+The insight behind early **attention mechanisms** was straightforward once seen: why force all information through a single context vector? What if the decoder, at each step of generation, could look back at *all* the encoder\'s hidden states --- not just the final one --- and decide for itself which ones were most relevant?
+
+This is attention. At each decoding step, the decoder computes a relevance score between its current state and every encoder hidden state. These scores are normalized into a probability distribution --- the attention weights. The decoder then computes a weighted sum of all encoder hidden states, using these weights, producing a context vector that is specific to the current step and the current needs of the decoder.
+
+The effect is remarkable. When translating a sentence and generating the French word that corresponds to the third English word, the decoder can attend strongly to the third encoder hidden state --- effectively \"looking at\" that part of the input directly, rather than relying on a compressed summary of the whole thing. The bottleneck is bypassed.
+
+Attention transformed the encoder-decoder architecture into something dramatically more capable. Translation quality improved substantially. Researchers could even visualize the attention weights as heatmaps, producing the first interpretable glimpse into how these models were actually processing language. You could watch the decoder attend to source words as it generated corresponding target words --- and see it track long-range dependencies across sentences.
+
+But attention, in this original form, was an add-on. It supplemented a sequential architecture. The encoder still processed tokens one by one. Parallelization was still impossible. The core sequential bottleneck remained.
+
+This was the state of the field in 2016. The pieces of a more radical solution were accumulating. The question being quietly asked in research labs was: what if we did not process sequentially at all? What if attention was not the supplement, but the entire architecture?
+
+That question, and its answer, belongs to Chapter 8. But to appreciate the answer, you had to feel the question.
+
+## Sequence Models in Practice --- What You Need to Know
+
+### Tokenization: Turning Text into Numbers
+
+Before any sequence model can process language, raw text must be converted into numbers. This process --- **tokenization** --- is more consequential than it might appear.
+
+The simplest approach is word-level tokenization: split on spaces and punctuation, assign each unique word an integer ID. Simple, interpretable, and limited. It produces enormous vocabularies (hundreds of thousands of words in any real corpus), fails completely on words not seen during training (\"out-of-vocabulary\" words), and offers no graceful handling of misspellings, new terminology, or words from multiple languages.
+
+Character-level tokenization goes to the other extreme: every individual character is a token. The vocabulary is tiny (perhaps 100 symbols), and the model handles any input. But the sequences become much longer, and the model must learn to compose characters into meaning --- an additional burden that slows learning considerably.
+
+The approach that became standard --- and that you will use when preparing your MIPDS language pipeline --- is **subword tokenization**. Methods like Byte-Pair Encoding (BPE) and WordPiece start with characters and iteratively merge the most frequent pairs into new tokens. The result is a vocabulary of perhaps 30,000--50,000 subword units that covers common words as single tokens but handles rare words by decomposing them into recognizable fragments. The word \"tokenization,\" if absent from the vocabulary, might be represented as \[\"token\", \"##ization\"\]. The model has never seen the full word, but it has seen both parts --- and can reason about the whole.
+
+This approach elegantly solves the out-of-vocabulary problem. It also makes models more robust to morphological variation: \"runs,\" \"running,\" and \"runner\" all share the subword \"run,\" giving the model a natural connection between them.
+
+### Embeddings: Meaning in Geometry
+
+Once text has been tokenized, each token ID must be mapped to a vector that the neural network can process. This mapping is the **embedding layer**.
+
+In the simplest implementation, the embedding layer is a lookup table: an integer ID indexes into a matrix of learned vectors, each of which has a fixed dimensionality (often 128, 256, or 512 values). These vectors are initialized randomly and updated during training. Over time, they come to encode semantic relationships: vectors for \"king\" and \"queen\" end up geometrically closer to each other than to \"table\" or \"algorithm.\" The famous word arithmetic --- *king -- man + woman ≈ queen* --- is a consequence of this geometric structure.
+
+There are two broad approaches to obtaining embeddings. The first is to use pre-trained embeddings --- vectors trained on a large corpus (like GloVe, trained on 840 billion words of web text) and imported directly. These give your model a head start: it inherits semantic relationships learned from enormous amounts of data even before seeing a single example from your specific task. The second approach is to learn embeddings from scratch on your own training data. This is more flexible but requires more data and more training time.
+
+A third approach --- contextual embeddings, where the same word gets different vector representations depending on the surrounding context --- is one of the transformative innovations of the Transformer era. The word \"bank\" in a financial context and \"bank\" in a geographic context will have meaningfully different representations. This topic is central to Chapter 9; for now, note that it exists and that the embeddings built this week will eventually be superseded by richer representations.
+
+### Sequence Length and Practical Considerations
+
+Every sequence model requires a decision about maximum sequence length. This decision has real consequences for memory usage, training speed, and model capability.
+
+Shorter maximum lengths are computationally cheaper but may truncate important information. Longer maximum lengths are more expressive but grow the computational cost of attention mechanisms quadratically --- a consideration that becomes critical in Chapter 8. For a recurrent model, longer sequences simply require more time steps and increase the risk of gradient issues.
+
+Setting maximum length involves understanding your data distribution: what is the typical length of inputs your system will process? How much information is lost by truncating to your chosen limit? And how much of your compute budget are you willing to dedicate to handling the long tail of unusually long inputs?
+
+These are engineering decisions, not mathematical ones --- and they are worth making deliberately, especially in a system like MIPDS that will eventually integrate language understanding with visual reasoning.
+
+## Why This All Mattered --- And Where It Was Going
+
+By the mid-2010s, LSTM-based sequence models had transformed natural language processing. Tasks that had resisted automated approaches for decades --- machine translation, sentiment analysis, reading comprehension, text summarization --- were yielding to deep recurrent architectures. The academic and industrial communities were publishing breakthroughs at a pace that felt, to people inside the field, almost disorienting.
+
+And yet.
+
+Anyone working closely with these systems could see the walls. Translating long documents introduced errors that accumulated with length. Training on large corpora was slow in a way that hardware improvements could not easily fix, because the sequential nature of RNNs meant that token 100 genuinely could not begin processing until token 99 was complete. The architecture was not parallelizable, not at the level of the sequence. GPU clusters designed to process thousands of operations simultaneously were being under-utilized because the fundamental computation was a chain, not a grid.
+
+There was also the deeper problem of what these models actually understood. LSTMs could carry context across hundreds of steps --- far better than basic RNNs. But their representation of that context was always a fixed-size vector, a single point in a high-dimensional space. As sequences grew longer, information inevitably collided and interfered. The filing cabinet had finite drawers.
+
+The researchers who would write the 2017 paper \"Attention Is All You Need\" were asking a different question. Not *how do we make the memory bigger?* but *do we need sequential memory at all?* What if every word in a sentence could attend directly to every other word, in parallel, without any recurrent loop? What if the architecture threw out sequential processing entirely and let attention --- pure, scalable, parallelizable attention --- do all the work?
+
+That is the Transformer. And by the time you finish Chapter 8, you will understand not just how it works, but why it was inevitable --- a logical response to the exact limitations we have spent this chapter uncovering.
+
+## Hands-On Exploration
+
+### Overview
+
+This exploration builds intuition for how information fades in recurrent models as sequences grow longer. You will not train any model from scratch. Instead, you will probe a pre-trained RNN and LSTM to observe how well each one preserves information about early inputs as sequence length increases.
+
+**Time estimate:** 45--60 minutes **Tools:** Google Colab (provided notebook), no GPU required
+
+### Part 1 --- Setting Up the Probe (15 minutes)
+
+The provided Colab notebook loads two pre-trained models: a simple RNN and an LSTM of equivalent size, both trained on a sentence completion task. Your first task is to feed each model a set of sentences of varying length and extract the hidden state after the final token.
+
+Specifically, provide:
+
+-   A 5-word sentence
+
+-   A 10-word sentence
+
+-   A 15-word sentence
+
+-   A 20-word sentence
+
+-   A 30-word sentence
+
+For each, visualize the final hidden state as a heatmap (the notebook provides a helper function). Do not try to interpret the individual values --- focus on the overall pattern. Do the heatmaps look qualitatively different as sentences grow longer?
+
+### Part 2 --- The Subject-Recall Probe (20 minutes)
+
+The notebook includes a simple probing classifier: a linear layer trained to predict the grammatical subject of a sentence from the model\'s final hidden state alone. Run each of your sentences through this classifier and record the accuracy at each sequence length.
+
+Plot accuracy against sequence length for both the RNN and the LSTM. You should observe that both degrade --- but at different rates.
+
+### Questions to consider as you observe:
+
+-   At what length does the RNN\'s subject-recall accuracy begin to drop noticeably?
+
+-   At what length does the LSTM\'s accuracy drop?
+
+-   What is the approximate accuracy of each model on 30-word sentences?
+
+### Part 3 --- Reflection (15--20 minutes)
+
+Write a 200--300 word reflection addressing both of these questions:
+
+1.  Both models degrade with increasing sequence length. What does this tell you about the fundamental nature of fixed-size hidden states as a memory mechanism? If you had to design a different kind of memory --- one that did not degrade this way --- what properties would it need?
+
+2.  Your MIPDS system will eventually need to process language inputs. Based on what you observed in this exploration, what would concern you about relying on an LSTM as the language encoder for a system that needs to handle paragraph-length descriptions or captions? What would you want to test before trusting such a system in deployment?
+
+### Case Study: Google Neural Machine Translation (2016)
+
+### The Problem
+
+By 2014, Google Translate was processing over 100 billion words per day. The underlying system --- a phrase-based statistical model that had been incrementally refined for years --- had reached the boundary of what statistical approaches could achieve. For short, simple sentences, it performed adequately. For long, complex sentences with intricate dependencies and idiomatic expressions, it did not. The problem was structural: the system had no model of sentence meaning. It matched and recombined statistical patterns in language without ever understanding what those patterns meant.
+
+### The Deep Learning Approach
+
+In 2016, a team at Google published the system that would replace phrase-based translation: the Google Neural Machine Translation system (GNMT). At its core was a deep LSTM encoder-decoder architecture --- eight stacked LSTM layers in both the encoder and decoder, connected by residual connections that allowed gradients to flow more reliably through the depth of the network. The system was, in essence, the culmination of everything covered in this chapter.
+
+Critically, GNMT incorporated the attention mechanism described in Section 4. Rather than compressing the entire source sentence into a single context vector, the system used attention to allow the decoder to dynamically reference all encoder hidden states at each step of output generation. For long, complex sentences --- the specific failure case of the previous system --- this made an immediate and measurable difference.
+
+The system was trained on millions of sentence pairs across dozens of language pairs, using distributed training infrastructure spread across hundreds of machine learning accelerators. Training a single language pair to convergence took days.
+
+### The Results
+
+The improvement was substantial. GNMT reduced translation errors by 55--85% compared to the previous phrase-based system across several high-traffic language pairs. Human evaluators rated the outputs as dramatically more natural, noting in particular that long sentences --- previously the weakest point --- had improved most significantly. For several language pairs, the gap between machine and human translation quality, as measured by professional translators, had nearly closed.
+
+The system was deployed in Google Translate in late 2016 and immediately became the engine behind billions of daily translations.
+
+### The Limitations
+
+GNMT revealed, with clarity, both what LSTM-based systems could accomplish and where they strained.
+
+Training was expensive in a way that had no obvious ceiling. Scaling to better performance meant more data, more compute, and more training time --- and the sequential nature of recurrent processing meant that scaling compute could not be fully utilized. A system that processes tokens one at a time cannot trivially use a ten-times-larger GPU cluster to train ten times faster.
+
+The system also struggled with rare and domain-specific vocabulary. A word the encoder had seen infrequently during training received a weak, underspecified embedding, and the decoder inherited that weakness. Medical terminology, legal language, and technical jargon all posed challenges.
+
+And translation quality varied sharply by language pair --- a fact that deserves careful attention.
+
+### The Ethical Dimension: Who Benefits from \"Breaking Down Language Barriers\"?
+
+GNMT launched with strong performance for a handful of high-traffic language pairs: English-French, English-German, English-Spanish, English-Mandarin. For these pairs, the improvement over prior systems was striking and real.
+
+For lower-resource language pairs --- Swahili, Yoruba, Tagalog, Nepali, and dozens of others --- the improvement was more modest, and in some cases marginal. The reason is structural: these language pairs had far less parallel training data. The internet is not a neutral representation of the world\'s languages. English-language content dominates it. Languages spoken predominantly by communities with lower rates of internet access, lower rates of digital content production, or longer histories of political and economic marginalization are underrepresented in training corpora by factors of tens or hundreds.
+
+A system trained primarily on well-resourced language pairs will naturally perform best on those pairs. When that system is then deployed as a universal translation service --- available equally to everyone, in theory --- it delivers meaningfully better service to speakers of already-dominant languages and meaningfully worse service to speakers of lower-resource languages.
+
+This is worth sitting with. The stated goal of machine translation --- democratizing communication across language barriers --- is a genuinely admirable one. But when performance is highly unequal across the user population, the claim to be equalizing access deserves scrutiny. A service that works 80% of the time for a French speaker and 40% of the time for a Yoruba speaker is not providing equal access. It is embedding and amplifying existing inequalities under a neutral-sounding technical interface.
+
+The field has made progress since 2016 on low-resource translation, but the underlying dynamic --- that training data availability reflects existing patterns of technological power --- has not been resolved. It is a design challenge and a political one.
+
+## Chapter Summary
+
+This chapter traced the evolution of sequence modeling from its earliest neural form through the architectures that dominated NLP for a decade. The key insights to carry forward:
+
+Language is sequential and context-dependent in ways that feedforward and convolutional architectures are not designed to handle. Processing each token independently discards information that is essential for meaning. Sequence models address this by maintaining a hidden state --- a running summary of what has been seen so far.
+
+The basic RNN implements this through a feedback loop, but its hidden state is a fixed-size vector that gets overwritten at every step. Gradients that must propagate backward through many time steps suffer from the vanishing gradient problem --- the same phenomenon you encountered in deep feedforward networks in Week 3, now operating across time rather than depth. Long-range dependencies cannot be learned reliably.
+
+The LSTM solved this through two complementary innovations: a separate cell state that can carry information across many steps without being overwritten, and three learned gates that control what is remembered, what is added, and what is exposed. The GRU simplified this to two gates with comparable empirical performance on many tasks. Both architectures extended the effective range of sequence modeling from a few steps to hundreds --- enabling the first generation of genuinely capable neural NLP systems.
+
+The encoder-decoder architecture extended sequence models to tasks requiring variable-length output --- translation, summarization, question answering --- by using one network to compress input and another to generate output. Attention mechanisms, introduced as a modification of this architecture, allowed the decoder to reference all encoder states rather than a single bottlenecked vector, dramatically improving performance on long inputs.
+
+But fundamental limitations remained. Sequential processing prevented parallelization. Fixed-size representations still struggled at document scale. And the architecture\'s success in some language communities masked its underperformance in others.
+
+The question that these limitations raised --- whether sequential processing was necessary at all --- was about to receive a definitive answer.
+
+## Review Questions
+
+1.  Throughout this chapter, we described the RNN hidden state as a \"notepad that gets overwritten.\" What does this analogy capture accurately about the architecture? Where does it mislead? Can you construct a better analogy that more precisely reflects the mathematical reality of how hidden states are updated?
+
+2.  The LSTM uses three gates whose parameters are learned from training data, not set by the engineer. What does it mean for a network to \"learn what to remember\"? Does this give you more or less confidence in the reliability of the model compared to a system with hand-coded memory rules? What failure modes does each approach introduce?
+
+3.  The GRU achieves comparable performance to the LSTM with fewer parameters. Does this suggest that the LSTM is overengineered, or does it suggest that both architectures are capturing the same essential mechanism in slightly different ways? What would you need to know to distinguish between these interpretations?
+
+4.  The encoder-decoder architecture requires compressing an entire input sequence into a single fixed-size vector. What kinds of information do you think are hardest to preserve through this compression? Can you construct a specific example sentence where you would predict the bottleneck would cause a translation error --- and explain why?
+
+5.  Google Neural Machine Translation was celebrated for reducing translation errors by up to 85% on some language pairs. Yet its performance was substantially lower for low-resource languages. Should this performance gap have been disclosed to users at launch? What obligations do technology companies have when deploying systems with known, differential performance across user populations?
+
+6.  Sequential processing means that RNNs and LSTMs cannot take full advantage of parallel computation hardware. As AI systems become more computationally expensive, this becomes a practical equity issue: organizations with more compute can run bigger models for longer. How should the research community weigh the value of more powerful architectures against the increasing resource requirements to train and deploy them?
+
+7.  Your MIPDS system is designed with a specific application in mind. What language inputs will it need to process? Are those inputs typically short or long? Based on what you have learned in this chapter, does the information bottleneck problem seem like a serious concern for your use case? What would you test to find out?
+
+## Further Reading
+
+### Foundational Papers
+
+Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. *Neural Computation, 9*(8), 1735--1780. *The original LSTM paper. Notoriously dense, but the introduction\'s treatment of the vanishing gradient problem is worth reading even if the full architecture derivation is not. This is where the idea that gating could solve long-range dependency learning was first articulated.*
+
+Cho, K., van Merrienboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H., & Bengio, Y. (2014). Learning phrase representations using RNN encoder-decoder for statistical machine translation. In *Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing* (pp. 1724--1734). https://arxiv.org/abs/1406.1078 *Introduces both the GRU architecture and the encoder-decoder framework as applied to machine translation. Readable and conceptually well-motivated.*
+
+Bahdanau, D., Cho, K., & Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. In *Proceedings of the International Conference on Learning Representations (ICLR 2015)*. https://arxiv.org/abs/1409.0473 *The attention mechanism paper. Introduces the idea of allowing the decoder to reference all encoder states and visualizes the resulting alignment as a heatmap. The figures alone are worth studying carefully --- they provide the first interpretable window into how these models process language.*
+
+### For Conceptual Depth
+
+Olah, C. (2015). Understanding LSTM networks. *Distill (colah\'s blog)*. https://colah.github.io/posts/2015-08-Understanding-LSTMs/ *The clearest visual explanation of LSTM gate mechanics available online. Essential reading if the gate descriptions in this chapter left you wanting more concreteness. The diagrams are designed to build genuine intuition rather than merely convey formulas.*
+
+Karpathy, A. (2015). The unreasonable effectiveness of recurrent neural networks. *Andrej Karpathy\'s blog*. http://karpathy.github.io/2015/05/21/rnn-effectiveness/ *A celebrated essay demonstrating what character-level RNNs learn to produce when trained on different types of text. The examples --- generated Shakespeare, Linux source code, music --- are fascinating, but more valuable is Karpathy\'s visualization of which neurons activate on which characters. Builds intuition for what these networks are actually learning.*
+
+### On Language and Equity
+
+Blasi, D. E., Anastasopoulos, A., & Neubig, G. (2022). Systematic inequalities in language technology performance across the world\'s languages. *Proceedings of the Association for Computational Linguistics, 60*, 5486--5505. https://aclanthology.org/2022.acl-long.376/ *A rigorous cross-linguistic audit of NLP system performance across hundreds of language pairs. Documents precisely the kind of performance gap described in this chapter\'s case study, at a scale that makes the pattern undeniable. Recommended for students interested in AI governance, fairness, or international deployment.*
+
+### Technical Reference
+
+Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep learning* (Chapter 10: Sequence modeling). MIT Press. https://www.deeplearningbook.org *The authoritative graduate-level treatment of recurrent networks. Chapter 10 covers BPTT, vanishing gradients, and LSTM in greater mathematical depth than this chapter. Recommended for students who want to work through the derivations rather than take the results on faith.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 7: The Memory Problem --- Sequence Models and the Road to Attention*

@@ -1,0 +1,502 @@
+---
+title: "The Art of Controlled Noise"
+subtitle: "Diffusion Models and Advanced Generative Systems"
+---
+
+## Opening Narrative
+
+Chiara Colombo has spent fifteen years restoring damaged paintings at a museum conservation laboratory in Florence. Her work is not dramatic --- it is painstaking, incremental, and deeply uncertain. A seventeenth-century oil painting arrives with centuries of grime obscuring the original surface, with later over-painting covering damaged areas, with yellowed varnish distorting the original color relationships. She does not restore it in one decisive act. She works in passes.
+
+The first pass establishes the broad composition --- regions of light and dark, approximate color fields, the general spatial organization of the figures. The second pass refines the tonal relationships. Later passes address increasingly fine details: the texture of fabric, the precise quality of light falling on a hand, the subtle transitions at the edge of a shadow. Each pass is informed by all the previous ones and by her accumulated knowledge --- fifteen years of studying this artist\'s technique, the conventions of his period, the way he handled particular types of surface and light. The painting emerges gradually, each step constrained by the previous steps and guided by deep familiarity with what this kind of painting should look like.
+
+What Chiara knows --- implicitly, through years of practice --- is something like the probability distribution over paintings of this type. Not the explicit rules, but a deep statistical sense of which visual configurations are plausible, which transitions are coherent, which details ring true. At each step, she is making decisions that move the restoration toward the most plausible outcome, given everything she knows and everything she has done so far.
+
+This is, with surprising precision, what a diffusion model does.
+
+In Chapter 11, we examined two foundational approaches to generative modeling. Variational Autoencoders approach generation as structured compression: learn a latent representation organized enough that sampling from it produces coherent outputs. Generative Adversarial Networks approach generation as competitive deception: train a generator and discriminator against each other until the generator produces outputs that are perceptually indistinguishable from reality. Both approaches work. Both have characteristic limitations. VAEs produce organized latent spaces but blurry outputs. GANs produce sharp outputs but unstable training and limited controllability.
+
+For years, this tradeoff seemed intrinsic to the generative modeling problem --- a consequence of the training objectives themselves rather than an accident of implementation. Then, between 2020 and 2022, a series of papers arrived from an unexpected direction --- drawing on ideas from statistical physics, thermodynamics, and the mathematics of stochastic processes --- and produced a generative paradigm that resolves the tradeoff in a way neither VAEs nor GANs could.
+
+Diffusion models approach generation through deliberate, gradual destruction followed by learned reconstruction. They are, at their core, noise-removal machines --- trained to reverse a carefully controlled noising process, step by tiny step, guided at each step by internalized knowledge of what coherent data looks like. Their outputs are simultaneously sharp, diverse, and controllable. The systems built on them --- DALL-E 2, Stable Diffusion, Midjourney, Imagen --- brought generative AI to mainstream awareness and transformed entire industries in the span of two years.
+
+This chapter opens the diffusion model and examines every part.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain the forward diffusion process and describe what the model learns to reverse it
+
+-   Describe the denoising training objective and explain why predicting noise is equivalent to learning the score function of the data distribution
+
+-   Explain how conditioning is incorporated into diffusion models, including the mechanism and effect of classifier-free guidance
+
+-   Explain the latent diffusion architecture and why operating in latent space rather than pixel space dramatically improves efficiency
+
+### Analyze and Evaluate
+
+-   Analyze how conditioning signals --- text embeddings, class labels, image inputs --- are injected into the denoising process through cross-attention
+
+-   Compare diffusion models to VAEs and GANs across the dimensions of output quality, training stability, generation speed, and controllability
+
+-   Trace the complete Stable Diffusion pipeline from text input to image output, identifying each component\'s architectural origin and function
+
+-   Assess the ethical implications of open-source text-to-image generation, including training data consent, representational harm, and the infrastructure of creative disruption
+
+### Apply and Create
+
+-   Connect the components of diffusion systems to the building blocks developed across the course --- CLIP encoders, VAE latent spaces, Transformer cross-attention
+
+-   Upgrade the MIPDS generative module to a conditioned diffusion pipeline, documenting the architecture and text-conditioning mechanism
+
+## Key Terms and Concepts
+
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                             **Definition**
+  ------------------------------------ -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Diffusion Model**                  A generative model that learns to reverse a gradual noising process. Trained by predicting the noise added at each step of a controlled corruption process, and used for generation by starting from pure noise and iteratively denoising toward a coherent output.
+
+  **Forward Process**                  The fixed, non-learned process of gradually adding Gaussian noise to a data point over T timesteps, until the original data is completely obscured and what remains is indistinguishable from pure Gaussian noise. The forward process has no trainable parameters --- it is a mathematical specification.
+
+  **Reverse Process**                  The learned process of iteratively removing noise, step by step. At each step, the neural network estimates the noise present at that noise level and subtracts it, moving the sample toward a coherent output. Generation happens by running this process starting from a sample of pure noise.
+
+  **Denoising Score Matching**         The training objective for diffusion models: at a randomly sampled timestep, add the appropriate amount of noise to a training example, and train the network to predict the noise that was added. This is mathematically equivalent to learning the gradient of the log probability of the data distribution.
+
+  **Noise Schedule**                   The specification of how much noise is added at each step of the forward process --- how quickly the data transitions from clean to pure noise. A carefully designed schedule controls training dynamics and generation quality.
+
+  **UNet**                             The neural architecture used as the denoising backbone in most diffusion models. An encoder-decoder architecture with skip connections between corresponding encoder and decoder layers, enabling processing at multiple scales simultaneously.
+
+  **Timestep Embedding**               A learned representation of the current noise level, injected into each UNet layer. Allows the network to calibrate its denoising behavior appropriately for the current amount of noise --- coarser corrections at high noise levels, finer refinements at low noise levels.
+
+  **Score Function**                   The gradient of the log probability of the data distribution --- a vector field that points, at any location in data space, toward the nearest high-probability region. Diffusion models implicitly learn this function through the denoising objective.
+
+  **Conditioning**                     The mechanism by which additional information --- a text description, a class label, another image --- is incorporated into the denoising process to steer generation toward a specific output. Typically implemented through cross-attention between the denoising network and an embedded conditioning signal.
+
+  **Classifier-Free Guidance (CFG)**   A conditioning approach that trains a single model jointly on conditioned and unconditioned inputs and combines their predictions at inference time. The guidance scale parameter controls how strongly the conditioning steers the output --- interpolating between \"generate freely\" and \"generate exactly what the condition specifies.\"
+
+  **Guidance Scale**                   The parameter in classifier-free guidance that controls the strength of conditioning. A scale of 1.0 produces outputs close to unconditioned generation; higher values produce outputs more faithful to the condition but less diverse.
+
+  **Latent Diffusion Model (LDM)**     A diffusion model that operates in the compressed latent space of a pretrained autoencoder rather than directly in pixel space. Reduces the computational cost of each denoising step by the compression factor, making high-resolution generation tractable.
+
+  **Stable Diffusion**                 An open-source latent diffusion model trained on LAION-5B. Uses a CLIP text encoder for conditioning, a VAE for the latent space, and a UNet for denoising. The most widely deployed open text-to-image generation system.
+
+  **DALL-E 2**                         OpenAI\'s text-to-image system that uses CLIP image embeddings as an intermediate representation --- generating a CLIP image embedding from the text prompt, then inverting that embedding through a diffusion prior to produce an image.
+
+  **DDPM**                             Denoising Diffusion Probabilistic Models --- the foundational formulation by Ho et al. (2020) that established the noise-prediction training objective and the iterative reverse process as a generative paradigm.
+
+  **DDIM**                             Denoising Diffusion Implicit Models --- an accelerated sampling approach that reduces the number of denoising steps from hundreds to tens by using a deterministic update rule, enabling faster generation without fully retraining the model.
+
+  **Consistency Model**                A further acceleration of diffusion generation that trains a model to map any noisy sample directly to the clean output in a single step, reducing generation to a single forward pass at deployment.
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## The Problem Diffusion Solves
+
+### Revisiting the Tradeoff
+
+Chapter 11 ended with an honest acknowledgment. Variational Autoencoders provide structured, navigable latent spaces and stable training --- but their outputs are blurry, because the reconstruction objective averages over uncertainty. Generative Adversarial Networks produce sharp, photorealistic outputs --- but their training is unstable, prone to mode collapse, and their latent spaces lack principled organization. Neither architecture fully resolves the three-way tension between output quality, diversity, and controllability.
+
+For several years, this tradeoff seemed structural --- the inevitable consequence of how each paradigm framed the generative problem. VAEs paid for organization with blurriness. GANs paid for sharpness with instability.
+
+The question diffusion models answer is: what happens if you approach generation not as a compression problem and not as a competitive game, but as a denoising problem? What if, instead of learning to map noise directly to data in a single pass --- as GANs do --- or learning to compress and reconstruct through a structured bottleneck --- as VAEs do --- you learned to move incrementally from noise to data, one small step at a time?
+
+The answer, it turned out, was: much better outputs, stable training, and a natural framework for controllable generation. At the cost of slower inference.
+
+To understand why, we need to understand the mechanism.
+
+### The Inspiration: Heat Diffusion and Stochastic Processes
+
+The mathematical inspiration for diffusion models comes from physics --- specifically, from the study of how heat spreads through materials and how particles undergo random walks. When a drop of dye is placed in a glass of water, it does not stay concentrated at the drop site. It diffuses outward: the dye molecules undergo random Brownian motion, colliding with water molecules, gradually spreading until the dye is uniformly distributed throughout the water. Given enough time, no trace of the original drop\'s location remains.
+
+This process is irreversible in practice --- you cannot unstiir the dye back into a concentrated drop by normal physical means. But it is mathematically invertible in a precise sense: the statistical properties of the diffusion process are well-understood, and if you knew the exact trajectory of every molecule, you could compute what the initial configuration must have been.
+
+The diffusion model borrows this structure. Start with a real data point --- an image, a molecule, an audio waveform. Gradually add random noise --- the analog of Brownian motion --- until the original is completely obscured and what remains is pure Gaussian noise --- the analog of uniformly distributed dye. This forward process is the analog of physical diffusion. Then ask: can a neural network learn to reverse it?
+
+Not by computing the exact trajectory of every noise element --- that would require knowing the forward process\'s complete history. But by learning the statistical properties of the reverse transitions: given an image at noise level t, what does the slightly-less-noisy image at level t-1 look like? This is the learned reverse process, and it is what makes generation possible.
+
+## The Forward Process --- Controlled Destruction
+
+### Adding Noise, Step by Step
+
+The forward process is mathematically simple and contains no learnable parameters. Starting from a clean data point x₀ --- a real image from the training set --- noise is added incrementally over T timesteps. At each step t, a small amount of Gaussian noise is mixed into the current sample, producing x₁, x₂, \..., x_T.
+
+The amount of noise added at each step is controlled by the noise schedule --- a sequence of values specifying how quickly the signal is destroyed. A common choice is a linear schedule that starts with very small noise and gradually increases to large noise. More recent work has found that cosine schedules, which add noise slowly at first and faster in the middle, produce better training dynamics for images.
+
+Crucially, the forward process can be computed in closed form for any timestep t without simulating all the intermediate steps. You can jump directly from x₀ to x_t by computing a single Gaussian perturbation whose variance depends only on t and the noise schedule. This mathematical shortcut is what makes training efficient: you do not need to simulate the full noising chain to produce a training example at any noise level.
+
+Visualize what the forward process looks like for an image. At t=0, you have the original photograph --- sharp, detailed, fully coherent. At t=250, the image is noticeably noisy but the content is still recognizable. At t=500, the original content is visible but substantially obscured. At t=750, only the faintest ghost of the original remains. At t=1000 --- or whatever the final timestep is --- you have pure Gaussian noise, indistinguishable from a random draw from a normal distribution.
+
+The forward process is the mechanism by which the model\'s training data is systematically destroyed. The training task is to learn to undo this destruction.
+
+### What T Represents
+
+The number of timesteps T is a design choice that involves tradeoffs. More timesteps means each step adds a tiny amount of noise --- the steps are smaller, smoother, and individually easier to reverse. Fewer timesteps means larger individual noise additions --- coarser but faster. Original DDPM formulations used T=1000. Most practical systems now use fewer steps through accelerated sampling, described later in this chapter.
+
+The noise schedule and T together determine the difficulty of the reverse problem at each step. Well-calibrated diffusion models devote approximately equal \"work\" to each noise level --- early steps (high noise) make large, coarse decisions about composition; late steps (low noise) make fine adjustments to texture and detail. Understanding this hierarchy --- coarse decisions first, fine decisions later --- is important for understanding how conditioning works and why it can be applied selectively at different noise levels.
+
+## The Reverse Process --- Learning to Denoise
+
+### What the Network Learns
+
+The reverse process is the learned counterpart to the forward process. At each timestep t, a neural network receives a noisy image x_t and attempts to estimate what noise was added to produce x_t from x\_{t-1}. If it can do this accurately, then given x_t, it can produce an estimate of x\_{t-1} --- a slightly less noisy version. Apply this operation repeatedly, from t=T down to t=0, and you have a generator: starting from pure noise, produce a coherent image.
+
+The training task, concretely, is this: take a clean training image x₀. Sample a random timestep t. Compute x_t by adding the appropriate amount of noise for that timestep. Train the network to predict the noise that was added.
+
+This is the denoising training objective. The loss function is the mean squared error between the true noise and the network\'s predicted noise. It is, in implementation, a simple regression problem. What makes it profound is what the network must internalize to solve it well.
+
+To accurately predict the noise in an image at noise level t, the network must implicitly know what real images look like at that noise level --- what structures, textures, and patterns would be present in a real image with this much noise added. It must, in other words, have internalized the statistics of real images at every noise level. A network that solves this regression problem well has learned a deep model of image structure.
+
+### The Score Function Connection
+
+There is a deeper mathematical interpretation of what diffusion models learn, and understanding it clarifies why the approach is so powerful.
+
+In statistical physics and probability theory, the score function of a probability distribution is the gradient of its log probability --- a vector field that, at any point in data space, points in the direction of increasing probability. If you are standing at a location in data space and want to move toward a more probable region --- toward something that looks more like real data --- the score function tells you which direction to go.
+
+It has been shown mathematically that the optimal denoising network --- the one that perfectly predicts the noise at every timestep --- is equivalent to estimating the score function of the data distribution at the corresponding noise level. Each denoising step is, in effect, taking a step in the direction of the score function: moving the noisy sample toward a more probable region of the data distribution.
+
+The compass analogy is the most useful one here. The score function is a compass pointing toward the nearest high-probability region. At high noise levels, the compass gives coarse directional guidance --- the sample is far from any real data point, and the direction is approximate. At low noise levels, the compass gives precise guidance --- the sample is close to a coherent image, and small corrections move it to something sharp and real.
+
+Each denoising step follows the compass. Over hundreds of steps, starting from pure noise and following the compass at each step, the sample is guided from a random location in data space to a point on the high-probability manifold --- a coherent image that could plausibly have come from the real data distribution.
+
+This connection --- between denoising and score estimation, between the training objective and the geometry of the data distribution --- is what gives diffusion models their theoretical foundations and distinguishes them from the more empirically motivated training objectives of GANs.
+
+## The Architecture --- UNet as Denoising Backbone
+
+### Why UNet
+
+The neural network that performs the denoising at each step needs specific architectural properties. It receives a noisy image and must produce a noise estimate of the same spatial dimensions. It must process the input at multiple scales simultaneously --- coarse denoising decisions require seeing the whole image; fine denoising decisions require seeing local texture. And it must incorporate information about the current timestep --- the network should denoise differently at t=900 (when the image is mostly noise) than at t=100 (when the image is mostly clean).
+
+The UNet architecture, originally developed for biomedical image segmentation and introduced in Week 5, satisfies all of these requirements. Its encoder-decoder structure with skip connections enables multi-scale processing: the encoder progressively compresses the spatial resolution, capturing context at increasingly large scales; the decoder progressively upsamples back to full resolution; skip connections at each scale allow fine spatial details from the encoder to inform the decoder\'s outputs.
+
+For diffusion, the UNet is modified in several important ways. Attention layers --- typically self-attention and cross-attention --- are added at multiple resolution levels, allowing the network to integrate global context with local texture. The timestep t is encoded into a learned embedding vector and injected into each UNet block, conditioning the network\'s behavior on the current noise level. Conditioning signals --- text embeddings, class labels, or image features --- are incorporated through cross-attention layers that allow the denoising network to \"read\" the condition at each step.
+
+### Timestep Embedding
+
+The timestep embedding is worth examining in detail because it is the mechanism that makes a single network serve as the denoiser for all noise levels.
+
+A naïve approach would train a separate denoising network for each timestep --- but with T=1000 timesteps, this is clearly impractical. Instead, the timestep t is encoded into a continuous embedding vector (typically using sinusoidal encoding, in a direct parallel to the positional encodings of Chapter 8) and injected into the network at each layer through learned affine transformations of the normalization parameters.
+
+The effect is that the network\'s computations at each layer are modulated by the current noise level. At high noise levels, the network learns to focus on large-scale structure --- position and composition of major elements. At low noise levels, it focuses on fine detail and texture. The single network serves all noise levels because the timestep embedding tells it which level it is operating at and allows it to adapt accordingly.
+
+This is a conceptual parallel to something you have seen before. The attention mechanism produces different representations depending on the content of the sequence. The timestep embedding produces different computations depending on the noise level. Both are forms of input-dependent computation that allow a single model to handle a range of situations.
+
+### Cross-Attention for Conditioning
+
+When a diffusion model is conditioned --- when it is given a text description, a class label, or another image to guide the generation --- that conditioning information is injected into the denoising UNet through cross-attention layers.
+
+The mechanism is exactly the cross-attention of Chapter 8, applied in a new context. The conditioning signal --- say, a sequence of text embeddings produced by a CLIP or Transformer text encoder --- provides the keys and values for the cross-attention operation. The denoising UNet\'s intermediate representations provide the queries. At each cross-attention layer, the UNet attends to the conditioning signal, learning which aspects of the text description are relevant to the denoising operation at each spatial location.
+
+The result is that each denoising step is guided by the conditioning signal. The network does not just ask \"what noise was added here?\" --- it asks \"what noise was added here, given that the output should look like this description?\" The conditioning signal shapes every step of the iterative refinement process.
+
+This is quite different from how conditioning works in a cGAN, where the condition is provided once at the start of generation. In a diffusion model, the condition is consulted at every step, allowing it to exert influence at every level of the spatial hierarchy --- from coarse composition to fine texture. This multi-scale conditioning is one of the primary reasons diffusion models are more controllable than their predecessors.
+
+## Classifier-Free Guidance --- Steering Generation
+
+### The Conditioning Tradeoff
+
+When a generative model is conditioned on a text description, there is an inherent tension between two desiderata. On one hand, the output should be faithful to the condition --- if you ask for \"a red barn in a snowy field at sunset,\" you want a red barn, not a yellow house. On the other hand, the output should look realistic --- it should have the full visual richness and coherence of a photograph, not a stiff, over-literal rendering of your description.
+
+These two goals are in tension because the data distribution and the conditioning signal are not perfectly aligned. Not every possible image that fits the description \"a red barn in a snowy field at sunset\" looks equally photorealistic. Some are better photographs than others. A model that slavishly adheres to the condition may sacrifice image quality for literal faithfulness; a model that maximizes image quality may wander away from the condition.
+
+Classifier-Free Guidance, introduced by Ho and Salimans in 2021, provides an elegant solution to this tension by making the tradeoff explicitly tunable at inference time through a single parameter.
+
+### How CFG Works
+
+The CFG training procedure is simple. During training, the conditioning signal is randomly dropped with some probability --- typically 10--20% of the time, the model is trained on the input without any conditioning, as if it were an unconditional model. The rest of the time, it is trained with the conditioning signal as usual. This trains a single model that can operate both with and without conditioning.
+
+At inference time, CFG exploits this dual capability through interpolation. At each denoising step, the network is run twice: once with the conditioning signal, producing a conditioned prediction of the noise, and once without, producing an unconditioned prediction. The actual update applied at that step is not either prediction alone but a linear extrapolation:
+
+**Update = unconditioned prediction + guidance_scale × (conditioned − unconditioned prediction)**
+
+When guidance_scale is 1, the update is exactly the conditioned prediction --- standard conditional generation. When guidance_scale is higher than 1, the update is an extrapolation beyond the conditioned prediction, in the direction that the condition is pulling relative to the unconditioned baseline. The conditioning is amplified beyond what the model would produce naturally.
+
+The effect is intuitive. At low guidance scale, the model generates diverse, naturalistic outputs that are loosely consistent with the condition. At high guidance scale, the outputs are tightly faithful to the condition --- closer to a literal rendering of the description --- but somewhat less diverse and sometimes less naturalistic in their visual quality. Very high guidance scale can produce outputs that look slightly oversaturated or artifactual.
+
+The guidance scale is the dial between \"generate freely\" and \"generate exactly what I specified.\" Most practical applications use values between 7 and 12 for a reasonable balance. Users who want precise control increase it; users who want diversity and aesthetic quality decrease it.
+
+This is a powerful design choice because it puts a meaningful control in the hands of the user without requiring a different model for different use cases. The same trained model, with the same weights, can produce radically different generation behaviors through a single number.
+
+## Latent Diffusion --- Making It Tractable
+
+### The Computational Cost of Pixel-Space Diffusion
+
+The forward and reverse processes as described so far operate directly on image pixels. For a 512×512 image with three color channels, this means each denoising step processes a 786,432-dimensional vector. With T=1000 steps, generating a single image requires 1000 forward passes through a large neural network operating on nearly a million dimensions.
+
+This is computationally demanding to an extent that makes practical deployment difficult. Training on large datasets, generating at inference time with reasonable latency, and running on consumer hardware all become infeasible at pixel-space scale. Something had to change.
+
+The insight of the Latent Diffusion Model, introduced by Rombach and colleagues in 2022, was to move the diffusion process off of pixel space entirely.
+
+### The LDM Architecture
+
+The latent diffusion approach consists of three components, each performing a distinct function.
+
+**A pretrained autoencoder** --- specifically a VAE of the type examined in Chapter 11 --- is trained to compress images to a lower-dimensional latent space. For a 512×512 image, the VAE encoder might produce a 64×64×4 latent representation --- a compression factor of roughly 48 in terms of total elements. The VAE decoder maps latents back to full-resolution images. Crucially, the autoencoder is trained to minimize reconstruction loss, so the latent space is a semantically meaningful, perceptually faithful compressed representation of the original image.
+
+**The diffusion process runs entirely in the latent space.** The forward process adds noise to latent codes rather than to pixels. The reverse process --- the learned UNet denoiser --- operates on latent codes, not pixels. A single denoising step processes a 64×64 representation rather than a 512×512 one: the dimension is reduced by a factor of 64, and the computational cost of each step is reduced correspondingly.
+
+**The conditioning signal** --- text embeddings from a CLIP or Transformer text encoder --- is injected into the latent-space UNet through cross-attention, exactly as described in Section 4. The text encoder operates in its own space, and its outputs condition the denoising process through the attention mechanism.
+
+At generation time, the pipeline runs as follows. A text input is tokenized and encoded by the text encoder to produce conditioning embeddings. A random latent code is sampled from a standard Gaussian. The UNet denoiser iteratively refines this latent code over T steps, conditioned on the text embeddings, moving it from noise to a structured latent that corresponds to an image fitting the description. The VAE decoder maps the final latent to a full-resolution image.
+
+The efficiency gain is dramatic. At 48× compression, each denoising step is orders of magnitude cheaper than pixel-space diffusion. The quality loss from operating in latent space rather than pixel space is minimal --- the VAE\'s latent representation is perceptually faithful, and the diffusion process in latent space produces latents that decode to high-quality images. The abstraction layer the VAE provides actually helps: rather than modeling the full complexity of pixel distributions, the diffusion model operates on a semantically compressed representation where the meaningful variation is already organized.
+
+### DDIM: Fewer Steps, Same Quality
+
+The original DDPM formulation required T=1000 denoising steps to produce high-quality outputs --- 1000 sequential UNet forward passes per image. Denoising Diffusion Implicit Models, introduced by Song and colleagues in 2020, provided a way to reduce this dramatically without retraining the model.
+
+DDIM replaces the stochastic reverse process of DDPM with a deterministic one. Rather than sampling from a Gaussian at each step, DDIM computes a deterministic update that is consistent with the trained noise predictor. This deterministic path can be traversed with fewer steps --- 20 to 50 steps rather than 1000 --- with only modest degradation in quality. The trajectory is the same; DDIM takes larger steps along it.
+
+The quality-speed tradeoff with DDIM is manageable: 50 steps produces outputs nearly indistinguishable from 1000 steps; 20 steps shows some degradation but is acceptable for many applications. This reduction from 1000 to 20 steps, combined with the 48× reduction from latent diffusion, makes practical deployment feasible on consumer hardware.
+
+Further acceleration has been achieved through consistency models --- architectures trained to map any noisy sample directly to the clean output in a single step, effectively collapsing the iterative process to one forward pass. Single-step generation with consistency models sacrifices some quality relative to full diffusion, but the speed gain makes real-time applications possible.
+
+## Stable Diffusion --- A Complete System
+
+Stable Diffusion is the most widely used open text-to-image diffusion system, and examining its complete architecture provides the clearest illustration of how all the components discussed in this chapter --- and in the preceding three chapters --- come together.
+
+The pipeline is composed of four major components, each drawing on concepts from different parts of this course.
+
+**The CLIP Text Encoder.** Text input --- a natural language description of the desired image --- is tokenized using the same subword tokenization examined in Chapter 7. The tokens are encoded by a CLIP text encoder (Chapter 10), producing a sequence of contextual text embeddings. These embeddings capture the semantic content of the description in the same joint embedding space as CLIP\'s image representations --- a space shaped by 400 million image-text training pairs.
+
+**The VAE.** A pretrained variational autoencoder (Chapter 11) maps between pixel space and a 64×64×4 latent space. At generation time, the VAE decoder is used at the end of the pipeline to convert the final denoised latent to a full-resolution image. The VAE encoder is used when performing image-to-image generation or inpainting --- encoding a reference image or a masked image into latent space before the diffusion process begins.
+
+**The UNet Denoising Network.** The core of the diffusion process is a UNet trained to predict noise at each timestep in latent space. Text conditioning embeddings from the CLIP encoder are injected at each UNet resolution level through cross-attention layers: the text embeddings serve as keys and values; the UNet\'s intermediate representations serve as queries. The UNet also receives the current timestep t as a sinusoidal embedding, modulating its behavior across the noise spectrum. Classifier-free guidance is applied at inference time by running the UNet twice --- conditioned and unconditioned --- and extrapolating according to the guidance scale.
+
+**DDIM Sampling.** Generation iterates over T steps (typically 20--50 with DDIM), updating the latent code at each step using the UNet\'s noise prediction. At the end of the sampling process, the resulting latent is decoded by the VAE decoder to produce the final image.
+
+The circuit is complete: language enters through a Transformer-based text encoder, is mapped to a semantically meaningful embedding by CLIP\'s joint training, conditions a denoising process operating in a VAE-structured latent space, and emerges as pixels through VAE decoding. Every component of this pipeline was introduced in earlier chapters: the Transformer text encoder in Chapters 8--9, the CLIP joint embedding in Chapter 10, the VAE in Chapter 11, the UNet in Chapter 5. Stable Diffusion is not a new architecture --- it is a sophisticated integration of existing architectures, combined by a carefully designed training regime and a principled generation process.
+
+## Comparing the Generative Paradigms
+
+With three generative paradigms now fully described --- VAEs, GANs, and diffusion models --- it is worth constructing an honest comparison across the dimensions that matter for practical application.
+
+### Output Quality
+
+Diffusion models currently produce the highest-quality outputs across most image generation benchmarks, including FID scores on standard datasets and human preference evaluations. At high resolution and with strong conditioning, they exceed the visual quality of comparable GANs without the training instability. They also exhibit strong diversity --- they do not suffer from mode collapse in the way GANs do, because the iterative denoising process inherently explores the distribution at each step rather than mapping from a fixed latent code in a single pass.
+
+VAEs produce the lowest visual quality of the three paradigms at equivalent scale, primarily because the reconstruction objective averages over uncertainty. Their outputs are recognizably from the right distribution but lack the sharpness and texture richness of GANs or diffusion models.
+
+### Training Stability
+
+Diffusion models train through straightforward supervised regression --- predict the noise at each timestep. There is no adversarial dynamic, no balancing act between competing networks, no mode collapse risk. Training is stable, reproducible, and scales predictably with compute. This is a significant practical advantage over GANs, where training instability is a persistent challenge.
+
+VAEs are also stable to train, with a well-defined optimization objective. Their training does not involve adversarial dynamics and is generally more robust to hyperparameter choices than GANs.
+
+GANs remain the most challenging to train. Mode collapse, vanishing gradients, and sensitivity to hyperparameters require expertise and monitoring.
+
+### Generation Speed
+
+This is diffusion\'s primary limitation relative to GANs and VAEs. Generating a single image requires 20--1000 sequential network forward passes --- each one dependent on the previous --- which cannot be trivially parallelized. A GAN or VAE generates in a single forward pass.
+
+With DDIM and latent diffusion, generation times on modern hardware are in the range of seconds to tens of seconds per image. This is acceptable for many applications. It is not acceptable for applications requiring real-time generation or very high throughput. Consistency models bring single-step generation to diffusion-quality outputs, but with some quality tradeoff.
+
+### Controllability
+
+Diffusion models offer the richest controllability of any current generative paradigm. Classifier-free guidance provides a continuously tunable control over faithfulness to the conditioning signal. Multi-scale conditioning through cross-attention at each UNet resolution level allows conditioning to influence generation at coarse and fine levels simultaneously. Image conditioning --- inpainting, image-to-image translation, depth-guided generation --- can be incorporated by conditioning the diffusion process on existing visual content. The iterative nature of generation makes it possible to apply different conditioning signals at different noise levels.
+
+GANs offer controllability through conditional architectures (cGAN, StyleGAN) and latent space manipulation, but the control is typically coarser and less compositionally flexible. VAEs offer smooth latent space navigation and attribute manipulation, but the output quality limitations constrain their practical usefulness for controllable generation.
+
+### Latent Structure
+
+VAEs have the most explicitly organized latent space --- the KL training objective enforces a structured prior that enables principled sampling, interpolation, and latent arithmetic. Diffusion models do not have an obvious single latent code for any given image --- the generation process produces a trajectory through latent space rather than a single point, and extracting a compact latent representation requires additional techniques. GANs have navigable latent spaces in practice but without the theoretical guarantees of VAEs.
+
+### Summary
+
+  ------------------------------------------------------------------------
+  **Dimension**            **VAE**       **GAN**           **Diffusion**
+  ------------------------ ------------- ----------------- ---------------
+  Output quality           Lower         High              Highest
+
+  Training stability       High          Challenging       High
+
+  Generation speed         Fast          Fast              Slow
+
+  Controllability          Moderate      Moderate          Rich
+
+  Latent structure         Explicit      Implicit          Trajectory
+  ------------------------------------------------------------------------
+
+No paradigm dominates on all dimensions. The right choice depends on the application: where speed and latent structure matter, VAEs and GANs remain relevant. Where quality and controllability are paramount, diffusion is the current state of the art.
+
+## The Ethics of Text-to-Image Generation at Scale
+
+### What Changed
+
+Generative models have existed for a decade. The ethical concerns around deepfakes and synthetic media, examined in Chapter 11, have been present since GANs became capable of photorealistic output. What changed with text-to-image diffusion systems was the combination of three factors: accessibility (open weights, consumer hardware), generality (any image describable in text), and scale (millions of users in months of deployment).
+
+Each factor existed in partial form before diffusion systems. StyleGAN was accessible but not general --- it generated faces, not arbitrary content. DALL-E 2 was general but not accessible --- a closed API with usage policies. Stable Diffusion was both accessible and general, and it reached millions of users within months of open release in August 2022. The combination produced ethical challenges at a scale and speed that earlier systems had not created.
+
+### Training Data and Artistic Labor
+
+Stable Diffusion was trained on LAION-5B, assembled from approximately 5.85 billion web-scraped image-text pairs. Within that dataset were hundreds of millions of images produced by working artists, photographers, illustrators, and designers --- people who make their living from creating visual content.
+
+These creators did not consent to the use of their work as training data. They were not compensated. In many cases, they became aware of the use only after observing that the resulting model could reproduce their distinctive visual styles --- the output of years of artistic development --- on demand, through a simple text prompt.
+
+The legal framework for this use is contested. At the time of writing, multiple lawsuits from artists and image agencies against AI companies over training data use were active in US, UK, and EU courts. The outcomes will significantly shape what constitutes permissible training data for generative models. The ethical question exists independently of the legal one: even if training on web-scraped images is ultimately found to be legally permissible under fair use doctrine, the displacement of creative livelihoods by systems trained on creators\' work without compensation raises questions about who benefits and who bears the cost of this technology transition.
+
+The argument that \"AI learns the way humans learn --- by looking at art\" is frequently offered as a defense. It is worth examining carefully. A human artist spends years absorbing influences, developing a perspective, producing a body of work shaped by their particular experience and judgment. A diffusion model processes billions of images in weeks, extracts statistical patterns from their collective distribution, and produces outputs that can replicate any particular style on demand at negligible cost. The scale of the consumption and the commercial deployment of the resulting capability are categorically different from human artistic learning.
+
+What an equitable arrangement looks like --- opt-in rather than opt-out training data systems, licensing frameworks, revenue sharing --- is being actively worked out. The technical community\'s role is to implement whatever consent and attribution mechanisms policy and legal frameworks develop, not to dismiss the question as resolved.
+
+### Representational Harm at Scale
+
+Diffusion models trained on web-scraped data inherit and amplify the representational patterns of that data. Studies have documented consistent patterns: certain demographics are associated with certain roles, aesthetics, and contexts in ways that reflect and reinforce existing social biases. Prompts for \"a doctor\" tend to produce male-presenting figures; prompts for \"a nurse\" tend to produce female-presenting ones. Prompts for \"beautiful people\" produce narrow aesthetic conventions. Prompts in non-English languages produce weaker results than English prompts, reflecting the linguistic distribution of the training data.
+
+These patterns are not incidental. They are what the model learned from the training distribution. Correcting them after the fact through output filtering is partial at best --- the bias is embedded in the model\'s representations, not just in its surface outputs. Addressing it properly requires attention to training data curation, which raises the same consent and compensation questions discussed above.
+
+At the scale of deployment reached by text-to-image systems --- millions of users generating billions of images --- these representational patterns have real consequences. Educational content generated by these systems, marketing materials produced with their assistance, illustrations for news articles and social media --- all carry the distributional biases of the training data into wide circulation.
+
+### Open Release and the Acceleration of Dual-Use
+
+The Stable Diffusion open release created a specific situation that the AI ethics literature had not previously encountered at this scale: a model with documented dual-use capabilities, released with full weights publicly available, where the organization releasing it had no ongoing ability to monitor or constrain downstream use.
+
+Within days of release, the model was being used to generate non-consensual intimate imagery of real people --- a use case that was explicitly prohibited in the release terms and which the releasing organization could not prevent. The terms of service were legally unenforceable for local deployment of open weights.
+
+The debate about this release --- whether the benefits to research, creative applications, and capability democratization outweighed the documented harms --- remains unresolved and continues to shape policy discussions about open versus closed AI deployment. Several frameworks have been proposed: structured access (open weights to vetted researchers, API access to the public), partial openness (open model architecture but closed training data), and mandatory content filtering built into released models. None has emerged as a consensus standard.
+
+What is clear is that the standard research publication norm --- publish the architecture and paper, share the weights, let the community work with them --- does not transfer without modification to models with the capability level and accessibility of Stable Diffusion. The community is still developing the norms.
+
+## Hands-On Exploration
+
+### Overview
+
+This exploration builds direct intuition for how guidance scale affects the quality-diversity tradeoff in conditioned diffusion models, and how prompt structure affects the specificity and reliability of generated outputs. You will use a pre-loaded Stable Diffusion model to observe both the power and the failure modes of text-to-image generation.
+
+**Time estimate:** 45--60 minutes **Tools:** Google Colab (provided notebook), Stable Diffusion via HuggingFace Diffusers, free-tier GPU.
+
+### Part 1 --- The Guidance Scale Dial (20 minutes)
+
+Choose a single prompt relevant to your MIPDS application domain. Generate four images using identical prompt and random seed, varying only the guidance scale: 1.0, 4.0, 7.5, and 15.0.
+
+Observe and document:
+
+-   At guidance scale 1.0: how closely does the output follow the prompt? What visual qualities does it have that the higher-scale outputs may lack?
+
+-   At guidance scale 15.0: is the output more or less literally faithful to the prompt? What visual qualities has it gained or lost?
+
+-   Where on the scale would you set the dial for your MIPDS application, and why?
+
+Produce a structured written comparison of the four outputs --- not just \"1.0 looks worse\" but a characterization of what specifically changes and what trade-off each setting represents.
+
+### Part 2 --- Prompt Specificity (15 minutes)
+
+Generate images from a sequence of four prompts about the same subject, increasing in specificity:
+
+-   Very general: choose a one- or two-word description of your domain
+
+-   Moderately specific: add context (setting, time, condition)
+
+-   Highly specific: add fine-grained details (color, texture, angle, lighting)
+
+-   Domain-specific: add technical vocabulary from your MIPDS application domain
+
+Record where in the specificity progression the outputs are most useful for your application. Does maximum specificity produce maximum usefulness? Identify the point at which additional specificity stops helping or starts producing unexpected outputs.
+
+### Part 3 --- Systematic Failure Inventory (10 minutes)
+
+Design prompts specifically to find failure modes relevant to your MIPDS domain:
+
+-   A prompt requiring spatial reasoning (\"the equipment is positioned to the left of the patient\")
+
+-   A prompt requiring precise counting (\"three separate instances of\...\")
+
+-   A prompt using technical terminology from your domain that may be absent from web-crawled training data
+
+For each failure, write a one-sentence characterization of what failed and what it reveals about the model\'s training distribution or generative limitations.
+
+### Reflection (200--300 words)
+
+\"You have observed the guidance scale tradeoff directly and mapped the failure modes of a text-to-image system against your specific application domain.
+
+Consider two scenarios for your MIPDS deployment. In the first, your diffusion pipeline generates content that will be reviewed by a human expert before use --- a radiologist reviewing AI-generated training data augmentations, an artist reviewing AI-generated concept sketches. In the second, the pipeline generates content that will be used directly without human review --- automated synthetic data generation, real-time image completion.
+
+How would your choices about guidance scale, prompt structure, and acceptable failure modes differ between these two deployment scenarios? What does this exercise reveal about the relationship between generative capability and the human oversight required to deploy it responsibly?\"
+
+### Case Study: Stable Diffusion and the Open-Source Generative Revolution
+
+### The Question
+
+By early 2022, the research community had established that diffusion models could produce text-to-image outputs competitive with GANs and exceeding previous generative paradigms in diversity and controllability. DALL-E 2 from OpenAI and Imagen from Google demonstrated this convincingly. Both were closed systems: access was restricted, usage was subject to policy controls, and the models themselves were not publicly released.
+
+The Latent Diffusion Model paper from Rombach and colleagues at LMU Munich provided the architectural insight that made open release feasible --- by operating in compressed latent space, training and inference costs were reduced to levels achievable outside the largest research organizations. Stability AI, a startup, raised funding to train a model at scale on LAION-5B and release it publicly.
+
+The question the Stable Diffusion release implicitly posed --- and that the field has been grappling with since --- was: what does responsible open release of a capable generative model look like?
+
+### The Release and Its Consequences
+
+Stable Diffusion was released in August 2022 with full model weights, permissive licensing for most uses, and a model card documenting known limitations and concerns. The infrastructure to run it locally on a consumer GPU was straightforward to set up. Within days, it had been downloaded by hundreds of thousands of users worldwide.
+
+The beneficial applications were immediate and extensive. Artists used it as a creative tool, generating concept sketches and exploring visual directions at speeds and costs that transformed their workflows. Researchers studied the architecture, identified failure modes, proposed improvements, and published results that advanced the field. Developers built applications serving creative professionals across illustration, game design, fashion, and film. The accessibility of open weights enabled a breadth and diversity of application development that a closed API could not have produced.
+
+The harmful applications were equally immediate. Within the first week of release, tools for generating non-consensual intimate imagery using Stable Diffusion were publicly circulated. Political deepfakes using the system appeared within the first month. The usage policies in the license were unenforceable for local deployment --- a user running the model weights on their own hardware was not subject to any API-based content filtering or usage monitoring.
+
+### What the Debate Revealed
+
+The debate following Stable Diffusion\'s release was unusually productive because it was specific. Rather than abstract arguments about AI risk, it engaged concrete questions: what technical controls can be embedded in open weights? (Answer: limited and bypassable.) What are the realistic deployment pathways for harmful use? (Answer: accessible and fast.) What does the community of beneficial users lose if release is restricted? (Answer: a great deal, particularly researchers and smaller developers without API budget.)
+
+No consensus has emerged on the correct framework. The arguments for open release --- that open systems enable beneficial innovation, allow independent safety research, and prevent concentration of transformative capabilities in a small number of organizations --- have genuine force. The arguments against unrestricted open release --- that some capabilities create irreversible harms at the speed and scale of open deployment --- also have genuine force. The field is developing norms, not applying settled ones.
+
+### The Training Data Legal Landscape
+
+At the time of writing, multiple legal proceedings were active regarding the use of artist and photographer work in diffusion model training datasets. Getty Images filed suit against Stability AI for training on images from its archive. A class action brought by artists alleged copyright infringement by Stability AI, Midjourney, and DeviantArt. The EU AI Act, enacted in 2024, introduced transparency requirements for training data used in foundation models, including requirements to document and publish summaries of training data.
+
+These proceedings and regulations are shaping what constitutes permissible training data use in different jurisdictions. The outcomes will define the legal landscape for the next generation of generative model development. Technical practitioners need to understand these constraints --- not because they are primarily legal actors, but because the data decisions made at training time have consequences that persist through the model\'s entire deployment lifecycle.
+
+## Chapter Summary
+
+Diffusion models resolve the central tradeoff of Chapter 11 --- sharpness versus organization --- through a completely different approach to the generative problem. Rather than learning to map noise to data in a single pass (GANs) or learning to compress and reconstruct through a structured bottleneck (VAEs), diffusion models learn to reverse a gradual noising process, step by iterative step, guided at each step by internalized knowledge of what real data looks like.
+
+The forward process adds Gaussian noise incrementally over T timesteps until the original data is completely obscured. The reverse process --- the learned component --- estimates the noise present at each timestep and subtracts it, moving a noisy sample toward coherence. The training objective is a simple regression: predict the noise added at a randomly sampled timestep. This regression is equivalent, mathematically, to estimating the score function of the data distribution --- the vector field pointing toward high-probability regions.
+
+The UNet architecture serves as the denoising backbone, with timestep embeddings conditioning the network\'s behavior on the current noise level and cross-attention layers incorporating conditioning signals at each scale. Classifier-free guidance trains a single model on both conditioned and unconditioned inputs, enabling a tunable tradeoff between faithfulness to the condition and diversity at inference time through the guidance scale parameter.
+
+Latent diffusion models reduce the computational cost of diffusion by running the process in the compressed latent space of a pretrained VAE rather than in pixel space. Stable Diffusion instantiates this architecture with a CLIP text encoder for conditioning, a VAE for the latent space, and a UNet denoiser trained on LAION-5B --- producing a complete text-to-image pipeline whose components directly draw on Chapters 7 through 11 of this course.
+
+The ethical dimensions of text-to-image generation at scale encompass training data consent and the displacement of creative labor, representational harm amplified through the distributional biases of web-scraped training data, and the unresolved question of what responsible open release of generative models capable of harm should look like. These are not peripheral concerns. They are the design constraints within which all responsible deployment of these systems must operate.
+
+MIPDS now has genuine generative capability: a text-conditioned diffusion pipeline that connects the language encoder built in Weeks 8--9 to a visual output channel through a principled, controllable generative process. The system can see, read, reason across modalities, and create. Week 13 adds the final architectural layer: decision-making.
+
+## Review Questions
+
+1.  The denoising training objective --- predict the noise added at each timestep --- is mathematically equivalent to learning the score function of the data distribution. What does it mean for a neural network to have learned the score function? Does this constitute understanding the data distribution, or something more limited? What would you want to test to find out?
+
+2.  Classifier-free guidance allows users to trade diversity for prompt faithfulness through a single numerical parameter. This gives users meaningful control, but it also means that the same model can produce very different outputs depending on the user\'s setting. What are the implications for evaluating or comparing diffusion models? Is a model\'s quality best measured at a canonical guidance scale, across a range of scales, or through some other framework?
+
+3.  Latent diffusion models run the diffusion process in the compressed latent space of a pretrained VAE. The VAE was trained to minimize reconstruction error, not to produce a latent space optimally suited for diffusion. Does this architectural dependency create any systematic limitations? What properties of the VAE latent space matter most for diffusion quality, and how might a latent space specifically designed for diffusion differ?
+
+4.  Stable Diffusion\'s open release with full weights enabled rapid creative applications and independent safety research --- but also immediate harmful use cases that content policies could not prevent. Is there a configuration of technical safeguards that could have preserved most of the beneficial open-release benefits while substantially reducing the harmful use cases? Or is this tradeoff fundamental to open release of capable generative systems?
+
+5.  Artists argue that diffusion models trained on their work constitute commercial exploitation of their labor without consent or compensation. AI companies argue that training on publicly accessible data is a form of learning analogous to how humans are influenced by art they have seen. Which argument do you find more persuasive, and what would constitute compelling evidence for the other side?
+
+6.  You observed in the hands-on exploration that diffusion models fail systematically at spatial reasoning, precise counting, and domain-specific technical content. For your MIPDS application, what is your honest assessment of the failure modes most likely to cause real-world harm if your generative pipeline is deployed without human review? What oversight mechanisms would you want in place?
+
+7.  Diffusion models are increasingly used for data augmentation --- generating synthetic training examples to address labeled data scarcity. If the synthetic data inherits the biases of the generative model\'s training distribution, a model trained on it may perform differently than a model trained on real data. How would you design a validation study to detect this effect before deployment?
+
+## Further Reading
+
+### Foundational Papers
+
+Ho, J., Jain, A., & Abbeel, P. (2020). Denoising diffusion probabilistic models. In *Advances in Neural Information Processing Systems, 33*, 6840--6851. https://arxiv.org/abs/2006.11239 *The foundational DDPM paper. The method section establishes the forward process, reverse process, and noise-prediction training objective that define the paradigm. The connection to score matching is noted but not fully developed here --- for that, see the Song & Ermon paper below.*
+
+Song, Y., & Ermon, S. (2020). Improved techniques for training score-based generative models. In *Advances in Neural Information Processing Systems, 33*, 12438--12448. https://arxiv.org/abs/2006.09011 *Develops the score-based perspective on diffusion models. The introduction\'s treatment of the score function and its relationship to the denoising objective is the clearest available explanation of the mathematical foundations. Recommended for students who want to understand why noise prediction works, not just that it works.*
+
+Song, J., Meng, C., & Ermon, S. (2020). Denoising diffusion implicit models. In *Proceedings of ICLR 2021*. https://arxiv.org/abs/2010.02502 *Introduces DDIM. The key contribution --- replacing stochastic reverse steps with deterministic ones --- is explained clearly and the speed-quality tradeoff is empirically characterized. Essential reading for understanding why inference is tractable in practice.*
+
+Rombach, R., Blattmann, A., Lorenz, D., Esser, P., & Ommer, B. (2022). High-resolution image synthesis with latent diffusion models. In *Proceedings of CVPR 2022* (pp. 10684--10695). https://arxiv.org/abs/2112.10752 *The Latent Diffusion Model paper, which is the architectural foundation of Stable Diffusion. Section 3 (the LDM approach) and the ablation studies on the compression factor are the most important reading. The conditioning experiments demonstrate how text, images, and other signals can be incorporated through cross-attention.*
+
+Ho, J., & Salimans, T. (2022). Classifier-free diffusion guidance. In *NeurIPS 2021 Workshop on Deep Generative Models*. https://arxiv.org/abs/2207.12598 *Introduces classifier-free guidance. Brief and readable. The key contribution --- jointly training on conditioned and unconditioned inputs and interpolating at inference --- is clearly explained.*
+
+### For Conceptual Depth
+
+Luo, C. (2022). Understanding diffusion models: A unified perspective. https://arxiv.org/abs/2208.11970 *An unusually clear tutorial treatment of diffusion models, deriving the training objective from first principles and connecting DDPM, score matching, and latent diffusion in a unified framework. Recommended for students who want a thorough mathematical treatment without reading the original papers in sequence.*
+
+### On Training Data and Ethics
+
+Birhane, A., Prabhu, V. U., & Kahembwe, E. (2021). Multimodal datasets: Misogyny, pornography, and malignant stereotypes. https://arxiv.org/abs/2110.01963 *Documents the content of large-scale web-scraped image-text datasets --- the kind used to train models like Stable Diffusion. Directly relevant to understanding the ethical implications of training data composition for generative models.*
+
+Schuhmann, C., Beaumont, R., Vencu, R., Gordon, C., Wightman, R., Cherti, M., \... & Jitsev, J. (2022). LAION-5B: An open large-scale dataset for training next generation image-text models. In *Advances in Neural Information Processing Systems, 35*. https://arxiv.org/abs/2210.08402 *The paper describing LAION-5B, the dataset used to train Stable Diffusion. Reading the data collection methodology alongside the bias documentation provides a clear picture of what this training data actually contains and the decisions made in its assembly.*
+
+Epstein, Z., Hertzmann, A., & Investigators of Human Creativity. (2023). Art and the science of generative AI. *Science, 380*(6650), 1110--1111. https://doi.org/10.1126/science.adh4451 *A concise, balanced analysis of the relationship between generative AI and human artistic creation --- the analogy question examined in this chapter\'s ethical section. A useful starting point for the discussion question on training data and artistic labor.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 12: The Art of Controlled Noise --- Diffusion Models and Advanced Generative Systems*

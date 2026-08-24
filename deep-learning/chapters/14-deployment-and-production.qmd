@@ -1,0 +1,550 @@
+---
+title: "From Prototype to System"
+subtitle: "Integration, Deployment, and the Production Gap"
+---
+
+## Opening Narrative
+
+In 2019, a team of researchers published a study that sent a quiet shock through the medical AI community. They had evaluated a deep learning model for detecting diabetic retinopathy --- a leading cause of blindness --- that had achieved exceptional sensitivity scores in its original validation study. The model had been celebrated. It had been cited. It had been discussed as an example of AI reaching specialist-level diagnostic performance.
+
+The team deployed it at a network of primary care clinics in Thailand.
+
+Performance was substantially worse than the validation study had indicated. Not catastrophically so --- the model still provided useful diagnostic information. But the gap between what the benchmarks had promised and what the clinics experienced was large enough to matter. Patients who should have been flagged for specialist referral were not flagged. The discrepancy was not uniform: it was concentrated among patients whose imaging conditions differed most from the academic medical centers where the training data had been collected.
+
+The algorithm had not changed. The model weights were identical. What had changed was everything around the model: the imaging hardware, the lighting conditions, the patient demographics, the distribution of disease severity, the preprocessing pipeline. The model had been validated in one world and deployed in another, and the gap between those worlds was exactly the gap between the benchmark numbers and the clinical numbers.
+
+This gap --- the distance between a model\'s performance in controlled experimental conditions and its performance in the unpredictable reality of actual deployment --- is called the production gap. It is the defining challenge of applied AI development, and it is almost entirely absent from the technical literature on model architectures and training algorithms.
+
+Understanding it is what this chapter is about.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain the production gap and identify the categories of failure it encompasses
+
+-   Describe the three primary model compression techniques --- quantization, pruning, and knowledge distillation --- and explain the tradeoff each involves
+
+-   Explain what data drift and concept drift are, why they cause performance degradation, and how monitoring systems detect them
+
+-   Describe the MLOps discipline and explain why sustainable deployment requires it
+
+### Analyze and Evaluate
+
+-   Compare cloud, edge, and hybrid deployment architectures against the requirements of a specific application
+
+-   Analyze the integration challenges specific to multi-component pipelines --- error propagation, latency accumulation, component versioning, and failure mode isolation
+
+-   Evaluate the ethics of deployment --- informed consent, performance disparities, auditability, and the obligation to monitor for harm
+
+### Apply and Create
+
+-   Connect the production gap to the generalization concepts of earlier chapters, recognizing distribution shift as the deployment-time manifestation of the same underlying challenge
+
+-   Produce a deployment plan for MIPDS specifying architecture, optimization strategy, monitoring approach, and rollout procedure
+
+## Key Terms and Concepts
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                         **Definition**
+  -------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Production Gap**               The difference between a model\'s performance in controlled experimental conditions and its performance in real-world deployment. Caused by distribution shift, edge cases, system integration complexity, and the unpredictability of actual users and environments.
+
+  **Inference**                    The operation of using a trained model to produce predictions on new data. In deployment, inference is what matters to users --- the training process is invisible to them.
+
+  **Latency**                      The time between when a system receives input and when it returns a response. The primary user experience metric for interactive and real-time applications.
+
+  **Throughput**                   The number of requests a system processes per unit time. The primary metric for batch processing and high-volume applications. Latency and throughput are in tension: optimizing for one often degrades the other.
+
+  **Quantization**                 Reducing the numerical precision of model weights and activations --- from 32-bit floating point to 8-bit integers, for example. Reduces model size and increases inference speed at the cost of some representational fidelity, typically with small and acceptable accuracy loss.
+
+  **Pruning**                      Removing weights, neurons, or entire structural elements from a trained model based on their estimated contribution to performance. Reduces model size and computation at some cost to accuracy.
+
+  **Knowledge Distillation**       Training a compact \"student\" model to reproduce the outputs of a larger \"teacher\" model --- transferring the teacher\'s learned knowledge without the teacher\'s computational requirements.
+
+  **ONNX**                         Open Neural Network Exchange --- an open standard for representing trained models that enables conversion between frameworks and deployment across diverse hardware targets.
+
+  **Cloud Deployment**             Running models on remote infrastructure accessed via the network. Provides elastic scalability and powerful hardware; introduces network latency and data privacy considerations.
+
+  **Edge Deployment**              Running models on the device where data is generated. Eliminates network latency and keeps data local; constrained by the computation and memory available on the device.
+
+  **Hybrid Deployment**            Routing requests between edge and cloud tiers based on complexity, latency requirements, or privacy constraints --- combining the advantages of both while managing their respective costs.
+
+  **Data Drift**                   Changes in the statistical distribution of input data over time. Inputs encountered in production differ from inputs encountered during training, causing performance degradation without any change to the model.
+
+  **Concept Drift**                Changes in the relationship between inputs and correct outputs over time. Even if inputs remain statistically similar, the right answer has changed --- as when a model trained on pre-pandemic behavioral data encounters post-pandemic patterns.
+
+  **Monitoring**                   Continuous measurement of a deployed system\'s behavior --- tracking performance metrics, input distributions, output distributions, latency, and error rates to detect problems before they cause user-visible harm.
+
+  **Model Card**                   A structured document accompanying a deployed model that describes its intended use, performance characteristics, limitations, and ethical considerations --- a standard instrument for communicating what the model is and is not suitable for.
+
+  **MLOps**                        The set of practices that combine machine learning development with software engineering operations --- versioning, testing, automated pipelines, monitoring, and systematic model updates applied to the ML lifecycle.
+
+  **A/B Testing**                  Comparing two system versions by routing different users to each and measuring outcomes --- the standard method for evaluating whether a new model version improves on the previous one in real-world conditions.
+
+  **Canary Deployment**            Rolling out a new system version to a small fraction of users before full deployment --- allows detection of problems at limited scale before they affect all users.
+
+  **Adversarial Input**            A carefully crafted input designed to cause a model to produce incorrect or harmful outputs. A security concern for deployed systems, particularly those accessible to users who may have incentive to manipulate system behavior.
+
+  **Hallucination**                A generative model\'s production of plausible-sounding but factually incorrect or entirely fabricated content. A deployment concern for language and multimodal systems that require factual reliability.
+
+  **System Integration Testing**   Testing the complete pipeline of components together rather than each component in isolation. Necessary because component interactions can produce failures that no individual component test would reveal.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## The Production Gap --- Why Good Models Fail in the Real World
+
+### The Gap and Its Sources
+
+The production gap is not one thing. It is a collection of related problems that arise when a system designed and validated in a controlled environment encounters the uncontrolled reality of actual deployment. Understanding each source of the gap is a prerequisite for addressing it.
+
+**Distribution shift** is the most fundamental. Every model is trained on a sample of data from some distribution --- a specific set of images, texts, or sensor readings, collected under specific conditions, from a specific population, at a specific time. The model learns to perform well on that distribution. In deployment, it encounters data from a different distribution: different users, different conditions, different times, different hardware, different languages, different cultural contexts. The farther the deployment distribution is from the training distribution, the larger the performance gap.
+
+The Thai diabetic retinopathy case illustrates this precisely. The model was trained on images from US academic medical centers with modern equipment. It was deployed in clinics with older equipment and different patient demographics. The imaging characteristics were different. The disease presentation distribution was different. The model had learned features specific to its training distribution that did not transfer.
+
+**Edge cases** are inputs that fall outside the regions of the input space where training data was dense. A sentiment classifier trained on formal review text will have dense coverage of standard positive and negative expressions. It will have sparse coverage of sarcasm, irony, mixed sentiment, code-switching, and emerging slang. In a controlled test set, these edge cases may appear rarely enough to have limited impact on the overall accuracy metric. In production, where the full diversity of human language appears, they may constitute a significant fraction of inputs --- and a disproportionate fraction of failures.
+
+The fundamental challenge of edge cases is that you cannot anticipate which edge cases will matter until you observe production traffic. Test sets are constructed by the same team that built the model, sharing the same blind spots and assumptions. Production users have no obligation to stay within those assumptions.
+
+**System integration failures** arise when components that each work correctly in isolation interact in ways that produce incorrect behavior at the system level. This is particularly relevant for multi-component architectures like MIPDS, and it deserves its own section later in this chapter. For now, note that it is a distinct category from component-level failures: the components may be functioning exactly as designed, and the system may still produce wrong outputs, because the design of the integration was incorrect.
+
+**Resource constraint failures** arise when a model that performed well in the resource-abundant environment of training and development encounters the constraints of production: limited memory, limited computation, latency requirements, concurrent users. A model that takes two seconds per inference is acceptable in a research notebook; it is unacceptable in an interactive application where users expect sub-second responses. Addressing this requires the compression and optimization techniques discussed in Section 2.
+
+**Behavioral drift over time** occurs as the world changes and the model does not. A content moderation model trained on what harmful content looked like in 2021 may not recognize harmful content that emerged in 2023. A recommendation model trained on pre-pandemic user behavior may perform poorly on post-pandemic patterns. A fraud detection model trained on historical transaction patterns may miss novel fraud schemes. Models are snapshots of a world that continues to change; without ongoing monitoring and retraining, their performance degrades as the world diverges from the snapshot.
+
+### Why the Gap Is Not Caught in Testing
+
+The natural question is: why doesn\'t evaluation catch the production gap? Why do test set results fail to predict production performance?
+
+The answer is that test sets are constructed from the same distribution as training data --- usually from the same original dataset, split temporally or randomly. A model that has learned features specific to the training distribution will score well on a test set drawn from that distribution. The test set is only predictive of production performance to the extent that the production distribution matches the training distribution.
+
+There are evaluation practices that better predict production performance: adversarial testing against likely failure modes, evaluation on held-out domains or demographics, systematic stress testing against edge cases, and real-world piloting with limited exposure before full deployment. These practices are more expensive than standard test set evaluation and require more expertise to design. They are also more predictive of what actually happens in production.
+
+The most predictive evaluation is canary deployment --- deploying the model to a small fraction of real users and measuring real-world performance before full deployment. Nothing predicts production performance better than production performance. The challenge is managing the risk during the canary period --- accepting that some real users will be exposed to potentially worse performance in order to learn what that performance actually is.
+
+## Making Models Deployable --- Compression and Optimization
+
+### The Training-Inference Mismatch
+
+Training and inference are different activities with different requirements, and optimizing for one does not optimize for the other.
+
+Training is a batch process. It takes place over many hours or days on powerful hardware. It uses large batches of data processed simultaneously. It requires storing intermediate activations for backpropagation. It can tolerate slow, iterative computation because the goal is learning, not responsiveness. It is typically performed once, or infrequently, by a small number of engineers on specialized hardware.
+
+Inference is a real-time or near-real-time process. It happens billions of times, on hardware ranging from high-end servers to smartphones to embedded microcontrollers. It must be fast --- often responding in milliseconds. It cannot store all intermediate activations --- memory is constrained. It happens continuously, often on millions of simultaneous requests, by a deployed system that cannot be paused for optimization.
+
+A model trained for accuracy without regard to inference efficiency will almost never be deployable as-is. The compression techniques discussed in this section exist to bridge this gap: taking a model optimized for training and transforming it into a model optimized for inference, with acceptable accuracy tradeoff.
+
+### Quantization: Reducing Numerical Precision
+
+A trained neural network stores its parameters as numbers. The standard training format uses 32-bit floating-point representation --- a format that can represent a very wide range of values with high precision. But 32-bit precision is often more than is needed for inference. A weight that is 0.7312847 probably does not need to be represented more precisely than 0.73.
+
+Quantization reduces the numerical precision used to represent weights and activations --- typically from 32-bit floats to 16-bit floats or 8-bit integers. The benefits are immediate and substantial: a model quantized from 32-bit to 8-bit takes one-quarter of the memory and can often run two to four times faster, because 8-bit arithmetic is cheaper to execute and allows more data to fit in fast memory caches.
+
+The cost is reduced representational fidelity. Some weight values that were previously representable cannot be represented exactly at lower precision; they are rounded to the nearest representable value. For most models, this rounding introduces small errors that have minimal impact on accuracy --- typically less than 1% degradation for INT8 quantization of large, well-trained models. For smaller models, models trained in specialized domains, or models whose performance depended on precise weight values in specific layers, the degradation can be larger.
+
+The photograph analogy captures the tradeoff well. A 24-bit color photograph has over 16 million distinguishable colors. An 8-bit image has 256. For many photographic subjects, the 8-bit image looks nearly identical to the 24-bit original --- the human visual system cannot distinguish most of those 16 million colors. For photographs with subtle color gradients --- a sunset, a skin tone --- the reduction is visible as banding. The tradeoff between precision and file size is context-dependent.
+
+Two approaches exist. **Post-training quantization** applies quantization to a model after training is complete --- no retraining required, but slightly higher accuracy loss. **Quantization-aware training** simulates the rounding effects of quantization during training, allowing the model to learn weights that are more robust to quantization --- better accuracy at the cost of a retraining step.
+
+### Pruning: Removing What Does Not Matter
+
+A trained neural network typically contains redundancy. Not every weight contributes meaningfully to the model\'s performance. Some weights are very close to zero --- their activation contributes almost nothing to the output. Some neurons fire on inputs so rare that removing them would not detectably affect average performance. Pruning identifies and removes these low-contribution elements.
+
+The surgical manuscript editing analogy is useful here. A first draft of a long document often contains sentences that restate earlier points, paragraphs that address cases too rare to be worth the space, and phrases that add words without adding meaning. Careful editing removes these without damaging the essential argument. A pruned model is similarly edited --- the non-essential elements removed, the essential structure preserved.
+
+Pruning can be applied at different granularities. **Unstructured pruning** removes individual weights throughout the network --- any weight below a magnitude threshold is zeroed. This produces a sparse network that can be represented compactly but does not translate directly into computational speedup without specialized sparse matrix hardware support. **Structured pruning** removes entire structural elements --- channels in a convolutional layer, attention heads in a Transformer, entire layers. Structured pruning produces a smaller dense network that runs faster on standard hardware without specialized support.
+
+The tradeoff: aggressive pruning reduces model size and computation substantially --- sometimes to 30--50% of the original size with 95%+ of accuracy retained. But the accuracy loss is not uniform: pruning removes the capacity to handle rare and unusual inputs before it removes capacity to handle common inputs. A heavily pruned model may perform well on average while performing poorly on the edge cases that were already its weakness.
+
+Pruning and quantization are often applied together: prune first to reduce model size, then quantize to reduce precision. The combination can produce models 10--20× smaller and faster than the original with modest accuracy degradation.
+
+### Knowledge Distillation: Teaching a Smaller Student
+
+Quantization and pruning work with an existing trained model, compressing it. Knowledge distillation takes a different approach: train a new, smaller model from scratch, but use the large model\'s outputs --- not the original labels --- as the training signal.
+
+The mechanism is the following. A large, high-quality \"teacher\" model is trained normally. For each training example, the teacher produces a full probability distribution over outputs --- not just \"this is a cat\" but \"this is 87% probably a cat, 8% probably a fox, 3% probably a dog.\" These soft probability distributions carry more information than the hard labels. They encode the teacher\'s uncertainty, its knowledge of which categories are similar to each other, and its representation of the underlying structure of the problem.
+
+The student model --- smaller, faster, with fewer parameters --- is trained to match the teacher\'s soft distributions rather than the original hard labels. A student trained on these rich soft targets learns more efficiently than a student trained on hard labels alone, often achieving performance close to the teacher while being a fraction of the size.
+
+The professor\'s lecture and student notes analogy is precise here. A student who transcribes every word of a lecture is doing something different from a student who takes notes that capture the essential structure and key insights. The notes are smaller; the essential knowledge is preserved; and a student who studies well-organized notes may learn more efficiently than one who tries to process the raw lecture.
+
+Distillation is particularly powerful for deploying large language models. A GPT-4 class model may have hundreds of billions of parameters and require enormous GPU resources for inference. A distilled student trained on that model\'s outputs might achieve 80--90% of its performance at 1--5% of the inference cost. This is the approach behind many of the smaller, faster language models available for on-device deployment.
+
+## Deployment Architecture --- Choosing Where the Model Lives
+
+### The Architecture Decision
+
+Where a model runs is not an aesthetic choice. It is a consequence of requirements --- of latency, privacy, cost, reliability, and the nature of the data being processed. Getting the architecture decision wrong produces systems that are either technically dysfunctional (too slow, too expensive, unreliable) or ethically problematic (unnecessary privacy violations, inaccessible to users without reliable internet, dependent on third-party infrastructure with its own failure modes).
+
+The space of deployment architectures can be understood as a spectrum between two poles, with hybrid architectures in between.
+
+### Cloud Deployment
+
+In cloud deployment, the model runs on remote servers --- typically in a major cloud provider\'s data center --- and users interact with it via network APIs. The model is never installed on the user\'s device; requests travel over the network, are processed centrally, and results travel back.
+
+The advantages are substantial. Cloud infrastructure provides essentially unlimited scalability --- a system that receives ten requests per second on Monday can handle ten thousand per second on Friday by provisioning additional servers. The hardware available is powerful --- current-generation GPUs and TPUs, regularly updated, require no capital investment from the deployer. Multiple models, even very large ones, can be maintained and updated centrally.
+
+The costs are equally real. Network latency introduces delays --- round-trip times to cloud servers range from tens to hundreds of milliseconds depending on geographic distance and network conditions. This is often acceptable for non-interactive tasks but can be unacceptable for applications requiring real-time response. User data must travel over the network to reach the model, which raises privacy concerns: a medical image sent to a cloud server for analysis may traverse multiple network hops and be processed on servers in a different jurisdiction. For sensitive data --- health records, financial information, personal communications --- this is often legally constrained and ethically fraught. And cloud services are subject to outages, rate limits, and pricing changes that are outside the deployer\'s control.
+
+### Edge Deployment
+
+In edge deployment, the model runs directly on the device where data is generated --- a smartphone, a medical device, an industrial sensor, an autonomous vehicle. No network communication is required for inference.
+
+Edge deployment\'s advantages mirror cloud deployment\'s disadvantages. Latency is minimal --- inference happens locally, with no network round-trip. Privacy is preserved --- data never leaves the device. Reliability is robust --- the system continues to function without network connectivity.
+
+The constraints are severe. Edge devices --- phones, embedded systems, IoT sensors --- have limited memory, limited computation, and limited power. A model that requires 10GB of GPU memory cannot run on a device with 4GB of RAM. This is where the compression techniques of Section 2 become essential: edge deployment almost always requires quantization, pruning, distillation, or some combination, to produce models small enough and fast enough to run on constrained hardware.
+
+Edge deployment also complicates maintenance. Updating a cloud-deployed model is a server-side operation --- the change is immediately available to all users. Updating an edge-deployed model requires distributing the update to millions of individual devices and ensuring that the update process itself is reliable. Versioning, rollback, and update management are substantially more complex at the edge.
+
+### Hybrid Deployment
+
+Hybrid architectures route different parts of the workload to different tiers --- running lightweight models on-device and heavier models in the cloud, directing each request to the appropriate tier based on the request\'s characteristics.
+
+Consider a voice assistant. A small keyword detection model runs continuously on the device, listening for the wake word. It needs to be fast and efficient --- it runs on battery power, processes audio in real time, and must not drain the battery noticeably. When the wake word is detected, a larger, more capable language model in the cloud handles the actual query. The cloud model can be orders of magnitude larger than anything that could run on the device, but it is only invoked when needed, keeping network latency and data transmission to a minimum.
+
+This pattern --- fast, lightweight edge model for common and privacy-sensitive operations; powerful cloud model for complex or infrequent operations --- is applicable to many multimodal and AI-assistant architectures. For MIPDS specifically, a hybrid architecture might run the vision encoder on the local device (preserving privacy for the images being processed), transmit only the resulting feature vectors to a cloud API (protecting raw image privacy), and run the language encoder and multimodal fusion in the cloud (where more compute is available).
+
+The design of a hybrid architecture requires explicit decisions about which data must be kept local, which latency constraints allow cloud round-trips, and what happens when the cloud component is unavailable. Hybrid architectures are more complex to build and maintain than either pure cloud or pure edge --- the complexity is the cost of the combined advantages.
+
+### Applying the Framework to MIPDS
+
+MIPDS is a multi-component pipeline: vision encoder, language encoder, multimodal fusion, generative module, decision-making layer. Each component has different computational requirements, different latency sensitivities, and potentially different privacy implications.
+
+A principled architecture decision for MIPDS requires answering these questions explicitly. Where is the input data generated, and what are the privacy requirements for each modality? What are the latency requirements for the application --- interactive or batch? What hardware is available at the point of deployment? What is the acceptable cost per inference? What happens when the network is unavailable?
+
+The answers determine the architecture. A clinical MIPDS deployed in a resource-constrained setting might run the vision encoder on a local medical device (keeping patient images local), transmit feature vectors to a cloud service for language understanding and decision support (accepting the latency tradeoff), and cache frequently used generative outputs locally to reduce generation latency. A creative tool MIPDS deployed as a consumer application might run entirely in the cloud on the user\'s device with a thin client --- accepting the latency but providing the most powerful models possible.
+
+There is no universally correct architecture. There is the architecture that best satisfies the specific requirements of the specific deployment context.
+
+## The Integration Challenge --- When Components Become a System
+
+### Why Integration Is Hard
+
+The integration challenge is the least-discussed topic in AI deployment courses and one of the most important in practice. A model that performs well in isolation may be a component in a system that performs poorly. Understanding why requires understanding how failures propagate through composed pipelines.
+
+For MIPDS, this is the central engineering challenge of Week 14. The system has five major components, each validated separately, now being composed into a pipeline. The question is not whether each component works --- that has been established over thirteen weeks. The question is whether the composition works.
+
+### Error Propagation
+
+In a multi-component pipeline, errors made by early components compound through later components. If the vision encoder misclassifies an input --- producing a feature vector that represents the wrong content --- the language encoder operates on a query that is already contextually incorrect, the fusion layer combines two signals that are semantically misaligned, and the generative module or decision-making component produces an output based on this compounded error.
+
+The overall pipeline\'s error rate is not the average of the component error rates. It is higher --- sometimes substantially higher --- because errors accumulate multiplicatively. If each of five components has a 5% error rate, the probability that at least one error occurs in a given inference is not 5% --- it is approximately 23%. And errors from component one are not independent of errors from components two through five; they are correlated, because an unusual input that fools the vision encoder is likely to produce unusual features that challenge the downstream components.
+
+This has practical implications for system design. The most reliable components should be at the front of the pipeline, because errors they make cannot be corrected by later components. Early components should also produce calibrated uncertainty estimates --- some signal that indicates when their output is less reliable than usual --- so that downstream components can adjust their behavior accordingly or route the input to a human reviewer rather than proceeding automatically.
+
+### Latency Accumulation
+
+Every component in a pipeline adds latency. The total end-to-end latency of a composed pipeline is the sum of the individual component latencies plus the overhead of data transfer between components. For a real-time application, a pipeline with five components each taking 50ms produces 250ms end-to-end latency --- perhaps acceptable, perhaps not, depending on the application.
+
+The latency budget --- how much total time the end-to-end pipeline is allowed --- must be explicitly allocated across components. If the budget is 300ms and five components share it, some components must be faster than others, and the distribution of the budget should reflect which components have the most flexibility in their latency-accuracy tradeoff.
+
+Batching --- processing multiple inputs simultaneously --- can improve throughput but increases latency for individual requests. A component that processes 16 inputs in parallel is more efficient in terms of GPU utilization, but any individual input must wait until 15 others arrive before processing begins. For real-time interactive applications, batching must be managed carefully.
+
+Latency is not just an engineering constraint. It is a user experience dimension. Research on human-computer interaction consistently finds that response times above 200ms are perceptible as delay; response times above 1000ms are perceived as system lag and significantly degrade user experience. For medical applications, excessive latency can affect clinical workflow in ways that reduce actual uptake of the system. Designing a system whose latency is acceptable in theory but unacceptable to actual users in practice is a production gap failure.
+
+### Component Versioning
+
+In a system composed of multiple components, each component may be updated on a different schedule. The vision encoder might be retrained when new labeled data becomes available. The language encoder might be updated when a better pretrained model is released. The fusion layer might be redesigned when performance analysis reveals a systematic weakness.
+
+When one component is updated, the full system must be retested --- not because the other components changed, but because the updated component\'s outputs may be subtly different in ways that affect downstream components. A vision encoder retrained with additional data might produce feature vectors with slightly different statistical properties --- the same underlying information, but distributed differently across the feature dimensions. A fusion layer trained on the previous encoder\'s outputs may perform worse on the new encoder\'s outputs, even if the new encoder is individually better.
+
+This creates a component coupling problem: updates to any component potentially require revalidation of all downstream components. Managing this correctly requires explicit versioning --- tracking which version of each component was used in which version of the full system --- and regression testing protocols that validate the full system after any component update, not just the updated component in isolation.
+
+### Failure Mode Isolation
+
+When a deployed system fails --- when it produces a wrong output, crashes, or takes too long --- identifying which component is responsible requires observability infrastructure built in from the start. A monolithic system with no per-component logging is a black box: when it fails, you know that it failed, but not where or why.
+
+Effective failure mode isolation requires logging inputs and outputs at each component boundary, tracking per-component latency, monitoring per-component error rates, and maintaining separate alerting thresholds for each component. When an alert fires, the logs should immediately show which component\'s output first diverged from expected behavior --- and whether that divergence was the cause of the downstream failure or a consequence of an earlier component\'s failure.
+
+This observability infrastructure must be designed before deployment, not retrofitted after the first production incident. Retrofitting observability to a deployed system is technically difficult and operationally risky --- adding logging and monitoring to a production system risks introducing new failure modes in the process.
+
+## Monitoring and Drift --- Knowing When Your System Is Breaking
+
+### Why Monitoring Is Non-Negotiable
+
+A deployed model is not like deployed conventional software. Traditional software has deterministic behavior: given the same input, it always produces the same output, and a bug is a bug until it is fixed. A deployed model\'s behavior is statistical: its performance on any given input depends on how similar that input is to the training distribution, and that similarity changes over time as the world changes.
+
+Without monitoring, you will not know that your system is degrading until users tell you --- by complaining, by abandoning the product, or by experiencing harm. In high-stakes applications, user reports of harm are not an acceptable monitoring strategy. The monitoring infrastructure must detect degradation before users experience it at scale.
+
+### Data Drift
+
+Data drift is the change in the statistical properties of inputs over time. The inputs your model encounters in production in month six are different from the inputs it encountered in month one, which are different from the training data from two years ago.
+
+Drift can be gradual --- seasonal patterns in consumer behavior, slow demographic shifts, gradual changes in language use. It can be abrupt --- a viral social media trend that suddenly changes what content users are creating, a supply chain disruption that changes what products are available for a recommendation system, a global health event that changes what searches people make and what information they need.
+
+Detecting drift requires monitoring the statistical properties of incoming inputs and comparing them to the training distribution. If the distribution of input values shifts --- different feature distributions, different correlation structures, different vocabulary --- a drift alert can be triggered before accuracy is measurably affected. Drift in inputs often precedes drift in accuracy: the model begins receiving inputs it is less well-prepared for before the outputs have clearly degraded.
+
+This early warning is valuable. A drift detection system that identifies distribution shift before accuracy degrades gives the team time to investigate and respond --- retraining on new data, adjusting thresholds, or restricting deployment to inputs within the known reliable distribution --- before users experience harm.
+
+### Concept Drift
+
+Concept drift is more subtle than data drift and harder to detect. It occurs when the correct output for a given input changes over time --- not because the inputs have changed, but because the relationship between inputs and the right answer has changed.
+
+A sentiment classifier trained in 2019 might learn that certain words are associated with positive sentiment. By 2021, some of those words have acquired ironic or negative connotations through social media usage. The inputs --- sentences containing those words --- may look statistically similar to the training distribution. But the correct classification has changed. The model\'s accuracy on current inputs is lower than its accuracy on the training distribution, not because inputs shifted, but because meaning shifted.
+
+Detecting concept drift requires ground-truth labels for recent production inputs --- some way of knowing what the correct output should have been. This is expensive: it requires ongoing labeling effort on production data. The practical compromise is a monitoring approach that collects a sample of production inputs, labels them with the correct outputs (through expert review, user feedback, or deferred ground truth), and compares the model\'s outputs on this sample to the correct outputs over time. When the gap between the model\'s outputs and the correct outputs grows, concept drift has occurred.
+
+### What to Monitor
+
+A complete monitoring system for a deployed multimodal AI system tracks metrics at multiple levels.
+
+**Input distribution metrics** detect data drift: statistical summaries of incoming inputs (mean values, variance, distributions of key features) compared to reference statistics from the training distribution. Statistical tests for distribution shift --- population stability index, Kullback-Leibler divergence, or simpler threshold-based comparisons --- can trigger alerts when inputs deviate significantly from the expected distribution.
+
+**Output distribution metrics** detect behavioral drift: statistics of the system\'s outputs over time. If a classification system that usually produces 60/40 class splits suddenly produces 90/10 splits, something has changed --- either the inputs have shifted in a way that favors one class, or the model\'s behavior has become miscalibrated. Either warrants investigation.
+
+**Performance metrics against labeled samples** provide the most direct measure of accuracy but require ongoing labeling effort. For high-stakes applications where the cost of accuracy degradation is high, continuous labeling of a sample of production inputs is justified. For lower-stakes applications, periodic manual review of a random sample may suffice.
+
+**Latency and error rate metrics** detect operational failures: component timeouts, increased error rates, unusual latency spikes. These are the monitoring metrics most similar to traditional software monitoring, and they are the easiest to implement because they require no domain knowledge --- only measurement.
+
+**Per-subgroup performance metrics** detect inequity: monitoring whether the system\'s accuracy is degrading at different rates for different demographic groups, input domains, or user types. This is the monitoring dimension most often omitted from baseline implementations and the one most important for detecting the equity-related failures documented in the clinical AI literature.
+
+### The Alert-to-Action Pipeline
+
+Monitoring infrastructure that generates alerts without clear procedures for responding to those alerts provides false security. An alert tells you something has changed; a procedure tells you what to do about it.
+
+The alert-to-action pipeline should be explicit and tested. When a drift alert fires, who is notified? What is the procedure for investigating whether the drift is affecting accuracy? What are the criteria for restricting deployment to a subset of inputs while the investigation proceeds? What are the criteria for triggering a retraining run? What are the criteria for full rollback to a previous model version?
+
+These decisions should be made before production, not in response to a 2am alert about a system degrading in ways no one understood in advance. The monitoring system is only as valuable as the procedures it connects to.
+
+## MLOps --- Making Deployment Sustainable
+
+### The Deployment-as-Event Fallacy
+
+The most common failure mode in AI deployment is treating deployment as an event rather than a process. A model is trained. A model is validated. A model is deployed. Done. The team moves on to the next project.
+
+This works for conventional software, which does not degrade unless changed. It fails for AI systems, which degrade as the world changes around them. A model deployed as an event and then ignored will, with certainty, provide worse performance over time than it did at deployment --- because the world it was trained on has changed and the model has not.
+
+MLOps is the set of practices that transforms deployment from a one-time event into a continuous operational discipline. It borrows from software engineering\'s DevOps tradition the principle that operational concerns --- reliability, maintainability, continuous improvement --- must be designed into systems from the start, not bolted on as afterthoughts.
+
+### Version Control for Everything
+
+In conventional software development, version control for code is universal. In ML systems, version control must extend to models, datasets, and configuration --- not just code.
+
+**Model versioning** means maintaining a complete record of every model version deployed or considered for deployment, including the training data version, hyperparameters, and evaluation results. When a deployed model is producing unexpected outputs, the ability to identify which model version is running and what distinguishes it from the previous version is essential for rapid diagnosis.
+
+**Data versioning** means tracking what data was used for each training run. When a model\'s performance changes between versions, the change may be due to the model architecture, the training procedure, or the training data --- and distinguishing these requires knowing exactly what data each version was trained on. DVC (Data Version Control) and similar tools provide git-like version control for large datasets.
+
+**Configuration versioning** means tracking all hyperparameters, preprocessing decisions, and deployment configuration alongside the model. A model trained with a specific learning rate schedule and deployed with a specific batch size and quantization configuration is a complete system, not just the weights file.
+
+### Automated Testing Pipelines
+
+Before any model version is promoted to production, it should pass a comprehensive automated test suite. Testing for ML systems includes several categories beyond the unit and integration tests standard in software engineering.
+
+**Functional tests** verify that the model produces correct outputs for a set of known-correct examples --- the ML equivalent of unit tests. For a classification model, this means a test set where the correct labels are known and the model\'s accuracy must exceed a threshold. For a generative model, this might mean testing that specific prompts produce outputs in the expected format or satisfying specific quality criteria.
+
+**Regression tests** verify that the new model version does not perform substantially worse than the previous version on the existing production distribution. A new model that improves on the development test set but degrades on the production distribution has not improved the deployed system. Regression tests compare new and old model behavior on a representative sample of recent production inputs.
+
+**Fairness tests** verify that performance is consistent across relevant subgroups --- demographic groups, input domains, languages, geographic regions. A model that passes functional and regression tests but has substantially worse performance for a specific demographic group should not be promoted to production until the disparity is understood and addressed.
+
+**Stress tests** verify that the system performs acceptably under high load --- at peak concurrency, with large inputs, with adversarially constructed inputs. Load testing should simulate realistic production conditions, not just average conditions.
+
+Only after all tests pass --- and only after human review of any borderline results --- should a new model version be promoted for staged deployment.
+
+### Staged Rollout
+
+Even a model that passes all automated tests should not be immediately deployed to all users. The canary deployment pattern --- exposing a small fraction of users to the new version, monitoring closely, and progressively expanding exposure if performance is satisfactory --- is the standard approach for managing rollout risk.
+
+The stages might be: 1% of users → 5% → 20% → 50% → 100%, with each stage gated by success criteria. The success criteria should include not just accuracy metrics but latency, error rate, user-visible behavioral metrics, and equity metrics across subgroups. A model that performs slightly better on average but substantially worse for a specific user subgroup should not be promoted regardless of the aggregate improvement.
+
+The rollback procedure --- how to quickly revert to the previous model version if the new one performs unacceptably --- must be tested before the rollout begins, not after a problem is discovered. In a well-designed MLOps infrastructure, rollback should be a single command that takes effect within minutes.
+
+### Retraining Pipelines
+
+The monitoring system that detects drift must be connected to a retraining pipeline that responds to it. When drift exceeds threshold, the pipeline should automatically collect recent production data, combine it with the existing training set, trigger a new training run with the combined dataset, validate the new model, and initiate a staged rollout.
+
+The degree to which this pipeline should be automated versus human-supervised is a design decision that depends on the stakes of the application. A recommendation system with low stakes and abundant feedback data might safely automate the full pipeline. A clinical diagnostic system with high stakes and expensive expert labeling might require human review at multiple stages. The pipeline must be designed for the specific application, not copied from a generic template.
+
+## The Ethics of Deployment
+
+### Deployment Is Where Intentions Meet Consequences
+
+All of the ethical considerations discussed throughout this course --- bias in training data, alignment of objectives, representational disparities, reward hacking, the consent of data subjects --- culminate in deployment. It is only when a system is running in the real world, making decisions that affect real people, that the abstract ethical concerns become concrete harms or concrete benefits.
+
+Deployment is also where ethical intentions most often fail to translate into ethical outcomes. A team that thought carefully about fairness during model development may deploy a system that disadvantages specific user groups because the deployment monitoring never tracked subgroup performance. A team that built careful consent mechanisms into the training data collection may deploy a system that processes data from users who had no opportunity to consent, because the deployment context differs from the development context. A team that tested their system thoroughly against known failure modes may deploy a system that finds new failure modes under production conditions, because those failure modes were not in the test set.
+
+The ethical obligations of deployment are not separate from the technical practices described in this chapter. They are the reason those practices matter.
+
+### Informed Consent and Transparency
+
+Users interacting with an AI system have a right to know that they are interacting with one. This principle is widely acknowledged in ethical guidelines for AI systems and increasingly encoded in regulation --- the EU AI Act, the FTC\'s guidance on AI, and sector-specific regulations in healthcare and finance all include transparency requirements.
+
+Transparency means more than labeling an output as AI-generated. It means providing users with information sufficient to make informed decisions about how to use the system\'s outputs. A user who does not know that a medical AI system performs worse for their demographic group cannot make an informed decision about whether to trust its recommendations. A user who does not know that a content recommendation system is optimizing for engagement rather than relevance cannot make an informed decision about how much weight to give its suggestions.
+
+The model card --- a structured document describing a model\'s intended use, performance characteristics, limitations, and ethical considerations --- is the standard instrument for operationalizing transparency. A model card does not replace user-facing transparency communication, but it provides the authoritative reference document from which user-facing communication can be derived.
+
+### The Obligation to Monitor for Harm
+
+Deploying an AI system creates an ongoing obligation to monitor for harm. This is not optional for responsible deployment. It follows directly from the fact that the production gap exists, that drift occurs, and that the consequences of deploying a system that is causing harm without the deployer\'s knowledge are borne by users, not by the deploying organization.
+
+The monitoring obligation encompasses subgroup performance monitoring --- not just tracking accuracy overall, but ensuring that accuracy is consistent across the demographic groups, geographic regions, and use cases the system serves. A system that improves average performance while degrading performance for a specific minority user group has caused harm, even if its aggregate metrics look good.
+
+It also encompasses what might be called prospective harm monitoring --- monitoring not just whether the system is producing incorrect outputs, but whether the system\'s outputs are being used in ways that cause harm. A content recommendation system that technically produces accurate recommendations but is used to amplify harmful content at scale is causing harm that pure accuracy monitoring would not detect.
+
+### Performance Disparities and Equity
+
+The clinical AI case study establishes a pattern that appears consistently across deployed AI systems: performance disparities across demographic groups or geographic regions, typically disadvantaging groups that were underrepresented in training data. This pattern is not incidental. It is structural --- it follows predictably from the incentive structure of AI development, which concentrates training data collection in settings where it is easiest to collect (large institutions, wealthy geographies, well-resourced organizations) and deploys in settings that include the underrepresented populations.
+
+Addressing performance disparities requires active effort at every stage: training data collection that intentionally seeks representational diversity, evaluation that reports subgroup performance alongside aggregate performance, deployment decisions that restrict use cases where disparities are large, and ongoing monitoring that tracks subgroup performance in production.
+
+The deployment decision --- not the training decision --- is where performance disparities most often cause harm. A model with known performance disparities can be deployed in contexts where those disparities matter minimally, or it can be deployed universally in high-stakes contexts where they matter enormously. The ethical responsibility for that choice lies with the deploying organization.
+
+### Auditability and Recourse
+
+Users affected by an AI system\'s decisions have an interest in understanding why those decisions were made and a right to contest decisions that are incorrect or unfair. This interest creates an obligation for the deploying organization to maintain systems that enable auditability --- the ability to reconstruct why a specific decision was made --- and recourse --- the ability for a user to appeal a decision and have it reviewed by a human.
+
+Auditability requires logging. Every consequential decision the system makes should be logged with sufficient detail to reconstruct the inputs, the intermediate representations, and the output. This logging must be maintained for a duration appropriate to the stakes --- credit decisions may require months of retention; medical decisions may require years.
+
+Recourse requires human oversight. No AI system, regardless of its accuracy, should be deployed in high-stakes contexts without a human review pathway for users who contest its decisions. The presence of human review is not just an ethical safeguard --- it is also a monitoring mechanism, because human reviewers who frequently override the system\'s decisions are providing evidence of systematic failures that automated monitoring may not have detected.
+
+## Hands-On Exploration
+
+### Overview
+
+This exploration makes the production gap tangible by evaluating a pre-trained multimodal model under three conditions --- in-distribution, domain-shifted, and after quantization --- and observing how each condition affects the quality-efficiency tradeoff.
+
+**Time estimate:** 45--60 minutes **Tools:** Google Colab (provided notebook), pre-trained multimodal model, HuggingFace model compression tools. No training required.
+
+### Part 1 --- In-Distribution vs. Out-of-Distribution Performance (20 minutes)
+
+The notebook provides three evaluation sets:
+
+**Standard set:** images and captions drawn from a distribution similar to the model\'s training data. **Domain-shifted set:** images from a different domain --- medical, satellite imagery, or artistic styles, depending on your MIPDS application. **Adversarial set:** inputs specifically constructed to challenge the model\'s weaknesses.
+
+Run the model on all three sets. Record accuracy, and for the failed examples in the domain-shifted condition, categorize the failure type: is the error in the visual understanding, the language understanding, or the fusion?
+
+### Part 2 --- Quantization Effects (20 minutes)
+
+Apply post-training INT8 quantization using the provided quantization function. Compare the original and quantized model on four dimensions:
+
+-   Model size (bytes)
+
+-   Average inference latency (ms per input)
+
+-   Accuracy on the standard evaluation set
+
+-   Accuracy on the domain-shifted evaluation set
+
+Present your results in a structured table. Note specifically whether the accuracy drop is larger on the domain-shifted set than on the standard set --- this tells you whether quantization is disproportionately affecting the model\'s ability to handle out-of-distribution inputs.
+
+### Part 3 --- Latency at Scale (10 minutes)
+
+Run inference on batch sizes of 1, 4, 16, and 64 inputs. Record the per-input latency at each batch size. Plot the curve. Identify the batch size beyond which adding more inputs does not significantly reduce per-input latency --- the saturation point where the system is compute-bound rather than overhead-bound.
+
+### Reflection (200--300 words)
+
+\"You observed a consistent pattern: the model performs substantially better on in-distribution inputs than on domain-shifted inputs, and quantization may widen this gap. The compression that makes the model deployable on constrained hardware costs more accuracy in the conditions that already challenged the model than in the conditions where it was already strong.
+
+This pattern has a direct implication for your MIPDS deployment plan. The users who are most likely to encounter performance failures are users whose inputs are most different from your training distribution --- often the users with the least power to contest or route around those failures.
+
+In your deployment plan, specify: what is the most likely domain shift between your training distribution and your most underserved user population? How would you detect that shift in production monitoring? And what would your response be --- restrict deployment, collect additional training data, adjust thresholds --- if monitoring detected that a specific user subgroup was experiencing substantially higher error rates than the overall average?\"
+
+### Case Study: Deploying Clinical AI --- The Production Gap in High Stakes
+
+### The Problem
+
+Between 2018 and 2022, a pattern emerged in the medical AI literature that was difficult to ignore. Deep learning models for medical image analysis --- diabetic retinopathy detection, chest X-ray analysis, skin lesion classification, mammography interpretation --- were achieving impressive performance on benchmark datasets. Some studies reported performance matching or exceeding specialist physicians on specific tasks.
+
+Then these models were deployed outside the research settings where they had been developed, and the performance gap became visible.
+
+A diabetic retinopathy model validated at US academic medical centers deployed at clinics in Thailand performed substantially worse. A chest X-ray analysis system validated at one hospital network produced unreliable results at community hospitals with different equipment. A skin lesion classifier trained predominantly on lighter skin tones performed markedly worse on darker skin tones.
+
+The algorithms had not changed. The production gap had been revealed.
+
+### The Sources of the Gap in Healthcare
+
+In the clinical domain, the sources of the production gap are specific and well-documented.
+
+**Imaging hardware variation** is the most consistent driver. A model trained on images from high-end scanners at major academic medical centers learns features that reflect those specific imaging conditions. Images from older equipment, from different manufacturers, or from different acquisition protocols have different noise characteristics, different contrast properties, and different artifact patterns. The model that learned features specific to its training hardware encounters unfamiliar features in deployment hardware.
+
+**Population distribution shift** is the most ethically consequential driver. Training datasets for clinical AI are typically collected from the patients of major academic medical centers --- which tend to be in wealthy urban areas, serving populations that are not representative of the patients who would benefit most from accessible AI-assisted diagnosis. Models trained on these datasets learn features that reflect this specific population. Their performance on populations with different demographic characteristics, different comorbidity patterns, or different disease prevalence distributions is typically lower.
+
+**Preprocessing pipeline variation** is the most technically subtle driver. Before an image reaches the model, it passes through a preprocessing pipeline: resizing, normalization, format conversion. If the preprocessing pipeline used in deployment differs from the one used in training --- different normalization constants, different resizing algorithms, different color space handling --- the model receives inputs that look statistically different from training inputs even when the underlying images are clinically similar.
+
+### The Equity Dimension
+
+The pattern across clinical AI deployments is remarkably consistent: models perform better for populations well-represented in training data and worse for populations underrepresented in training data. Since training data collection tends to concentrate in wealthy, urban, high-resource settings, the populations that perform best tend to be the populations with the most existing access to specialist care. The populations that perform worst tend to be the populations with the greatest need for accessible diagnostic support.
+
+A model marketed as democratizing access to specialist-level diagnosis, but that performs substantially worse for the patients least likely to have access to specialists, is not democratizing access. It is providing a lower standard of care to those most in need of a higher one.
+
+The documentation of this pattern --- across multiple imaging modalities, multiple disease conditions, and multiple geographic contexts --- is one of the most thorough empirical demonstrations in the AI ethics literature of how algorithmic systems can amplify rather than reduce existing disparities.
+
+### The Response
+
+The medical AI community\'s response has evolved from acknowledging the problem to developing structural requirements.
+
+The FDA updated its guidance on software as a medical device to require performance reporting across demographic subgroups and real-world performance evidence from diverse deployment settings, not only benchmark results. The UK\'s National Health Service developed evaluation frameworks specifically addressing demographic performance disparities. Academic medical journals began requiring demographic breakdown of performance data as a condition of publication for clinical AI studies.
+
+Technical responses have included federated learning approaches that enable training on data distributed across diverse institutions without centralizing patient data, prospective validation studies conducted at geographically and demographically diverse sites, and subgroup performance analysis as a standard component of model evaluation rather than an optional supplement.
+
+These responses are partial. The fundamental driver --- that training data collection reflects existing distributions of healthcare access and resource allocation --- is not resolved by technical approaches alone. It requires sustained effort in data collection design, active outreach to underrepresented institutions and populations, and willingness to accept that models with documented performance disparities should have their deployment restricted until those disparities are addressed.
+
+### The Lesson Beyond Healthcare
+
+The clinical AI production gap is unusually well-documented because healthcare has rigorous outcome measurement, a culture of evidence-based evaluation, and regulatory requirements that create pressure for transparency. The same dynamics exist in other domains --- hiring, credit, criminal justice, content moderation, educational assessment --- but are less systematically measured and less publicly documented.
+
+The lesson is not that clinical AI is uniquely problematic. The lesson is that the production gap is universal, that distribution shift consistently disadvantages underrepresented populations, and that the stakes of the gap are determined by the domain. Healthcare makes the consequences visible. Other domains make them invisible. Invisible consequences are not absent consequences.
+
+## Chapter Summary
+
+The production gap --- the difference between a model\'s performance in controlled experimental conditions and its performance in real-world deployment --- is the defining challenge of applied AI development. It is caused by distribution shift, edge cases, system integration failures, resource constraint failures, and behavioral drift over time. Understanding it, measuring it, and managing it is what distinguishes systems that deliver sustained value from systems that perform impressively in demos and poorly in practice.
+
+Model compression techniques --- quantization, pruning, and knowledge distillation --- address the resource constraint dimension of the production gap by reducing model size and inference cost to levels compatible with real-world deployment hardware. Each involves a tradeoff between efficiency and accuracy; the right choice depends on the specific requirements of the deployment context.
+
+Deployment architectures --- cloud, edge, and hybrid --- represent distinct tradeoffs among latency, privacy, cost, and reliability. The architecture decision must be derived from the requirements of the specific application, not from convenience or familiarity.
+
+Multi-component pipelines like MIPDS face integration challenges that single-model systems do not: error propagation, latency accumulation, component versioning, and failure mode isolation. These challenges require explicit design attention --- integration testing, observability infrastructure, and versioning discipline --- not just component-level optimization.
+
+Monitoring and drift detection are the practices that make deployed systems sustainable rather than one-time events. Data drift detection provides early warning of distribution shift; concept drift detection tracks changes in the correct output for given inputs; subgroup performance monitoring tracks equity dimensions. Alerts must connect to clear procedures for investigation and response.
+
+MLOps practices --- version control for models, data, and configuration; automated testing pipelines including fairness tests; staged rollout through canary deployment; and automated retraining pipelines --- operationalize the insight that deployment is a continuous process, not a one-time event.
+
+The ethics of deployment are not separate from the technical practices. They are the reason those practices matter. Monitoring for harm, maintaining performance across demographic subgroups, providing auditability and recourse, and ensuring informed consent are the obligations that follow from deploying systems with real consequences for real people. These obligations are ongoing --- they do not end at the moment of deployment.
+
+MIPDS has been deployed this week, in the form of a complete deployment plan that specifies how its components will be integrated, optimized, monitored, and maintained. Week 15 examines the broader landscape of AI at scale --- what happens when millions of MIPDS-like systems are deployed across diverse contexts. Week 16 returns to the ethical and societal questions that have been present throughout this course, now with the full technical vocabulary to address them precisely.
+
+## Review Questions
+
+1.  A model achieves 94% accuracy on its test set and 71% in production. Walk through the most likely causes of this gap for a multimodal AI system like MIPDS. Which cause would you prioritize investigating first, and what evidence would you look for?
+
+2.  Quantization reduces model precision and typically produces small accuracy losses on average, but may produce larger losses on out-of-distribution inputs. What does this pattern suggest about where quantization is removing information? And for a deployed system, is average accuracy the right metric to optimize, or is something else more important?
+
+3.  A clinical AI system performs at 89% sensitivity for the population well-represented in its training data and 76% sensitivity for a rural demographic that was underrepresented in training. The developers know about this disparity. The overall average sensitivity is 87%. What are the developers\' obligations before deploying? What parties should be involved in the deployment decision?
+
+4.  Model cards provide structured documentation of a model\'s intended use, limitations, and performance characteristics. They are not currently required in most jurisdictions. Should model cards be mandatory for models deployed in healthcare, hiring, credit, or criminal justice? What should they be required to contain, and who should be responsible for their accuracy?
+
+5.  An organization deploys a model and monitors accuracy against a held-out validation set. Accuracy remains stable for six months. Data drift monitoring reveals that the input distribution has shifted substantially from training. The organization argues that stable accuracy is sufficient evidence that the system is performing correctly. Is this argument valid? What does stable accuracy in the face of distribution shift imply about the future trajectory of performance?
+
+6.  Canary deployments expose a small fraction of users to a new model version before full rollout. In a healthcare setting, some patients receive care informed by the new model and some by the old one. Different patients receive different standards of care. Is this ethical? Under what conditions would this be acceptable? Under what conditions would it not be?
+
+7.  Your MIPDS deployment plan specifies a monitoring system and alert thresholds. Walk through one scenario --- specific to your application domain --- where your system is causing systematic harm for a subset of users that your current monitoring plan would not detect. What would it take to detect that harm? What change to your monitoring plan would address it?
+
+## Further Reading
+
+### On the Production Gap and Model Evaluation
+
+Sculley, D., Holt, G., Golovin, D., Davydov, E., Phillips, T., Ebner, D., \... & Dennison, D. (2015). Hidden technical debt in machine learning systems. In *Advances in Neural Information Processing Systems, 28*. https://papers.nips.cc/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html *The foundational paper on the engineering complexity of deployed ML systems. Introduces the concept of technical debt specific to ML --- the gap between what the benchmark results suggest and what production reality requires. Essential background for the production gap framing.*
+
+Sugiyama, M., & Kawanabe, M. (2012). *Machine learning in non-stationary environments: Introduction to covariate shift adaptation*. MIT Press. *The authoritative treatment of distribution shift --- the theoretical foundation of the data drift section of this chapter. Chapter 1 provides an accessible introduction to covariate shift.*
+
+### On Model Compression
+
+Hinton, G., Vinyals, O., & Dean, J. (2015). Distilling the knowledge in a neural network. https://arxiv.org/abs/1503.02531 *The distillation paper. The introduction\'s explanation of soft targets and their information content is particularly clear and directly maps to the teacher-student framing used in this chapter.*
+
+Dettmers, T., Svirschevski, R., Seinfeld, T., Danowitz, A., & Zettlemoyer, L. (2022). LLM.int8(): 8-bit matrix multiplication for transformers at scale. In *Advances in Neural Information Processing Systems, 35*. https://arxiv.org/abs/2208.07339 *A concrete treatment of quantization applied to large language models. Shows both the efficiency gains and the specific failure modes that quantization introduces for large model inference.*
+
+### On MLOps and Production Systems
+
+Huyen, C. (2022). *Designing machine learning systems: An iterative process for production-ready applications*. O\'Reilly Media. *The most practical and comprehensive treatment of ML deployment available. Chapters 7--9 cover data distribution shifts, model evaluation in production, and continual learning. Recommended for anyone building systems that will be deployed and maintained over time.*
+
+### On Clinical AI and the Production Gap
+
+Zech, J. R., Badgeley, M. A., Liu, M., Costa, A. B., Titano, J. J., & Oermann, E. K. (2018). Variable generalization performance of a deep learning model to detect pneumonia in chest radiographs: A cross-sectional study. *PLOS Medicine, 15*(11), e1002686. https://doi.org/10.1371/journal.pmed.1002686 *One of the earliest and most clearly documented studies of the clinical AI production gap. Shows how a model\'s performance varies substantially across hospital systems due to institutional characteristics embedded in training data. The methodology section is a model for how to study distribution shift in deployed systems.*
+
+Obermeyer, Z., Powers, B., Vogeli, C., & Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. *Science, 366*(6464), 447--453. https://doi.org/10.1126/science.aax2342 *Documents a systematic racial bias in a widely deployed healthcare algorithm --- a direct example of the subgroup performance disparity discussed in this chapter\'s case study and ethics section. The analysis methodology --- probing for disparate impact through careful subgroup evaluation --- is directly applicable to MIPDS monitoring design.*
+
+### On Ethics of Deployment
+
+Raji, I. D., Smart, A., White, R. N., Mitchell, M., Gebru, T., Hutchinson, B., \... & Barnes, P. (2020). Closing the AI accountability gap: Defining an end-to-end framework for internal algorithmic auditing. In *Proceedings of FAccT 2020* (pp. 33--44). https://dl.acm.org/doi/10.1145/3351095.3372873 *Proposes a framework for internal auditing of AI systems --- an operational approach to the accountability obligations discussed in this chapter\'s ethics section. Directly relevant to the model card and monitoring plan components of the MIPDS deployment milestone.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 14: From Prototype to System --- Integration, Deployment, and the Production Gap*

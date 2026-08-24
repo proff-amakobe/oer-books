@@ -1,0 +1,460 @@
+---
+title: "When Vision Meets Language"
+subtitle: "Multimodal Systems and the Architecture of Shared Understanding"
+---
+
+## Opening Narrative
+
+Dr. Yemi Adeyemi is a radiologist at a teaching hospital in Lagos. On a Tuesday morning she reviews a chest CT for a fifty-three-year-old patient. The scan shows a small nodule in the right upper lobe --- subtle, easy to miss, roughly eight millimeters in diameter. By itself, the image is ambiguous. Nodules of this size appear in plenty of healthy lungs. They also appear in early-stage malignancies.
+
+Then she reads the clinical note. The patient is a former heavy smoker. A maternal uncle died of lung cancer at fifty-six. The patient has been experiencing unexplained fatigue for three months. No fever, no infection markers.
+
+With the note, the image is transformed. What was ambiguous becomes urgent. The same cluster of pixels that might have been dismissed as incidental --- a lymph node, a healed scar --- now belongs to a different interpretive frame entirely. Dr. Adeyemi orders a follow-up PET scan and a biopsy referral.
+
+She did not use two separate reasoning systems that happened to operate at the same time. She used one integrated system that held both the image and the text simultaneously and reasoned across them. The scan informed her reading of the note; the note transformed her reading of the scan. Neither piece of information was sufficient alone. Together, they were diagnostic.
+
+This is multimodal reasoning --- and building machines that can do it is one of the most important and technically demanding frontiers of modern deep learning.
+
+For nine weeks, you have been building MIPDS in two parallel directions. A vision pipeline --- convolutional backbone, detection head, frozen and composable since Week 6 --- that can look at an image and produce a rich vector of visual features. A language pipeline --- tokenizer, Transformer encoder, pre-trained language model --- that can read text and produce deep contextual representations of meaning. Two powerful systems, growing in sophistication week by week, neither knowing the other exists.
+
+This week, they meet. And the meeting requires solving a problem that is more subtle than it first appears.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain why combining image and text representations requires learning a shared embedding space rather than simply concatenating separate vectors
+
+-   Describe how contrastive learning trains a joint embedding space, including the role of positive and negative pairs
+
+-   Explain how zero-shot image classification works in CLIP and why it is surprising relative to supervised classification
+
+### Analyze and Evaluate
+
+-   Analyze the CLIP architecture --- how its encoders are trained jointly and what capabilities this produces
+
+-   Compare early fusion, late fusion, and cross-modal attention as multimodal fusion strategies, evaluating the tradeoffs for different task types
+
+-   Assess the ethical implications of multimodal systems, including surveillance capabilities, consent at scale, and the compounding of biases across modalities
+
+### Apply and Create
+
+-   Connect contrastive pre-training to the self-supervised learning paradigm introduced in Chapter 9, recognizing it as a third pre-training objective that operates across modalities
+
+-   Design and document the fusion layer that connects MIPDS\'s vision and language channels, producing the first fully integrated multimodal component
+
+## Key Terms and Concepts
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                              **Definition**
+  ------------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Multimodal Learning**               Training a model on data from multiple input types simultaneously --- images and text, audio and video, vision and language --- enabling the model to build representations that reflect information from all modalities and reason across them.
+
+  **Joint Embedding Space**             A single shared vector space in which representations from different modalities are positioned such that semantically related items from different modalities are geometrically close. The goal of joint embedding training is to give image and text a common geometric language.
+
+  **Contrastive Learning**              A training paradigm that shapes a representation space by pulling similar pairs closer together and pushing dissimilar pairs further apart. The model learns what things mean by learning what belongs with what.
+
+  **Positive Pair**                     In contrastive learning, a pair of inputs that should be geometrically close in the embedding space --- typically a matched image and its corresponding caption, or two views of the same image.
+
+  **Negative Pair**                     In contrastive learning, a pair of inputs that should be geometrically distant --- a mismatched image and caption, or examples from different semantic categories.
+
+  **InfoNCE Loss**                      The contrastive loss function used in CLIP. For each image in a batch, it trains the image encoder to rank the correct text higher than all other texts in the batch, and vice versa. The name reflects its connection to mutual information estimation.
+
+  **CLIP**                              Contrastive Language-Image Pre-training --- a model trained by OpenAI on 400 million image-text pairs from the web, producing image and text encoders that map inputs to a shared semantic space.
+
+  **Zero-shot Classification**          The ability to classify images into categories never explicitly seen during training, by comparing image embeddings to text embeddings of category descriptions. Possible when image and text live in a shared space.
+
+  **Early Fusion**                      A multimodal strategy that combines representations from different modalities at an early stage of processing, before deep feature extraction, allowing the model to learn joint patterns from the beginning.
+
+  **Late Fusion**                       A multimodal strategy that processes each modality independently through deep networks, then combines the resulting high-level representations at the end --- typically through concatenation, averaging, or a learned combination layer.
+
+  **Cross-modal Attention**             An attention mechanism in which the queries come from one modality and the keys and values come from another, allowing one modality to selectively read from the other based on relevance. The direct extension of Chapter 8\'s cross-attention to the multimodal setting.
+
+  **Visual Question Answering (VQA)**   A multimodal task requiring a model to answer a natural language question about an image. Requires grounding language in visual content and reasoning jointly across both.
+
+  **Image Captioning**                  A multimodal generation task requiring a model to produce a natural language description of an image --- transforming visual representations into language.
+
+  **Visual Grounding**                  The task of identifying and localizing a specific region of an image described by a natural language phrase. Requires precise alignment between spatial visual features and linguistic reference.
+
+  **Modality Gap**                      The observed geometric separation between image embedding clusters and text embedding clusters in a joint space, even after contrastive training. Matched pairs end up close relative to mismatched pairs, but images and texts do not fully interleave --- they align across the gap rather than merge into one distribution.
+
+  **Contrastive Pre-training**          Using contrastive learning as the pre-training objective for a large model, with naturally occurring paired data --- such as web-scraped image-caption pairs --- as the training signal. No manual annotation required.
+
+  **Projection Layer**                  A learned linear transformation that maps a representation from one dimensionality or space into another --- in multimodal systems, used to project vision and language representations into a common embedding dimension before fusion or comparison.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## The Problem of Two Languages
+
+### Why Concatenation Does Not Work
+
+You have two powerful encoders. The vision encoder takes an image and produces a 768-dimensional vector. The language encoder takes a sentence and produces a 768-dimensional vector. They have the same dimensionality. Why not simply concatenate them and pass the result to a classifier?
+
+The answer is that these two vectors do not speak the same language.
+
+The vision encoder\'s representation of a photograph was shaped by training on images --- by learning to distinguish visual textures, colors, spatial arrangements, edge patterns. The language encoder\'s representation of a sentence was shaped by training on text --- by learning grammatical structure, semantic associations, the statistical patterns of how words co-occur. Both encoders produce meaningful representations within their own domain. But the geometry of one space has no relationship to the geometry of the other.
+
+Consider a concrete example. The vision encoder produces a vector for a photograph of a golden retriever playing in autumn leaves. The language encoder produces a vector for the sentence \"a dog playing outdoors.\" These two vectors should be semantically related --- they describe the same scene. But if the vision encoder was never trained to relate to language, and the language encoder was never trained to relate to images, there is no reason for these vectors to be geometrically close. They might point in completely unrelated directions in their respective spaces. Concatenating them produces a 1,536-dimensional vector that is, at best, two unrelated descriptions stapled together.
+
+For the combined vector to be useful, the system would need to learn, from scratch, how to interpret the vision half and the language half in relation to each other. This requires abundant labeled training data for the specific task --- exactly the scarce resource we have been working to reduce dependence on throughout the course.
+
+The deeper problem is not computational. It is representational. Two encoders trained independently in separate objectives will not, by default, produce representations that are meaningfully comparable. Before they can reason together, they need a shared coordinate system.
+
+This is the joint embedding problem, and it is the central challenge of multimodal learning.
+
+### What a Joint Embedding Space Is
+
+A joint embedding space is a single vector space in which representations from different modalities are positioned according to their semantic content rather than their modality of origin. In a well-trained joint space, the vector for a photograph of a sunset and the vector for the phrase \"a colorful evening sky\" should be geometrically close --- not because they look similar in any pixel-by-pixel sense, but because they describe the same thing. And the vector for that same photograph should be far from the vector for \"a quarterly earnings report\" --- because they have nothing to do with each other.
+
+The bilingual dictionary is a helpful analogy. A good translation dictionary does not just list word pairs --- it encodes a deeper claim: that \"chien\" in French and \"dog\" in English refer to the same concept, even though the sounds and letters are completely different. The meaning is the same; the surface form is different. A joint embedding space is this idea taken to its geometric extreme: build a single address space in which concepts have coordinates, and where the same concept always arrives at the same address regardless of whether it came from an image or a sentence.
+
+Building this space requires a training objective that explicitly enforces the relationship. You cannot arrive at it through independent training on separate modalities. You need both modalities in the same training loop, with a loss that rewards bringing matching pairs close and pushing non-matching pairs apart.
+
+That objective is contrastive learning.
+
+## Contrastive Learning --- Meaning Through Comparison
+
+### The Core Idea
+
+There is a beautiful simplicity to the contrastive learning intuition. You do not need to define what a dog looks like in order to train a model to recognize one. You need only show the model which things belong together and which do not. Given enough examples of what belongs with what, the model will learn to build a space in which belonging is reflected by proximity.
+
+Imagine organizing a large party. You want guests who know each other to stand near each other and guests who are strangers to be far apart. You do not give anyone a map. You simply release everyone into the room and say: find the people you came with. The social dynamics do the rest. Over time, a meaningful spatial arrangement emerges --- groups forming, clusters tightening, strangers drifting apart.
+
+Contrastive learning is this process, formalized as a training objective. The model receives pairs of inputs. Some pairs are positive --- they belong together. Some pairs are negative --- they do not. The training objective rewards the model for placing positive pairs close in embedding space and negative pairs far apart. Given enough such pairs, the geometry of the embedding space comes to reflect semantic relationships.
+
+For multimodal learning, the positive pairs are naturally occurring: a photograph and the caption that describes it. An image and its alt text. A product photo and its description. These pairs exist in abundance on the internet, without any need for human annotation beyond what the original authors provided. The negative pairs are trivially generated: take any image and any caption from a different example. They do not match.
+
+This observation --- that the internet contains hundreds of millions of naturally occurring image-text pairs that can serve as contrastive training data --- is what made large-scale multimodal pre-training possible.
+
+### Positive and Negative Pairs in a Training Batch
+
+The mechanics of contrastive training are best understood through what happens in a single training batch. Suppose the batch contains N image-text pairs --- N images and their corresponding captions. This produces N positive pairs (each image with its own caption) and N² - N negative pairs (each image with every other caption in the batch).
+
+For each image in the batch, the model computes the similarity between that image\'s embedding and the embedding of every text in the batch. It should assign the highest similarity to the matching text --- the one that describes this image --- and lower similarity to all others. The loss function penalizes the model when a non-matching text scores higher than the matching one.
+
+The same logic applies in the other direction: for each text, the model should rank its matching image highest among all images in the batch.
+
+The difficulty of the task scales with batch size. A small batch of ten examples provides nine negatives per positive --- not very challenging. A batch of 512 examples provides 511 negatives per positive --- much harder, forcing the model to learn finer-grained distinctions. This is why contrastive learning benefits dramatically from large batch sizes. CLIP was trained with batches of 32,768 image-text pairs --- every image competing simultaneously against more than thirty thousand candidate texts.
+
+### The InfoNCE Loss
+
+The loss function that formalizes this training objective is called InfoNCE --- Information Noise-Contrastive Estimation. For each image in the batch, it computes the softmax of that image\'s similarity scores against all texts, and trains the model to maximize the probability assigned to the correct text. For each text, it does the same in the other direction.
+
+The combined loss pulls matched pairs together and pushes every other pair apart, simultaneously, in both directions. The signal is always comparative: not \"this image embedding should look like X\" but \"this image embedding should be closer to its matching text than to any other text in this batch.\"
+
+This comparative framing is what makes contrastive learning work. The representations are defined entirely by their relationships --- not by any absolute target value. The model learns what things mean by learning how they relate to everything else.
+
+## CLIP --- Contrastive Language-Image Pre-training
+
+### The Ambition
+
+CLIP, introduced by Radford and colleagues at OpenAI in 2021, applied contrastive pre-training to images and text at a scale no one had attempted before. The training dataset contained 400 million image-text pairs assembled from publicly accessible sources on the internet. No manual annotation was required. The supervision signal came entirely from the natural co-occurrence of images and the text that people had written about them.
+
+The question the researchers were asking was whether this kind of noisy, web-scale supervision could produce a visual representation system that generalized more broadly than anything trained on curated, labeled datasets. The answer exceeded their expectations.
+
+### The Architecture
+
+CLIP\'s architecture is conceptually simple. Two encoders, trained jointly.
+
+The image encoder is either a Vision Transformer or a ResNet, depending on the variant. It takes an image and produces an embedding vector. The text encoder is a Transformer, taking a tokenized text string and producing an embedding vector. Both encoders project their outputs to a shared embedding dimension --- 512 or 1,024, depending on the model size.
+
+During training, for each batch of image-text pairs, both encoders run forward passes simultaneously. The image embeddings and text embeddings are compared using dot products, normalized by their magnitudes to produce cosine similarities. The InfoNCE loss is computed across the full batch --- maximizing similarity for correct pairs, minimizing it for incorrect pairs --- and backpropagation updates both encoders simultaneously.
+
+Neither encoder is frozen. Neither is pre-trained independently. They learn together, from the contrastive signal, finding representations that bring matching pairs close in the shared space. The optimization pressure is always relational: be more similar to your matching pair than to everything else in the batch.
+
+### Zero-shot Classification --- The Surprising Result
+
+The capability that most vividly demonstrated what CLIP had learned was zero-shot image classification: classifying images into categories that CLIP had never been explicitly trained to classify.
+
+The mechanism is straightforward once you understand the joint embedding space. For each category in a classification benchmark, construct a text description: \"a photo of a cat,\" \"a photo of a dog,\" \"a photo of an airplane.\" Encode each description using CLIP\'s text encoder to produce a text embedding. Encode the test image using CLIP\'s image encoder to produce an image embedding. Find the category whose text embedding is most similar to the image embedding. That is the predicted class.
+
+On ImageNet --- a benchmark with 1,000 categories and millions of labeled training images --- CLIP achieved accuracy comparable to a ResNet-50 trained with full supervised learning on the ImageNet dataset. Using no ImageNet labels. No ImageNet training examples. Just the ability to compare image embeddings to text embeddings of category names.
+
+Why is this surprising? Because the entire supervised learning paradigm that dominated computer vision for a decade assumed that classification requires labeled examples. You need to show the model many examples of cats, labeled as cats, before it can recognize a cat. CLIP violated this assumption. By training on the relationship between images and the language people use to describe them, it acquired a visual understanding flexible enough to be directed by natural language descriptions of novel categories at inference time.
+
+The analogy to a field guide is instructive. An experienced ornithologist who has read detailed descriptions of hundreds of bird species can recognize a bird they have never personally seen --- because their general understanding of what birds look like, how species differ, and what diagnostic features matter is rich enough that a text description bridges to visual recognition. CLIP has learned something with a similar character: a general understanding of the relationship between visual appearance and linguistic description.
+
+### What CLIP Does Well and Where It Fails
+
+CLIP\'s zero-shot performance is impressive on categories well-represented in web image-text data. It recognizes everyday objects, common animals, familiar scenes, and standard photography subjects reliably. Its representations generalize across visual styles --- an oil painting of a dog and a photograph of a dog both produce embeddings close to the text \"a dog.\"
+
+It fails, predictably, on domains underrepresented in web-scraped data. Medical imaging --- X-rays, histology slides, MRI scans --- appears in relatively few internet image-text pairs with informative captions. Satellite imagery, industrial inspection, scientific visualization, and other specialized domains fare similarly. In these domains, CLIP\'s zero-shot performance may be poor or misleading.
+
+CLIP also struggles with tasks requiring spatial reasoning (\"the object on the left\"), counting (\"three birds\"), fine-grained attribute discrimination (\"a red car next to a blue car\"), and reasoning that requires understanding causal or logical relationships. The contrastive training objective teaches the model to associate images with descriptions holistically --- it does not build explicit spatial or logical reasoning capabilities.
+
+The modality gap is worth naming explicitly. Even in a well-trained CLIP model, image embeddings and text embeddings do not fully interleave in the shared space. They align across a geometric gap --- matched pairs are closer to each other than to mismatched pairs, but the image cluster and text cluster remain somewhat distinct. This has been documented empirically and suggests that contrastive training produces cross-modal alignment rather than full representational merger. The distinction matters for understanding the limits of what CLIP \"understands.\"
+
+## Fusion Strategies --- How Modalities Come Together
+
+Joint embeddings like CLIP solve the alignment problem for one specific pattern: comparing a whole image to a whole text. Many multimodal tasks require something richer --- the ability for visual and linguistic information to interact at multiple levels of abstraction, to ground specific phrases in specific image regions, or to answer questions that require jointly processing both inputs rather than separately encoding them and comparing at the end.
+
+This is the fusion problem. There is more than one right answer, and the right answer depends on the task.
+
+### Early Fusion
+
+Early fusion combines representations from different modalities at the earliest possible stage --- before deep feature extraction has occurred. In a simple implementation, raw pixel values and raw token embeddings might be concatenated and processed by a single network. More commonly, low-level features from both modalities are combined before any task-specific processing.
+
+The advantage of early fusion is that the model can learn joint patterns from the beginning. If visual texture and linguistic description interact in systematic ways at a low level --- and for some tasks they do --- early fusion allows the model to discover these relationships directly.
+
+The disadvantage is that early fusion requires the two modalities to be represented at a compatible level of abstraction before they are combined. Raw pixels and raw token embeddings are not naturally comparable, and combining them too early may produce interactions that are more noise than signal. Early fusion works best when the modalities are closely related in their input structure --- for instance, combining multiple sensory streams in robotic control, where timing and format are carefully aligned.
+
+### Late Fusion
+
+Late fusion processes each modality independently through its own deep architecture, producing a high-level representation for each, and then combines those representations at the end. The combination step is typically simple: concatenation, element-wise addition, or a learned linear combination.
+
+Late fusion is the most natural starting point for systems like MIPDS, where the vision and language encoders have been developed and validated independently. Each encoder can be selected, pre-trained, and frozen for its own modality; the fusion step is then a lightweight component that learns to combine already-rich representations.
+
+The limitation of late fusion is depth of interaction. Because the modalities are processed separately until the final combination, the model cannot use visual information to guide how language is processed, or linguistic information to direct visual attention. The combination happens once, at the end, and it happens with the full-sequence aggregate representations rather than at the token or patch level. For tasks that require fine-grained cross-modal alignment --- locating the specific region of an image described by a specific phrase --- late fusion is insufficient.
+
+### Cross-modal Attention
+
+Cross-modal attention is the richest of the three approaches, and the most computationally demanding. It applies the attention mechanism from Chapter 8 across modalities rather than within a single modality: one modality provides the queries, and the other provides the keys and values.
+
+In a visual question answering system, for example, each word in the question might attend to the visual patch representations from the image encoder. The attention weights determine which image regions are most relevant to each word. A question asking \"what color is the car?\" will produce high attention weights on the image patches containing the car. A question asking \"how many people are visible?\" will distribute attention across patches containing human figures.
+
+This directional attending is what makes cross-modal attention powerful for tasks requiring precise alignment between language and visual content. The model can, in effect, ask the image a question --- direct linguistic queries to specific visual regions --- rather than reasoning from a pooled aggregate.
+
+The computational cost is the same quadratic scaling we encountered with standard self-attention, now compounded by the cross-modal interaction. Attention must be computed between every query token and every image patch, for every example in the batch. For long texts attending to high-resolution images, this becomes expensive quickly.
+
+### Choosing a Strategy
+
+These three approaches are not mutually exclusive --- many production systems combine elements of all three. But for the purpose of MIPDS, the choice can be framed clearly:
+
+If your application requires retrieval or zero-shot classification --- finding the image that matches a description, or identifying whether an image matches a textual label --- the contrastive alignment approach is most natural. Your system needs a joint embedding space in which similarity is meaningful.
+
+If your application requires understanding a specific relationship between a specific image and a specific text --- answering a question about an image, grounding a phrase in an image region, or generating a caption --- cross-modal attention will produce better results than late fusion.
+
+If you are starting from independently validated encoders and want a working system quickly, late fusion with concatenation is a robust starting point that can be refined toward cross-modal attention as your application\'s requirements become clearer.
+
+## Multimodal Tasks --- What Systems Like This Can Do
+
+### Visual Question Answering
+
+Visual question answering is the canonical benchmark for multimodal understanding. The task is exactly what it sounds like: given an image and a natural language question about it, produce a correct answer.
+
+\"What color is the umbrella?\" \"How many people are in the image?\" \"Is the woman to the left or right of the man?\" \"What is the animal in the background doing?\"
+
+Each of these questions requires different things from a multimodal system. Color questions require localizing a referenced object and reading its visual properties. Counting questions require detecting multiple instances of a category. Spatial questions require understanding geometric relationships in the image. Activity questions require interpreting dynamic visual content as action.
+
+What makes VQA a useful benchmark is not that it is a practically important application in isolation --- it is that it taxes a broad range of multimodal capabilities simultaneously. A system that performs well across VQA questions has demonstrated that its visual and linguistic representations are genuinely integrated, not merely aligned at a high level.
+
+Systems that approach VQA through late fusion --- a pooled image vector concatenated with a question embedding --- tend to fail on questions requiring spatial reasoning or precise attribute identification. Systems using cross-modal attention perform substantially better, because the question can direct visual attention to the relevant image regions before the answer is produced.
+
+VQA systems also fail in characteristic ways that reveal important limitations. They are susceptible to language priors: if the question asks \"is the sky blue?\" most training images have blue skies, and the model learns to answer \"yes\" regardless of what the actual image contains. They struggle with counterfactual questions. They perform worse on images from underrepresented domains. These failure modes are not incidental --- they reflect the structure of the training data and the alignment between visual and linguistic representations.
+
+### Image Captioning
+
+Image captioning reverses the direction of VQA: rather than taking an image and a question as input and producing a short answer, captioning takes an image as input and produces a full natural language description.
+
+The architecture is naturally an encoder-decoder: the image encoder produces visual representations, and a language decoder generates the caption token by token, with cross-attention connecting the decoder to the image encoder\'s output at each generation step. The decoder, at each step, can attend to the image features most relevant to the word it is currently generating.
+
+Good captioning systems describe what is visually present with accuracy and appropriate specificity. They face a well-known failure mode called hallucination: generating plausible-sounding descriptions that contain objects or attributes not present in the image. A system trained on captions describing typical scenes will default toward typical descriptions, even when the actual image contains something atypical. A kitchen image with an unusual object on the counter may be described without the unusual object --- the system filled in what it expected to see rather than what it actually saw.
+
+Hallucination in captioning is a specific instance of a more general challenge in language generation systems. We will return to it in Chapter 14 when discussing deployment and reliability.
+
+### Image-Text Retrieval
+
+A third class of multimodal tasks --- perhaps the most practically valuable --- is retrieval: given a text query, find the most relevant image in a large collection; or given an image, find the most relevant text.
+
+CLIP-style joint embeddings make retrieval natural. Encode all images in the collection using the image encoder. At query time, encode the text query using the text encoder. Find the images whose embeddings are most similar to the query embedding. Return the top results.
+
+This pattern underlies image search systems, content moderation pipelines (find images matching a description of prohibited content), and product discovery (find products visually matching a user\'s description). The zero-shot generality of CLIP-style embeddings means the system can handle queries it was never explicitly trained on, as long as the query describes something within the range of concepts the model encountered during pre-training.
+
+## What Multimodal Systems Cannot Do --- Yet
+
+Discussing what multimodal systems can do without discussing their limitations would be incomplete. Several of the most important limitations are worth naming directly.
+
+### Spatial and Relational Reasoning
+
+Current multimodal systems struggle systematically with questions requiring precise spatial reasoning: which object is in front of which, what is to the left, which of two objects is larger. These relationships require understanding the three-dimensional structure of a scene from a two-dimensional image --- a challenge that goes beyond pattern matching to structural inference.
+
+Systems trained on web-scraped data that contains relatively few examples of precise spatial reasoning tasks will not develop spatial reasoning capabilities simply by scaling. The training signal must contain the right structure for the capability to emerge.
+
+### Temporal and Causal Understanding
+
+Static image-text systems have no model of time or causation. They cannot answer questions about what will happen next in a scene, what caused the state of affairs depicted, or what a sequence of images implies about a process. Extending multimodal systems to video --- temporally structured visual input --- is an active research area, but temporal reasoning remains significantly weaker than static scene understanding.
+
+### Compositional Understanding
+
+A system can correctly classify \"a dog\" and correctly classify \"a red object\" but fail to classify \"a red dog\" --- because compositional attribute binding requires the model to represent the combination of properties, not just each property individually. This limitation, sometimes called the binding problem, affects multimodal systems in characteristic ways: CLIP can associate \"red\" with redness and \"car\" with cars, but may struggle with \"a small red sports car parked next to a large blue van\" when the colors and objects must be bound to specific referents.
+
+### The Modality Gap --- A Deeper Limitation
+
+We have mentioned the modality gap in passing, but it deserves fuller treatment. Even after contrastive training, image embeddings and text embeddings in a joint space do not fully interleave --- they form two distinct clusters that are aligned (matched pairs are closer than mismatched pairs) but not merged (images are generally still closer to other images than to their matching texts).
+
+This gap has practical implications. It means that arithmetic in the joint space does not always produce the intuitive results you might expect. It means that the shared space is more like a bilingual dictionary with two distinct sections that have been carefully cross-indexed than like a truly unified conceptual space. And it raises a deeper question: does the model \"understand\" that an image and its caption describe the same thing, or does it merely know that they tend to appear together? The contrastive objective enforces co-occurrence statistics, not semantic equivalence. The degree to which these produce genuine understanding versus sophisticated pattern matching is not fully resolved.
+
+## The Ethics of Seeing and Reading Together
+
+### Capabilities That Did Not Exist Before
+
+A system that can analyze images and understand text independently has certain capabilities. A system that can do both simultaneously, with a jointly trained representation, has qualitatively different capabilities --- ones that require explicit ethical consideration.
+
+A text-only system cannot identify people in photographs. An image-only system cannot interpret a description to find a specific person. A multimodal system can be given a text description of a person --- their appearance, clothing, distinguishing features --- and used to search a database of images for matches. The individual whose image is searched need not have consented to that search. They may not know it is happening.
+
+This is not a hypothetical application. Facial recognition systems have existed for years, but they typically require a reference photograph of the person being sought. A CLIP-style system extends this capability: a linguistic description is sufficient. \"A tall man in a blue jacket near the main entrance of the building\" is now a query that can retrieve images, without any reference photograph.
+
+The scale at which this becomes concerning is not the individual researcher building an exploration notebook. It is the integration of these capabilities into surveillance infrastructure --- city-wide camera networks, social media monitoring systems, border control databases --- where the scale and the absence of individual consent transform a useful research capability into a mass surveillance tool.
+
+### Consent at the Scale of Pre-training
+
+CLIP was trained on 400 million image-text pairs from the internet. The images include photographs of people --- at events, in public spaces, in contexts they shared on social media for personal or professional reasons. The people in those photographs did not consent to having their images used to train a model that can, among other things, search for them by description.
+
+The legal framework for this kind of use varies by jurisdiction and is actively contested. The ethical question is more straightforward: is it acceptable to train surveillance-capable systems on data from people who had no knowledge that their images were being used for this purpose?
+
+The standard response from organizations doing this kind of training is that the data was publicly available. This conflates accessibility with consent. A photograph shared on a personal social media account is accessible to people who follow that account --- not accessible to every application developer who wants to scrape it for model training. The fact that a technical barrier is low does not mean the ethical barrier is absent.
+
+### Compounding Biases Across Modalities
+
+Chapter 9 discussed how pre-training corpora embed biases that propagate to every downstream application. Multimodal systems face a compounded version of this problem: biases present in image training data and biases present in text training data can interact in the joint embedding space in ways that are harder to detect than either modality\'s biases alone.
+
+A text-only model may associate certain names or descriptors with certain demographic groups --- a well-documented bias in language models trained on web text. An image-only model may have disparate performance on faces from different demographic groups --- a well-documented bias in vision models trained on non-representative image datasets. A jointly trained multimodal model may amplify both biases through their interaction: the linguistic associations shape which images are considered matching for a given description, and the visual biases shape which descriptions are considered matching for a given image.
+
+The resulting system may produce outputs that neither biased source would produce alone. And because the biases are embedded in the joint representation rather than in a single modality\'s encoder, they may be harder to detect and correct through post-hoc auditing.
+
+For practitioners deploying multimodal systems in consequential contexts --- hiring, medical triage, content moderation, law enforcement --- this compounding is a serious design concern. Auditing each modality independently is necessary but not sufficient. The multimodal system must be audited as a complete system, in the contexts in which it will actually be deployed.
+
+### Whose World Is Represented?
+
+The 400 million image-text pairs in CLIP\'s training data are not a representative sample of the world\'s visual and linguistic diversity. They are a sample of what is on the internet --- which reflects the distribution of who has internet access, who creates image-rich content online, whose languages and cultural contexts are well-represented in English-language web data, and whose are not.
+
+A multimodal system trained on this data will produce rich, accurate representations for scenes, objects, and linguistic contexts well-represented in that data. It will produce weaker, less reliable representations for scenes and contexts that were underrepresented. A photograph from a rural community in a country with lower internet penetration, paired with a caption in a lower-resource language, will be less well-served by a CLIP-style system than a photograph from a major Western city paired with an English caption.
+
+This is not a problem unique to multimodal systems --- it is a recurring pattern across the field. But in multimodal systems it takes a specific form: the alignment between what the system can see and what it can describe reflects the alignment that existed in the training data, which reflects the distribution of content production on the internet, which reflects existing patterns of technological and economic power. Deploying the resulting system globally does not correct this imbalance; it exports it.
+
+## Hands-On Exploration
+
+### Overview
+
+This exploration builds direct intuition for what a jointly trained image-text embedding space looks like, how zero-shot classification works, and where the alignment breaks down. You will use a pre-loaded CLIP model to probe the geometry of the shared space and observe the modality gap directly.
+
+**Time estimate:** 45--60 minutes **Tools:** Google Colab (provided notebook), CLIP via HuggingFace. No training required.
+
+### Part 1 --- Zero-shot Classification (15 minutes)
+
+Select five images from your MIPDS domain --- whatever kinds of visual inputs your system is designed to process. For each image, create a set of five text descriptions: the correct description and four plausible distractors. Compute the CLIP similarity score between the image embedding and each text embedding. Record which description scores highest.
+
+Then try deliberately adversarial distractors: descriptions that are very similar to the correct one but differ on one specific attribute (\"a brown dog\" versus \"a black dog,\" \"a woman in a red jacket\" versus \"a woman in a blue jacket\"). At what level of specificity does CLIP\'s matching begin to fail?
+
+### Part 2 --- Probing the Modality Gap (15 minutes)
+
+Generate embeddings for five matched image-text pairs and five unmatched pairs. Using the provided dimensionality reduction tool, project all embeddings into two dimensions and plot them --- using different colors for image embeddings and text embeddings, and connecting matched pairs with lines.
+
+Observe: do image embeddings and text embeddings intermix, or do they form separate clusters connected by the lines of matched pairs? Record your observation and compare it to what you would expect if the joint space represented a truly unified conceptual space.
+
+### Part 3 --- Failure Cases (15 minutes)
+
+Test CLIP on three categories of input where you suspect it will fail:
+
+-   An image from a specialized domain unlikely to appear in web-crawled image-text data
+
+-   A description using technical or domain-specific vocabulary
+
+-   A description requiring spatial reasoning (\"the object on the left side of the image\")
+
+For each failure, categorize the cause: domain shift (the domain was underrepresented in training), vocabulary gap (the terms were unfamiliar), or reasoning gap (the task requires a capability contrastive training does not produce).
+
+### Reflection (200--300 words)
+
+\"You observed that CLIP performs zero-shot classification well on familiar domains and degrades on specialized or spatially complex inputs. You also observed the modality gap --- image and text embeddings aligning across a geometric separation rather than fully merging.
+
+For your MIPDS application: what proportion of your expected inputs fall in CLIP\'s strong performance region, and what proportion in its weak regions? Would you deploy CLIP directly for your use case, fine-tune it on domain-specific data, or use it only as a component in a larger system?
+
+And a harder question: does the modality gap you observed suggest that CLIP has achieved genuine multimodal understanding --- a unified representation of concepts regardless of input modality --- or something more like very good cross-modal pattern matching? Does this distinction matter for how you would trust the system in your application?\"
+
+### Case Study: CLIP and the Architecture of Modern Multimodal AI
+
+### The Question
+
+By 2020, the standard approach to visual tasks was supervised learning on curated, labeled datasets. ImageNet had defined a generation of progress. But it had also defined a ceiling: models trained on ImageNet\'s 1,000 categories could not recognize objects outside those categories without new labeled data and new training. Every new domain, every new category, required annotation effort. The labeled data cost was a structural constraint on how broadly vision models could be deployed.
+
+The question that motivated CLIP was whether this constraint was fundamental or contingent. Is labeled supervision necessary for good visual representations, or is it merely what the field had relied on because curated labeled data was the first form of training signal that was available?
+
+### The Bet
+
+CLIP\'s answer was to bet on internet-scale noisy supervision. The intuition: the internet contains hundreds of millions of images, and people have written descriptions of those images --- in captions, in alt text, in surrounding context, in social media posts. This text is not a clean label; it is natural language, variable in quality, sometimes only loosely related to the image. But at sufficient scale, the statistical relationship between images and the text that describes them carries real information about visual concepts and their linguistic representations.
+
+Training image and text encoders jointly on 400 million such pairs, using a contrastive objective, would force the encoders to develop representations reflecting the semantic relationship between visual appearance and linguistic description. No manual annotation required.
+
+### What Was Discovered
+
+The zero-shot results were the headline finding: on ImageNet, a benchmark CLIP was never trained on, zero-shot classification with text descriptions of categories achieved accuracy comparable to a ResNet-50 trained with full supervision. Across 27 additional classification benchmarks, CLIP transferred to 16 out of 27 without any task-specific training.
+
+Equally important were the representation properties. CLIP\'s image encoder, unlike supervised ImageNet models, produced representations robust to distribution shift --- they generalized to images that looked quite different from typical web photography. They also generalized to sketches, cartoons, and non-photographic visual content in ways that supervised models did not.
+
+The result changed how the field thought about the role of large-scale supervision in visual learning, and established contrastive pre-training as the foundation for a generation of multimodal systems.
+
+### The Legacy
+
+CLIP\'s influence is visible in nearly every major multimodal system developed after 2021. DALL-E 2 used CLIP embeddings as the bridge between text descriptions and image generation. Stable Diffusion uses a CLIP text encoder to condition the diffusion process. Systems for robotic navigation, medical image retrieval, and document understanding have all built on CLIP-style joint embeddings.
+
+The architecture proved to be a platform, not just a model: once you have a shared embedding space in which images and text are meaningfully related, you can build many different applications on top of it without re-solving the alignment problem from scratch.
+
+### The Limitations and Concerns
+
+CLIP\'s web-scraped training data absorbed the biases of internet content production: demographic stereotypes, geographic skews, cultural biases embedded in how images are described online. Research subsequent to CLIP\'s release documented these biases in the model\'s associations --- which occupations tend to be associated with which demographics, which geographic contexts are well-represented, which are not.
+
+The surveillance capabilities enabled by zero-shot image-text matching received significant attention. A system that can find images matching a linguistic description --- including descriptions of specific individuals --- can be integrated into surveillance infrastructure in ways that extend far beyond any benign use case. OpenAI\'s release of CLIP was accompanied by a model card documenting known limitations and potential harms, but the model was made publicly available, and its integration into downstream systems proceeded without consistent attention to these concerns.
+
+The tension between open research and dual-use capability is not unique to CLIP. It is a defining challenge for the current period of AI development --- one that the research community and policymakers are still working to resolve.
+
+## Chapter Summary
+
+Multimodal learning addresses the challenge of building systems that can reason across different input types simultaneously. The central technical problem is representational: images and text trained independently in separate objectives produce vectors with no natural geometric relationship. Reasoning jointly requires a shared embedding space --- a common coordinate system in which semantic similarity is reflected by geometric proximity regardless of input modality.
+
+Contrastive learning is the training paradigm that produces joint embedding spaces. By training image and text encoders jointly on large collections of matched pairs --- pulling correct pairs close and pushing incorrect pairs apart --- contrastive training shapes a space in which the same concept, described through different modalities, occupies a similar location. The InfoNCE loss formalizes this objective, training the model to rank correct pairs above all incorrect pairs in a batch.
+
+CLIP demonstrated this paradigm at scale, training on 400 million web-scraped image-text pairs to produce a model capable of zero-shot image classification, cross-modal retrieval, and rich multimodal representations. Its zero-shot capabilities --- transferring to tasks and categories never explicitly seen during training --- changed how the field understood the relationship between web-scale noisy supervision and curated labeled datasets.
+
+Fusion strategies vary in the depth of cross-modal interaction they permit. Late fusion combines independently processed modality representations at the end --- simple, robust, starting-point appropriate. Cross-modal attention allows one modality to selectively attend to the other at multiple processing levels --- richer but computationally demanding. The right choice depends on whether the task requires global alignment or precise fine-grained correspondence.
+
+Multimodal systems have characteristic limitations: spatial and relational reasoning, compositional attribute binding, temporal understanding, and the modality gap --- the observed geometric separation between image and text clusters even in well-trained joint spaces. These limitations reflect the structure of the training objective and the training data, not simply the scale of training.
+
+The ethical implications of combining vision and language are qualitatively different from either modality alone. Surveillance capabilities, consent at the scale of pre-training, compounding biases across modalities, and the question of whose visual and linguistic experience is well-represented --- all require explicit attention before deployment in consequential contexts.
+
+MIPDS is now, for the first time, a genuinely multimodal system. The two channels built across the first ten weeks of this course are connected. The system can see and it can read. The remaining weeks build on this foundation: generative capabilities in Weeks 11 and 12, decision-making in Week 13, integration and deployment in Weeks 14 and 15, and the ethical and societal dimensions of the complete system in Week 16.
+
+## Review Questions
+
+1.  A joint embedding space is trained to bring matching image-text pairs close together. But \"matching\" in CLIP\'s training data means \"this image appeared with this caption on the internet\" --- a relationship defined by human content production patterns, not by semantic equivalence. What are the ways this proxy for semantic similarity might fail? Can you construct examples where an image and a caption are \"matching\" by the training criterion but semantically misleading?
+
+2.  CLIP\'s zero-shot classification works by comparing image embeddings to text embeddings of category descriptions. A well-trained ornithologist can recognize a bird they have never seen by comparing it to a field guide description. Is CLIP doing something analogous --- is it \"recognizing\" in a meaningful sense --- or is it doing something fundamentally different that only looks like recognition? Does the distinction matter for how we should trust the system?
+
+3.  The modality gap persists in well-trained CLIP models: image embeddings and text embeddings form separate clusters in the joint space rather than fully interleaving. What does this geometric separation suggest about what contrastive training achieves? Is alignment across a gap the same as unified representation? What would you need to observe to be confident that genuine representational fusion had occurred?
+
+4.  CLIP was trained on 400 million image-text pairs scraped from the internet. The people whose images appear in that data did not consent to this use. The standard defense is that the data was publicly accessible. Is public accessibility sufficient justification for training on data that enables surveillance capabilities? Does the answer depend on how the resulting model is used?
+
+5.  Multimodal systems enable capabilities --- searching for individuals by linguistic description, identifying people across images without reference photographs --- that did not exist before. Should these capabilities be subject to specific regulatory requirements before deployment? Who should set those requirements, and what enforcement mechanisms would be meaningful?
+
+6.  Your MIPDS system now has both vision and language channels connected. What new ethical considerations arise from the fusion that did not apply to either channel alone? Are there applications for your specific MIPDS design where you would choose not to connect the channels, even if it were technically straightforward?
+
+7.  CLIP performs well on domains well-represented in web-scraped English-language content and poorly on underrepresented domains. When a multimodal system trained on such data is deployed globally --- including in communities underrepresented in the training distribution --- what obligations does the deploying organization have? What would a minimally responsible deployment process look like for a multimodal system with known demographic performance gaps?
+
+## Further Reading
+
+### Foundational Papers
+
+Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., \... & Sutskever, I. (2021). Learning transferable visual models from natural language supervision. In *Proceedings of ICML 2021* (pp. 8748--8763). https://arxiv.org/abs/2103.00020 *The CLIP paper. Sections 2 (approach) and 3 (experiments) are essential. The zero-shot transfer results across 27 datasets are best read with careful attention to which benchmarks show strong transfer and which do not --- the variation is informative about what contrastive pre-training learns and where it fails.*
+
+Oord, A. v. d., Li, Y., & Vinyals, O. (2018). Representation learning with contrastive predictive coding. https://arxiv.org/abs/1807.03748 *The paper that formalized the InfoNCE loss and provided the theoretical connection to mutual information estimation. More technical than necessary for most readers, but the intuition in the introduction is worth reading for a precise understanding of what contrastive objectives are maximizing.*
+
+Antol, S., Agrawal, A., Lu, J., Mitchell, M., Batra, D., Lawrence Zitnick, C., & Parikh, D. (2015). VQA: Visual question answering. In *Proceedings of ICCV 2015* (pp. 2425--2433). https://arxiv.org/abs/1505.00468 *The paper that established visual question answering as a benchmark task. The dataset construction and analysis sections are worth reading for the specific ways VQA tasks tax multimodal systems --- and for the documented biases in early VQA systems that answer correctly for the wrong reasons.*
+
+### For Conceptual Depth
+
+Liang, P. P., Zadeh, A., & Morency, L.-P. (2022). Foundations and trends in multimodal machine learning: Principles, challenges, and open questions. https://arxiv.org/abs/2209.03430 *A comprehensive survey of the multimodal machine learning landscape. The taxonomy of fusion strategies (Section 3) is the clearest systematic treatment available and directly relevant to the MIPDS fusion design decisions this week.*
+
+Liang, V. W., Zhang, Y., Kwon, Y., Yeung, S., & Zou, J. Y. (2022). Mind the gap: Understanding the modality gap in vision-language model representations. In *Advances in Neural Information Processing Systems, 35*. https://arxiv.org/abs/2203.02053 *The paper that systematically characterized the modality gap --- the geometric separation between image and text clusters in CLIP-style joint spaces. Essential reading for understanding the limits of contrastive alignment and what it would mean to achieve genuine representational fusion.*
+
+### On Ethics and Surveillance
+
+Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? In *Proceedings of FAccT 2021* (pp. 610--623). https://dl.acm.org/doi/10.1145/3442188.3445922 *Though focused on language models, the analysis of training data scale, bias propagation, and the gap between research capability and deployment consequence applies directly to multimodal systems trained on web-scraped data.*
+
+Birhane, A., Prabhu, V. U., & Kahembwe, E. (2021). Multimodal datasets: Misogyny, pornography, and malignant stereotypes. https://arxiv.org/abs/2110.01963 *An audit of large-scale multimodal datasets documenting the kinds of harmful and biased content present in web-scraped image-text training data. Directly relevant to understanding what models trained on such data may have absorbed and why auditing the training corpus matters.*
+
+### Technical Reference
+
+Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., \... & Houlsby, N. (2020). An image is worth 16x16 words: Transformers for image recognition at scale. In *Proceedings of ICLR 2021*. https://arxiv.org/abs/2010.11929 *The Vision Transformer paper, describing the image encoder architecture used in larger CLIP variants. Understanding how images are tokenized into patches and processed through Transformer layers connects the vision pipeline from Weeks 4--6 to the multimodal systems discussed this week.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 10: When Vision Meets Language --- Multimodal Systems and the Architecture of Shared Understanding*

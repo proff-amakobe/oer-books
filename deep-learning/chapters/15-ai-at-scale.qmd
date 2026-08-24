@@ -1,0 +1,486 @@
+---
+title: "AI at Scale"
+subtitle: "Infrastructure, Governance, and Societal Consequence"
+---
+
+## Opening Narrative
+
+On October 4, 2021, at approximately 11:40 AM Eastern Time, Facebook, Instagram, and WhatsApp went offline simultaneously. The outage lasted nearly six hours. For three and a half billion users --- roughly half the world\'s population with internet access --- the platforms simply stopped working.
+
+The technical cause was relatively mundane: a misconfigured BGP routing update during maintenance that effectively disconnected Facebook\'s data centers from the rest of the internet. The consequences were less mundane.
+
+In Bangladesh, garment workers who coordinated shifts through WhatsApp had no way to communicate with their employers. In Nigeria, journalists who had been using Facebook as the primary channel for distributing news found themselves cut off from their audiences on the same day that a major political story was developing. In parts of Latin America, small businesses whose entire sales infrastructure --- customer contact, order taking, payment coordination --- was built on Facebook Messenger discovered that they had no backup channel. Emergency response coordinators in several countries who had come to rely on WhatsApp as a coordination tool found themselves scrambling for alternatives.
+
+The outage also revealed something about the engineers responsible for restoring service. Facebook\'s internal communication systems --- the tools engineers used to coordinate the recovery effort --- were themselves hosted on the affected infrastructure. The people trying to fix the problem could not easily reach each other to coordinate the fix.
+
+What October 4, 2021 revealed was not a technical failure in the ordinary sense. It revealed that a private company\'s internal infrastructure had become essential public infrastructure --- that billions of people, across dozens of countries and economic sectors, had organized significant parts of their lives and livelihoods around systems they did not control, did not understand, and had no formal recourse to when those systems failed.
+
+This is what happens when a tool becomes infrastructure.
+
+The AI systems you have studied and built in this course are undergoing the same transition. MIPDS, as you have designed it, is a tool: a system you built, understand, control, and can modify. But the foundation models underlying MIPDS --- the pretrained Transformers, the CLIP encoders, the diffusion backbones --- are not tools. They are infrastructure. The same models that power your application power millions of others. The compute clusters that trained them are operated by a handful of organizations. The APIs that provide access to their capabilities define the terms on which the world\'s developers can participate in the AI economy.
+
+When AI becomes infrastructure, the questions change. Individual system performance matters less than systemic reliability. Individual fairness interventions matter less than the governance frameworks that shape how the infrastructure is built. Individual ethical choices by practitioners matter less --- though they still matter --- than the institutional and regulatory structures that constrain and direct those choices.
+
+This chapter examines AI at that larger scale.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain what foundation models are as infrastructure, including the shared dependencies they create and the concentration of power their development involves
+
+-   Describe the AI compute supply chain, from semiconductor fabrication through training clusters to API access
+
+-   Describe the current AI regulatory landscape, including the EU AI Act and other major governance frameworks
+
+### Analyze and Evaluate
+
+-   Analyze the compute supply chain to identify where concentration creates systemic risk and geopolitical vulnerability
+
+-   Evaluate the documented labor market effects of AI at scale, distinguishing displacement from augmentation and aggregate effects from distributional ones
+
+-   Analyze the environmental cost of AI training and inference, and evaluate proposed mitigation approaches
+
+-   Assess the effects of AI-generated content at scale on information ecosystems and epistemic autonomy
+
+### Apply and Create
+
+-   Situate MIPDS within the larger infrastructure of AI at scale, identifying foundation model dependencies, governance obligations, and systemic risks
+
+-   Apply the EU AI Act\'s risk classification to your MIPDS application
+
+## Key Terms and Concepts
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                         **Definition**
+  -------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Foundation Model**             A large model trained on broad data at scale, intended as a base for diverse downstream applications. As infrastructure, foundation models create shared dependencies: many applications depend on a small number of underlying models, concentrating control and risk.
+
+  **API Economy**                  The ecosystem in which AI capabilities are accessed and monetized through application programming interfaces. Developers pay for capability access rather than owning or training models. Creates accessibility but also dependency, behavioral constraints, and pricing risk.
+
+  **Compute Concentration**        The concentration of the hardware infrastructure necessary to train frontier AI models in a small number of organizations. Creates structural barriers to entry for frontier model development and systemic risk from dependency on concentrated providers.
+
+  **AI Supply Chain**              The full chain from raw materials through semiconductor fabrication through training compute through model development through API deployment. Vulnerable at multiple points to technical failure, geopolitical disruption, and market concentration.
+
+  **Systemic Risk**                The risk that failure in one part of a shared infrastructure propagates to affect all dependent parts simultaneously --- the risk that arises when many applications share common foundation model dependencies.
+
+  **AI Governance**                The laws, regulations, standards, norms, and institutional arrangements that shape how AI systems are developed, deployed, and held accountable. Currently fragmented across jurisdictions and sectors; rapidly evolving.
+
+  **EU AI Act**                    The European Union\'s comprehensive AI regulation, enacted in 2024. Classifies AI systems by risk level and imposes obligations accordingly --- the most significant AI-specific regulatory framework yet enacted.
+
+  **High-Risk AI System**          Under the EU AI Act, an AI system deployed in contexts where failure could cause serious harm --- healthcare, criminal justice, employment, critical infrastructure, education. Subject to mandatory conformity assessment and transparency requirements.
+
+  **General-Purpose AI System**    Under the EU AI Act, a large AI model trained on broad data with the capability to be used across a wide range of tasks. Subject to transparency obligations regarding training data and systemic risk evaluation above a compute threshold.
+
+  **Algorithmic Accountability**   The principle that organizations deploying AI systems should be able to account for those systems\' decisions --- explain them, audit them, and bear responsibility for their consequences.
+
+  **Labor Displacement**           Reduction in demand for human labor in specific tasks or occupations due to automation. A documented consequence of AI deployment at scale with heterogeneous effects across different worker populations.
+
+  **Labor Augmentation**           Use of AI to enhance human workers\' capabilities --- increasing productivity, quality, or the range of tasks a worker can perform effectively --- rather than replacing human labor.
+
+  **Environmental Cost of AI**     The energy consumed and carbon emitted in training and running AI models, including data center construction, hardware manufacturing, and the ongoing energy cost of inference at scale.
+
+  **Epistemic Autonomy**           The capacity to form one\'s own beliefs through one\'s own reasoning, encounter with diverse information, and critical evaluation. Potentially affected at scale by AI systems that shape what information people encounter and how it is framed.
+
+  **Synthetic Media**              AI-generated text, images, audio, and video. Raises questions about authenticity, evidence reliability, and the information environment when any content can be fabricated at low cost and high quality.
+
+  **Geopolitics of AI**            The international dimension of AI capability development --- how AI affects national security, economic competitiveness, and diplomatic relationships, and how different national regulatory approaches interact or conflict.
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## From Tool to Infrastructure --- What Changes at Scale
+
+### The Tool-Infrastructure Distinction
+
+A tool is an artifact that extends individual human capability. Its value is realized when someone uses it. Its failure affects only the person using it at that moment. Its design reflects the needs and values of the people who built it and the people who use it. The user can typically understand how it works, repair it, or replace it.
+
+Infrastructure is different in every one of these dimensions. Infrastructure is a shared substrate upon which many other capabilities depend. Its value is realized not by individual use but by enabling the activities of everyone who depends on it. Its failure propagates --- when infrastructure fails, all dependent activities fail simultaneously. Its design reflects the needs of its builders and dominant users, which may not be the needs of all users. Many of the people who depend on it cannot understand it, cannot repair it, and have no practical alternative when it fails.
+
+The electrical grid is the canonical infrastructure. Roads. Water systems. Telecommunications networks. Each was once a tool --- owned and used by specific individuals or organizations for specific purposes. Each became infrastructure as its adoption became widespread enough that other essential activities came to depend on it.
+
+AI systems are undergoing this transition now.
+
+### How AI Became Infrastructure
+
+The transition from tool to infrastructure does not require a single dramatic moment. It happens gradually, through accumulated dependency. Each individual choice to use a foundation model API rather than building a smaller, specialized system is rational --- the API provides better capabilities with less development effort. Aggregated across millions of applications, these individually rational choices create a structural dependency: the AI capability layer becomes a shared substrate upon which other services depend.
+
+Consider what MIPDS itself depends on. The vision backbone --- a pretrained network trained by a research organization on millions of images. The language encoder --- a pretrained Transformer whose parameters reflect the choices made by a specific team about training data, objective function, and fine-tuning. The multimodal components --- models like CLIP whose training on 400 million web-scraped image-text pairs encoded specific cultural and demographic patterns. The generative module --- a diffusion model whose aesthetic sensibilities reflect the training data collected by a specific organization.
+
+None of these dependencies were forced on you. Each was a reasonable engineering choice. But collectively, they mean that MIPDS depends on systems built by others, governed by others, and potentially changeable by others in ways that would affect your application without your input or consent.
+
+Multiply MIPDS by the millions of applications built on the same foundation models, and you have infrastructure.
+
+### What Infrastructure Concentration Means
+
+The concerning dimension of AI\'s transition to infrastructure is not that it happened --- it happened with electricity and telecommunications too --- but the degree of concentration at each layer of the infrastructure stack.
+
+Leading-edge semiconductor fabrication is concentrated at two facilities to a degree unprecedented in any comparable infrastructure: TSMC in Taiwan produces the vast majority of the most advanced chips used for AI training, with Samsung\'s facilities in South Korea providing most of the remainder. A disruption to semiconductor fabrication in Taiwan --- whether from natural disaster, geopolitical conflict, or supply chain failure --- would constrain the ability to produce the GPUs that train frontier AI models globally, for years, with no short-run substitute.
+
+GPU manufacturing is effectively a monopoly: NVIDIA produces the training accelerators that underlie essentially all frontier model development. No viable substitute currently exists for NVIDIA\'s H100 and successor chips in high-performance AI training applications.
+
+Training compute is concentrated at a small number of hyperscale cloud providers --- primarily Microsoft Azure (in partnership with OpenAI), Google, Amazon, and Anthropic\'s own infrastructure. The organizations that can afford to train frontier models, using this compute, number in the tens.
+
+Foundation model development --- the layer that produces the models that everyone else depends on --- is concentrated in a handful of organizations: OpenAI, Google DeepMind, Anthropic, Meta AI, and a small number of others. The vast majority of AI applications worldwide are built on top of models produced by these few organizations.
+
+This is not a coincidence. It is the predictable outcome of economics: training frontier models requires capital investment that only well-resourced organizations can make, creating structural barriers to entry that prevent the competition that might otherwise distribute the power to shape AI behavior more broadly.
+
+The implications are not hypothetical. When one of these organizations changes a model\'s behavior --- through fine-tuning updates, safety filter changes, or system prompt modifications --- millions of dependent applications change simultaneously. When one of these organizations changes its pricing or terms of service, the economics of millions of businesses change. When one of these organizations makes a decision about what content a model will and will not produce, that decision shapes the information environment of the millions of applications its models power.
+
+This is infrastructure power. And unlike electrical utilities or water systems, AI infrastructure is largely unregulated as infrastructure.
+
+## The Compute Supply Chain --- Where AI Comes From
+
+### The Full Chain
+
+Understanding AI infrastructure requires tracing the full supply chain from which it emerges. The capabilities you access through an API have a history --- a chain of dependencies that stretches from raw materials through manufacturing through computation through development before they reach you.
+
+**Raw materials.** Training AI models at scale requires semiconductors. Semiconductors require rare earth elements --- neodymium, dysprosium, terbium, lanthanum --- whose mining is concentrated in specific geographies, primarily China (which controls roughly 80% of global rare earth production) and, to a lesser extent, Australia, India, and the United States. The environmental and labor conditions of rare earth mining are well-documented concerns: mining operations produce toxic waste, disturb ecosystems, and in some producing regions have been associated with exploitative labor practices.
+
+**Semiconductor fabrication.** The raw materials become chips through a fabrication process of extraordinary technical sophistication --- and extraordinary geographic concentration. TSMC\'s facilities in Hsinchu and Tainan, Taiwan produce the most advanced chips used for AI training. The implications of this concentration are geopolitical as well as technical: Taiwan\'s semiconductor infrastructure is a potential flashpoint in US-China relations, and its disruption would constrain frontier AI development globally with no short-term substitute.
+
+**GPU hardware.** NVIDIA designs (though does not itself fabricate) the GPUs that constitute the primary training hardware for frontier AI. The H100 chip, its successor the B100, and their successors provide the computational substrate for virtually all frontier model training. During 2023 and 2024, demand for H100s substantially exceeded supply, with wait times measured in months. Organizations with early access to substantial H100 allocations --- secured through long-term agreements with cloud providers --- had structural advantages in frontier model development that organizations without such allocations could not easily overcome.
+
+**Training compute.** The chips are assembled into training clusters --- arrays of thousands of GPUs connected by high-bandwidth networks --- operated primarily by hyperscale cloud providers. Microsoft Azure, Google Cloud, and Amazon Web Services operate the largest such clusters. These clusters are extraordinarily expensive to build and operate, requiring not just the hardware but the networking, power infrastructure, and cooling systems to sustain continuous operation at scale. A single frontier model training run may cost tens of millions of dollars in compute alone.
+
+**Foundation model development.** The compute produces foundation models when combined with massive training datasets, engineering expertise, and the specific algorithmic and architectural choices described throughout this course. The organizations that have made this combination work at frontier scale are, as noted, a small number. Their output --- the pretrained models --- is then made available to others through open release (Meta\'s Llama family) or API access (OpenAI\'s GPT family, Anthropic\'s Claude, Google\'s Gemini).
+
+**API access and application development.** The final layer is where most practitioners --- including most students in this course --- encounter AI capabilities. API access makes frontier capabilities available to anyone with a credit card, abstracting away the full complexity of the underlying supply chain. This accessibility is genuinely valuable. It also creates dependencies whose structure is invisible to most of the people who depend on them.
+
+### The Geopolitical Dimension
+
+The supply chain description above is also a map of geopolitical vulnerability. The concentration of rare earth production in China, semiconductor fabrication in Taiwan, GPU design at a US company, and training compute at US-based cloud providers creates a supply chain that reflects and reinforces geopolitical relationships and tensions.
+
+The US government\'s export controls on advanced AI chips to China --- implemented in 2022 and progressively tightened through 2024 --- represent the most visible geopolitical intervention in the AI supply chain. By restricting the export of H100-class GPUs to Chinese buyers, the controls aim to slow Chinese frontier model development. They also illustrate that AI infrastructure can be weaponized in geopolitical competition --- that the supply chain is not a purely technical matter but a domain of strategic competition.
+
+China\'s response has included accelerated domestic semiconductor development --- HUAWEI\'s Ascend chips, produced on SMIC\'s less advanced fabrication processes, are a partial substitute --- and investment in AI development approaches less dependent on frontier hardware. The outcome of this competition will shape the global distribution of AI capabilities over the coming decade.
+
+For practitioners building applications that depend on this supply chain, the geopolitical dimension is not merely background context. Export controls can restrict access to APIs and models. Geopolitical tensions can disrupt supply chains. National security considerations can force divestiture of AI assets across borders. Building critical application infrastructure on foundation models controlled by organizations subject to these dynamics carries risks that do not appear in any technical specification.
+
+## AI Governance --- The Regulatory Landscape
+
+### Why AI Governance Is Hard
+
+Governing AI is difficult in ways that differ from governing previous technologies. Several characteristics of AI systems create governance challenges that existing regulatory frameworks --- designed for earlier technologies --- handle poorly.
+
+**Dual use.** AI capabilities that enable beneficial applications also enable harmful ones, and the same technical system can serve both. A face recognition system that helps locate missing children also enables mass surveillance. A language model that assists with medical research also assists with generating disinformation. Governance frameworks that permit beneficial uses while prohibiting harmful ones must operate at the level of applications and deployment contexts, not the underlying capabilities --- a far more difficult regulatory target.
+
+**Opacity.** AI systems, particularly large neural networks, make decisions through processes that cannot be fully understood even by the people who built them. Traditional regulatory approaches --- based on inspectable specifications, testable safety standards, and auditable procedures --- work poorly for systems whose behavior emerges from billions of trained parameters rather than explicit programmed rules.
+
+**Pace.** AI capabilities have advanced faster than any regulatory process can track. The EU AI Act, enacted in 2024, was drafted based on the AI landscape of 2021. The capabilities that exist at its enforcement date differ substantially from the capabilities it was designed to address. Governance frameworks designed for today\'s systems may be inadequate for tomorrow\'s --- and the typical regulatory cycle of years is badly mismatched with the AI development cycle of months.
+
+**Cross-border deployment.** AI systems developed in one jurisdiction are deployed globally. A regulation enacted by the EU applies to systems deployed to EU citizens, regardless of where those systems were developed. This extraterritorial application creates compliance complexity for developers and regulatory arbitrage opportunities for organizations that structure their operations to minimize exposure to demanding regulatory regimes.
+
+### The EU AI Act
+
+The most significant AI-specific regulatory framework enacted at the time of writing is the EU AI Act, which entered into force in August 2024, with its most significant provisions taking effect on a staggered timeline through 2026.
+
+The Act adopts a risk-based approach: different categories of AI system face different regulatory requirements based on the potential severity of harm their deployment could cause.
+
+**Prohibited practices** are outright banned, with narrow exceptions. These include: AI systems using subliminal manipulation to affect behavior in ways that harm users; AI systems exploiting vulnerabilities of specific groups (age, disability) to distort behavior; social scoring systems by governments that evaluate citizens based on behavior; and, with limited law enforcement exceptions, real-time remote biometric identification systems in public spaces.
+
+**High-risk systems** face the most substantial obligations. The Act defines high-risk systems as those deployed in eight domains specified in Annex III: biometric identification and categorization; management and operation of critical infrastructure; education and vocational training; employment, worker management, and access to self-employment; access to essential private and public services; law enforcement; migration, asylum, and border control management; and administration of justice and democratic processes.
+
+High-risk systems must maintain quality management systems, maintain technical documentation, enable human oversight, achieve appropriate accuracy and robustness standards, and meet transparency requirements with users. Before deployment, they must undergo a conformity assessment --- either self-assessment with documentation, or third-party assessment for systems with the highest risk potential.
+
+**General-purpose AI models** --- the foundation models that underlie most downstream applications --- face transparency obligations if they are made available to the public. Those trained above a compute threshold of 10²⁵ FLOPs (approximately GPT-4 scale) are designated as models with systemic risk and face additional requirements: conducting adversarial testing (red teaming), reporting to the EU AI Office, implementing cybersecurity measures, and reporting serious incidents.
+
+**Limited and minimal risk systems** --- the majority of AI applications --- face light-touch transparency obligations (disclosing when users are interacting with AI, disclosing when synthetic content is AI-generated) but no substantive mandatory requirements.
+
+### Beyond the EU Act --- Other Governance Frameworks
+
+The EU AI Act is the most comprehensive AI-specific legislation enacted, but it operates within a broader governance landscape.
+
+**US regulation** has taken a more sector-specific approach. Executive orders from the Biden and Biden-successor administrations have directed federal agencies to develop AI guidance specific to their regulatory domains: the FDA for medical AI, CFPB for credit AI, HHS for healthcare AI, the Equal Employment Opportunity Commission for hiring AI. The 2023 Executive Order on AI created disclosure requirements for frontier model developers regarding safety testing, but these were challenged and their legal durability was uncertain at time of writing. The US has not enacted a comprehensive AI law comparable to the EU Act.
+
+**UK regulation** has adopted a principles-based, pro-innovation approach that delegates AI governance to existing sector regulators --- the FCA for financial services AI, the ICO for data protection implications of AI, the CMA for competition implications --- with a coordinating AI Safety Institute providing cross-cutting technical analysis.
+
+**China** has enacted a series of AI-specific regulations: regulations on algorithmic recommendation systems (2022), regulations on deep synthesis (deepfakes) (2022), and regulations on generative AI services (2023). These tend to focus on specific deployment contexts rather than comprehensive risk-based classification, and they require alignment with \"core socialist values\" and content moderation in ways that reflect specifically Chinese governance priorities.
+
+**International frameworks** include the OECD AI Principles, the G7 Hiroshima AI Process Code of Conduct for advanced AI developers, and the Council of Europe\'s Framework Convention on AI --- the first legally binding international AI treaty, opened for signature in 2024. None of these approaches the binding force of national legislation, but they shape governance norms and provide reference points for national regulatory development.
+
+### The Governance Gaps
+
+Significant governance gaps persist at the time of writing.
+
+**Liability frameworks** for AI harm remain underdeveloped. When an AI system causes harm --- a medical diagnostic error, a discriminatory hiring decision, a defamatory synthetic media output --- the question of who is legally liable is often unresolved. Is it the foundation model developer? The application developer? The deploying organization? The user who prompted the output? Existing tort and product liability frameworks were not designed for AI systems and do not map cleanly onto the layered dependency structure of deployed AI.
+
+**Audit and enforcement** capabilities lag behind regulatory ambitions. Mandating conformity assessment for high-risk AI systems is only as valuable as the existence of technically competent third-party auditors who can conduct meaningful assessments. At current regulatory timelines, the technical infrastructure for auditing AI systems at scale does not yet exist.
+
+**Extraterritorial effectiveness** is uncertain. The EU Act\'s reach to systems deployed to EU citizens regardless of development jurisdiction requires either enforcement against non-EU entities (legally and diplomatically complex) or voluntary compliance by non-EU organizations motivated by reputational and market access concerns. The extent to which the Act effectively governs non-EU AI development is an open empirical question.
+
+**Foundation model accountability** remains partially addressed. The Act\'s general-purpose AI provisions create obligations for foundation model developers, but the mechanism by which downstream application developers\' use of those models creates or transfers regulatory obligations is not fully clear. An application developer who deploys a high-risk system built on a foundation model may face regulatory obligations regardless of what the foundation model developer did or disclosed.
+
+## Labor Markets --- Who Benefits and Who Bears the Cost
+
+### What the Evidence Shows
+
+The debate about AI\'s effects on labor markets generates more heat than light, partly because it conflates several distinct empirical questions that should be kept separate.
+
+The first question is whether AI automates specific tasks. The answer is clearly yes --- AI systems demonstrably perform many tasks that previously required human labor, including some tasks that required substantial human skill and judgment. Code completion, image classification, document summarization, translation, customer service response generation --- all are tasks that AI systems now perform with quality competitive with human performance in many settings.
+
+The second question is whether task automation translates to occupational displacement --- reduced employment in specific occupational categories. The relationship between task automation and employment is not direct. When a task is automated, the total employment effect depends on whether the task\'s automation increases demand for the remaining tasks in the same occupation (as happened with ATMs and bank tellers initially --- lower transaction costs increased demand for bank branches), decreases demand for the occupation overall (as happened with typographers after desktop publishing), or shifts demand to adjacent occupations.
+
+The third question is about the distributional effects --- which workers, in which occupations, in which economic circumstances --- bear displacement costs versus receive augmentation benefits. This question is often elided in aggregate analyses, but it is the one that matters most for policy.
+
+**Documented displacement effects** as of 2024 include: measurable reductions in demand for entry-level coding assistance roles at organizations that adopted AI coding assistants; reductions in demand for certain translation and localization roles for language pairs where AI translation is high quality; reductions in demand for some categories of image production and stock photography; and preliminary evidence of reduced demand for some categories of customer service roles at organizations that deployed AI-based customer service systems.
+
+**Documented augmentation effects** include: significant productivity increases for software developers using AI coding assistants on certain task types; improved accuracy for radiologists reading images with AI assistance in some clinical contexts; expanded access to legal document drafting capabilities for individuals who could not previously afford legal assistance; and productivity improvements for writers using AI as a drafting tool.
+
+**The distributional dimension** is the most important and the most poorly documented. Entry-level workers in affected occupations --- those who have not yet developed the irreplaceable expertise that makes human judgment valuable --- face the greatest displacement risk. Workers in lower-wage countries who provided the labor for tasks now automatable --- image annotation, content moderation, translation for high-resource language pairs --- face displacement with fewer alternative employment options than workers in higher-wage economies. Freelance and gig economy workers in creative fields --- illustrators, writers, voice actors --- face competition from AI systems trained substantially on their own work, without compensation or consent.
+
+### The Disruption-Adaptation Pattern
+
+Historical analysis of previous automation waves offers a sobering reference point. The displacement of agricultural labor by mechanization, the displacement of manufacturing labor by industrial automation, and the displacement of clerical labor by computing all produced net long-run employment increases while causing severe short-run disruption for displaced workers.
+
+The \"long run\" is not a comfort for the people bearing the disruption. Agricultural workers displaced from farming by mechanization in the early twentieth century faced decades of economic dislocation before the manufacturing economy absorbed them. The long-run aggregate outcome --- more people employed in more productive occupations --- was real. The short-run human cost --- displacement, poverty, family disruption --- was also real, and fell disproportionately on people with the least capacity to absorb it.
+
+Current AI\'s labor market effects are likely to follow a similar pattern: aggregate long-run improvements in productivity alongside substantial short-run disruption concentrated in specific worker populations. The policy question --- one that technical practitioners have no special authority to answer but some obligation to inform --- is what obligations wealthy societies have to people who bear the costs of transitions they did not choose and from which they do not primarily benefit.
+
+## Environmental Cost --- What Training and Inference Actually Cost
+
+### The Training Cost
+
+Training large AI models consumes substantial energy. Estimates of the energy cost of training specific models are difficult to verify independently because organizations rarely publish detailed power consumption data, but several studies have produced credible estimates.
+
+Training GPT-3 was estimated to require approximately 1,287 MWh of electricity --- roughly the annual electricity consumption of 120 US homes. Training GPT-4, whose scale was not publicly disclosed but is believed to be substantially larger, is estimated to have consumed an order of magnitude more. Training Llama 3, Meta\'s open-source frontier model, is reported to have used approximately 39.3 million GPU hours on H100 chips --- at typical data center power draw, this corresponds to energy consumption comparable to the annual electricity use of several thousand homes.
+
+These numbers are large in absolute terms. They are more meaningfully contextualized relative to other activities: training a frontier language model consumes roughly the energy equivalent of several transatlantic flights by a medium-sized aircraft. The total cumulative energy consumption of all frontier model training to date is substantial but small relative to global energy consumption. The rapid growth in training compute --- driven by the scaling laws discussed throughout this course --- makes the trajectory more concerning than the current absolute level.
+
+Carbon footprint depends on the energy mix of the data centers where training runs. Microsoft, Google, and Amazon have made commitments to run their data centers on 100% renewable energy, though the specifics of how renewable energy credits are counted and matched to actual consumption are complex and contested. A training run on a data center powered by renewable energy has a much smaller carbon footprint than the same run on coal-powered electricity. The geographic distribution of training compute --- and the energy mix in those geographies --- matters substantially for the actual carbon impact.
+
+### The Inference Cost
+
+Training cost gets most of the attention, but inference cost --- the energy consumed by running trained models to serve user queries --- is at least as significant at scale and growing faster.
+
+A single query to a large language model consumes more energy than a web search --- rough estimates suggest by a factor of roughly ten, though this varies substantially by model size and query length. When multiplied by the billions of queries per day that major AI services handle, this produces an inference energy footprint that rivals or exceeds training costs on a continuous basis. Google reported that its AI services had increased its data center energy consumption substantially; Microsoft projected similar increases from Copilot deployments. ChatGPT processes a reported 10 million queries per day; at even conservative energy estimates per query, this represents significant ongoing consumption.
+
+Efficiency improvements offer a partial offset. The development of smaller, more efficient models --- through distillation, pruning, and architectural improvements --- reduces the inference cost per query. Inference optimization techniques reduce latency and improve hardware utilization. The trend toward running smaller models on edge devices rather than large models in cloud data centers reduces network energy overhead. But the demand for AI capabilities is growing faster than efficiency improvements are reducing per-query costs, and the net effect on energy consumption is growth.
+
+### Hardware Manufacturing
+
+The energy cost of operating AI infrastructure understates the full environmental cost by omitting the cost of manufacturing the hardware. Semiconductor manufacturing is an energy-intensive process. TSMC\'s fabrication facilities are major energy consumers in Taiwan. The carbon footprint of manufacturing an H100 GPU --- the energy and materials consumed in its production --- is a significant fraction of the carbon emitted running that GPU over its operational lifetime.
+
+Data center construction carries its own environmental footprint: concrete, steel, cooling systems, electrical infrastructure. The rapid expansion of hyperscale data center construction driven by AI demand has provoked controversy in several locations over water consumption (cooling), land use, and local grid impacts.
+
+### What Efficiency Improvements Can and Cannot Do
+
+The trajectory of AI development creates a Jevons paradox concern. As AI becomes more efficient --- requiring less energy per capability unit --- the cost of accessing AI capabilities falls, expanding the range of applications for which AI is economically viable, increasing total consumption. Historical experience with energy efficiency improvements in other sectors suggests that efficiency gains reliably produce per-unit reductions but are routinely offset by consumption growth.
+
+This does not mean efficiency improvements are worthless --- they are essential for managing the environmental footprint of AI at any given level of capability provision. But efficiency improvements alone, without demand management, are unlikely to produce absolute reductions in AI\'s energy consumption in an era of rapidly growing AI adoption.
+
+## Information Ecosystems and Epistemic Effects
+
+### AI and the Information Environment
+
+The deployment of AI systems at scale has effects on the information environment that are distinct from any individual system\'s performance or failure modes. When AI systems shape what information billions of people encounter --- through recommendation algorithms, content generation, search ranking, and translation --- their aggregate effect on the information ecosystem is a legitimate subject of societal concern independent of any individual system\'s behavior.
+
+This is not a new concern. Recommendation algorithms have shaped information exposure since the rise of social media platforms. The addition of generative AI capabilities --- the ability to produce high-quality synthetic content at low cost and high volume --- adds new dimensions to an existing concern rather than introducing an entirely new one.
+
+### Recommendation Algorithms and Exposure Shaping
+
+Most information that reaches most people online now passes through algorithmic filters: search engines rank results according to learned models; social media feeds are sorted by engagement prediction models; news aggregators prioritize stories by relevance models; music and video services select what to play next based on preference models. The information environment for any given person is substantially constructed by AI systems optimizing for specific objectives.
+
+The objectives these systems optimize are not primarily \"inform the user accurately\" or \"expose the user to diverse perspectives.\" They are primarily \"maximize engagement\" --- measured through clicks, time spent, shares, and comments. As discussed in Chapter 13\'s treatment of reward hacking, maximizing engagement and maximizing information quality are not the same objective. Content that is emotionally activating --- outrageous, frightening, conflict-laden --- drives higher engagement than content that is accurate, nuanced, or calming. Recommendation systems that optimize for engagement will systematically favor emotionally activating content, whether or not that content is accurate or helpful.
+
+The documented effects of this optimization include: filter bubbles, where users receive information confirming their existing beliefs while algorithmic filtering minimizes exposure to challenging perspectives; the amplification of outrage-inducing content, including misinformation, because such content drives engagement; and the economic incentivization of content producers to produce engaging rather than accurate content.
+
+### Synthetic Media and Epistemic Trust
+
+Generative AI capabilities --- the diffusion models and language models studied in Chapters 11--13 --- introduce a distinct challenge to the information environment: the collapse of the evidential value of media.
+
+Historically, a photograph, audio recording, or video provided some evidential weight for the events they depicted --- not conclusive evidence (photographs can be staged, recordings can be edited), but a genuine epistemic constraint on fabrication. Producing a convincing fake photograph required skill, time, and resources that most actors could not deploy. Producing a convincing fake video of a specific person saying specific things required even more.
+
+Diffusion models and video synthesis systems have substantially reduced these constraints. High-quality synthetic photographs, audio in specific voices, and video depicting specific individuals in fabricated scenarios are now accessible to individuals with consumer hardware and basic technical skills. The epistemic cost of fabricating specific evidence has dropped by orders of magnitude.
+
+The consequences are not merely that more misinformation exists --- though that is true. The more fundamental consequence is the weakening of media\'s evidential function. When any image could be AI-generated, the evidentiary weight of any image declines. When any audio recording could be synthetic, audio evidence in legal, journalistic, and political contexts loses force. The equilibrium the information ecosystem is moving toward is one where consumers cannot rely on media as evidence without independent verification --- a situation that advantages actors willing to fabricate and disadvantages those who rely on authentic documentation.
+
+### Epistemic Autonomy at Scale
+
+Epistemic autonomy --- the capacity to form one\'s own beliefs through one\'s own reasoning and engagement with information --- is a value underlying liberal democratic theory. Democratic legitimacy depends on citizens being able to form views through genuine deliberation rather than manipulation. Legal systems depend on evidence retaining meaning. Journalism depends on reportable facts being distinguishable from fabrications.
+
+AI systems that shape information exposure at scale, that generate synthetic content at low cost, and that optimize for engagement rather than accuracy affect epistemic autonomy not through any individual interaction but through their aggregate effect on the information environment. A single recommendation system that slightly favors engaging content over accurate content is a minor distortion. That system, deployed to three billion users for a decade, cumulates into a substantial effect on the information environment those users inhabit.
+
+This concern is not a reason to prohibit AI recommendation systems or generative AI --- the beneficial applications of both are real and valuable. It is a reason to take seriously the governance questions about how these systems are optimized, what transparency obligations they carry, and what recourse users have to understand and contest how their information environment is being shaped.
+
+## The Governance Participation Obligation
+
+### What Technical Practitioners Can Contribute
+
+The governance questions examined in this chapter --- who controls AI infrastructure, how should AI systems be regulated, what labor market policies are appropriate, how should environmental costs be managed, what obligations do AI systems carry regarding the information environment --- are not technical questions. They are political, ethical, and economic questions, and their resolution through democratic and deliberative processes is appropriate.
+
+But they cannot be answered well without technical input. A regulation that misunderstands what a foundation model is will create perverse incentives or fail to address the risks it was meant to address. A labor market policy based on inaccurate assumptions about which tasks AI will automate will misallocate support to workers in the wrong occupations. An environmental policy that ignores inference cost while focusing on training cost will understate the problem. A governance framework for synthetic media that is technically naïve will be trivially circumventable.
+
+Technical practitioners are among the small number of people who understand both what these systems can do and what they cannot --- and who understand the gap between marketing claims and technical reality. This understanding is a resource that governance processes need.
+
+### The Challenge of Conflicted Participation
+
+The challenge is that technical practitioners rarely participate in governance processes as neutral parties. They are employed by organizations with interests in specific governance outcomes. An AI company that employs an ML engineer has interests in regulations that permit its business model and disfavor its competitors. An academic researcher may have interests in funding streams that depend on continued AI development. A journalist covering AI may have interests in engaging, dramatic narratives that exaggerate capability claims.
+
+Navigating this is not simple, and it would be dishonest to present it as such. But the obligation to contribute honestly to governance processes that affect the broader public does not disappear because of employment relationships. Governance processes that receive only industry-friendly technical input will produce industry-friendly outcomes. The countervailing technical voice --- the honest characterization of what AI systems can and cannot do, what risks they carry, what the evidence shows about their effects --- matters, and it requires practitioners who are willing to provide it even when their employers would prefer otherwise.
+
+This is not a counsel to be self-destructive in one\'s career. It is a counsel to recognize that technical expertise carries social responsibilities that extend beyond the employment relationship --- and that the long-run interests of both individuals and the field are better served by an honest governance process than by an industry-captured one.
+
+## Hands-On Exploration
+
+### Overview
+
+This exploration develops concrete understanding of the dependency chain underlying a real AI system --- your MIPDS --- and maps it to the governance framework that applies.
+
+**Time estimate:** 45--60 minutes **Tools:** Your MIPDS Architecture Record, access to model documentation for the foundation models you have used, the EU AI Act risk classification framework (provided as a structured summary in the course materials).
+
+### Part 1 --- Dependency Tree Construction (20 minutes)
+
+Using your Architecture Record, construct a dependency tree for your MIPDS application. For each major component:
+
+-   Identify the specific pretrained model used, the organization that trained it, and the dataset it was trained on
+
+-   Note the terms of service governing its use
+
+-   Note any documented biases, performance limitations, or legal status issues associated with the training data
+
+Then extend the tree one level up: identify the compute infrastructure (which cloud provider) on which your key foundation models were trained, and the hardware (which GPU manufacturer) underlying that compute.
+
+Your tree should have at least three levels: your application → foundation models → compute infrastructure. Four levels if you can identify the semiconductor manufacturer.
+
+**Present your findings as a structured table, not a diagram:** organization, model/component, training data, terms of service notes, known limitations.
+
+### Part 2 --- Governance Classification (20 minutes)
+
+Apply the EU AI Act\'s classification framework to your MIPDS application. Work through each classification systematically:
+
+**Prohibited practices (Article 5):** Does your application involve subliminal manipulation, exploitation of vulnerable groups, government social scoring, or real-time biometric identification in public spaces? Document your determination.
+
+**High-risk system (Annex III):** Does your application fall into one of the eight listed domains --- biometrics, critical infrastructure, education, employment, essential services, law enforcement, migration, administration of justice? If your application touches more than one domain, classify each touch point.
+
+**General-purpose AI model:** Does your application itself constitute a general-purpose AI model made available to third parties? (Probably not for MIPDS as designed, but document your reasoning.)
+
+**Transparency obligations:** What disclosure obligations does your application carry under the Act\'s limited-risk provisions --- disclosing AI interaction, disclosing synthetic content?
+
+Document your classification, your reasoning, and the specific compliance obligations each applicable classification creates.
+
+### Part 3 --- Single Point of Failure (10 minutes)
+
+Identify the single component in your dependency tree whose unavailability would most severely disable your MIPDS application. For that component:
+
+-   What would cause it to become unavailable? (Technical failure, business decision, regulatory action, legal challenge --- be specific)
+
+-   How would you detect that it had become unavailable?
+
+-   What is your mitigation plan --- can you substitute an alternative, degrade gracefully, or must the application simply stop?
+
+### Reflection (200--300 words)
+
+\"You traced your MIPDS system\'s dependency tree to foundation models controlled by specific organizations, trained on data with specific consent and legal status questions, running on hardware concentrated in specific geographies and manufactured by specific companies.
+
+Return to the Design Philosophy Document you wrote in Week 1 --- before you had technical knowledge of any of these systems. What risks did you anticipate then? What risks do you now understand that you could not have anticipated without the technical knowledge this course has given you?
+
+And consider the governance classification you completed. If your application qualifies as high-risk under the EU AI Act: what does compliance actually require? Does your current architecture and deployment plan, as specified in Week 14, satisfy those requirements? If not, what would need to change --- and is that change technically feasible, or does it require design decisions you cannot make alone?\"
+
+### Case Study: The GPT-4 API Economy --- Capability, Dependency, and Control
+
+### The Situation
+
+When OpenAI released the GPT-4 API in March 2023, it made available to any developer with a credit card capabilities that had previously required building and training large language models from scratch --- an undertaking accessible only to well-resourced research organizations. Within weeks, thousands of applications had been built on the API. Startups organized their entire product architectures around GPT-4 capabilities. Healthcare, legal, educational, and creative applications deployed systems whose core intelligence was provided by a single external service.
+
+The democratization of capability was real and significant. The alternative --- requiring every application to train its own large language model --- would have restricted sophisticated AI capabilities to the organizations with resources to train them. The API made capabilities accessible that would otherwise have been unavailable to the vast majority of developers and organizations.
+
+It also created a new class of dependencies.
+
+### The Dependency Structure
+
+An application built on the GPT-4 API has a risk profile fundamentally different from one built on a locally hosted model. The capability is powerful, but the control is not the developer\'s.
+
+OpenAI controls the model\'s behavior. Updates to the underlying model --- through fine-tuning, safety filter changes, or system prompt modifications --- change the behavior of every application built on the API, simultaneously, without requiring any action by application developers. An application carefully calibrated to work with the model\'s behavior before an update may behave differently after. The developer receives no prior notice; in many cases, release notes describe changes in terms too general to predict their effect on specific applications.
+
+OpenAI controls the pricing. The API\'s pricing changed multiple times in the two years following GPT-4\'s release. Applications whose unit economics were calculated under earlier pricing had to recalculate. For some applications, the pricing changes were favorable --- OpenAI reduced prices as efficiency improved. For others, particularly those using high-volume long-context queries, price changes were costly. The economics of an application that depends entirely on a third-party API can change without any engineering decision by the application developer.
+
+OpenAI controls access. Content policies determine which use cases the API will serve. Policy updates over time restricted certain categories of use and expanded others. An application built around a use case that was permitted at development time may find that use case restricted by subsequent policy updates. The policy applies globally; there is no negotiation for applications that find specific constraints harmful to their legitimate use cases.
+
+### The Concentration Behind the API
+
+The GPT-4 API\'s power traces back to the infrastructure concentration described earlier in this chapter. OpenAI\'s training runs depended on Microsoft Azure\'s GPU clusters --- one of the largest concentrations of AI training compute outside the hyperscalers themselves, built on NVIDIA H100s manufactured on TSMC processes.
+
+The dependency chain from application developer to API to training compute to hardware to fabrication represents a concentration of control at every link. The application developer can change everything within their application but can change nothing upstream. A disruption at any link --- a regulatory restriction on OpenAI\'s API, an NVIDIA supply constraint limiting Azure\'s GPU availability, a geopolitical event affecting TSMC\'s production --- propagates down the chain to affect every dependent application.
+
+This is precisely the systemic risk structure that makes AI infrastructure a governance concern rather than merely a business risk.
+
+### What Developers Discovered
+
+The practical lesson that developers drew from the GPT-4 API experience was that the capability-dependency tradeoff requires explicit management, not just passive acceptance.
+
+Applications for which some variation in model outputs is acceptable, for which the application can adapt to behavioral changes, and for which the dependency risk is incorporated into the business model work well on API infrastructure. The leverage is high and the development cost is low.
+
+Applications for which consistency and predictability of model behavior is critical --- where unexpected output changes could expose users to harm, where the application serves a vulnerable population, where the legal liability for model outputs falls on the application developer rather than OpenAI --- require more careful consideration. For these applications, the dependency structure created by API reliance may be acceptable only with contractual guarantees about behavior stability that standard API terms of service do not provide, or with the option to run a locally hosted model version for which the application developer controls updates.
+
+The lesson generalizes beyond OpenAI\'s specific API to the full class of foundation model APIs: capability on favorable terms, with dependencies whose implications require explicit assessment rather than implicit acceptance.
+
+### The Governance Vacuum and Its Partial Filling
+
+The GPT-4 API rollout occurred with no specific regulatory framework governing foundation model APIs. No mandatory disclosure of training data. No required performance reporting by demographic group. No standardized incident reporting for model behavior failures. No liability framework for harm caused by API-dependent applications.
+
+The EU AI Act\'s general-purpose AI provisions began to address this vacuum. Foundation models above the 10²⁵ FLOP training compute threshold --- which includes GPT-4 class models --- face transparency obligations regarding training data, adversarial testing requirements, and incident reporting requirements. The Act applies to models made available in the EU market, creating de facto global requirements for organizations that serve EU users.
+
+Whether these provisions are sufficient, and how they interact with the layered dependency structure of the API economy --- where the foundation model developer and the application developer are separate organizations with separate obligations --- is being worked out through guidance documents, enforcement decisions, and the iterative process of regulatory implementation. The governance gap is not closed; it is in the process of being addressed.
+
+## Chapter Summary
+
+AI has transitioned from a collection of specialized tools to a shared infrastructure upon which much of the digital economy increasingly depends. Foundation models --- trained by a small number of organizations on massive datasets using concentrated compute resources --- underlie millions of applications worldwide, creating shared dependencies that make AI a subject of infrastructure governance rather than only product regulation.
+
+The compute supply chain reveals AI\'s dependence on concentrated and geographically vulnerable resources: rare earth elements from geographically concentrated sources, leading-edge semiconductor fabrication concentrated primarily in Taiwan, GPU design concentrated at NVIDIA, training compute concentrated at hyperscale cloud providers. Disruption at any link in this chain propagates to affect all dependent applications.
+
+The regulatory landscape for AI is emerging but fragmentary. The EU AI Act, enacted in 2024, is the most comprehensive AI-specific regulation yet adopted, applying a risk-based classification that imposes obligations proportional to the potential harm of a system\'s deployment. High-risk systems face conformity assessment and transparency requirements; general-purpose AI models face training data disclosure and systemic risk evaluation requirements. Governance gaps remain substantial: liability frameworks are underdeveloped, audit capabilities lag regulatory ambitions, and extraterritorial effectiveness is uncertain.
+
+Labor market effects are heterogeneous and distributional. AI automates specific tasks and displaces some occupations while augmenting others. The aggregate long-run employment effect is contested; the distributional short-run effect --- displacement concentrated in specific worker populations who did not choose and do not primarily benefit from the transition --- is a legitimate policy concern regardless of the aggregate trajectory.
+
+The environmental cost of AI --- in training energy, inference energy, and hardware manufacturing --- is substantial and growing. Efficiency improvements offset some growth in per-capability energy cost but have not produced absolute reductions as overall AI demand grows rapidly.
+
+AI\'s effects on information ecosystems --- through recommendation algorithms that optimize for engagement, synthetic media that reduces the evidential value of digital content, and content generation at scale --- raise concerns about epistemic autonomy that operate at the population level rather than the individual system level.
+
+Technical practitioners have a specific contribution to make to these governance and societal questions: honest characterization of what AI systems can and cannot do, what evidence shows about their effects, and what technical constraints bear on proposed governance approaches. This contribution requires willingness to participate in processes that affect outcomes beyond any single employer\'s interests.
+
+MIPDS is now situated in this larger context: a specific system, built on specific foundation models, subject to specific governance frameworks, participating in the larger infrastructure and societal dynamics this chapter has examined. Week 16 subjects this complete system --- and the field it is part of --- to ethical and societal review.
+
+## Review Questions
+
+1.  Foundation models are built by a small number of organizations and depended on by millions of applications. This structure concentrates the power to shape model behavior --- values, biases, capabilities, limitations --- in a small number of hands. What governance mechanisms would be appropriate for this level of infrastructure concentration? Who should have standing to participate in decisions about how foundation models behave?
+
+2.  The EU AI Act classifies AI systems by risk level rather than by capability type. High-risk systems in specific domains face conformity assessment and transparency requirements regardless of the underlying technology. Is risk-based classification the right approach to AI governance? What does it capture well? What does it miss?
+
+3.  AI\'s labor market effects include both documented displacement and documented augmentation. The displacement effects tend to fall on specific worker populations --- entry-level workers in affected occupations, workers in lower-wage countries providing automatable tasks. How should policy respond to distributional harm even when aggregate effects are neutral or positive? Who bears responsibility for workers displaced by transitions they did not choose?
+
+4.  The energy consumed by training and serving frontier AI models is substantial and growing. AI companies have made commitments to carbon neutrality through offsets and renewable energy procurement. Is this adequate? What would a more demanding environmental governance standard look like --- and what would its effects on AI development be?
+
+5.  AI recommendation systems optimize for engagement, which systematically favors emotionally activating content over accurate or diverse content. What are the obligations of organizations operating recommendation systems with respect to epistemic autonomy? Should optimization objectives for recommendation systems be regulated?
+
+6.  Technical practitioners employed by AI companies have expertise that is valuable for governance processes --- and interests that are shaped by their employers. How should a technical practitioner navigate the tension between honest participation in governance processes and loyalty to their employer? Is there a meaningful distinction between legitimate advocacy for an employer\'s position and providing misleading technical input to governance processes?
+
+7.  Return to your MIPDS Design Philosophy Document from Week 1. What risks did you anticipate before you had deep technical knowledge of the systems involved? What risks do you now understand that you could not have anticipated then? What would you change about your Week 1 design philosophy in light of everything you have learned?
+
+## Further Reading
+
+### On Foundation Models as Infrastructure
+
+Bommasani, R., Hudson, D. A., Aditi, E., Altman, R., Arora, S., Sydney, G., \... & Liang, P. (2021). On the opportunities and risks of foundation models. *Stanford CRFM Report*. https://arxiv.org/abs/2108.07258 *The foundational analysis of foundation models as a category --- their technical properties, the opportunities they create, and the systemic risks they introduce. Part II (opportunities) and Part III (risks) are most relevant to this chapter. The section on socioeconomic effects is particularly well-reasoned.*
+
+### On AI Governance
+
+The EU AI Act. (2024). *Regulation (EU) 2024/1689 of the European Parliament and of the Council*. https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689 *The full text of the Act is publicly available and worth reading directly for the Annex III list of high-risk applications and the general-purpose AI provisions in Title VIII. The recitals --- the numbered paragraphs preceding the operative articles --- explain the reasoning behind each provision and provide essential context for interpreting the operative text.*
+
+Dafoe, A. (2018). AI governance: A research agenda. *Future of Humanity Institute, University of Oxford*. https://www.fhi.ox.ac.uk/wp-content/uploads/GovAI-Agenda.pdf *A systematic framework for thinking about AI governance as a research problem. Identifies the key governance challenges and maps the research landscape. Useful background for understanding why governance is hard and what governance research is trying to accomplish.*
+
+### On Labor Market Effects
+
+Acemoglu, D., & Restrepo, P. (2019). Automation and new tasks: How technology displaces and reinstates labor. *Journal of Economic Perspectives, 33*(2), 3--30. https://www.aeaweb.org/articles?id=10.1257/jep.33.2.3 *The most rigorous economic framework for thinking about the labor market effects of automation --- distinguishing task displacement from employment displacement and analyzing the conditions under which automation creates or destroys employment. Essential background for understanding why the \"AI will create as many jobs as it destroys\" claim is empirically contested.*
+
+Eloundou, T., Manning, S., Mishkin, P., & Rock, D. (2023). GPTs are GPTs: An early look at the labor market impact potential of large language models. https://arxiv.org/abs/2303.10130 *An analysis of the occupational exposure to large language model capabilities --- mapping which tasks within which occupations are potentially automatable by current LLMs. The methodology and data are worth examining for how to think about task-level versus occupational-level effects.*
+
+### On Environmental Cost
+
+Patterson, D., Gonzalez, J., Hölzle, U., Le, Q., Liang, C., Munguia, L. M., \... & Dean, J. (2022). The carbon footprint of machine learning training will plateau, then shrink. *Computer, 55*(7), 18--28. https://arxiv.org/abs/2204.05149 *A careful empirical analysis of AI training energy consumption and carbon footprint, including the role of hardware efficiency improvements and renewable energy sourcing. More optimistic than some estimates; read alongside the response literature for a calibrated view.*
+
+### On Information Ecosystems
+
+Vosoughi, S., Roy, D., & Aral, S. (2018). The spread of true and false news online. *Science, 359*(6380), 1146--1151. https://doi.org/10.1126/science.aap9559 *Documents that false news spreads faster and wider than true news on social media --- the empirical foundation for the epistemic concern about engagement-optimized information systems. The finding that humans, not bots, are primarily responsible for the spread of false news is particularly important for policy design.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 15: AI at Scale --- Infrastructure, Governance, and Societal Consequence*

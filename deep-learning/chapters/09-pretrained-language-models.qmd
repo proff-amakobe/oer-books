@@ -1,0 +1,480 @@
+---
+title: "Learning from Everything"
+subtitle: "Pre-trained Language Models and the Power of Transfer"
+---
+
+## Opening Narrative
+
+Dr. Priya Mehta has spent twenty-two years studying linguistics. She has read deeply across multiple languages --- not as a native speaker of each, but as someone who has spent decades immersed in how language works: the logic of grammar, the way context shapes meaning, the patterns that make an argument feel coherent or a sentence feel off. She knows how relative clauses are structured in half a dozen languages. She understands the pragmatics of implication, the way a question can be a polite form of a command, the way a pause in conversation carries as much information as the words surrounding it.
+
+Now imagine asking Dr. Mehta to help with a legal document. She has never worked in law. She does not know the precise meaning of terms like *indemnification* or *tortfeasor*. But she is not starting from zero. She arrives with a vast and flexible understanding of how language works --- and she will be able to learn the specific patterns of legal writing far faster than someone encountering language itself for the first time. Her prior knowledge transfers. It does not transfer perfectly, and some of what she knows will need to be revised for the new domain. But the transfer is real, and it is valuable.
+
+This is the story of pre-trained language models.
+
+For the first decade of deep learning\'s success with language, the standard approach was to train a model for each task from scratch. Want to classify sentiment? Train a network on labeled reviews. Want to detect named entities? Train a separate network on annotated news articles. Want to answer reading comprehension questions? Train yet another network on question-answer pairs. Each model started with random weights. Each model learned language from the beginning.
+
+This worked well enough when you had millions of labeled examples. It worked poorly --- sometimes not at all --- when you had hundreds. And the inconvenient reality of most real-world language problems is that labeled data is expensive, slow, and scarce. Annotating 10,000 medical discharge summaries for clinical event extraction requires clinical expertise, careful quality control, and months of work. No organization building a realistic NLP system had bottomless labeled data reserves.
+
+Then a different question was asked. What if the problem of *understanding language* could be separated from the problem of *performing a task?* What if a model could spend a long time learning the deep structure of language itself --- from unlabeled text that required no annotation effort at all --- and only then be adapted to specific tasks with modest amounts of labeled data?
+
+The answer to that question produced BERT, GPT, T5, and the paradigm that now dominates the field. It is one of the most consequential ideas in the history of the discipline --- and it is what this chapter is about.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+### Remember and Understand
+
+-   Explain the pre-training and fine-tuning paradigm, including what pre-training learns and why that knowledge transfers to downstream tasks
+
+-   Describe masked language modeling and causal language modeling as pre-training objectives, and explain what reading strategy each one enforces
+
+-   Explain what emergent abilities are in large language models, and why their appearance at scale is surprising
+
+### Analyze and Evaluate
+
+-   Compare BERT, GPT, and T5 as architectural families, mapping each to the tasks it is best suited for and explaining why
+
+-   Evaluate full fine-tuning, feature extraction, and parameter-efficient fine-tuning as strategies for adapting a pre-trained model, given specific constraints on data and compute
+
+-   Assess the ethical implications of centralized pre-training pipelines --- who controls what a model learns before any task-specific training begins
+
+### Apply and Create
+
+-   Connect the encoder-only and decoder-only architectural distinction from Chapter 8 to the BERT and GPT families as its realized expression
+
+-   Select and justify a pre-trained language model for MIPDS integration, with explicit reasoning tied to your application\'s needs
+
+## Key Terms and Concepts
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                                     **Definition**
+  -------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Pre-training**                             Training a large model on massive quantities of unlabeled text using a self-supervised objective --- one that generates its own supervision signal from the structure of the data itself --- in order to develop general, reusable language representations before any task-specific training occurs.
+
+  **Fine-tuning**                              Continuing to train a pre-trained model on a smaller, labeled dataset for a specific downstream task. The pre-trained weights serve as the starting point; fine-tuning adjusts them toward task-relevant patterns while preserving the general language understanding acquired in pre-training.
+
+  **Self-supervised Learning**                 A training paradigm in which the supervision signal is derived from the data itself, without human annotation. Masked language modeling and causal language modeling are both self-supervised: the \"labels\" are parts of the original text that were hidden or held back.
+
+  **Masked Language Modeling (MLM)**           A pre-training objective in which a random subset of tokens is replaced with a mask token, and the model is trained to predict the original tokens from the surrounding context. Because the correct prediction requires understanding both what precedes and what follows the masked token, MLM forces genuinely bidirectional encoding.
+
+  **Causal Language Modeling (CLM)**           A pre-training objective in which the model is trained to predict the next token given all previous tokens. Because each prediction depends only on what came before, CLM trains a fundamentally autoregressive model --- one built to continue sequences rather than understand them holistically.
+
+  **BERT**                                     Bidirectional Encoder Representations from Transformers. An encoder-only Transformer pre-trained with masked language modeling, producing deep bidirectional representations of text. The dominant architecture for language understanding tasks: classification, tagging, reading comprehension, and semantic similarity.
+
+  **GPT**                                      Generative Pre-trained Transformer. A decoder-only Transformer pre-trained with causal language modeling, producing models that generate coherent text continuations. At sufficient scale, GPT-family models exhibit surprising generalization through in-context learning.
+
+  **T5**                                       Text-to-Text Transfer Transformer. An encoder-decoder Transformer that frames every NLP task as transforming an input text string into an output text string --- translation, summarization, classification, and question answering all expressed through the same interface.
+
+  **Encoder-Only Architecture**                A Transformer that processes input through stacked encoder layers and produces contextualized representations of each input token. Bidirectional by nature. Best suited for tasks where the full input is available and understanding it holistically is the goal.
+
+  **Decoder-Only Architecture**                A Transformer that generates output token by token using causal self-attention. Best suited for tasks where the goal is to produce a continuation or response --- generation, dialogue, code completion.
+
+  **Encoder-Decoder Architecture**             A Transformer that uses both an encoder (to understand the input) and a decoder (to generate the output), connected by cross-attention. Best suited for sequence-to-sequence tasks where input and output are in different forms.
+
+  **Transfer Learning**                        The practice of using representations learned in one context as the starting point for learning in another. In language models, this means applying the general language understanding developed during pre-training to a specific task during fine-tuning. Transfer is effective when the source and target distributions share meaningful structure.
+
+  **Catastrophic Forgetting**                  The phenomenon where fine-tuning a pre-trained model aggressively --- with too high a learning rate or too many epochs --- causes the model to overwrite the general representations acquired during pre-training. Performance on the target task may improve briefly before the model loses the generality that made it valuable.
+
+  **Full Fine-tuning**                         Updating all parameters of a pre-trained model during task-specific training. The most expressive approach --- every weight can be adjusted to the new task --- but also the most resource-intensive, and most susceptible to catastrophic forgetting if not carefully managed.
+
+  **Feature Extraction**                       Using a pre-trained model as a fixed feature extractor: the encoder\'s weights are frozen, and only a small task-specific head added on top is trained. Fast and computationally cheap, but less adaptable when the target task differs significantly from the pre-training distribution.
+
+  **Parameter-Efficient Fine-tuning (PEFT)**   Methods that fine-tune a small number of additional parameters --- inserted into or layered atop a frozen pre-trained model --- while leaving the majority of pre-trained weights unchanged. LoRA, adapters, and prompt tuning are examples. Balances expressiveness with efficiency.
+
+  **Emergent Abilities**                       Capabilities that appear in large language models above a certain parameter scale but are absent in smaller models --- not predicted by smooth extrapolation of smaller-scale performance, and often surprising when they arise. Multi-step reasoning, code generation, and in-context learning are frequently cited examples.
+
+  **In-context Learning**                      The ability of large language models to perform tasks based solely on examples provided in the input prompt, with no updates to the model\'s parameters. The model infers the task structure from the examples and generalizes to new instances without any training signal.
+
+  **Prompt Engineering**                       The practice of deliberately designing input text to guide a pre-trained model\'s behavior without modifying its weights. Effective prompting exploits the patterns a model learned during pre-training and can dramatically affect output quality.
+
+  **Foundation Model**                         A large model pre-trained on broad data at scale, intended as a starting point --- a foundation --- for a wide range of downstream tasks. The term captures both the ambition of the paradigm and its structural risk: many applications depending on a shared base that carries all of its creators\' choices and limitations.
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Why Pre-training Works --- The Fundamental Idea
+
+### The Cost of Starting from Scratch
+
+Every model you have trained or studied in this course began with the same condition: randomly initialized weights, no knowledge of the world, no understanding of the domain. Everything the model learned came from the training examples it was shown.
+
+For image classification with millions of labeled examples, this was fine. For language tasks where labeled data is scarce, it was a deep structural problem. A Transformer with hundreds of millions of parameters, trained on a few thousand labeled examples, will overfit catastrophically. There are simply not enough examples to constrain that many parameters to meaningful solutions. The model memorizes the training set without learning anything generalizable.
+
+The conventional response was regularization: dropout, weight decay, data augmentation. These help. But they are treating a symptom. The underlying issue is that the model has no prior knowledge to constrain its learning. Every parameter is equally unconstrained before the first labeled example.
+
+Now consider what would change if the model\'s weights were not random to begin with. What if, instead of random initializations, every weight already encoded something real about language --- about which words tend to appear in which contexts, about grammatical dependencies, about the semantic relationships between concepts? The model would arrive at fine-tuning with a prior. A small number of labeled examples would not need to teach language from scratch; they would only need to redirect already-rich representations toward the specific task.
+
+This is the pre-training insight. And the key to making it work is finding a training objective that requires genuine language understanding but requires no human annotation to produce its labels.
+
+### Self-supervised Objectives: Labels Hidden in the Text Itself
+
+The solution is elegant. Language, as it naturally exists, contains its own supervision signals. Take any sentence, hide some of it, and ask a model to reconstruct what was hidden. Doing this correctly requires understanding --- understanding that draws on syntax, semantics, co-reference, world knowledge, and discourse structure. The \"label\" is the original text. No human annotator is needed. The supervision emerges from the structure of language itself.
+
+This family of approaches is called **self-supervised learning**. The model is not told what is correct by a human expert; it discovers what is correct by trying to reconstruct or predict parts of its own input. The work of annotation has, in a sense, already been done --- by whoever wrote the text in the first place.
+
+Two self-supervised objectives have dominated the pre-training landscape, and they differ in a fundamental way that shapes everything downstream.
+
+## Two Ways to Learn from Text
+
+### Filling in the Blanks --- Masked Language Modeling
+
+Imagine a fill-in-the-blank exercise. You are given the sentence:
+
+*\"The patient was admitted to the \_\_\_ with severe chest pain.\"*
+
+To fill in the blank correctly, you need to read in both directions simultaneously. The word before the blank tells you the structure: \"admitted to the.\" The words after tell you the context: \"with severe chest pain.\" Together, they make \"hospital\" the obvious answer. Neither direction alone is sufficient; the correct fill requires integrating both.
+
+This is **Masked Language Modeling**, the pre-training objective at the heart of BERT. A random subset of tokens --- typically around 15% --- is replaced with a special \[MASK\] token. The model is then trained to predict the original tokens at each masked position, using the full surrounding context in both directions. Because the model must look both ways to solve the task, it is forced to build genuinely bidirectional representations of each token.
+
+The thing that makes this beautiful is the breadth of knowledge it requires. Predicting a masked token correctly demands understanding of syntax (what grammatical category fits here?), semantics (what concepts are appropriate in this context?), world knowledge (what entity names are plausible?), and discourse structure (what does the surrounding paragraph tell us about this sentence\'s content?). A model that learns to do this well across billions of sentences has absorbed something substantial about how language works.
+
+The representations that emerge from MLM pre-training are deeply contextual. The same word will have different representations in different sentences --- \"bank\" in a sentence about rivers and \"bank\" in a sentence about interest rates will produce genuinely different vectors, reflecting the different contexts in which each appears. This is a qualitative step beyond the static word embeddings of Chapter 7, where each word had exactly one representation regardless of context.
+
+### Predicting What Comes Next --- Causal Language Modeling
+
+Now consider a different exercise. You are given:
+
+*\"The company announced unexpectedly strong quarterly earnings, sending its stock price \_\_\_\"*
+
+To predict what comes next, you must also understand language deeply --- but from a different angle. You are not filling in a blank surrounded by context; you are committing to a continuation. You must understand the semantic drift of the sentence, the causal relationship implied by \"sending,\" the domain conventions of financial writing. You are reading as a writer reads mid-sentence, feeling the momentum of what has been said and choosing where it goes next.
+
+This is **Causal Language Modeling**, the pre-training objective of the GPT family. The model is trained to predict each token given all the tokens that preceded it. Nothing from the future is available. The computation is unidirectional --- left to right --- and each prediction depends only on prior context.
+
+CLM is, in a sense, the oldest language modeling objective in the field. N-gram language models, which predate neural networks, were also predicting the next word from prior context. What changes at the scale of modern Transformers is the depth of the representations that inform each prediction. A large GPT-family model predicting the next token is not pattern-matching on recent context; it is drawing on representations that encode grammar, world knowledge, common discourse patterns, and --- at sufficient scale --- something resembling commonsense reasoning.
+
+The key distinction: MLM trains bidirectional understanding; CLM trains directional prediction and generation. This distinction is not academic. It shapes what each model is good at, what it struggles with, and how it is most naturally used.
+
+## BERT --- Understanding Language Bidirectionally
+
+### The Architecture
+
+BERT --- Bidirectional Encoder Representations from Transformers, introduced by Devlin and colleagues at Google in 2018 --- is the most direct realization of the encoder-only Transformer described in Chapter 8.
+
+The model consists of a stack of Transformer encoder layers. The base variant uses 12 layers, 12 attention heads, and a model dimension of 768 --- producing approximately 110 million parameters. The large variant uses 24 layers and 1,024 dimensions, reaching 340 million parameters. Both were pre-trained on BookCorpus (800 million words of unpublished fiction) and English Wikipedia (2.5 billion words), using masked language modeling as the primary objective alongside a secondary task called next-sentence prediction.
+
+Several details of BERT\'s input format are worth understanding, because they recur throughout the encoder-only family.
+
+Every input begins with a special \[CLS\] token --- a classification token that serves no linguistic purpose in the input but whose final-layer representation is used as an aggregate summary of the entire sequence for tasks like classification. Sentence pairs (used in tasks like entailment, where you need to compare two texts) are separated by a \[SEP\] token. The model learns, during pre-training, that the \[CLS\] representation should carry information useful for whole-sequence classification tasks.
+
+This is an elegant design: rather than pooling all token representations or taking the average, BERT provides a single dedicated slot whose learned function is to summarize the input. The downstream task simply reads from that slot.
+
+### What Fine-tuning Looks Like
+
+The power of BERT is most visible in how little needs to change to adapt it to diverse tasks. Consider four different NLP tasks:
+
+**Sequence classification** (sentiment analysis, topic classification): Add a linear layer on top of the \[CLS\] token representation. Fine-tune the entire model on labeled examples. The \[CLS\] representation, already rich from pre-training, adjusts to reflect task-relevant distinctions.
+
+**Token classification** (named entity recognition, part-of-speech tagging): Add a linear layer on top of each token\'s final-layer representation. Fine-tune on labeled sequences. Every token\'s contextual representation provides the input for its own classification.
+
+**Reading comprehension** (answering questions about a provided passage): Provide both the question and passage as input, separated by \[SEP\]. Add two linear layers that predict the start and end positions of the answer span within the passage. The model\'s bidirectional representations make it effective at finding the relevant span.
+
+**Sentence pair tasks** (textual entailment, semantic similarity): Provide both sentences as input. Use the \[CLS\] representation to drive the output.
+
+In all four cases, the core architecture is identical. What changes is only the output head --- typically a single linear layer or a small classification network --- and the labeled data used to train it. This is the transfer learning value proposition made concrete: one architecture, one pre-trained checkpoint, four different tasks.
+
+### Why Bidirectionality Matters
+
+A subtle but important point about BERT is worth dwelling on. The fact that it processes context in both directions simultaneously is not a minor technical choice --- it is fundamental to what BERT is good at and where it is limited.
+
+Bidirectional encoding is ideal for tasks where the complete input is known in advance. When you are classifying a document, extracting entities from a sentence, or answering a question about a passage you already have, bidirectional context gives you the richest possible representations. You can look at every word in light of every other word before committing to any output.
+
+But bidirectional encoding makes autoregressive generation difficult. To generate text token by token, you need each new token to attend only to what has already been generated --- if you allow future tokens to influence earlier ones, you have a circular dependency that cannot be resolved during generation. BERT\'s bidirectionality, the source of its understanding power, is the reason it is not a natural text generator.
+
+This is not a limitation of the approach --- it is a design tradeoff that reflects a clear choice about what the model is for. BERT was built to understand. For generation, a different family was needed.
+
+## GPT --- Generating Language at Scale
+
+### The Architecture
+
+The GPT family --- Generative Pre-trained Transformers, developed by OpenAI beginning in 2018 --- is the other great branch of the pre-training paradigm. Where BERT is an encoder-only model pre-trained to understand, GPT is a decoder-only model pre-trained to generate.
+
+The architecture is the Transformer decoder from Chapter 8 with one modification: the cross-attention sublayer is removed, since there is no encoder to attend to. What remains is a deep stack of masked self-attention layers and feed-forward sublayers, processing tokens left to right, predicting each one from all that preceded it. The causal mask is not an add-on but a defining structural feature --- it is what makes the model autoregressive by design.
+
+Pre-training objective: predict the next token at every position in a large text corpus. The model is exposed to hundreds of billions of tokens of text. At each position, it produces a probability distribution over the vocabulary, and the training signal is how well that distribution assigns probability to the actual next token. No labels needed. No human annotation. Just text, and the model\'s attempt to predict it.
+
+The GPT family has been trained in successively larger versions: GPT (117 million parameters, 2018), GPT-2 (1.5 billion, 2019), GPT-3 (175 billion, 2020), and beyond. The progression is not merely quantitative. Something qualitatively different emerges at scale --- and understanding what that is requires understanding emergent abilities.
+
+### In-context Learning --- An Unexpected Capability
+
+When GPT-3 was released in 2020, researchers discovered that a 175-billion-parameter language model exhibited a capability that smaller models did not: it could perform tasks based on examples provided in the input prompt, without any updates to its parameters.
+
+The mechanism is called **in-context learning**, and it works like this. You structure your input as a series of examples followed by a test case:
+
+*\"Translate English to French. Apple → Pomme. Library → Bibliothèque. Hospital → \_\_\_\"*
+
+The model fills in the blank correctly --- not because it was trained to translate, and not because its weights were updated on these examples, but because it has seen enough text of this structure during pre-training to infer the pattern. The examples in the prompt are enough. No gradient descent required.
+
+This is remarkable for a specific reason: it suggests that the model has learned not just facts and language patterns, but something like a general-purpose learning mechanism. It can read a task description, understand the pattern of examples, and extend that pattern to new instances. This happens entirely in the forward pass --- in the activation of representations rather than the update of weights.
+
+Think of a colleague who you need to give a new type of task. You show them three examples: here is the input, here is the output I want. For a very capable colleague, three examples are enough. They have deep background knowledge that allows them to infer what you want from a small number of demonstrations, without needing a long training process. Large GPT-family models are doing something analogous --- drawing on representations built over hundreds of billions of training tokens to generalize from a handful of in-context examples.
+
+### Emergent Abilities --- Capabilities That Arise from Scale
+
+In-context learning is one instance of a broader phenomenon that has both excited and unsettled the AI research community: **emergent abilities** in large language models.
+
+An emergent ability is a capability that is absent in smaller models and appears --- often discontinuously --- in larger ones. It is not predicted by smooth extrapolation from smaller-scale performance. You cannot look at a model with one billion parameters struggling at a task, measure the rate of improvement, and predict when a model with one hundred billion parameters will succeed. The capability is simply not present at small scale, and then it is.
+
+Multi-step arithmetic is a studied example. Small language models fail at multi-step math problems consistently. At a certain scale threshold, models begin solving them at rates far above chance. The improvement does not happen gradually; it appears. Chain-of-thought reasoning --- the ability to produce step-by-step solutions that are more accurate than one-shot answers --- emerged similarly.
+
+The child learning to read is a useful analogy here. For a long time, a child recognizes some letters, sounds out a few words, reads individual sentences slowly. Then, at some threshold of practice and neural development, something shifts. The child is reading --- not sounding out words letter by letter, but processing meaning fluently. The capability appeared discontinuously. The foundations were being built for a long time; the emergence was sudden.
+
+What does emergence imply for how we should evaluate and deploy language models? It implies that evaluation at smaller scale may not predict behavior at larger scale. A model that shows no evidence of a capability when tested at one size may exhibit that capability --- and potentially misuse of that capability --- when scaled up. This is a genuine challenge for responsible deployment: the standard practice of testing smaller models before deploying larger ones may not give accurate advance warning of what the larger model will do.
+
+## T5 --- One Model, Every Task
+
+### The Unifying Insight
+
+By 2019, the NLP landscape had fragmented in a specific way. BERT had produced a family of encoder-only fine-tuning methods for understanding tasks. GPT had produced a family of decoder-only generation methods. Every task had its best-practice architecture, its best-practice fine-tuning recipe, its best-practice evaluation protocol. Comparing progress across tasks was difficult; expertise in one architecture did not transfer cleanly to another.
+
+The T5 paper --- \"Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer,\" from Raffel and colleagues at Google in 2019 --- proposed a different organizing principle. Every NLP task can be expressed as a transformation from one text string to another. Translation is text in one language to text in another. Classification is text to a label word. Summarization is long text to short text. Question answering is a question and passage to an answer span. If you express everything this way, you can use a single architecture for everything.
+
+T5 uses an encoder-decoder Transformer --- the full original architecture from the 2017 paper --- and reformats every task as: given this input text with a task prefix, produce this output text. A translation task might look like: input \"translate English to German: The weather is nice today\" → output \"Das Wetter ist heute schön.\" A classification task: input \"sentiment: This product exceeded all my expectations.\" → output \"positive.\" A summarization task: the article, prefixed with \"summarize:\", → the summary.
+
+The model learns, through fine-tuning on diverse tasks, to use the task prefix as an instruction. The encoder processes the full input (including the prefix), and the decoder generates the output.
+
+### What Unification Gains --- and Costs
+
+The T5 framework produces a model that can handle diverse tasks through a single interface. For applications that need to perform multiple language tasks without maintaining multiple models, this is valuable. It also makes multi-task fine-tuning natural: you can train on a mixture of tasks simultaneously, and the model benefits from the shared representations.
+
+The cost is efficiency at specialized tasks. An encoder-only model fine-tuned specifically for binary classification can be faster and lighter than T5, because the decoder and cross-attention mechanisms are unnecessary overhead for that task. T5\'s generality comes at a computational price.
+
+The framework also reveals something interesting about what language models are learning. If classification, translation, and summarization can all be expressed through the same input-output interface, perhaps the distinctions between \"understanding\" and \"generation\" tasks are less fundamental than they appear. Both require building a rich representation of the input and producing an appropriate output. The output format differs --- a label word versus a translated sentence --- but the underlying representational requirements may overlap more than the encoder-only vs. decoder-only distinction suggests.
+
+## Fine-tuning --- Adapting Pre-trained Knowledge
+
+### The Three Strategies
+
+A pre-trained language model is not an end product. It is a starting point. The process of adapting it to a specific task --- fine-tuning --- is where the general language understanding becomes task-specific capability. There are three broad strategies, and the right choice depends on your data, your compute, and how different your task is from the pre-training distribution.
+
+### Full Fine-tuning
+
+All parameters of the pre-trained model are updated during task-specific training. The model\'s weights are initialized from the pre-trained checkpoint, and gradient descent proceeds as usual on the labeled training data, adjusting every weight.
+
+This is the most expressive approach --- given enough labeled data, the model can adapt every parameter to the new task. It is also the most resource-intensive and the most susceptible to catastrophic forgetting.
+
+Catastrophic forgetting is worth understanding carefully. When you fine-tune a pre-trained model with a learning rate that is too high or for too many epochs, the model rapidly adjusts its weights toward the target task --- and in doing so, overwrites the general representations that made it valuable in the first place. The representations for \"language in general\" are replaced by representations for \"this specific labeled dataset.\" If the labeled dataset is small or non-representative, the model ends up worse than a simpler baseline.
+
+The cure is careful training: low learning rates (typically 2e-5 or lower for BERT-style models, compared to 1e-3 in standard training), a warmup schedule, and close monitoring of validation performance. Fine-tuning a large pre-trained model is fundamentally different from training a small model from scratch, and the training recipe must reflect that.
+
+### Feature Extraction
+
+The pre-trained model\'s weights are frozen --- they receive no gradient updates. A small task-specific head is added on top and trained from scratch. The pre-trained model serves as a fixed feature extractor: it converts raw text into rich representations, and the head learns to map those representations to task outputs.
+
+This approach is fast --- you are training a small head, not a large model --- and immune to catastrophic forgetting, since the pre-trained weights never change. It works well when the target task is similar to the pre-training distribution and when the frozen representations are already well-suited to the task.
+
+It works poorly when the target task requires representations that are quite different from what pre-training produced. If you freeze a model pre-trained on general English and ask it to extract chemical compound names from patents, the frozen representations may not carry the domain-specific signals needed for good performance, and no amount of clever head design can compensate.
+
+### Parameter-Efficient Fine-tuning
+
+The third approach sits between the two extremes and has become increasingly important as models have grown larger. Rather than updating all parameters (expensive) or none (limiting), parameter-efficient fine-tuning methods introduce a small number of new, trainable parameters --- while leaving the vast majority of pre-trained weights frozen.
+
+**LoRA** (Low-Rank Adaptation) is the most widely used example. The insight behind LoRA is that the weight changes needed to adapt a pre-trained model to a new task can be well-approximated by low-rank matrices. Instead of updating a large weight matrix directly, LoRA adds two small matrices whose product approximates the necessary update. The pre-trained weights are never changed; the LoRA matrices are all that trains. For a model with billions of parameters, LoRA may train fewer than one percent of them --- yet achieve results close to full fine-tuning.
+
+**Adapters** insert small bottleneck neural networks into each Transformer layer, training only those bottlenecks. **Prompt tuning** prepends learned vectors to the input, training those vectors rather than any model weights.
+
+These methods matter most at scale. When a pre-trained model has 70 billion parameters, full fine-tuning is prohibitively expensive for most practitioners. Parameter-efficient methods allow meaningful adaptation on hardware available outside the largest research laboratories --- redistributing some of the practical benefit of large models more broadly.
+
+### Choosing a Strategy
+
+The choice among these strategies is not about which is abstractly best. It is about matching the strategy to the situation.
+
+If you have substantial labeled data (tens of thousands of examples or more) and the compute for full fine-tuning, full fine-tuning typically produces the strongest results. If you have limited labeled data and your target task is close to the pre-training distribution, feature extraction with a frozen encoder can be fast and effective. If you are working with a very large model and have modest compute, parameter-efficient methods offer the best balance.
+
+The most important practical principle is this: treat fine-tuning as the continuation of training a model that has already learned a great deal, not as training a new model that happens to start from better initialization. The learning rates, schedules, and regularization strategies appropriate for fine-tuning a pre-trained model are often quite different from what you would use for training from scratch.
+
+## Emergent Abilities and What They Mean
+
+### The Phenomenon
+
+The research community expected that as language models grew larger, their capabilities would improve smoothly and predictably. More parameters, more training data, slightly better performance on benchmarks --- a steady curve of incremental progress.
+
+What happened instead was more complicated. For many capabilities, performance at small scale was flat --- essentially at the level of random guessing. Then, at a certain scale threshold, performance jumped sharply. The capability went from absent to present, without the gradual buildup that a smooth scaling curve would predict.
+
+This phenomenon --- capabilities that emerge discontinuously as a function of scale --- has been documented across dozens of tasks: multi-step arithmetic, analogical reasoning, code generation, chain-of-thought problem solving, certain forms of translation, reading comprehension requiring inference across multiple sentences. None of these capabilities was explicitly trained. None appeared in the smaller models. All appeared at sufficient scale.
+
+### Why This Is Surprising --- and Unsettling
+
+Emergence is surprising because it breaks the standard evaluation framework. The typical practice in machine learning is to develop and validate on smaller-scale experiments before deploying at larger scale. If capabilities were predictable from smaller models, this would be a reasonable safety check. Emergent capabilities violate this assumption. A capability that is absent at small scale may be present --- and potentially misused --- at large scale.
+
+It is also unsettling because the mechanisms are not fully understood. When a capability emerges in a large language model, we generally cannot point to the specific parameters or circuits responsible. The capability arises from the interaction of billions of weights, none of which was specifically designed to produce it. Debugging, auditing, and controlling emergent behavior is much harder than auditing explicit, trained-for behavior.
+
+This has practical implications for safety evaluation. If you want to know whether a large language model will produce harmful content under certain prompting conditions, testing the smaller version of the same model may not tell you. The harmful capability may not be present at small scale and may emerge only at deployment scale. The evaluation must be done at scale --- which means the evaluation is expensive and, for the largest models, accessible only to the organizations that built them.
+
+### The Interpretive Caution
+
+One note of caution is worth adding. The study of emergent abilities has become contested. Some researchers have argued that what looks like discontinuous emergence is partly an artifact of evaluation metrics --- that if you use a different way of measuring capability, the jumps look smoother. The debate is ongoing, and the scientific picture is not fully settled.
+
+What is not contested is that large language models exhibit capabilities that were not present in smaller versions, that these capabilities were not explicitly trained, and that predicting them in advance from smaller-scale experiments is difficult. Whatever the precise shape of the scaling curve, the practical implications for evaluation and deployment hold.
+
+## The Ethics of Pre-training --- Who Shapes What Models Know
+
+### The Data Is Not Neutral
+
+Every pre-trained language model inherits the characteristics of its training corpus. This is not an unfortunate side effect of scale --- it is the mechanism by which pre-training works. The model learns patterns from text, and the text carries the values, biases, assumptions, and blind spots of whoever wrote it.
+
+BERT was pre-trained on BookCorpus and English Wikipedia. BookCorpus overrepresents romance and young adult fiction. English Wikipedia is written predominantly by contributors who are male, Western, and English-speaking; it covers some topics exhaustively and others barely at all; it reflects the cultural prominence of certain histories, certain geographies, certain ways of framing events. These patterns are not incidental. They are encoded in the representations --- in what word associations the model learns, in what entities it treats as default, in what contexts feel familiar or strange to the model.
+
+A model pre-trained on this corpus will perform better on text that resembles it and worse on text that differs. A named entity recognition system fine-tuned on top of such a model may handle Western personal names reliably and African or East Asian names less so --- not because the fine-tuning data was biased, but because the pre-training representations were. And because fine-tuning does not start from scratch, fine-tuning cannot fully undo what pre-training encoded.
+
+### The Foundation Model Dependency
+
+There is a structural risk in the foundation model paradigm that deserves explicit attention.
+
+When many downstream applications share the same pre-trained base, they share the same biases. A sentiment analysis tool, a clinical note summarizer, a resume screening system, and a content moderation classifier --- if all four are fine-tuned from the same foundation model --- will all inherit the same pre-training distribution\'s characteristics. A bias present in the pre-training corpus propagates not to one application but to all applications built on that foundation.
+
+The pre-training step is also the step where the most consequential decisions are made, and it is the step furthest from downstream application developers. If you are fine-tuning a foundation model for clinical NLP, you probably did not design the pre-training corpus. You probably do not have complete documentation of what it contains. You are inheriting decisions you did not make.
+
+This is not an abstract concern. Research has documented that models pre-trained on common web corpora associate certain demographic groups with certain valenced attributes, that they produce outputs that differ in quality across languages and dialects in ways that track the distribution of training data, and that these patterns persist across fine-tuning. The word \"doctor\" tends to be more strongly associated with male pronouns in standard English-language models; the word \"nurse\" tends toward female associations. These are not properties of the task --- they are properties of the pre-training corpus, reflected in the representations that every downstream application inherits.
+
+### Who Is Responsible?
+
+The organizational structure of the foundation model paradigm distributes the consequences of pre-training decisions while concentrating the power to make them. The organizations that control pre-training control what the model knows and believes before any task-specific learning begins. Those organizations make decisions about corpus selection, filtering, de-duplication, and toxicity reduction that affect every application built on top.
+
+This raises questions that do not have settled answers, but that are worth asking explicitly. What disclosure obligations should foundation model developers have regarding training data? Should there be audit requirements --- independent review of pre-training corpus content and bias properties --- before models are made publicly available? When a downstream application causes harm through a bias inherited from pre-training, who bears responsibility: the application developer who fine-tuned, or the foundation model developer who pre-trained?
+
+These questions are being actively debated in policy circles. The technical community\'s role is not to answer them unilaterally, but to characterize the technical facts clearly enough that the policy debate can be informed rather than speculative. What we can say clearly: the pre-training corpus is a design choice, it encodes values and biases, those values and biases propagate downstream, and the organizations making those choices are responsible for understanding and disclosing their effects.
+
+## Hands-On Exploration
+
+### Overview
+
+A single pre-trained model can be adapted to remarkably diverse tasks. This exploration builds direct intuition for what changes during fine-tuning and what stays the same --- and confronts you with the distribution shift problem that makes deploying pre-trained models in novel domains risky.
+
+**Time estimate:** 45--60 minutes **Tools:** Google Colab (provided notebook), HuggingFace Transformers library. No training required; all models are pre-loaded.
+
+### Part 1 --- Three Tasks, One Base Model (20 minutes)
+
+The notebook provides three versions of the same pre-trained encoder, each fine-tuned for a different task:
+
+-   Version A: fine-tuned for sentiment classification on movie reviews
+
+-   Version B: fine-tuned for named entity recognition on news articles
+
+-   Version C: fine-tuned for textual entailment on sentence pairs
+
+Run each of the following sentences through all three models and record the outputs:
+
+*\"Dr. Sarah Chen at Stanford Medical Center reported that the treatment showed promising early results.\"*
+
+*\"The company\'s quarterly earnings disappointed investors, sending shares down 12% in after-hours trading.\"*
+
+*\"I found the film\'s third act genuinely moving --- the performances carried the weak script.\"*
+
+For each input-model combination, record what the model produces. Think about: for each input, which model\'s output seems most sensible given the task it was trained for? For which inputs does any model produce something that surprises you?
+
+### Part 2 --- Distribution Shift in Practice (15 minutes)
+
+Take Version A --- the sentiment classifier trained on movie reviews --- and feed it language from a medical context:
+
+*\"The patient responded poorly to the initial treatment regimen.\"* *\"Recovery was slow but ultimately the outcome was favorable.\"* *\"Side effects were mild and the patient tolerated the procedure well.\"* *\"The intervention was contraindicated given the patient\'s prior history.\"*
+
+Does the model\'s sentiment classification remain sensible? Write down the model\'s outputs and your assessment of whether they are meaningful in a medical context.
+
+Now reflect: what is the model actually doing when it classifies these sentences? Is it detecting sentiment in the clinical sense, or pattern-matching on surface features that correlate with sentiment in movie reviews?
+
+### Part 3 --- Prompting a Generative Model (10 minutes)
+
+Using a provided small GPT-style model, run the same factual question in three formats:
+
+-   Direct question: *\"What causes thunderstorms?\"*
+
+-   Instruction format: *\"Explain briefly: What causes thunderstorms?\"*
+
+-   Few-shot format with two prior question-answer pairs before the question
+
+Record the three outputs. Do they differ in length, style, or accuracy? What does this tell you about the relationship between prompt structure and model output?
+
+### Reflection (200--300 words)
+
+\"In Part 2, you observed that a model fine-tuned on movie reviews produces outputs when given medical text --- but those outputs may be misleading. The model does not know that it is outside its training distribution; it simply processes whatever it is given and produces a prediction.
+
+Think about your own MIPDS application. What is the training distribution of the pre-trained model you have chosen? Where is the language your system will encounter in deployment likely to diverge from that distribution? What would it look like for your system to produce confidently wrong outputs --- predictions that seem plausible but are wrong in ways that matter for your use case? What would you put in place to detect this?\"
+
+### Case Study: BERT and the GLUE Benchmark --- 2018
+
+### The Problem
+
+By 2018, NLP research faced a coordination problem. Dozens of language understanding tasks existed --- sentiment analysis, textual entailment, co-reference resolution, reading comprehension, semantic similarity --- each with its own dataset, its own evaluation metric, and its own community of researchers pushing incremental improvements. Progress on one task rarely transferred to others. There was no way to know whether a new model represented genuine advances in language understanding or merely overfitting to the idiosyncrasies of one benchmark.
+
+The General Language Understanding Evaluation (GLUE) benchmark was designed to address this: nine diverse NLP tasks evaluated together, producing a single aggregate score. A model that scored well on GLUE had demonstrated breadth, not just specialization in one narrow problem.
+
+### The Impact
+
+BERT, released in October 2018, surpassed the previous GLUE state-of-the-art by a substantial margin --- improving on individual tasks by amounts that, in some cases, exceeded the total progress made over the preceding several years of specialized research. On the Stanford Question Answering Dataset, BERT matched human performance. On textual entailment tasks that had resisted improvement for years, BERT\'s fine-tuned performance was decisively better than any prior approach.
+
+The field responded with something close to consensus: pre-training with masked language modeling, followed by task-specific fine-tuning, was the new default paradigm. Within a year, virtually all published NLP research either used BERT as a baseline or built directly on BERT-family models.
+
+### The Tradeoffs
+
+BERT\'s pre-training required significant compute: the base model trained on 16 TPUs for four days; the large model required 64 TPUs for the same duration. Fine-tuning was accessible --- a researcher with a single GPU could fine-tune BERT for a specific task in hours --- but the pre-training checkpoint that made fine-tuning powerful was produced by a single organization, on hardware accessible to almost no one else.
+
+This created a structural dependency. The entire NLP community was, to a large extent, building on one organization\'s pre-training decisions: Google\'s choices about corpus selection, tokenization, pre-training objective, and model scale became the de facto starting point for a field\'s worth of downstream research and applications. When papers cited \"BERT,\" they were citing not just an architecture but a specific trained artifact produced under specific conditions that most of the field could not replicate.
+
+BERT\'s 512-token maximum sequence length was a persistent practical limitation. Documents longer than roughly one page required chunking, with various strategies for combining the representations of multiple chunks --- each with its own failure modes for tasks requiring understanding of long-range document structure.
+
+### The Ethical Dimension: Bias by the Billion
+
+BERT\'s training corpus --- BookCorpus and English Wikipedia --- is not a neutral sample of human language. BookCorpus skews toward certain fiction genres. Wikipedia is authored predominantly by English-speaking men in Western countries, covering some histories comprehensively and others sparsely, framing events through lenses that reflect its contributor base.
+
+These biases were absorbed into BERT\'s representations before any fine-tuning occurred. Research subsequent to BERT\'s release documented measurable associations: male pronouns more strongly associated with professional and authoritative contexts, female pronouns more strongly associated with domestic and nurturing contexts. Name-based associations that reflected the cultural demographics of the training corpus. Geographic and cultural knowledge distributed unevenly across topics.
+
+Because BERT became the foundation for thousands of downstream applications --- in healthcare, legal technology, hiring, content moderation, and education --- these pre-training biases propagated into deployed systems at scale. A hiring tool fine-tuned on BERT might learn to score resumes better on task-relevant features, but it arrives at that task with representations that already encode correlations between demographic markers and professional outcomes derived from the training corpus.
+
+This is the practical consequence of the foundation model paradigm: centralized pre-training decisions have distributed effects that downstream developers neither control nor often fully understand.
+
+## Chapter Summary
+
+Pre-training and fine-tuning represent the dominant paradigm of modern natural language processing --- an approach that separates the general problem of understanding language from the specific problem of performing a task.
+
+Pre-training uses self-supervised objectives to learn general language representations from massive, unlabeled text corpora. The two foundational objectives are masked language modeling, which trains bidirectional understanding by requiring the model to fill in masked tokens from context in both directions, and causal language modeling, which trains generative capability by requiring the model to predict each token from prior context only. The choice of objective shapes the resulting model\'s strengths.
+
+BERT is the canonical encoder-only model pre-trained with masked language modeling, producing rich bidirectional representations ideal for understanding tasks. Its fine-tuning flexibility --- the same pre-trained encoder adapted to classification, tagging, reading comprehension, and similarity tasks through minimal architectural changes --- demonstrated the power of the paradigm and reshaped the field.
+
+GPT is the canonical decoder-only model pre-trained with causal language modeling, producing models designed for generation. At sufficient scale, GPT-family models exhibit in-context learning --- the ability to perform tasks from examples in the input prompt without any parameter updates --- and a range of emergent abilities that were not present in smaller versions of the same architecture.
+
+T5 unifies diverse NLP tasks under a text-to-text framework using an encoder-decoder architecture, framing every task --- classification, translation, summarization, question answering --- as transforming an input string into an output string.
+
+Fine-tuning strategies range from full fine-tuning (all parameters updated, most expressive, most resource-intensive) through frozen feature extraction (fast, limited adaptability) to parameter-efficient methods like LoRA (small number of new parameters, accessible at scale). The right strategy depends on data availability, compute budget, and the distance between the pre-training and target distributions.
+
+Emergent abilities --- capabilities that appear discontinuously in large models but are absent in smaller ones --- complicate the standard practice of validating at small scale before deploying at large scale. They also underscore how much remains poorly understood about why large language models behave as they do.
+
+The ethics of pre-training are not peripheral to the paradigm but structural to it. The training corpus is a design choice that encodes values, biases, and coverage decisions. Those choices propagate through every downstream application built on the foundation. Understanding them is not optional for responsible practitioners.
+
+## Review Questions
+
+1.  Pre-training on text prediction produces models capable of reading comprehension, sentiment analysis, and factual question answering. Does successfully predicting the next word constitute *understanding* language, or only *modeling* it? Is there a meaningful distinction, and does it matter practically?
+
+2.  BERT reads text bidirectionally; GPT reads text causally, left to right. Is there something about bidirectional processing that makes it better suited to understanding, or is this a contingent outcome of how each was trained? Could you imagine a GPT-style model trained differently that would be as good at reading comprehension as BERT?
+
+3.  Emergent abilities appear discontinuously at scale --- absent below a threshold, present above it. What does this pattern suggest about how AI systems should be tested before deployment? Is it adequate to evaluate a smaller version of a model before deploying the larger one? What evaluation practices would you want to see adopted?
+
+4.  In-context learning allows users to shape a model\'s behavior through prompt design --- without the model developer\'s knowledge or control. What are the security implications? What are the accessibility implications --- does the ability to craft effective prompts confer an advantage that not all users share equally?
+
+5.  BERT\'s training data included English Wikipedia, written predominantly by Western, English-speaking men. A hiring tool fine-tuned on BERT will inherit representations shaped by that corpus. Where should legal and ethical responsibility lie when such a system produces discriminatory outcomes --- with the organization that pre-trained BERT, the organization that fine-tuned it, or the organization that deployed it in hiring decisions?
+
+6.  Foundation models are trained once and used by many. This creates efficiency, but it also concentrates consequential decisions in a small number of organizations. Should there be governance mechanisms --- disclosure requirements, auditing, independent oversight --- that apply specifically to foundation model pre-training? What would you want those mechanisms to look like?
+
+7.  You have selected a pre-trained language model for your MIPDS system. Conduct a brief inventory: what is the training corpus of your chosen model? What languages are represented? What time period does the data cover? What domains are over- or under-represented? Given your specific application, where are the gaps most likely to cause problems?
+
+## Further Reading
+
+### Foundational Papers
+
+Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional transformers for language understanding. In *Proceedings of NAACL-HLT 2019* (pp. 4171--4186). https://arxiv.org/abs/1810.04805 *The BERT paper. Sections 3 (model architecture) and 4 (pre-training procedure) are essential. Pay particular attention to how fine-tuning is described for different task types --- the minimal architectural changes required are what demonstrate the transfer learning value proposition most clearly.*
+
+Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., \... & Amodei, D. (2020). Language models are few-shot learners. In *Advances in Neural Information Processing Systems, 33*, 1877--1901. https://arxiv.org/abs/2005.14165 *The GPT-3 paper. The introduction and the in-context learning sections are particularly worth reading closely. The paper\'s discussion of emergent capabilities at scale shaped a field\'s understanding of what large language models can do --- and raised the questions about evaluation and deployment that this chapter addresses.*
+
+Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S., Matena, M., \... & Liu, P. J. (2020). Exploring the limits of transfer learning with a unified text-to-text transformer. *Journal of Machine Learning Research, 21*(140), 1--67. https://arxiv.org/abs/1910.10683 *The T5 paper. The text-to-text framing section is worth reading as a conceptual argument, not just a technical description. The systematic ablation studies comparing different architectures, pre-training objectives, and data sources make this one of the most informative papers on what actually matters in the pre-training paradigm.*
+
+### For Conceptual Depth
+
+Bommasani, R., Hudson, D. A., Aditi, E., Altman, R., Arora, S., Sydney, G., \... & Liang, P. (2021). On the opportunities and risks of foundation models. *Stanford CRFM Report*. https://arxiv.org/abs/2108.07258 *A comprehensive treatment of the foundation model paradigm --- what it enables, what risks it creates, and what governance mechanisms might apply. Long but highly readable; individual sections on bias, misuse, and economic concentration are relevant to this chapter\'s ethical discussion.*
+
+Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., \... & Chen, W. (2022). LoRA: Low-rank adaptation of large language models. In *Proceedings of ICLR 2022*. https://arxiv.org/abs/2106.09685 *The LoRA paper. The introduction clearly explains the motivation for parameter-efficient fine-tuning; the method is technically elegant and the paper is readable at a conceptual level without requiring deep mathematical background.*
+
+Wei, J., Tay, Y., Bommasani, R., Raffel, C., Zoph, B., Borgeaud, S., \... & Fedus, W. (2022). Emergent abilities of large language models. *Transactions on Machine Learning Research*. https://arxiv.org/abs/2206.07682 *The paper that systematized the study of emergent abilities. Read alongside the response by Schaeffer et al. (2023) --- \"Are emergent abilities of large language models a mirage?\" --- for a sense of how contested this interpretation remains and why the methodological debate matters for deployment decisions.*
+
+### On Bias and Pre-training
+
+Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? In *Proceedings of FAccT 2021* (pp. 610--623). https://dl.acm.org/doi/10.1145/3442188.3445922 *Essential reading for anyone working with large pre-trained language models. The paper\'s analysis of training data curation, environmental costs, and downstream bias amplification is directly relevant to this chapter\'s ethical discussion and provides a framework for thinking about the responsibilities of pre-training organizations.*
+
+*Introduction to Deep Learning \| Second Edition \| Chapter 9: Learning from Everything --- Pre-trained Language Models and the Power of Transfer*

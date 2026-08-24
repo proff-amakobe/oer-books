@@ -52,6 +52,11 @@ jobs:
           quarto render
           cd ..
 
+          # ---- Deep Learning Book (HTML is the deployed edition) ----
+          cd deep-learning
+          quarto render --to html
+          cd ..
+
           
 
           # ---- Prepare public directory ----
@@ -72,6 +77,10 @@ jobs:
           # Copy Artificial Intelligence Book
           mkdir -p public/artificial-intelligence
           cp -r artificial-intelligence/_book/* public/artificial-intelligence/
+
+          # Copy Deep Learning Book
+          mkdir -p public/deep-learning
+          cp -r deep-learning/_book/* public/deep-learning/
 
           echo "----- Deployed tree -----"
           ls -R public

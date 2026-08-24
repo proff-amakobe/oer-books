@@ -1,0 +1,486 @@
+---
+title: "Visual Tasks Beyond Classification"
+subtitle: "Detection, Segmentation, and the Backbone as Universal Tool"
+---
+
+## Opening Narrative
+
+### The Doctor Who Could Not Point
+
+Imagine a radiologist sitting in front of a chest X-ray. She does not simply decide that the image is \"abnormal\" and move on. She looks at the upper left quadrant: there, a faint opacity the size of a thumbprint. She traces its irregular border. She estimates its distance from the pleural wall. She decides whether it is a nodule or an artifact, and if a nodule, whether it warrants a follow-up scan or immediate referral. Her diagnosis is not a single label --- it is a map.
+
+For several years after AlexNet\'s 2012 triumph, the dominant framing of deep learning as a vision technology was essentially this: given an image, predict a label. Dog or cat. Benign or malignant. Fraudulent or legitimate. The whole image goes in; one answer comes out. This framing was remarkably powerful for a wide class of problems. It was also severely limited for the problems that mattered most.
+
+Real-world vision tasks almost never ask \"what is in this image?\" in isolation. They ask \"where is it?\" They ask \"which pixels belong to it?\" They ask \"how many are there, and can I count them individually?\" A self-driving car does not need to know that a street scene contains pedestrians --- it needs to know where each pedestrian is, how large they are, and how fast they appear to be moving. A satellite system monitoring agricultural fields does not need a single crop-health label --- it needs a pixel-level map showing which regions are stressed and which are thriving. A surgical assistant does not need to know that surgical instruments are present in a frame --- it needs to distinguish the scalpel from the retractor from the suture.
+
+The architectures we studied in Chapter 4 --- ResNet, EfficientNet, Vision Transformers --- are powerful at the first question. This chapter is about the second, third, and fourth. It is about what happens when you need the network not just to recognize, but to point.
+
+The story of how researchers extended CNNs into these richer tasks is, in its way, as creative and consequential as the story of how they made CNNs deep in the first place. The same backbones we studied last week --- the same ResNet-50 you loaded for the MIPDS system\'s classification head --- turn out to be the foundation for everything we will study here. What changes is what gets built on top of them, and how the features they extract are used.
+
+By the end of this chapter, the MIPDS system will gain a significantly more sophisticated visual understanding: not just the ability to classify what it sees, but the ability to locate objects within scenes, segment meaningful regions from background, and produce the kind of rich spatial feature representations that will be essential when we connect the visual system to language in Chapter 10.
+
+## Learning Objectives
+
+After completing this chapter, you will be able to:
+
+1.  Explain the conceptual and architectural difference between image classification, object detection, and image segmentation --- including when each framing is appropriate and what each requires from a model.
+
+2.  Describe the core components of object detection systems: bounding boxes, anchor boxes, Intersection over Union (IoU), and Non-Maximum Suppression (NMS).
+
+3.  Explain the single-shot detection approach used by the YOLO family of models, and articulate the tradeoff between speed and accuracy that motivates its design.
+
+4.  Describe the Feature Pyramid Network and explain why multi-scale feature extraction is necessary for detecting objects of different sizes.
+
+5.  Distinguish between semantic segmentation (classifying every pixel into a category) and instance segmentation (distinguishing individual object instances), and explain the architectural strategies --- fully convolutional networks, encoder-decoder designs like U-Net, and Mask R-CNN --- used to achieve each.
+
+6.  Explain how a pre-trained CNN backbone functions as a universal feature extractor and how its output feature maps serve as the input for detection and segmentation heads.
+
+7.  Interpret standard evaluation metrics for dense prediction tasks: mean Average Precision (mAP), IoU thresholds, and precision-recall curves.
+
+8.  Reason about the ethical implications of real-world detection and segmentation systems, particularly in surveillance, medical, and public safety contexts.
+
+## Key Terms and Concepts
+
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Term**                                  Plain-Language Definition
+  ----------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Object Detection**                      The task of identifying where objects are in an image by predicting bounding boxes (rectangular regions) and class labels for each detected object.
+
+  **Bounding Box**                          A rectangular region defined by four values --- typically the x and y coordinates of the top-left corner plus the box\'s width and height --- that encloses a detected object.
+
+  **Anchor Box**                            A set of predefined bounding box shapes and sizes used as reference templates. During detection, the network predicts adjustments to these anchors rather than absolute box coordinates, which simplifies the learning problem.
+
+  **Intersection over Union (IoU)**         A metric measuring overlap between two bounding boxes: the area of their intersection divided by the area of their union. IoU = 1.0 means perfect overlap; IoU = 0 means no overlap at all.
+
+  **Non-Maximum Suppression (NMS)**         A post-processing step that resolves duplicate detections: when multiple bounding boxes overlap substantially and predict the same class, only the one with the highest confidence score is kept.
+
+  **Confidence Score**                      A value between 0 and 1 assigned by a detection model to each predicted box, indicating how certain the model is that an object of the predicted class is present inside that box.
+
+  **Single-Shot Detector (SSD)**            A detection architecture that predicts bounding boxes and class labels at multiple scales in a single forward pass through the network, without a separate region proposal stage.
+
+  **YOLO (You Only Look Once)**             A family of single-shot detection models that divide the image into a grid and predict boxes and classes from each grid cell simultaneously, trading some accuracy for very high inference speed.
+
+  **Feature Pyramid Network (FPN)**         An architectural addition to a backbone CNN that combines feature maps from multiple depths --- early layers with fine spatial detail, deep layers with rich semantic content --- to enable detection at multiple scales simultaneously.
+
+  **Semantic Segmentation**                 The task of assigning a class label to every pixel in an image. All pixels belonging to the same category (e.g., road, sky, car) receive the same label, with no distinction between individual instances.
+
+  **Instance Segmentation**                 A more fine-grained task that both assigns class labels to each pixel and distinguishes between separate instances of the same class --- for example, labeling each individual pedestrian separately rather than all pedestrians as one mass.
+
+  **Fully Convolutional Network (FCN)**     A neural network architecture for dense prediction that replaces the fully connected layers of a classifier with convolutional layers, enabling pixel-level output maps rather than single classification vectors.
+
+  **Encoder-Decoder Architecture**          A network design in which an encoder (typically a CNN backbone) progressively compresses the input into a compact representation, and a decoder progressively upsamples that representation back to full spatial resolution for dense prediction.
+
+  **Skip Connections (in Segmentation)**    Connections in encoder-decoder networks that route feature maps from encoder layers directly to the corresponding decoder layers. These carry fine spatial detail that would otherwise be lost during downsampling.
+
+  **U-Net**                                 A seminal encoder-decoder architecture for biomedical image segmentation, characterized by symmetric encoder and decoder branches connected by skip connections at every resolution level.
+
+  **Mask R-CNN**                            An extension of the Faster R-CNN detection framework that adds a parallel branch predicting a pixel-level segmentation mask for each detected object, enabling instance segmentation.
+
+  **Region Proposal Network (RPN)**         A small network that scans the backbone feature map and proposes candidate object regions (likely bounding boxes) for further classification and refinement.
+
+  **mAP (mean Average Precision)**          The standard evaluation metric for object detection: computed by averaging the precision-recall curve for each class across all IoU thresholds and then averaging across all classes.
+
+  **Upsampling / Transposed Convolution**   The operation that increases spatial resolution in a decoder --- effectively the reverse of pooling. Can be implemented as bilinear interpolation followed by convolution, or as a learned transposed convolution (sometimes called a deconvolution).
+
+  **Backbone**                              In detection and segmentation systems, the pre-trained CNN (e.g., ResNet-50) that extracts feature representations from the raw image. The backbone\'s output feeds into task-specific heads.
+
+  **Detection Head**                        The part of a detection model built on top of the backbone that predicts bounding box coordinates and class probabilities. The backbone extracts features; the head interprets them for the detection task.
+
+  **Segmentation Head**                     The part of a segmentation model built on top of the backbone (or encoder) that produces per-pixel class predictions. Often an FPN plus a simple convolutional decoder.
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Beyond the Label --- Three Questions Vision Must Answer
+
+### 1.1 What Classification Cannot Tell You
+
+When a neural network performs image classification, it collapses an entire image into a single vector, passes that vector through a softmax layer, and produces a probability distribution over categories. The winner is the prediction. This is a beautifully simple formulation, and for many problems it is exactly right. Determining whether a skin lesion is malignant. Deciding whether an email attachment is a spam image. Routing a scanned document to the correct department. In each of these cases, the whole-image label is the answer you need.
+
+But consider what the radiologist in our opening narrative was actually doing. She was not answering \"is this image abnormal?\" She was answering a compound question: \"where is the opacity, how large is it, what are its borders like, and what is its most probable cause?\" These are spatial questions. They require the network to preserve and interpret spatial information rather than collapsing it away.
+
+Most high-value computer vision applications are, at their core, spatial questions. This chapter introduces the three fundamental framings:
+
+-   **Image Classification:** What is the dominant subject of this image? (Whole-image label, no spatial output)
+
+-   **Object Detection:** Where are the objects in this image, what classes do they belong to, and how confident are we? (Bounding boxes + class labels + scores)
+
+-   **Image Segmentation:** Which class does each pixel belong to? (Dense pixel-level prediction map)
+
+Each framing is strictly more demanding than the previous. Classification produces one vector. Detection produces a variable-length list of boxes. Segmentation produces an output the same size as the input image. And yet, remarkably, all three share the same foundational technology: the pre-trained CNN backbone we studied in Chapter 4.
+
+### 1.2 The Common Foundation: Feature Extraction
+
+Recall from Chapter 4 that when we use transfer learning, we strip the classification head from a ResNet-50 and use only the backbone --- the convolutional layers that transform a raw image into a rich, spatially-organized set of feature maps. For classification, we then attach a global average pooling layer that collapses these feature maps into a single vector. The spatial structure is discarded.
+
+For detection and segmentation, we do the opposite: we preserve that spatial structure and build heads that interpret it directly. The feature maps produced by ResNet-50\'s final convolutional layer are not just intermediate computations on the way to a classification score --- they are a compressed, semantically-rich representation of the image\'s spatial structure. Every position in a deep feature map corresponds to a region in the original image. Every channel encodes a different learned feature. This two-dimensional spatial structure is exactly what detection and segmentation heads need.
+
+This is the central insight of this chapter: the backbone is not a classification machine. It is a feature extraction machine. Classification, detection, and segmentation are all different ways of reading the same underlying representation. This understanding will become critical in Chapter 10, when we combine visual features with language representations to build multimodal systems.
+
+## Object Detection --- Finding Things in Images
+
+### 2.1 The Detection Problem, Precisely Stated
+
+Object detection is harder than classification for three compounding reasons. First, there may be any number of objects in an image --- one, ten, zero, or a hundred. The output is variable-length, which does not fit naturally into the fixed-size vector a neural network typically produces. Second, you need to localize each object --- predict not just what it is but exactly where it is, usually as a bounding box. Third, objects appear at dramatically different scales: a car seen from a helicopter and a car seen from ten feet away differ by orders of magnitude in pixel coverage.
+
+Early approaches to this problem were multi-stage pipelines that first generated candidate regions, classified each region, and then refined the locations. These worked, but they were slow --- too slow for real-time applications. The breakthrough that made modern detection practical was the realization that you could do all of this in a single pass through the network.
+
+### 2.2 The Language of Detection: Boxes, Anchors, and Overlap
+
+### Bounding Boxes
+
+A bounding box is a rectangle defined by four numbers. The most common parameterization uses the center coordinates (cx, cy), width (w), and height (h) of the box. During training, the model learns to predict these four numbers for each detected object. During inference, those numbers define the rectangular region claimed to contain the object.
+
+The challenge is that the model must predict these numbers without knowing in advance how many objects are in the image or where they are. The solution is to pre-define a large set of candidate boxes --- anchors --- and ask the model to adjust them.
+
+### Anchor Boxes: The Template System
+
+Rather than predicting absolute box coordinates from scratch, detection models define a set of anchor boxes --- templates of different aspect ratios and sizes --- at each position in the feature map. At training time, each anchor is assigned to the ground-truth object it overlaps most. The model learns to predict four offsets (adjustments to the anchor\'s center and dimensions) plus a class probability distribution.
+
+This is a powerful simplification: instead of learning to predict \"there is a wide, flat box at position (340, 210),\" the model learns to predict \"the anchor of shape 2:1 at grid position (3,4) needs to shift left by 12 pixels and grow 20% taller.\" Corrections are far easier to learn than absolute coordinates --- a principle that will remind you of residual learning from Chapter 4.
+
+At inference time, a detection model produces thousands of candidate boxes --- one for each anchor at each position in the feature map. Most of these will be low-confidence predictions. Non-Maximum Suppression (NMS) cleans this up: if two boxes of the same class overlap substantially (measured by IoU), only the more confident one is kept.
+
+### Intersection over Union: The Geometry of Overlap
+
+IoU is the universal currency of detection evaluation. Given two boxes A and B:
+
+IoU = Area(A ∩ B) / Area(A ∪ B)
+
+An IoU of 1.0 means the boxes are identical. An IoU of 0 means they do not overlap at all. During training, an anchor is considered a positive match for a ground-truth box if their IoU exceeds a threshold (commonly 0.5). A detection is considered correct at evaluation time under the same criterion.
+
+IoU is also used to set the stringency of evaluation benchmarks. COCO evaluates at IoU thresholds from 0.5 to 0.95, averaging the results --- penalizing models that detect the right objects but localize them imprecisely.
+
+### 2.3 YOLO: You Only Look Once
+
+The YOLO (You Only Look Once) family of models represents one of the most consequential design philosophies in detection: the conviction that a detection model should be simple, fast, and unified --- processing the image exactly once rather than in multiple stages.
+
+### The Core Idea
+
+YOLO divides the input image into an S × S grid (for example, 13 × 13). Each grid cell is responsible for detecting objects whose center falls within that cell. For each cell, the model predicts B bounding boxes (each with four offsets and a confidence score) and C class probabilities. The entire prediction is produced as a single tensor in a single forward pass.
+
+Analogy: Imagine assigning a team of inspectors to a building by dividing the floor plan into a grid and assigning one inspector to each zone. Each inspector is responsible for reporting anything notable in their zone. The YOLO architecture does exactly this with image regions. Each grid cell is an inspector. The feature map at that grid position is everything the inspector knows about their zone. Their job is to report whatever they find --- up to B candidates, with confidence scores.
+
+### The Speed-Accuracy Tradeoff
+
+YOLO\'s single-pass design makes it dramatically faster than two-stage methods. The original YOLOv1 processed images at 45 frames per second --- fast enough for real-time video. Two-stage methods of the era ran at 5-7 fps. This speed came at a cost: YOLO\'s grid structure means it struggles with small objects and with multiple objects whose centers fall in the same grid cell.
+
+Subsequent versions of YOLO addressed these limitations systematically. YOLOv2 introduced anchor boxes and multi-scale prediction. YOLOv3 added predictions at three different feature map scales using a primitive feature pyramid. YOLOv4 and YOLOv5 incorporated a wider set of training techniques --- mosaic augmentation, label smoothing, learning rate warm-up --- alongside architectural refinements. Modern YOLO variants (v8, v9, v10) have closed much of the accuracy gap with two-stage methods while maintaining near-real-time performance.
+
+The practical lesson: if your application requires real-time inference --- video surveillance, autonomous driving, live sports analysis --- the YOLO family should be your starting point. If maximum accuracy at any computational cost is the requirement --- medical imaging, satellite analysis, forensic examination --- two-stage methods with FPN backbones are typically preferred.
+
+### 2.4 Feature Pyramid Networks: Seeing at Every Scale
+
+One of the most persistent challenges in object detection is scale variance. In a single image, a relevant object might occupy 10 pixels or 10,000. A detector designed to find large objects will miss small ones; a detector scaled for small objects will be overwhelmed by large ones. This is not a solvable problem by making the model larger or training longer --- it is a structural problem about where in the network different scales of information live.
+
+### The Insight
+
+In a deep CNN backbone like ResNet-50, early layers produce feature maps with high spatial resolution (many pixels) but low semantic richness (simple edge detectors). Deep layers produce feature maps with low spatial resolution (many pooling operations have compressed the map) but high semantic richness (the features represent complex objects and parts). Neither extreme is ideal for detection across scales. Small objects need the high resolution of early layers to be localized accurately. Large objects need the semantic depth of late layers to be classified correctly.
+
+A Feature Pyramid Network (Lin et al., 2017) solves this by fusing information from multiple levels of the backbone. The backbone\'s feature maps at different resolutions form a bottom-up pyramid. A top-down pathway then propagates rich semantic information from the deepest, most abstract level back toward the shallower, higher-resolution levels --- using lateral connections that add the two signal sources at each level.
+
+The result is a set of feature maps at multiple resolutions, each rich in both spatial detail and semantic content. Detection heads are attached at every level of this pyramid, each responsible for objects of a particular scale. Large anchors at the low-resolution, high-semantic levels catch large objects. Small anchors at the high-resolution levels catch small ones.
+
+Analogy: Imagine an urban planning team reviewing a city at multiple zoom levels simultaneously --- satellite view showing city-wide patterns, aerial view showing neighborhood structure, street view showing building details. An FPN is that multi-resolution review system. Each level of the pyramid looks at the city differently, and crucially, the street-level view is informed by what the satellite view already understood.
+
+FPN has become essentially universal in modern detection systems. It is used in Faster R-CNN, RetinaNet, YOLO versions 3 and beyond, and most production detection pipelines. Understanding it is not optional for practitioners working on detection.
+
+## Segmentation --- Understanding Every Pixel
+
+### 3.1 From Boxes to Pixels
+
+Object detection gives you a rectangle around each object. That rectangle is approximate by construction --- a bounding box around a cat includes some background, some furniture, and some of the cat\'s shadow. For many applications, this approximation is sufficient. For others, it is not.
+
+A surgical robot needs to know precisely where the instrument ends and the tissue begins --- not a bounding box, but a pixel-precise boundary. An autonomous vehicle\'s understanding of the road needs to account for the precise shape of each pedestrian and vehicle --- not just whether a pedestrian is present in a region, but exactly which pixels belong to them. Agricultural monitoring systems that assess crop stress need per-pixel health maps, not bounding boxes around stressed zones.
+
+Segmentation is the task of answering, for every pixel: what class does this belong to? It comes in two important variants with different levels of granularity.
+
+### 3.2 Semantic Segmentation: Class Without Count
+
+In semantic segmentation, each pixel is assigned exactly one class label from a predefined set --- road, sky, building, pedestrian, vegetation. There is no concept of individual instances: if five pedestrians overlap in the frame, all their pixels are labeled \"pedestrian\" and the model makes no attempt to distinguish which pixel belongs to which person.
+
+This is the appropriate framing when you care about the distribution of classes but not about counting or tracking individuals. Scene understanding for autonomous driving is a canonical example: the vehicle needs to know that a large region of pixels ahead is \"road\" and a cluster on the right is \"vegetation,\" not that there are exactly three individual trees.
+
+### Fully Convolutional Networks
+
+The key architectural innovation for semantic segmentation was the Fully Convolutional Network (FCN), introduced by Long, Shelhamer, and Darrell in 2015. The insight was simple but consequential: if you replace the fully connected layers of a classification network with convolutional layers, the network produces a spatial output map instead of a single class vector --- and this output map can be upsampled to match the input resolution for pixel-level prediction.
+
+The problem with a naive FCN is that by the time the network reaches its deepest layers, the feature map has been downsampled dramatically --- from 224×224 pixels to perhaps 7×7 --- through successive pooling operations. Simply upsampling this coarse map produces blurry, spatially imprecise segmentation masks. The fine-grained boundary information needed for accurate segmentation has been lost.
+
+The solution lies in skip connections: routing feature maps from earlier, higher-resolution layers directly to the decoder, where they are combined with the semantically rich but spatially coarse deep features. This is the architectural principle that makes accurate segmentation possible.
+
+### U-Net: The Architecture That Transformed Medical Imaging
+
+U-Net, introduced by Ronneberger, Fischer, and Brox in 2015 for biomedical image segmentation, takes the skip-connection principle to its logical extreme. Its architecture is symmetric: an encoder path that progressively downsamples the input (like a standard CNN), and a decoder path that progressively upsamples back to full resolution. At every resolution level, a skip connection routes the encoder\'s feature map directly to the corresponding decoder level.
+
+The result looks like a U when drawn --- hence the name. The encoding side compresses the image into a rich representation. The decoding side reconstructs the segmentation map at full resolution. The skip connections ensure that every spatial detail captured by the encoder --- every precise edge, every fine texture --- is available to the decoder when it needs to make pixel-level decisions.
+
+U-Net was designed for a context where labeled data is extremely scarce: biomedical imaging, where annotating a single image requires expert radiologist time. It was trained on fewer than 30 images and still produced state-of-the-art results. This data efficiency comes from its architecture --- the symmetric skip connections provide a strong spatial regularization --- and from heavy data augmentation during training.
+
+U-Net and its descendants (U-Net++, ResU-Net, nnU-Net) remain the dominant paradigm in medical image segmentation more than a decade after their introduction. If you are working with medical images in any modality --- histology, MRI, CT, ultrasound --- U-Net is almost certainly the right starting architecture.
+
+### 3.3 Instance Segmentation: Class and Count
+
+Instance segmentation is the most demanding formulation. It requires both the per-pixel class labels of semantic segmentation and the object-by-object distinction of detection. Each individual object instance gets its own binary mask: these pixels belong to person 1, those pixels belong to person 2, and that group of pixels belongs to the car behind them.
+
+This is the appropriate framing for counting, tracking, and interacting with individual objects. A robotics system picking items from a bin needs instance masks --- it needs to know where each individual item is and what space it occupies, not just that \"item\" pixels are present. A crowd analysis system trying to count people in a dense scene needs instance masks, not semantic labels that would merge overlapping people into one indistinguishable mass.
+
+### Mask R-CNN: Detection and Segmentation Unified
+
+Mask R-CNN, introduced by He, Gkioxari, Dollar, and Girshick at Facebook AI Research in 2017, is the most influential instance segmentation architecture and remains the reference implementation for many applications. It extends the Faster R-CNN detection framework by adding a third prediction head: alongside the existing box-regression head (where is the object?) and classification head (what class is it?), Mask R-CNN adds a mask head (which pixels within this box belong to the object?).
+
+The mask head is a small fully convolutional network that takes the ROI-aligned feature region for each detected object and produces a binary mask of fixed size (typically 28×28 pixels) predicting which pixels belong to the instance. This mask is then rescaled to the actual box dimensions.
+
+A critical detail of Mask R-CNN is ROI Align, the operation that extracts fixed-size feature regions from the backbone feature map for each proposed detection. Its predecessor, ROI Pool, used integer arithmetic that introduced small spatial misalignments. For bounding box prediction, these misalignments are negligible. For pixel-level mask prediction, they are catastrophic. ROI Align uses bilinear interpolation to extract features at precise, non-integer spatial positions, eliminating the misalignment and enabling the precise masks Mask R-CNN is known for.
+
+Analogy: If YOLO is the fast-moving inspector who marks zones with rough rectangles, Mask R-CNN is the forensic analyst who, for each flagged zone, traces the exact outline of every object with pixel precision. The rough detection gets you in the right neighborhood; the mask prediction draws the map.
+
+## The Backbone as Universal Feature Extractor
+
+### 4.1 One Network, Many Heads
+
+At this point you may have noticed a pattern: every architecture we have discussed --- YOLO, FPN-based detectors, U-Net, Mask R-CNN --- shares the same foundational component. A pre-trained CNN backbone (usually ResNet or EfficientNet) processes the raw image and produces a set of spatially-organized feature maps. Different task-specific heads then interpret those feature maps in different ways.
+
+This is not a coincidence. It reflects something deep about the structure of visual understanding. The features that make ResNet good at classifying dogs --- the ability to detect fur texture, ear shape, snout proportion --- are precisely the features that make it good at localizing dogs in a detection box, segmenting dog pixels from background, or separating two overlapping dogs in an instance mask. The visual information is the same. Only the reading changes.
+
+This insight has profound practical implications. It means that:
+
+-   You do not need to train a separate large network for each visual task. One backbone, pre-trained once on ImageNet (or on your domain-specific dataset), serves as the foundation for classification, detection, and segmentation simultaneously.
+
+-   Improvements in backbone quality transfer to all downstream heads. When a better backbone is released --- a stronger ResNet variant, a more efficient EfficientNet, a capable ViT --- every detection and segmentation system built on that backbone improves.
+
+-   Domain adaptation through fine-tuning applies universally. If you fine-tune a backbone on your specific domain (medical images, satellite imagery, industrial components), all the heads built on it benefit from that adaptation.
+
+### 4.2 What Feature Maps Contain
+
+To understand how heads interpret backbone features, it helps to think concretely about what feature maps represent at different depths.
+
+In the first few layers of a ResNet, feature maps are large (high spatial resolution) and capture low-level statistics: edges at different orientations, color gradients, simple textures. Each position in these feature maps corresponds to a small local region of the original image. The features are general --- they look similar across very different backbone architectures and training datasets.
+
+In the middle layers, feature maps are smaller (spatial resolution reduced by pooling) and capture mid-level patterns: object parts, recurring textures, local shapes. A feature map position in a middle layer corresponds to a larger region of the original image --- its receptive field has grown. The features are becoming task-specific.
+
+In the deepest layers, feature maps are very small (perhaps 7×7 for a 224×224 input) and capture high-level semantic concepts: object categories, scene contexts, abstract attributes. A single position in a deep feature map corresponds to a large region of the original image --- it has aggregated information from a wide context. But the spatial precision is coarse.
+
+This is the fundamental tension at the heart of detection and segmentation: deep features are semantically rich but spatially imprecise; shallow features are spatially precise but semantically shallow. Feature Pyramid Networks and skip connections are architectural answers to this tension --- mechanisms for having both at once.
+
+### 4.3 Choosing a Backbone for Detection and Segmentation
+
+The principles for backbone selection in dense prediction tasks are similar to those for classification, with some additional considerations:
+
+### Receptive Field Size
+
+Detection and segmentation heads need the backbone to have seen enough spatial context at each feature map position to make informed decisions. Architectures with larger effective receptive fields --- deeper networks, those with dilated convolutions --- generally produce better detection features. ResNet-50 and ResNet-101 are common choices; EfficientNet-B3 through B5 offer a good efficiency-accuracy balance.
+
+### Multi-Scale Feature Availability
+
+Not all backbones make it equally easy to attach an FPN. ResNet\'s staged architecture --- four blocks with progressively halved resolution --- provides natural attachment points at four scales, which is exactly what FPN expects. This is one reason ResNet remains the dominant backbone in detection frameworks despite being older and sometimes less accurate than EfficientNet or ViT for classification.
+
+### ViT as a Detection Backbone
+
+Vision Transformers, despite their global attention mechanism, were initially challenging to use for detection because they produce feature maps at a single scale --- the token grid --- rather than the multi-scale hierarchy FPN expects. Architectures like the Swin Transformer addressed this by introducing hierarchical attention windows, producing multi-scale features compatible with FPN. Swin-based detection models currently achieve state-of-the-art performance on standard benchmarks. However, for most practical applications, a ResNet or EfficientNet backbone with FPN remains simpler to deploy and nearly as accurate.
+
+### 4.4 Transfer Learning for Dense Prediction
+
+The same two-stage transfer learning protocol from Chapter 4 applies to detection and segmentation, with one important modification: the backbone is pre-trained for classification, but the heads are always initialized randomly and trained from scratch. There is no source of pre-trained detection or segmentation heads, because the classes and spatial configurations of your specific task are unique to your dataset.
+
+This means the fine-tuning dynamic is different: the backbone starts with good features; the head starts knowing nothing. If you freeze the backbone entirely and train only the head, the head must learn to make good predictions from fixed features that were not designed for detection or segmentation. This can work but often underperforms. The more common approach is to train both backbone and head together with different learning rates --- lower for the backbone (preserving its learned features), higher for the head (allowing rapid learning from scratch).
+
+A useful practical rule: start with the backbone frozen for the first few epochs while the head learns a reasonable initialization. Then unfreeze the backbone and continue training with the lower learning rate. This prevents the randomly initialized head\'s large early gradients from corrupting the pre-trained backbone features during the first few gradient steps.
+
+## Evaluation --- How Do We Know If It\'s Working?
+
+Classification has a simple evaluation story: accuracy, precision, recall, F1 score over a held-out test set. Detection and segmentation require more nuanced metrics that account for spatial precision.
+
+### 5.1 The Precision-Recall Tradeoff in Detection
+
+For a single class and a single IoU threshold, evaluation proceeds as follows: for each image in the test set, the model produces a set of predicted boxes with confidence scores. Ground-truth boxes are known. A predicted box is a True Positive if its IoU with a ground-truth box exceeds the threshold and the class label is correct; otherwise it is a False Positive. Ground-truth boxes with no matching prediction are False Negatives.
+
+As you vary the confidence threshold for what counts as a detection (from low, which admits many predictions and catches most objects but introduces many false alarms, to high, which is selective but misses more objects), you trace out a precision-recall curve. A model that achieves high precision at high recall is a good detector. Average Precision (AP) summarizes this curve as a single number: the area under the precision-recall curve.
+
+### 5.2 Mean Average Precision (mAP)
+
+Most detection datasets contain multiple classes. Mean Average Precision (mAP) is simply the average of AP values across all classes. This single number is the primary metric used in detection benchmarks like PASCAL VOC and COCO.
+
+COCO\'s evaluation protocol averages AP across ten IoU thresholds (0.50, 0.55, \..., 0.95), denoted AP@\[0.5:0.95\] or simply AP. This is a more stringent evaluation than VOC\'s AP@0.5, because it rewards models that localize precisely rather than just approximately. A model that detects the right class with a loose bounding box will score well at IoU 0.5 but poorly at IoU 0.9.
+
+COCO also reports AP separately for small, medium, and large objects (AP_S, AP_M, AP_L). This decomposition is diagnostically valuable: a model that scores well overall but poorly on AP_S has difficulty with small objects and likely benefits from FPN improvements or higher-resolution input. A model with poor AP_L may have anchor scale mismatches or insufficient receptive field at deep layers.
+
+### 5.3 Segmentation Metrics
+
+For semantic segmentation, the standard metric is mean Intersection over Union (mIoU): compute the IoU between predicted and ground-truth masks for each class, then average across classes. An mIoU of 0.5 means the predicted and ground-truth masks overlap by 50% on average.
+
+For instance segmentation, mask AP (measured per-mask rather than per-box) is the primary metric, evaluated at the same IoU thresholds as box AP. Computing mask IoU requires comparing pixel masks rather than rectangles, but the precision-recall framework is identical.
+
+### 5.4 Reading Evaluation Results Critically
+
+A few cautions worth internalizing when reading evaluation results:
+
+-   mAP on COCO or PASCAL VOC measures performance on a specific distribution of images. Performance on your target domain --- medical scans, satellite imagery, manufacturing inspection --- may be very different. Domain shift between benchmark and deployment is one of the most common causes of production failures.
+
+-   Class-averaged metrics hide per-class performance. A model with strong mAP might perform poorly on rare classes or small objects that matter most for your application. Always examine per-class AP when deploying in safety-critical settings.
+
+-   High mAP does not imply calibrated confidence scores. A model can correctly rank its predictions while being systematically overconfident or underconfident in absolute terms. Confidence calibration --- the relationship between predicted score and actual accuracy --- is a separate property that requires separate evaluation.
+
+-   Speed and accuracy are often in tension. mAP numbers in papers are measured at specific inference configurations. A model that achieves high mAP with a batch size of 1 on a V100 GPU may be impractically slow at the inference hardware your application requires. Always benchmark inference speed in your target environment.
+
+## Ethics in the Pixel --- What Detection and Segmentation Enable
+
+The capabilities we have discussed in this chapter are not neutral. The ability to locate, classify, and precisely delineate objects and people in images and video is among the most consequential capabilities in modern AI --- and it carries ethical dimensions that practitioners need to engage with honestly.
+
+### 6.1 Surveillance and Consent
+
+Object detection and tracking systems can identify and follow individuals across video feeds. This capability underlies public safety applications --- monitoring crowded venues for dangerous situations, helping locate missing persons. It also underlies mass surveillance systems that track individuals without their knowledge or consent across public spaces. The technology is the same; the application determines whether it respects or violates human dignity.
+
+The ethical line between legitimate public safety monitoring and surveillance-as-social-control is genuinely contested, varies across legal jurisdictions, and is actively being litigated in courts, legislative bodies, and public discourse worldwide. A practitioner building detection systems for deployment in public spaces has a responsibility to engage with this debate --- not to outsource it to whoever signs the procurement contract.
+
+Specific questions worth asking before deployment: Is the population being monitored informed that they are being monitored? Who has access to the detection data and for how long? What oversight mechanisms prevent misuse? Are there meaningful consent mechanisms for those who do not wish to be tracked?
+
+### 6.2 Bias in Detection --- Who Gets Found and Who Gets Missed
+
+Detection models are trained on datasets that reflect the visual distribution of whoever collected and annotated them. If that distribution underrepresents certain demographic groups, the model will perform worse on those groups. This is not a hypothetical concern. Studies of commercial face detection systems have documented significantly higher false-negative rates (failing to detect faces) for darker-skinned individuals, for women, and for older adults, relative to the demographics best represented in training data.
+
+For classification, a biased model produces wrong labels for underrepresented groups. For detection and segmentation, the failure modes are more operationally consequential: a pedestrian detection system that is less likely to detect darker-skinned pedestrians in low light is not an abstract fairness problem --- it is a safety hazard for those pedestrians. A medical segmentation system that was trained predominantly on images from one demographic group may produce systematically less accurate contours for patients from underrepresented groups.
+
+Mitigation requires deliberate action: auditing model performance disaggregated by relevant demographic variables, seeking out and incorporating more diverse training data, and being honest about deployment limitations when performance disparities exist.
+
+### 6.3 The Automation of Consequential Decisions
+
+Detection and segmentation systems are increasingly embedded in decision chains with real consequences: loan approvals, parole decisions, hiring pipelines, clinical workflows. When a detection model\'s output influences a consequential decision --- about a person, about their access to services, about their safety --- the question of who is accountable for that decision becomes urgent.
+
+The model is not accountable. It has no intentions, no values, no understanding of consequences. The people who chose to deploy it, configured its thresholds, and integrated it into the decision chain are accountable. This responsibility does not disappear because the decision was made by an automated system. If anything, it sharpens: automation at scale means that errors are replicated across millions of decisions before anyone notices.
+
+Building detection and segmentation systems with responsible deployment in mind means: documenting model limitations explicitly, designing human review processes for consequential decisions, monitoring deployed systems for performance drift and demographic disparities, and establishing clear accountability chains before deployment --- not after an incident makes accountability suddenly important.
+
+## Hands-On Exploration
+
+### The Goal
+
+This activity builds directly on Chapter 4\'s Architecture Archaeology exercise. You already have a fine-tuned ResNet-50 that classifies images. This week, you will see what that same backbone is \"seeing\" at a spatial level, and then load a pre-trained detection model to observe how detection heads interpret backbone features differently from a classification head.
+
+### Setup
+
+Use Google Colab. A starter notebook is provided that loads: (1) your fine-tuned ResNet-50 from Chapter 4 (or a fresh ImageNet-pretrained version), (2) a pre-trained YOLO model (YOLOv8 nano, the smallest variant, runs on CPU), and (3) a pre-trained Mask R-CNN model for instance segmentation visualization.
+
+### Part 1: Spatial Feature Visualization
+
+Using the GradCAM tool from Chapter 4, generate activation maps for three images: (a) an image with one clear subject centered in the frame, (b) an image with multiple objects of the same class, and (c) an image with multiple objects of different classes.
+
+Questions to answer: Does the classification model\'s activation spread across all objects of the target class, or focus on one? What happens when you ask it to classify a class that appears in the background? Does the activation shift to the background region?
+
+### Part 2: YOLO Detection Walkthrough
+
+Run the pre-loaded YOLOv8 nano model on the same three images from Part 1. Visualize the output bounding boxes and confidence scores.
+
+Questions to answer: How many objects does YOLO find compared to what the classifier saw? What is the lowest-confidence detection? Try lowering the confidence threshold from 0.5 to 0.2 --- what new detections appear, and what do they tell you about the model\'s uncertainty? Try raising the threshold to 0.8 --- what disappears?
+
+### Part 3: Instance Segmentation
+
+Run the pre-loaded Mask R-CNN model on one of your images and visualize the output instance masks. Use a scene with at least two objects of the same class (two people, two cars, two chairs).
+
+Questions to answer: Does Mask R-CNN successfully distinguish the two instances? How precise are the mask boundaries? Find a region where the mask and the actual object boundary diverge --- what spatial structure seems to be causing the error?
+
+### Reflection
+
+Write three sentences: (1) What does this exercise reveal about the difference between what a classifier knows about an image and what a detector knows? (2) How does varying the confidence threshold illustrate the precision-recall tradeoff in practice? (3) If you were deploying a detection system in a context where false positives are more costly than false negatives (for example, a triage system that triggers costly follow-up procedures), how would you adjust the threshold and what would you monitor?
+
+### Case Study: Screening the Invisible --- Diabetic Retinopathy Detection
+
+### The Problem
+
+Diabetic retinopathy is the leading cause of preventable blindness worldwide. It is caused by damage to the blood vessels of the retina --- small leaks, microaneurysms, and new vessel growth --- that, if detected early, can be treated to preserve vision. If detected late, it causes irreversible blindness. Globally, approximately 463 million people have diabetes. Screening all of them annually for retinal changes with traditional ophthalmologist examination is not feasible --- there are not enough specialists, particularly in lower-income countries where diabetes rates are rising fastest.
+
+### Why Deep Learning --- and Which Tasks
+
+The screening problem maps naturally onto the visual tasks of this chapter. At the classification level: is retinopathy present, and if so, at what severity grade (0--4, from no disease to proliferative)? At the detection level: where are the microaneurysms and hemorrhages --- the specific lesions that indicate disease progression? At the segmentation level: what is the precise extent of edema or neovascularization?
+
+Google\'s DeepMind and Verily health sciences divisions published landmark work in 2016 (Gulshan et al., JAMA) showing that a deep CNN trained on 128,000 graded retinal photographs achieved diagnostic accuracy at or above that of ophthalmologists for detecting diabetic retinopathy. The model was trained as a classifier (grade 0-4) but its internal representations implicitly learned to attend to the relevant lesions --- a point confirmed by subsequent attention visualization work.
+
+More recent systems have added detection heads to localize specific lesion types, and segmentation capabilities to precisely measure pathology extent for treatment planning. The progression from classification to detection to segmentation in retinopathy AI mirrors exactly the progression in this chapter --- each step adding spatial precision to the understanding.
+
+### What Worked
+
+The core backbone technology --- deep ResNet-style CNNs pre-trained on ImageNet and fine-tuned on retinal images --- transferred remarkably well to this specialized domain, despite retinal photographs looking nothing like ImageNet images. The texture features and edge-detection capabilities learned on natural images turned out to be directly applicable to detecting the textural and morphological signatures of retinal pathology.
+
+The systems also demonstrated that AI screening could be performed by non-specialist staff using portable cameras, dramatically expanding the geographic reach of screening programs. A nurse with a smartphone-connected retinal camera and an AI grading system can provide effective first-line screening in settings where an ophthalmologist might visit once a year.
+
+### Tradeoffs and Ongoing Limitations
+
+The systems were trained predominantly on photographs from specific camera types, lighting conditions, and patient demographics. Performance on images from different cameras or from demographic groups underrepresented in the training data showed disparities --- a challenge that remains actively studied.
+
+Regulatory approval in different jurisdictions requires different validation standards, creating deployment timelines that do not match the pace of technical development. FDA approval of AI medical devices requires clinical validation that can take years, during which the model may become technically outdated.
+
+Perhaps most importantly: a classification or detection system that flags images for specialist review changes, rather than replaces, the clinical workflow. The question of how clinicians respond to AI recommendations --- whether they appropriately override wrong predictions, or inappropriately defer to them --- is a behavioral and systems design challenge as much as a technical one. High model accuracy on a benchmark does not guarantee high system accuracy in deployment when human-AI interaction is part of the pipeline.
+
+### What This Case Study Teaches
+
+Diabetic retinopathy detection illustrates the full arc of this chapter in a single application: classification as the entry point, detection and segmentation as progressively richer understanding, backbone transfer learning as the enabling technology, and careful evaluation as the prerequisite for trust. It also illustrates that deploying a visual AI system in the world is a sociotechnical challenge --- requiring engagement with clinical workflows, regulatory frameworks, demographic equity, and human behavioral responses --- that begins where the technical work ends.
+
+## Chapter Summary
+
+This chapter extended our understanding of convolutional vision systems from the single-label world of image classification into the richer, spatially-demanding world of detection and segmentation.
+
+We began by establishing why classification\'s whole-image label is insufficient for most high-value real-world applications: the radiologist cannot simply say \"abnormal,\" the autonomous vehicle cannot simply say \"pedestrians present,\" the surgical assistant cannot simply say \"instruments visible.\" These applications require spatial answers --- where, and what precisely --- that classification is not designed to provide.
+
+Object detection gives us bounding boxes and class labels for each object in a scene. The core mechanisms --- anchor boxes, IoU, Non-Maximum Suppression --- form the language of detection. YOLO showed that detection can be performed in a single forward pass through the network, enabling real-time inference. Feature Pyramid Networks showed that detecting objects across scales requires fusing semantic richness from deep layers with spatial precision from shallow ones.
+
+Semantic segmentation assigns a class label to every pixel, appropriate when the distribution of classes matters more than the count or individuality of instances. Fully convolutional networks and encoder-decoder architectures with skip connections --- epitomized by U-Net --- make pixel-level prediction tractable and precise. Instance segmentation goes further, distinguishing individual object instances through systems like Mask R-CNN, which adds a mask prediction head to detection\'s box and class heads.
+
+Running through all of these tasks is the same pre-trained CNN backbone --- ResNet, EfficientNet, or increasingly Swin Transformer --- that we met in Chapter 4. The backbone\'s role is not to classify; it is to extract rich, spatial feature representations that task-specific heads then interpret. This understanding repositions the backbone as a universal feature extractor, a role that will become even more important in Chapter 10 when we fuse visual representations with language representations in multimodal systems.
+
+We closed by examining the ethical dimensions of these capabilities: the dual-use nature of detection in surveillance versus safety contexts, the documented disparities in detection performance across demographic groups, and the accountability questions that arise when detection systems are embedded in consequential decision chains. These are not peripheral concerns. They are part of the specification of any detection or segmentation system deployed in the world.
+
+In Chapter 6, we step back from the question of recognizing the world to take stock of everything the vision system has learned --- evaluating the MIPDS vision pipeline as a complete, tested module and preparing it for connection to the language system that begins in Chapter 7.
+
+## Review Questions
+
+9.  Object detection systems can locate and track individual people across video feeds. The same technology is used in public safety monitoring (detecting weapons, finding missing persons) and in mass surveillance systems that track individuals without their knowledge. Where, if anywhere, do you draw the line between legitimate monitoring and surveillance? Should that line be drawn by technical standards, legal frameworks, democratic processes, or market forces --- or some combination?
+
+10. YOLO\'s design philosophy is explicit: trade some accuracy for real-time speed. For which real-world applications is this tradeoff clearly correct? For which is it clearly wrong? Are there applications where you believe no speed tradeoff should be acceptable --- where human review is always required regardless of the AI\'s performance?
+
+11. Detection systems trained on COCO or ImageNet data are known to perform worse on underrepresented demographic groups. If you were deploying a pedestrian detection system in a city, what validation studies would you require before deployment? Who should conduct those studies, and who should have access to the results?
+
+12. U-Net was designed for contexts where labeled training data is scarce --- biomedical imaging, where expert annotation is expensive. Its architecture trades flexibility for data efficiency through strong structural priors. Is there a general principle here: that architectures designed for data-scarce settings should encode stronger domain assumptions? What are the risks of encoding too many assumptions?
+
+13. Mask R-CNN adds instance segmentation to a detection framework by adding a parallel mask prediction head. The architecture is elegant: one backbone, three heads, three capabilities. But each additional head adds complexity, training instability, and deployment cost. When is it worth building a multi-task system versus training separate specialized models? What factors should drive that decision?
+
+14. The diabetic retinopathy case study showed that AI diagnostic accuracy at the level of specialist ophthalmologists does not automatically translate into deployment success --- regulatory, clinical workflow, demographic, and behavioral factors all intervene. Does this suggest that technical benchmarks are fundamentally insufficient for evaluating medical AI? What evaluation framework would you design if you were responsible for approving AI medical devices?
+
+15. mAP is the standard evaluation metric for detection, but it is computed on specific benchmark datasets with specific image distributions. A model with high mAP on COCO might fail significantly on satellite imagery, medical scans, or images from different geographic regions. Should benchmark performance be sufficient for procurement decisions, or should deployment-environment validation be required? Who should bear the cost of that validation?
+
+16. The backbone-plus-head design pattern means that improvements in backbone quality automatically improve all downstream detection and segmentation systems. This creates strong incentives to focus research effort on backbone improvements. But it also means that biases in backbone pre-training propagate to all downstream tasks. What governance mechanisms, if any, should exist around the pre-training of widely-reused backbone models?
+
+## Further Reading
+
+### Foundational Papers
+
+Girshick, R., Donahue, J., Darrell, T., & Malik, J. (2014). Rich feature hierarchies for accurate object detection and semantic segmentation. CVPR. The original R-CNN paper that established the detect-then-classify paradigm.
+
+Redmon, J., Divvala, S., Girshick, R., & Farhadi, A. (2016). You only look once: Unified, real-time object detection. CVPR. The original YOLO paper. Read the motivation section for a clear statement of the speed-accuracy tradeoff argument.
+
+Lin, T. Y., Dollar, P., Girshick, R., He, K., Hariharan, B., & Belongie, S. (2017). Feature pyramid networks for object detection. CVPR. The FPN paper --- essential reading for anyone working with detection systems.
+
+Long, J., Shelhamer, E., & Darrell, T. (2015). Fully convolutional networks for semantic segmentation. CVPR. The paper that established the FCN paradigm for dense prediction.
+
+Ronneberger, O., Fischer, P., & Brox, T. (2015). U-Net: Convolutional networks for biomedical image segmentation. MICCAI. Elegant and readable; the architecture discussion repays careful study.
+
+He, K., Gkioxari, G., Dollar, P., & Girshick, R. (2017). Mask R-CNN. ICCV. Introduces ROI Align and the unified detection-segmentation framework.
+
+### Modern Developments
+
+Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., \... & Guo, B. (2021). Swin Transformer: Hierarchical vision transformer using shifted windows. ICCV. The architecture that made Transformers competitive with CNNs for detection and segmentation.
+
+Jocher, G., Chaurasia, A., & Qiu, J. (2023). YOLO by Ultralytics. The YOLOv8 technical report and codebase. The current state of practical real-time detection.
+
+Carion, N., Massa, F., Synnaeve, G., Usunier, N., Kirillov, A., & Zagoruyko, S. (2020). End-to-end object detection with transformers. ECCV. DETR --- the first detection system to replace anchor boxes and NMS entirely with a Transformer encoder-decoder.
+
+### Ethics and Societal Impact
+
+Buolamwini, J., & Gebru, T. (2018). Gender shades: Intersectional accuracy disparities in commercial gender classification. FAccT. The foundational demographic audit study --- read alongside any deployment of face or person detection.
+
+Browne, S. (2015). Dark matters: On the surveillance of blackness. Duke University Press. A historical and theoretical account of surveillance technology and race --- essential context for thinking about detection in public spaces.
+
+Lum, K., & Isaac, W. (2016). To predict and serve? Significance. A critical examination of predictive policing systems that use detection and classification as components.
+
+### Medical Imaging Applications
+
+Gulshan, V., Peng, L., Coram, M., Stumpe, M. C., Wu, D., Narayanaswamy, A., \... & Webster, D. R. (2016). Development and validation of a deep learning algorithm for detection of diabetic retinopathy in retinal fundus photographs. JAMA. The landmark diabetic retinopathy study --- accessible and important.
+
+Litjens, G., Kooi, T., Bejnordi, B. E., Setio, A. A. A., Ciompi, F., Ghafoorian, M., \... & Sanchez, C. I. (2017). A survey of deep learning in medical image analysis. Medical Image Analysis. A comprehensive overview of detection and segmentation across medical modalities.
