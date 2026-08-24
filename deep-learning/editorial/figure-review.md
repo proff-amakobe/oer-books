@@ -13,7 +13,7 @@ Phase 2.5 review of the eleven numbered figures identified in `figure-inventory.
 | 3.6 | 3 | READY — EDITORIAL REVIEW | High | `assets/figures/fig-3-6-training-curves.svg` | Yes | Yes | Curves illustrate the four diagnostic patterns described in the chapter; they are not empirical results. |
 | 3.7 | 3 | READY | High | `assets/figures/fig-3-7-dropout.svg` | Yes | Yes | None. Inactive units are crossed out as well as grayed, so the state does not depend on color. |
 | 3.8 | 3 | READY | High | `assets/figures/fig-3-8-gradient-pathologies.svg` | Yes | Yes | None. Arrow thickness and labels distinguish shrinking and growing gradients. |
-| 3.9 | 3 | TECHNICAL REVIEW REQUIRED | Medium–high | `assets/figures/fig-3-9-learning-rate-schedules.svg` | Yes | Yes | **FIGURE TECHNICAL REVIEW REQUIRED:** the placeholder requests final validation accuracy and claims warmup + cosine is best, but supplies no experiment or values. The figure therefore compares schedule shapes only and makes no accuracy ranking. |
+| 3.9 | 3 | READY — CONCEPTUAL COMPARISON | High | `assets/figures/fig-3-9-learning-rate-schedules.svg` | Yes | Yes | The unsupported accuracy ranking was removed from the caption and surrounding prose. The figure compares schedule shapes only and makes no empirical superiority claim. |
 | 3.10 | 3 | READY — EDITORIAL REVIEW | High | `assets/figures/fig-3-10-mipds-training-engine.svg` | Yes | Yes | The diagram is limited to the Week 3 interfaces stated in the chapter; editorial review should confirm that this is the intended definitive MIPDS interface before print lock. |
 
 ## Checklist Result

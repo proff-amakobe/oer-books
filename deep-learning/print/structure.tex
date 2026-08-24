@@ -1,0 +1,122 @@
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{etoolbox}
+
+% Quarto title and part commands are replaced by designed print structures.
+\AtBeginDocument{\renewcommand{\maketitle}{}}
+
+% Layered representation motif: transformations compress toward an abstraction.
+\newcommand{\DLLayers}[1]{%
+  \begin{scope}[shift={(#1)}]
+    \foreach \x/\op in {0/.12,.34/.16,.68/.20,1.02/.24,1.36/.30}{%
+      \draw[DLCyan,opacity=\op,line width=.8pt] (\x in,0) rectangle ++(.22in,1.45in);}
+    \draw[DLCyan,opacity=.35,line width=1.1pt,->] (0in,.72in)--(1.72in,.72in);
+    \fill[DLCyan,opacity=.42] (1.82in,.72in) circle (4pt);
+  \end{scope}}
+
+\newcommand{\DLHalfTitle}{%
+  \cleardoublepage\thispagestyle{empty}
+  \vspace*{2.25in}
+  {\centering\sffamily\bfseries\fontsize{31}{36}\selectfont\color{DLNavy}Deep Learning:\\A Comprehensive Guide\par}
+  \vspace{.55in}{\centering\color{DLCyan}\rule{1.2in}{2pt}\par}
+  \clearpage
+}
+
+\newcommand{\DLFullTitle}{%
+  \thispagestyle{empty}%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[DLNavy] ([xshift=.76in,yshift=.86in]current page.south west) rectangle ([xshift=-1.04in,yshift=-.76in]current page.north east);
+    \DLLayers{[xshift=-3.29in,yshift=-2.91in]current page.north east}
+  \end{tikzpicture}%
+  \vspace*{.68in}\begin{minipage}[t][.82\textheight][t]{.86\textwidth}
+    {\sffamily\bfseries\fontsize{35}{40}\selectfont\color{white}Deep Learning:\\A Comprehensive Guide\par}
+    \vspace{.7em}{\color{DLCyan}\rule{1.55in}{2.4pt}\par}
+    \vspace{.65em}
+    {\fontsize{16}{20}\selectfont\color{DLLight}Architectures, Training, Generative Models,\\and Real-World AI Systems\par}
+    \vfill
+    {\sffamily\bfseries\fontsize{15}{18}\selectfont\color{white}Moody Amakobe\par}
+    \vspace{.55em}{\sffamily\fontsize{9}{11}\selectfont\color{DLCyan}FIRST OPEN EDITION · 2026 · CC BY 4.0\par}
+  \end{minipage}\clearpage
+}
+
+\newcommand{\DLCopyrightPage}{%
+  \thispagestyle{empty}\vspace*{.85in}
+  {\sffamily\bfseries\fontsize{18}{22}\selectfont\color{DLNavy}Deep Learning: A Comprehensive Guide\par}
+  \vspace{.25em}{\itshape Architectures, Training, Generative Models, and Real-World AI Systems\par}
+  \vspace{1.1em}Moody Amakobe\par
+  \vspace{1.25em}Copyright © 2026 Moody Amakobe\par
+  \vspace{.8em}\textbf{First Open Edition}\par
+  Independently published as an Open Educational Resource.\par
+  \vspace{.9em}This work is licensed under the Creative Commons Attribution 4.0 International License unless otherwise indicated. You may share and adapt it with appropriate attribution, a license link, and an indication of changes.\par
+  \vspace{.9em}ISBN — Print: To be assigned\\ISBN — PDF: To be assigned\\ISBN — EPUB: To be assigned\par
+  \vspace{.9em}Deep learning frameworks, APIs, model behavior, software libraries, hardware, and deployment practices evolve rapidly. Readers implementing production systems should verify current technical documentation, test behavior in their target environment, and apply appropriate security, safety, legal, and professional review.\par
+  \vfill{\small Recommended citation: Amakobe, M. (2026). \textit{Deep learning: A comprehensive guide: Architectures, training, generative models, and real-world AI systems} (First Open Edition).}\par
+  \clearpage
+}
+
+\newcommand{\DLPrintContents}{%
+  \setcounter{tocdepth}{1}%
+  \cleardoublepage\pdfbookmark[0]{Contents}{contents}\tableofcontents
+  \cleardoublepage\pdfbookmark[0]{List of Figures}{figures}\listoffigures
+  \cleardoublepage
+}
+
+\newcommand{\DLPartOpener}[3]{%
+  \cleardoublepage\refstepcounter{part}\addcontentsline{toc}{part}{\protect\numberline{\Roman{part}}#1}\thispagestyle{empty}
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[DLNavy] ([xshift=1.04in,yshift=.86in]current page.south west) rectangle ([xshift=-.76in,yshift=-.76in]current page.north east);
+    \DLLayers{[xshift=-3.01in,yshift=-2.76in]current page.north east}
+  \end{tikzpicture}%
+  \vspace*{.3in}\begin{minipage}[t][.80\textheight][t]{.88\textwidth}
+    {\sffamily\bfseries\fontsize{11}{13}\selectfont\color{DLCyan}PART\par}
+    {\sffamily\bfseries\fontsize{72}{76}\selectfont\color{white}\Roman{part}\par}
+    \vspace{.75in}{\sffamily\bfseries\fontsize{28}{33}\selectfont\color{white}#1\par}
+    \vspace{.55em}{\color{DLCyan}\rule{1.35in}{2.2pt}\par}
+    \vspace{.65em}{\fontsize{13}{17}\selectfont\color{DLLight}#2\par}
+    \vspace{.7em}{\fontsize{10.5}{14}\selectfont\color{DLMid}#3\par}
+  \end{minipage}\clearpage
+}
+
+% Quarto injects \part after Pandoc filters have run. Route those late-bound
+% commands through the print design and consume the duplicate part-QMD prose
+% up to the already-designed chapter opener.
+\newif\ifDLContentsPrinted\DLContentsPrintedfalse
+\long\def\DLDiscardPartText#1\DLChapterOpener#2#3#4#5{\DLChapterOpener{#2}{#3}{#4}{#5}}
+\renewcommand{\part}[1]{%
+  \ifDLContentsPrinted\end{DLSectionPanel}\else\DLPrintContents\DLStartMainMatter\global\DLContentsPrintedtrue\fi
+  \ifstrequal{#1}{Foundations of Deep Learning}{\DLPartOpener{#1}{Deep learning begins with a deceptively simple idea: layered computation can learn useful representations directly from data.}{Neural computation, network architecture, and training practice establish the vocabulary used throughout the book.}}{}%
+  \ifstrequal{#1}{Vision Systems}{\DLPartOpener{#1}{Vision systems transform spatial structure into increasingly abstract feature maps, predictions, and decisions.}{Convolution, attention, detection, segmentation, transfer learning, and pipeline evaluation form a connected visual-learning system.}}{}%
+  \ifstrequal{#1}{Sequence, Language, and Multimodal Learning}{\DLPartOpener{#1}{Sequences introduce memory; attention makes relationships directly accessible; multimodal learning asks different representations to share meaning.}{Recurrent models lead to Transformers, pre-trained language models, and shared vision-language representations.}}{}%
+  \ifstrequal{#1}{Generative and Adaptive Systems}{\DLPartOpener{#1}{Deep models can learn distributions, construct new samples, and adapt behavior through feedback.}{Variational, adversarial, diffusion, and reinforcement-learning systems expose complementary approaches to creation and adaptation.}}{}%
+  \ifstrequal{#1}{Engineering and Responsible Deep Learning}{\DLPartOpener{#1}{A model becomes consequential when it enters a system.}{Deployment introduces drift, dependencies, scale, governance, professional responsibility, and human impact.}}{}%
+  \DLDiscardPartText
+}
+
+\newcommand{\DLChapterOpener}[4]{%
+  \cleardoublepage\refstepcounter{chapter}\addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#2}\chaptermark{#2}\thispagestyle{empty}
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[DLNavy] ([xshift=1.04in,yshift=-.76in]current page.north west) rectangle ([xshift=-.76in,yshift=-3.42in]current page.north east);
+    \DLLayers{[xshift=-3.01in,yshift=-2.45in]current page.north east}
+  \end{tikzpicture}%
+  \vspace*{.15in}\noindent\begin{minipage}[t][2.28in][t]{\textwidth}
+    {\sffamily\bfseries\fontsize{8.5}{10}\selectfont\color{DLCyan}CHAPTER\hfill\MakeUppercase{#1}\par}
+    {\sffamily\bfseries\fontsize{46}{48}\selectfont\color{white}\ifnum\value{chapter}<10 0\fi\thechapter\par}
+    \vfill{\sffamily\bfseries\fontsize{23}{27}\selectfont\color{white}#2\par}
+    \vspace{.25em}{\fontsize{10.5}{13}\selectfont\color{DLLight}#3\par}
+  \end{minipage}
+  \vspace{.18in}
+  \begin{tcolorbox}[enhanced,colback=white,colframe=DLMid,boxrule=.45pt,arc=1.3mm,left=4mm,right=4mm,top=3mm,bottom=2.5mm,borderline west={2.4pt}{0pt}{DLCyan},title={LEARNING OBJECTIVES},coltitle=DLIndigo,fonttitle=\sffamily\bfseries\fontsize{8.5}{10}\selectfont,fontupper=\fontsize{8.1}{9.7}\selectfont,before skip=0pt,after skip=0pt]
+    \begin{enumerate}[leftmargin=1.7em,itemsep=.7pt,topsep=.5pt,label=\textcolor{DLBlue}{\sffamily\bfseries\arabic*.}]#4\end{enumerate}
+  \end{tcolorbox}\clearpage
+}
+
+\titleformat{name=\chapter,numberless}[display]{\sffamily\bfseries\color{DLNavy}\Huge}{}{0pt}{}[\vspace{.3em}{\color{DLCyan}\titlerule[1.5pt]}]
+\titlespacing*{\chapter}{0pt}{0pt}{2em}
+\titleformat{\section}[display]{\needspace{5\baselineskip}\sffamily\bfseries\color{DLNavy}\Large}{\color{DLBlue}\fontsize{10}{12}\selectfont\thesection}{.18em}{}[\vspace{.22em}{\color{DLCyan}\titlerule[1.1pt]}]
+\titlespacing*{\section}{0pt}{2.25em}{.9em}
+\titleformat{\subsection}[hang]{\needspace{3\baselineskip}\sffamily\bfseries\color{DLCharcoal}\large}{\color{DLBlue}\thesubsection}{.55em}{}
+\titlespacing*{\subsection}{0pt}{1.55em}{.5em}
+\titleformat{\subsubsection}[hang]{\needspace{3\baselineskip}\sffamily\bfseries\color{DLCharcoal}\normalsize}{\color{DLBlue}\thesubsubsection}{.5em}{}

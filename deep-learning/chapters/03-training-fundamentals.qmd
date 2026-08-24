@@ -372,7 +372,7 @@ A fixed learning rate throughout training is rarely optimal. Early in training, 
 ::: {#figure-3-9 .technical-figure}
 ![](../assets/figures/fig-3-9-learning-rate-schedules.svg){fig-alt="Conceptual graph comparing constant, step-decay, cosine-annealing, and warmup-plus-cosine learning-rate schedules over training epochs." width="100%"}
 
-**Figure 3.9:** Schedule Comparison. *Schedule choice can matter as much as architecture choice. The same model, trained identically except for its learning rate schedule, can produce substantially different outcomes.*
+**Figure 3.9:** Schedule Comparison. *Different learning-rate schedules produce distinct optimization trajectories. Their effectiveness depends on model architecture, dataset, optimizer, and training conditions.*
 :::
 
 ### Step Decay
@@ -381,7 +381,7 @@ The simplest schedule: reduce the learning rate by a fixed factor at predetermin
 
 ### Cosine Annealing
 
-Rather than sharp steps, cosine annealing decreases the learning rate smoothly following a cosine curve --- from its maximum value to near zero across the training run. The smooth deceleration avoids the instability of step decay and typically produces better final performance. Cosine annealing can also be combined with warm restarts: periodically resetting the learning rate back to its maximum value, allowing the optimizer to escape shallow local minima and explore different regions of the loss landscape before decelerating again.
+Rather than sharp steps, cosine annealing decreases the learning rate smoothly following a cosine curve --- from its maximum value to near zero across the training run. Its smooth deceleration avoids abrupt schedule transitions, although its effectiveness depends on the model, data, optimizer, and training conditions. Cosine annealing can also be combined with warm restarts: periodically resetting the learning rate back to its maximum value, allowing the optimizer to leave shallow local minima and explore different regions of the loss landscape before decelerating again.
 
 ### Warmup: Easing Into Learning
 
