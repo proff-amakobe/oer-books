@@ -24,8 +24,8 @@
 \usepackage{geometry}
 \geometry{
   paperwidth=8.5in,paperheight=11in,
-  inner=1.10in,outer=.76in,top=.76in,bottom=.87in,
-  bindingoffset=.12in,includeheadfoot,heightrounded
+  inner=1.00in,outer=.73in,top=.70in,bottom=.81in,
+  bindingoffset=.10in,includeheadfoot,heightrounded
 }
 \usepackage{tikz}
 \usetikzlibrary{calc,positioning}
@@ -38,6 +38,7 @@
 \usepackage{caption}
 \usepackage{ragged2e}
 \usepackage{fancyvrb}
+\usepackage{listings}
 \usepackage{graphicx}
 \usepackage{enumitem}
 
@@ -57,6 +58,7 @@
 \predisplaypenalty=6000
 \postdisplaypenalty=1000
 \setlength{\emergencystretch}{2em}
+\setlength{\parskip}{.28em plus .08em minus .05em}
 
 \newcommand{\SECategory}{%
   \ifcase\value{chapter}\or INTRODUCTION\or REQUIREMENTS\or SYSTEM MODELING\or ARCHITECTURE\or EXPERIENCE DESIGN\or AGILE DELIVERY\or VERSION CONTROL\or QUALITY\or CI/CD\or DATA \& APIs\or CLOUD\or SECURITY\or EVOLUTION\or PROFESSIONAL PRACTICE\or INTEGRATION\fi}
@@ -66,9 +68,9 @@
 \titleformat{\chapter}[display]
   {\normalfont\color{white}}
   {\begin{tikzpicture}[remember picture,overlay]
-     \fill[SENavy] (current page.north west) rectangle ([yshift=-6.45in]current page.north east);
-     \fill[SEDeepBlue] ([xshift=.53\paperwidth]current page.north) rectangle ([yshift=-6.45in]current page.north east);
-     \fill[SEPeriwinkle] ([yshift=-6.45in]current page.north west) rectangle ([yshift=-6.51in]current page.north east);
+     \fill[SENavy] (current page.north west) rectangle ([yshift=-5.62in]current page.north east);
+     \fill[SEDeepBlue] ([xshift=.53\paperwidth]current page.north) rectangle ([yshift=-5.62in]current page.north east);
+     \fill[SEPeriwinkle] ([yshift=-5.62in]current page.north west) rectangle ([yshift=-5.68in]current page.north east);
      \draw[SEPeriwinkle,opacity=.16,line width=.6pt] ([xshift=-2.0in,yshift=-.5in]current page.north east) grid[xstep=.42in,ystep=.42in] ([xshift=-.12in,yshift=-3.8in]current page.north east);
      \node[rotate=90,anchor=south west,text=SEPeriwinkle,font=\sffamily\bfseries\small] at ([xshift=.33in,yshift=-2.15in]current page.north west) {CHAPTER \ifnum\value{chapter}<10 0\fi\thechapter};
    \end{tikzpicture}%
@@ -77,55 +79,57 @@
    {\color{SEPeriwinkle}\large\SECategory}}
   {1.5em}
   {\sffamily\bfseries\fontsize{31}{35}\selectfont\color{white}}
-  [\vspace{.32in}{\rmfamily\color{white!72}\fontsize{12}{16}\selectfont\SEDescription}\vspace{.18in}{\color{SEPeriwinkle}\rule{1.05in}{4pt}}]
-\titlespacing*{\chapter}{0pt}{-0.55in}{2.2in}
+  [\vspace{.20in}{\rmfamily\color{white!72}\fontsize{11}{14}\selectfont\SEDescription}\vspace{.10in}{\color{SEPeriwinkle}\rule{1.05in}{4pt}}]
+\titlespacing*{\chapter}{0pt}{-0.58in}{1.32in}
 
 \titleformat{name=\chapter,numberless}[display]
   {\normalfont\rmfamily\bfseries\color{SEText}\fontsize{28}{32}\selectfont}
   {}{0pt}{}
   [\vspace{.35em}{\color{SEPeriwinkle}\rule{.95in}{4pt}}]
-\titlespacing*{name=\chapter,numberless}{0pt}{1.15in}{1.0in}
+\titlespacing*{name=\chapter,numberless}{0pt}{.28in}{.55in}
 
 \titleformat{\section}[display]
   {\normalfont\rmfamily\bfseries\color{SEText}\fontsize{23}{27}\selectfont}
   {\sffamily\bfseries\color{SEAcademicBlue}\small\thesection}
   {.25em}{}
   [\vspace{.35em}{\color{SEAcademicBlue}\rule{.72in}{3pt}}]
-\titlespacing*{\section}{0pt}{2.2em}{1.1em}
+\titlespacing*{\section}{0pt}{1.45em}{.65em}
 \titleformat{\subsection}[hang]
   {\normalfont\sffamily\bfseries\fontsize{13}{16}\selectfont\color{SEText}}
   {\color{SEAcademicBlue}\thesubsection}{.45em}{}
-\titlespacing*{\subsection}{0pt}{1.7em}{.65em}
+\titlespacing*{\subsection}{0pt}{1.15em}{.38em}
 \titleformat{\subsubsection}[hang]
   {\normalfont\sffamily\bfseries\fontsize{11}{14}\selectfont\color{SEText}}
   {\color{SEAcademicBlue}\thesubsubsection}{.45em}{}
-\titlespacing*{\subsubsection}{0pt}{1.35em}{.45em}
+\titlespacing*{\subsubsection}{0pt}{.95em}{.28em}
+\pretocmd{\section}{\Needspace{7\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace{5\baselineskip}}{}{}
 
 \newtcolorbox{SEObjectives}{
   enhanced,breakable,colback=white,colframe=SESoftGray,boxrule=.5pt,
   borderline west={0pt}{0pt}{white},arc=1mm,boxsep=0pt,
-  left=15mm,right=10mm,top=11mm,bottom=8mm,
-  before upper={\sffamily\bfseries\color{SEAcademicBlue}\large\MakeUppercase{Learning Objectives}\par\vspace{5mm}\rmfamily\mdseries\color{SEText}\normalsize},
-  overlay unbroken and first={\node[anchor=north west,text=SECrimson,font=\bfseries\Large] at ([xshift=6mm,yshift=-19mm]frame.north west) {$\checkmark$};},
+  left=12mm,right=8mm,top=7mm,bottom=5mm,
+  before skip=4pt,after skip=6pt,
+  before upper={\sffamily\bfseries\color{SEAcademicBlue}\normalsize\MakeUppercase{Learning Objectives}\par\vspace{3mm}\rmfamily\mdseries\color{SEText}\fontsize{9.4}{11.3}\selectfont},
+  overlay unbroken and first={\node[anchor=north west,text=SECrimson,font=\bfseries\large] at ([xshift=5mm,yshift=-14mm]frame.north west) {$\checkmark$};},
   shadow={1.5mm}{-1.5mm}{0mm}{black!14}
 }
-\AtBeginEnvironment{SEObjectives}{\setlist[itemize]{label=\textcolor{SECrimson}{\ensuremath{\checkmark}},leftmargin=7mm,itemsep=.55em,topsep=0pt}}
+\AtBeginEnvironment{SEObjectives}{\setlist[itemize]{label=\textcolor{SECrimson}{\ensuremath{\checkmark}},leftmargin=6mm,itemsep=.20em,topsep=0pt,parsep=0pt}}
 
 \renewenvironment{quote}
-  {\begin{tcolorbox}[enhanced,breakable,colback=SEDeepBlue,colframe=SEDeepBlue,arc=0mm,boxrule=0pt,borderline west={3mm}{0pt}{SECrimson},left=8mm,right=8mm,top=7mm,bottom=7mm]\color{white}\itshape\large}
+  {\begin{tcolorbox}[enhanced,breakable,colback=SEDeepBlue,colframe=SEDeepBlue,arc=0mm,boxrule=0pt,borderline west={3mm}{0pt}{SECrimson},left=7mm,right=7mm,top=5mm,bottom=5mm,before skip=7pt,after skip=8pt]\color{white}\itshape\large}
   {\end{tcolorbox}}
 
-\AtBeginEnvironment{Shaded}{\Needspace{8\baselineskip}}
-\AtBeginEnvironment{verbatim}{\Needspace{8\baselineskip}}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},fontsize=\small}
-\tcolorboxenvironment{Shaded}{enhanced,breakable,colback=SETerminal,colframe=SETerminal,arc=5mm,boxrule=0pt,left=7mm,right=7mm,top=12mm,bottom=6mm,before skip=1.2em,after skip=1.2em,overlay unbroken and first={\fill[SECrimson] ([xshift=7mm,yshift=-6mm]frame.north west) circle (1.5mm);\fill[SEGold] ([xshift=12mm,yshift=-6mm]frame.north west) circle (1.5mm);\fill[SEGreen] ([xshift=17mm,yshift=-6mm]frame.north west) circle (1.5mm);\draw[white!22] ([xshift=7mm,yshift=-10mm]frame.north west)--([xshift=-7mm,yshift=-10mm]frame.north east);\node[anchor=north,text=white!75,font=\ttfamily\small] at ([yshift=-3.5mm]frame.north) {Terminal};}}
+\lstdefinestyle{SECode}{basicstyle=\ttfamily\fontsize{8.1}{9.5}\selectfont\color{white!94},keywordstyle=\color{SEPeriwinkle}\bfseries,commentstyle=\color{white!58}\itshape,stringstyle=\color{SEGold},breaklines=true,breakatwhitespace=false,columns=fullflexible,keepspaces=true,showstringspaces=false,upquote=true,tabsize=2}
+\newtcblisting{SETerminal}[1][]{enhanced,breakable,listing only,listing engine=listings,listing options={style=SECode,#1},colback=SETerminal,colframe=SETerminal,coltext=white,arc=3mm,boxrule=0pt,left=5mm,right=5mm,top=9mm,bottom=4mm,before skip=7pt,after skip=9pt,breakable,overlay unbroken and first={\fill[SECrimson] ([xshift=6mm,yshift=-4.7mm]frame.north west) circle (1.2mm);\fill[SEGold] ([xshift=10mm,yshift=-4.7mm]frame.north west) circle (1.2mm);\fill[SEGreen] ([xshift=14mm,yshift=-4.7mm]frame.north west) circle (1.2mm);\node[anchor=north,text=white!70,font=\ttfamily\fontsize{7.5}{8}\selectfont] at ([yshift=-2.5mm]frame.north) {Terminal};},overlay middle and last={\node[anchor=north east,text=white!55,font=\ttfamily\fontsize{7}{8}\selectfont] at ([xshift=-4mm,yshift=-2mm]frame.north east) {Terminal -- continued};}}
 
 \captionsetup{font={small,it},labelfont={bf,color=SEAcademicBlue},textfont={color=SEMuted},justification=centering,singlelinecheck=true,skip=7pt}
-\setkeys{Gin}{width=\linewidth,height=.76\textheight,keepaspectratio}
+\setkeys{Gin}{width=.72\linewidth,height=.62\textheight,keepaspectratio}
 \rowcolors{2}{SESoftGray}{white}
 \arrayrulecolor{white}
-\setlength{\tabcolsep}{7pt}
-\setlength{\extrarowheight}{3pt}
+\AtBeginEnvironment{longtable}{\fontsize{8.8}{10.7}\selectfont}
+\setlength{\tabcolsep}{5pt}
+\setlength{\extrarowheight}{1.5pt}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -141,3 +145,6 @@
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 
 \AtBeginDocument{\renewcommand{\contentsname}{Contents}\setcounter{tocdepth}{1}}
+\makeatletter
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{4.2em}}
+\makeatother
