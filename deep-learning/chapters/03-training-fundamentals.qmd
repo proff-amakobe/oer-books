@@ -217,15 +217,11 @@ The loss landscape looks something like a mountain range, full of peaks (high lo
 
 This landscape analogy is more than just a metaphor. It directly informs almost every major training decision: learning rate, optimizer choice, regularization strategy, batch size. Understanding the landscape helps you understand why each of these decisions matters.
 
-+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.1 \]**                                                                                                                                                                                                                  |
-|                                                                                                                                                                                                                                       |
-| **The Loss Landscape**                                                                                                                                                                                                                |
-|                                                                                                                                                                                                                                       |
-| *A 3D surface showing peaks, valleys, saddle points, and plateaus. Gradient descent trajectories from multiple starting points converge toward low-loss regions at different rates, depending on learning rate and optimizer choice.* |
-+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-1 .technical-figure}
+![](../assets/figures/fig-3-1-loss-landscape.svg){fig-alt="Contour representation of a conceptual loss landscape with multiple low-loss basins and two illustrative descent paths approaching a central low-loss region from different starting points." width="100%"}
 
 **Figure 3.1:** The Loss Landscape. *The loss function defines a surface in weight space. Training is navigation toward a valley. The shape of the terrain determines which strategies work.*
+:::
 
 ### The Gradient: Reading the Slope of the Terrain
 
@@ -249,15 +245,11 @@ If your steps are too small, you will eventually reach the valley, but it will t
 
 A just-right learning rate descends steadily --- fast enough to make progress, small enough to settle accurately into a minimum. Finding this balance is part art, part systematic exploration. The loss curves in Figure 3.4 illustrate what each scenario looks like in practice: a key skill this chapter develops.
 
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.4 \]**                                                                                                                                                                                                                          |
-|                                                                                                                                                                                                                                               |
-| **The Learning Rate Dilemma**                                                                                                                                                                                                                 |
-|                                                                                                                                                                                                                                               |
-| *Three training loss curves: too high (erratic, possibly diverging), just right (smooth descent to low loss), too low (slow descent that plateaus far from minimum). A fourth curve shows learning rate warmup followed by cosine annealing.* |
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-4 .technical-figure}
+![](../assets/figures/fig-3-4-learning-rate-effects.svg){fig-alt="Four conceptual training-loss curves: an unstable high learning rate, a steadily descending appropriate rate, a slowly descending low rate, and warmup followed by cosine annealing." width="100%"}
 
 **Figure 3.4:** Learning Rate Effects. *The learning rate is arguably the single most important hyperparameter. Learn to read its signature in the training curve.*
+:::
 
 ### Backpropagation: Tracing Responsibility Backward
 
@@ -293,15 +285,11 @@ Use a small batch of examples --- typically 32 to 256 --- per update. Think of i
 
 Mini-batch is the dominant approach in modern deep learning. It is fast enough to train on enormous datasets, accurate enough to converge reliably, and just noisy enough to provide the regularizing effect that helps networks generalize. GPU hardware is also designed to process batches of examples in parallel --- making mini-batch training dramatically faster than stochastic updates on modern hardware.
 
-+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.5 \]**                                                                                                                                                                                        |
-|                                                                                                                                                                                                             |
-| **Gradient Descent Strategies**                                                                                                                                                                             |
-|                                                                                                                                                                                                             |
-| *Three descent paths through a contoured loss landscape. Batch: clean, efficient path. SGD: noisy, zigzag path. Mini-batch: moderately noisy but generally descending. Speed-stability tradeoff annotated.* |
-+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-5 .technical-figure}
+![](../assets/figures/fig-3-5-batch-strategies.svg){fig-alt="Three matched contour panels showing a stable batch-gradient path, a noisy stochastic-gradient path, and a moderately noisy mini-batch path toward a low-loss region." width="100%"}
 
 **Figure 3.5:** Batch Strategies. *Noisier gradient estimates produce more erratic paths --- but sometimes a little noise helps escape shallow traps.*
+:::
 
 ### Modern Optimizers: Smarter Ways to Descend
 
@@ -349,15 +337,11 @@ Neural networks learn by comparing --- how different are these weights from last
 
 A single training iteration --- processing one mini-batch and updating the weights once --- follows a strict four-phase sequence. This sequence will repeat millions of times over the course of a full training run. Understanding it deeply is the key to diagnosing problems when things go wrong.
 
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.3 \]**                                                                                                                                                                                                                       |
-|                                                                                                                                                                                                                                            |
-| **The Training Loop: One Iteration**                                                                                                                                                                                                       |
-|                                                                                                                                                                                                                                            |
-| *A circular flow diagram: Forward Pass → Loss Computation → Backward Pass (Backpropagation) → Parameter Update → repeat. Each phase color-coded and labeled with plain-language descriptions and the key mathematical operation involved.* |
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-3 .technical-figure}
+![](../assets/figures/fig-3-3-training-loop.svg){fig-alt="Circular four-phase training loop: forward pass produces predictions, loss computation compares them with targets, backpropagation computes gradients, and the optimizer updates parameters before the loop repeats." width="100%"}
 
 **Figure 3.3:** The Heartbeat of Training. *This four-phase loop repeats for every mini-batch in every epoch. Learn to describe each phase fluently.*
+:::
 
 ### Phase 1: The Forward Pass
 
@@ -385,15 +369,11 @@ How many epochs does training require? There is no universal answer --- it depen
 
 A fixed learning rate throughout training is rarely optimal. Early in training, the network\'s weights are far from their ideal values, and large steps help cover ground quickly. Later in training, as weights approach a good solution, large steps will cause the optimizer to overshoot and oscillate rather than settle. The ideal learning rate changes across training --- and learning rate schedules formalize this intuition.
 
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.9 \]**                                                                                                                                                                                                                                                   |
-|                                                                                                                                                                                                                                                                        |
-| **Learning Rate Schedules**                                                                                                                                                                                                                                            |
-|                                                                                                                                                                                                                                                                        |
-| *A single graph overlaying four training curves: constant rate, step decay, cosine annealing, and warmup followed by cosine annealing. Final validation accuracy labeled for each. The warmup + cosine curve achieves the best result with the smoothest convergence.* |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-9 .technical-figure}
+![](../assets/figures/fig-3-9-learning-rate-schedules.svg){fig-alt="Conceptual graph comparing constant, step-decay, cosine-annealing, and warmup-plus-cosine learning-rate schedules over training epochs." width="100%"}
 
 **Figure 3.9:** Schedule Comparison. *Schedule choice can matter as much as architecture choice. The same model, trained identically except for its learning rate schedule, can produce substantially different outcomes.*
+:::
 
 ### Step Decay
 
@@ -435,15 +415,11 @@ Overfitting occurs when the model learns the training data too precisely --- inc
 
 The underlying cause is almost always a mismatch between model capacity and data size or diversity. A very deep, highly parameterized network applied to a small dataset has the capacity to memorize every training example --- and it will, if given enough epochs. This is not a sign of intelligence; it is a sign of overpowered memorization.
 
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.6 \]**                                                                                                                                                                                                                                                                                 |
-|                                                                                                                                                                                                                                                                                                      |
-| **The Bias-Variance Spectrum**                                                                                                                                                                                                                                                                       |
-|                                                                                                                                                                                                                                                                                                      |
-| *Four learning curve panels: underfitting (both losses high), good fit (both losses low and tracking), mild overfitting (training low, validation plateau), severe overfitting (training low, validation rising). Each panel labeled with a diagnostic interpretation and a suggested intervention.* |
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-6 .technical-figure}
+![](../assets/figures/fig-3-6-training-curves.svg){fig-alt="Four paired training and validation loss panels showing underfitting, a good fit, mild overfitting with validation plateau, and severe overfitting with rising validation loss." width="100%"}
 
 **Figure 3.6:** Reading Training Curves. *Learn to recognize these four patterns instantly. Each represents a distinct failure mode with a distinct remedy.*
+:::
 
 ### Dropout: Training a Team, Not a Star
 
@@ -455,15 +431,11 @@ The consequence is powerful: no single neuron can become indispensable. The netw
 
 At test time, all neurons are active --- but their outputs are scaled down by the dropout probability to maintain the correct expected magnitude. No randomness at inference; only robust representations built during training.
 
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.7 \]**                                                                                                                                                                                                                                                                         |
-|                                                                                                                                                                                                                                                                                              |
-| **How Dropout Works**                                                                                                                                                                                                                                                                        |
-|                                                                                                                                                                                                                                                                                              |
-| *Left: full network active. Middle: dropout applied during training --- grayed neurons are inactive in this step. Right: different neurons inactive in the next step. Far right: all active at test time, outputs scaled. The pattern of \'coverage\' across training steps is illustrated.* |
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-7 .technical-figure}
+![](../assets/figures/fig-3-7-dropout.svg){fig-alt="Four network panels showing the full network, two training steps with different neurons crossed out by dropout, and inference with all neurons active and outputs scaled." width="100%"}
 
 **Figure 3.7:** Dropout. *By randomly silencing neurons during training, Dropout prevents over-reliance on any single pathway and forces distributed learning.*
+:::
 
 ### L2 Regularization: Occam\'s Razor for Neural Networks
 
@@ -533,15 +505,11 @@ Recall the telephone game: a message is whispered from person to person down a l
 
 During backpropagation, the gradient signal travels backward through layers in exactly this manner, being multiplied at each layer by local derivatives. And the same two failure modes can occur.
 
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.8 \]**                                                                                                                                                                                                                                                                   |
-|                                                                                                                                                                                                                                                                                        |
-| **Gradient Pathologies**                                                                                                                                                                                                                                                               |
-|                                                                                                                                                                                                                                                                                        |
-| *A deep network shown as a chain of layers. Vanishing case: gradient arrows shrink to near-invisible toward early layers. Exploding case: arrows grow to catastrophic size. Right panel: training curves for each pathology --- flat/zero for vanishing, exploding/NaN for exploding.* |
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-8 .technical-figure}
+![](../assets/figures/fig-3-8-gradient-pathologies.svg){fig-alt="Two deep-network chains compare backward gradients that shrink toward early layers with gradients that grow toward early layers; paired loss curves indicate slow learning and a loss spike or NaN." width="100%"}
 
 **Figure 3.8:** Vanishing and Exploding Gradients. *These pathologies were among the central technical failures behind the second AI Winter. Modern architectures and initialization methods largely solved them --- but they still occur in poorly designed networks.*
+:::
 
 ### Vanishing Gradients: When Early Layers Stop Learning
 
@@ -589,15 +557,11 @@ For the past two weeks, you have been building MIPDS --- the Multimodal Intellig
 
 But an architecture without a training engine is inert. This week, you complete the foundation: the mechanisms by which the MIPDS vision component will actually learn to see.
 
-+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **\[ FIGURE 3.10 \]**                                                                                                                                                                                                                                                                                                                     |
-|                                                                                                                                                                                                                                                                                                                                           |
-| **MIPDS Training Engine --- Week 3 State**                                                                                                                                                                                                                                                                                                |
-|                                                                                                                                                                                                                                                                                                                                           |
-| *System diagram of the MIPDS vision component (from Week 2) with training infrastructure overlaid: loss function, optimizer, regularization layers (Dropout), data augmentation pipeline, validation loop, learning rate schedule, and checkpoint manager. Labels connect each component to its conceptual motivation from this chapter.* |
-+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+::: {#figure-3-10 .technical-figure}
+![](../assets/figures/fig-3-10-mipds-training-engine.svg){fig-alt="MIPDS training-time pipeline from labeled images through augmentation, the vision model, cross-entropy loss, and Adam or AdamW updates, with a warmup-plus-cosine schedule and a separate validation and checkpoint-selection path." width="100%"}
 
 **Figure 3.10:** MIPDS Week 3: Structure + Training Engine. *Every labeled component in this diagram corresponds to a concept from this chapter. You should be able to explain each one, justify its presence, and describe what failure mode it prevents.*
+:::
 
 ### Designing the Training Engine: Key Decisions
 
