@@ -1,0 +1,167 @@
+book:
+  chapters:
+    - index.qmd
+    - preface.qmd
+    - acknowledgments.qmd
+    - chapters/01-introduction.qmd
+    - chapters/02-requirements-engineering.qmd
+    - chapters/03-systems-modeling.qmd
+    - chapters/04-software-architecture.qmd
+    - chapters/05-ui-ux.qmd
+    - chapters/06-agile-methodologies.qmd
+    - chapters/07-version-control.qmd
+    - chapters/08-testing-quality.qmd
+    - chapters/09-cicd.qmd
+    - chapters/10-data-management.qmd
+    - chapters/11-cloud-services.qmd
+    - chapters/12-security.qmd
+    - chapters/13-maintenance-evolution.qmd
+    - chapters/14-ethics-professionalism.qmd
+    - chapters/15-final-project-integration.qmd
+    - chapters/glossary.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles/custom.css
+    toc: true
+    code-copy: true
+    number-sections: true
+    reader-mode: true
+    link-external-newwindow: true
+    include-after-body: scripts/book-ui.html
+
+  pdf:
+    documentclass: scrbook
+    classoption: ["openany"]
+    pdf-engine: lualatex
+
+    papersize: "8.5in,11in"
+    fontsize: 11pt
+    linestretch: 1.12
+
+    geometry:
+      - paperwidth=8.5in
+      - paperheight=11in
+      - inner=1.15in
+      - outer=0.85in
+      - top=0.85in
+      - bottom=0.9in
+      - includeheadfoot
+
+    toc: true
+    toc-depth: 3
+    number-sections: true
+
+    colorlinks: true
+    linkcolor: GDSIGrayLink
+    urlcolor: GDSIGrayLink
+
+    fig-align: center
+    fig-width: 7.0
+    fig-pos: "H"
+
+    include-in-header:
+      text: |
+        % ---------------------------------------------------------------
+        % FONTS
+        % ---------------------------------------------------------------
+        \usepackage{fontspec}
+        \setmainfont{Latin Modern Roman}
+        \setsansfont{Latin Modern Sans}
+        \setmonofont{Latin Modern Mono}[Scale=0.88]
+
+        \directlua{
+          luaotfload.add_fallback("boxdrawfallback", {
+            "Latin Modern Mono:mode=harf;",
+          })
+        }
+        \defaultfontfeatures+{RawFeature={fallback=boxdrawfallback}}
+
+        \usepackage{unicode-math}
+        \setmathfont{Latin Modern Math}
+        \usepackage{microtype}
+
+        % ---------------------------------------------------------------
+        % DATE — fires after Quarto's template sets \date{} so it wins
+        % ---------------------------------------------------------------
+        \AtBeginDocument{\date{March 2026}}
+
+        % ---------------------------------------------------------------
+        % GRAYSCALE PALETTE
+        % ---------------------------------------------------------------
+        \usepackage{xcolor}
+        \definecolor{GDSIGray}{HTML}{222222}
+        \definecolor{GDSIGrayLink}{HTML}{2F2F2F}
+        \definecolor{GDSILight}{HTML}{F2F2F2}
+        \definecolor{GDSIFrame}{HTML}{B5B5B5}
+
+        % ---------------------------------------------------------------
+        % SECTION / CHAPTER STYLING
+        % ---------------------------------------------------------------
+        \usepackage{sectsty}
+        \chapterfont{\color{GDSIGray}}
+        \sectionfont{\color{GDSIGray}}
+        \subsectionfont{\color{GDSIGray}}
+
+        \usepackage{titlesec}
+        \titleformat{\chapter}[display]
+          {\normalfont\bfseries\LARGE\color{GDSIGray}}
+          {\chaptername\ \thechapter}{14pt}{\LARGE}
+        \titlespacing*{\chapter}{0pt}{-5pt}{18pt}
+        \pretocmd{\chapter}{\clearpage}{}{}
+
+        % ---------------------------------------------------------------
+        % GRAPHICS + FLOAT PLACEMENT
+        % ---------------------------------------------------------------
+        \usepackage{float}
+        \usepackage{graphicx}
+        \setkeys{Gin}{width=\linewidth,height=0.9\textheight,keepaspectratio}
+
+        % ---------------------------------------------------------------
+        % CODE BLOCK PAGE BREAKS (needspace — no stack overflow)
+        % ---------------------------------------------------------------
+        \usepackage{needspace}
+        \usepackage{etoolbox}
+        \AtBeginEnvironment{Shaded}{\Needspace{6\baselineskip}}
+        \AtBeginEnvironment{verbatim}{\Needspace{6\baselineskip}}
+
+        % ---------------------------------------------------------------
+        % TABLES
+        % ---------------------------------------------------------------
+        \usepackage{longtable}
+        \usepackage{booktabs}
+        \usepackage{colortbl}
+        \rowcolors{2}{GDSILight}{white}
+        \usepackage{adjustbox}
+        \setlength{\extrarowheight}{2pt}
+
+        % ---------------------------------------------------------------
+        % CALLOUT BOX
+        % ---------------------------------------------------------------
+        \usepackage{tcolorbox}
+        \tcbuselibrary{skins}
+        \newtcolorbox{gdsiNote}{
+          colback=GDSILight,
+          colframe=GDSIFrame,
+          title=Key Insight,
+          fonttitle=\bfseries
+        }
+
+        % ---------------------------------------------------------------
+        % ALGORITHMS
+        % ---------------------------------------------------------------
+        \usepackage{algorithm}
+        \usepackage{algpseudocode}
+
+  epub:
+    number-sections: true
+    # epub-chapter-level controls how Pandoc splits the book into separate
+    # XHTML files inside the EPUB container. Setting it to 1 means each
+    # top-level chapter (#) gets its own file, which ensures section IDs
+    # are always defined in the same file the TOC entry points to.
+    # Without this, Pandoc sometimes references an anchor that lives in a
+    # different split file, producing the RSC-012 "fragment not defined" errors.
+    epub-chapter-level: 1
+    # Explicit cover image ensures the OPF manifest includes it correctly.
+    cover-image: assets/images/cover.png

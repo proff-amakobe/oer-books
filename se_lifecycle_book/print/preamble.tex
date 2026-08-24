@@ -1,0 +1,143 @@
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{Latin Modern Mono}[Scale=0.88]
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\usepackage{microtype}
+\usepackage{xcolor}
+\definecolor{SENavy}{HTML}{071147}
+\definecolor{SEDeepBlue}{HTML}{123A9D}
+\definecolor{SEAcademicBlue}{HTML}{3155D4}
+\definecolor{SEBlue}{HTML}{3155D4}
+\definecolor{SEPeriwinkle}{HTML}{8998FF}
+\definecolor{SECrimson}{HTML}{E43B5A}
+\definecolor{SESoftBlue}{HTML}{EAF4FA}
+\definecolor{SESoftGray}{HTML}{F4F6F8}
+\definecolor{SEText}{HTML}{151922}
+\definecolor{SEMuted}{HTML}{6D7480}
+\definecolor{SETerminal}{HTML}{031926}
+\definecolor{SEGreen}{HTML}{70D44B}
+\definecolor{SEGold}{HTML}{F2C94C}
+\color{SEText}
+
+\usepackage{geometry}
+\geometry{
+  paperwidth=8.5in,paperheight=11in,
+  inner=1.10in,outer=.76in,top=.76in,bottom=.87in,
+  bindingoffset=.12in,includeheadfoot,heightrounded
+}
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{needspace}
+\usepackage{etoolbox}
+\usepackage{booktabs,tabularx,longtable,array,colortbl}
+\usepackage{caption}
+\usepackage{ragged2e}
+\usepackage{fancyvrb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+\AtBeginDocument{\hypersetup{
+  pdftitle={The Complete Software Engineering Lifecycle},
+  pdfauthor={Moody Amakobe},
+  pdfsubject={Software Engineering - 2026 Edition - Print ISBN 9798295760709},
+  pdfcreator={Quarto and LuaLaTeX},
+  colorlinks=true,linkcolor=SEText,urlcolor=SEDeepBlue,citecolor=SEText,
+  pdfborder={0 0 0},bookmarksopen=false,bookmarksdepth=2
+}}
+
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\brokenpenalty=5000
+\predisplaypenalty=6000
+\postdisplaypenalty=1000
+\setlength{\emergencystretch}{2em}
+
+\newcommand{\SECategory}{%
+  \ifcase\value{chapter}\or INTRODUCTION\or REQUIREMENTS\or SYSTEM MODELING\or ARCHITECTURE\or EXPERIENCE DESIGN\or AGILE DELIVERY\or VERSION CONTROL\or QUALITY\or CI/CD\or DATA \& APIs\or CLOUD\or SECURITY\or EVOLUTION\or PROFESSIONAL PRACTICE\or INTEGRATION\fi}
+\newcommand{\SEDescription}{%
+  \ifcase\value{chapter}\or The complete lifecycle, from engineering principles and SDLC models to version control and collaboration.\or Discovering, documenting, validating, and managing what software systems must accomplish.\or Using UML and complementary models to understand, communicate, and design software systems.\or Structuring software through architectural styles, SOLID principles, and proven design patterns.\or Designing usable, accessible interfaces through human-centered research and iterative prototyping.\or Organizing adaptive teams, iterative delivery, estimation, and project work.\or Building reliable collaborative workflows with Git, pull requests, and code review.\or Designing layered testing strategies and engineering quality into every stage of delivery.\or Automating integration, delivery, deployment, and operational feedback.\or Designing durable data models and dependable application programming interfaces.\or Packaging, deploying, scaling, and operating software on modern cloud platforms.\or Integrating secure design, implementation, verification, and operational practice.\or Maintaining, refactoring, documenting, and evolving long-lived software systems.\or Practicing software engineering responsibly, collaboratively, legally, and ethically.\or Bringing the lifecycle together in a complete, polished, professional software project.\fi}
+
+\titleformat{\chapter}[display]
+  {\normalfont\color{white}}
+  {\begin{tikzpicture}[remember picture,overlay]
+     \fill[SENavy] (current page.north west) rectangle ([yshift=-6.45in]current page.north east);
+     \fill[SEDeepBlue] ([xshift=.53\paperwidth]current page.north) rectangle ([yshift=-6.45in]current page.north east);
+     \fill[SEPeriwinkle] ([yshift=-6.45in]current page.north west) rectangle ([yshift=-6.51in]current page.north east);
+     \draw[SEPeriwinkle,opacity=.16,line width=.6pt] ([xshift=-2.0in,yshift=-.5in]current page.north east) grid[xstep=.42in,ystep=.42in] ([xshift=-.12in,yshift=-3.8in]current page.north east);
+     \node[rotate=90,anchor=south west,text=SEPeriwinkle,font=\sffamily\bfseries\small] at ([xshift=.33in,yshift=-2.15in]current page.north west) {CHAPTER \ifnum\value{chapter}<10 0\fi\thechapter};
+   \end{tikzpicture}%
+   \sffamily\bfseries\color{SEPeriwinkle}\Large CHAPTER\\[-.1em]
+   {\color{white}\fontsize{74}{74}\selectfont\ifnum\value{chapter}<10 0\fi\thechapter}\\[.15em]
+   {\color{SEPeriwinkle}\large\SECategory}}
+  {1.5em}
+  {\sffamily\bfseries\fontsize{31}{35}\selectfont\color{white}}
+  [\vspace{.32in}{\rmfamily\color{white!72}\fontsize{12}{16}\selectfont\SEDescription}\vspace{.18in}{\color{SEPeriwinkle}\rule{1.05in}{4pt}}]
+\titlespacing*{\chapter}{0pt}{-0.55in}{2.2in}
+
+\titleformat{name=\chapter,numberless}[display]
+  {\normalfont\rmfamily\bfseries\color{SEText}\fontsize{28}{32}\selectfont}
+  {}{0pt}{}
+  [\vspace{.35em}{\color{SEPeriwinkle}\rule{.95in}{4pt}}]
+\titlespacing*{name=\chapter,numberless}{0pt}{1.15in}{1.0in}
+
+\titleformat{\section}[display]
+  {\normalfont\rmfamily\bfseries\color{SEText}\fontsize{23}{27}\selectfont}
+  {\sffamily\bfseries\color{SEAcademicBlue}\small\thesection}
+  {.25em}{}
+  [\vspace{.35em}{\color{SEAcademicBlue}\rule{.72in}{3pt}}]
+\titlespacing*{\section}{0pt}{2.2em}{1.1em}
+\titleformat{\subsection}[hang]
+  {\normalfont\sffamily\bfseries\fontsize{13}{16}\selectfont\color{SEText}}
+  {\color{SEAcademicBlue}\thesubsection}{.45em}{}
+\titlespacing*{\subsection}{0pt}{1.7em}{.65em}
+\titleformat{\subsubsection}[hang]
+  {\normalfont\sffamily\bfseries\fontsize{11}{14}\selectfont\color{SEText}}
+  {\color{SEAcademicBlue}\thesubsubsection}{.45em}{}
+\titlespacing*{\subsubsection}{0pt}{1.35em}{.45em}
+
+\newtcolorbox{SEObjectives}{
+  enhanced,breakable,colback=white,colframe=SESoftGray,boxrule=.5pt,
+  borderline west={0pt}{0pt}{white},arc=1mm,boxsep=0pt,
+  left=15mm,right=10mm,top=11mm,bottom=8mm,
+  before upper={\sffamily\bfseries\color{SEAcademicBlue}\large\MakeUppercase{Learning Objectives}\par\vspace{5mm}\rmfamily\mdseries\color{SEText}\normalsize},
+  overlay unbroken and first={\node[anchor=north west,text=SECrimson,font=\bfseries\Large] at ([xshift=6mm,yshift=-19mm]frame.north west) {$\checkmark$};},
+  shadow={1.5mm}{-1.5mm}{0mm}{black!14}
+}
+\AtBeginEnvironment{SEObjectives}{\setlist[itemize]{label=\textcolor{SECrimson}{\ensuremath{\checkmark}},leftmargin=7mm,itemsep=.55em,topsep=0pt}}
+
+\renewenvironment{quote}
+  {\begin{tcolorbox}[enhanced,breakable,colback=SEDeepBlue,colframe=SEDeepBlue,arc=0mm,boxrule=0pt,borderline west={3mm}{0pt}{SECrimson},left=8mm,right=8mm,top=7mm,bottom=7mm]\color{white}\itshape\large}
+  {\end{tcolorbox}}
+
+\AtBeginEnvironment{Shaded}{\Needspace{8\baselineskip}}
+\AtBeginEnvironment{verbatim}{\Needspace{8\baselineskip}}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},fontsize=\small}
+\tcolorboxenvironment{Shaded}{enhanced,breakable,colback=SETerminal,colframe=SETerminal,arc=5mm,boxrule=0pt,left=7mm,right=7mm,top=12mm,bottom=6mm,before skip=1.2em,after skip=1.2em,overlay unbroken and first={\fill[SECrimson] ([xshift=7mm,yshift=-6mm]frame.north west) circle (1.5mm);\fill[SEGold] ([xshift=12mm,yshift=-6mm]frame.north west) circle (1.5mm);\fill[SEGreen] ([xshift=17mm,yshift=-6mm]frame.north west) circle (1.5mm);\draw[white!22] ([xshift=7mm,yshift=-10mm]frame.north west)--([xshift=-7mm,yshift=-10mm]frame.north east);\node[anchor=north,text=white!75,font=\ttfamily\small] at ([yshift=-3.5mm]frame.north) {Terminal};}}
+
+\captionsetup{font={small,it},labelfont={bf,color=SEAcademicBlue},textfont={color=SEMuted},justification=centering,singlelinecheck=true,skip=7pt}
+\setkeys{Gin}{width=\linewidth,height=.76\textheight,keepaspectratio}
+\rowcolors{2}{SESoftGray}{white}
+\arrayrulecolor{white}
+\setlength{\tabcolsep}{7pt}
+\setlength{\extrarowheight}{3pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\sffamily\bfseries\scriptsize\color{SEAcademicBlue}CHAPTER \ifnum\value{chapter}<10 0\fi\thechapter\enspace\textperiodcentered\enspace\MakeUppercase{\leftmark}}
+\fancyhead[RO]{\sffamily\bfseries\scriptsize\color{SEMuted}SOFTWARE ENGINEERING\enspace\textperiodcentered\enspace EDITION 2026}
+\fancyfoot[LE]{\sffamily\bfseries\color{SEAcademicBlue}\thepage\hfill\scriptsize\itshape\color{SEMuted}The Complete Software Engineering Lifecycle}
+\fancyfoot[RO]{\sffamily\scriptsize\itshape\color{SEMuted}The Complete Software Engineering Lifecycle\hfill\bfseries\color{SEAcademicBlue}\thepage}
+\renewcommand{\headrulewidth}{.4pt}
+\renewcommand{\footrulewidth}{.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{SESoftGray}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{SESoftGray}\leaders\hrule height \footrulewidth\hfill}}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+\AtBeginDocument{\renewcommand{\contentsname}{Contents}\setcounter{tocdepth}{1}}
