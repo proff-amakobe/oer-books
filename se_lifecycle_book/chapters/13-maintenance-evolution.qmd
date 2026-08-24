@@ -1,4 +1,4 @@
-# Chapter 13: Software Maintenance and Evolution
+# Software Maintenance and Evolution
 
 ## Learning Objectives
 
@@ -16,7 +16,7 @@ By the end of this chapter, you will be able to:
 
 ------------------------------------------------------------------------
 
-## 13.1 The Reality of Software Maintenance
+## The Reality of Software Maintenance
 
 There's a common misconception that software development is primarily about building new things. In reality, the vast majority of software work involves maintaining, modifying, and extending existing systems. Studies consistently show that 60-80% of software costs occur after initial development, during the maintenance phase that can span decades.
 
@@ -24,7 +24,7 @@ This reality surprises many new developers. The excitement of greenfield project
 
 Understanding software maintenance isn't just practical necessity; it fundamentally shapes how we should approach software development from the beginning. Code that's easy to maintain provides value for years. Code that's difficult to maintain becomes a liability that compounds over time, eventually requiring expensive rewrites or abandonment.
 
-### 13.1.1 Types of Software Maintenance
+### Types of Software Maintenance
 
 Software maintenance isn't a single activity but a collection of different types of work, each with distinct motivations and challenges:
 
@@ -73,7 +73,7 @@ The distribution of effort is telling. **Perfective maintenance**—adding new f
 
 **Preventive maintenance** is chronically underfunded despite offering the best long-term return. Refactoring code, improving documentation, and reducing technical debt don't provide immediate visible value. Stakeholders struggle to justify spending time on improvements that don't add features or fix bugs. Yet neglecting preventive maintenance steadily increases the cost of all other maintenance types.
 
-### 13.1.2 The Maintenance Mindset
+### The Maintenance Mindset
 
 Approaching software with maintenance in mind requires different thinking than building from scratch:
 
@@ -85,7 +85,7 @@ Approaching software with maintenance in mind requires different thinking than b
 
 **Working software is the primary constraint.** When modifying existing systems, you must preserve existing functionality. This is fundamentally different from greenfield development where you define functionality. Maintenance developers work within constraints established by previous decisions, for better or worse.
 
-### 13.1.3 Measuring Maintainability
+### Measuring Maintainability
 
 How do you know if software is maintainable? Several metrics provide insight:
 
@@ -117,13 +117,13 @@ How do you know if software is maintainable? Several metrics provide insight:
 
 ------------------------------------------------------------------------
 
-## 13.2 Technical Debt
+## Technical Debt
 
 **Technical debt** is a metaphor introduced by Ward Cunningham to describe the accumulated cost of shortcuts, expedient decisions, and deferred work in software. Like financial debt, technical debt allows faster progress now in exchange for ongoing interest payments and eventual principal repayment.
 
 The metaphor is powerful because it reframes discussions about code quality in business terms. Executives who dismiss "code cleanup" as developer self-indulgence understand that carrying debt has costs. Technical debt isn't inherently bad—strategic debt can accelerate time-to-market—but unmanaged debt eventually overwhelms a project.
 
-### 13.2.1 Sources of Technical Debt
+### Sources of Technical Debt
 
 Technical debt accumulates through various mechanisms:
 
@@ -164,7 +164,7 @@ Technical debt accumulates through various mechanisms:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 13.2.2 Manifestations of Technical Debt
+### Manifestations of Technical Debt
 
 Technical debt manifests in various recognizable patterns:
 
@@ -182,7 +182,7 @@ Technical debt manifests in various recognizable patterns:
 
 **Poor Architecture** constrains future development. A monolith that should be microservices (or vice versa). Tight coupling that prevents independent deployment. Wrong database choice for the access patterns. Architectural debt is expensive to repay because fixes require substantial restructuring.
 
-### 13.2.3 The Interest Payments
+### The Interest Payments
 
 Technical debt accrues interest in several forms:
 
@@ -231,7 +231,7 @@ Let's visualize how technical debt compounds:
 
 This progression isn't inevitable, but it's common. Without active debt management, the trend is always toward accumulation. The later you address debt, the more expensive the fix.
 
-### 13.2.4 Managing Technical Debt
+### Managing Technical Debt
 
 Effective debt management requires visibility, prioritization, and discipline:
 
@@ -275,13 +275,13 @@ Debt in frequently-modified, high-risk areas deserves priority. Debt in stable, 
 
 ------------------------------------------------------------------------
 
-## 13.3 Refactoring
+## Refactoring
 
 **Refactoring** is the process of restructuring existing code without changing its external behavior. The goal is improving internal structure—making code more readable, maintainable, and extensible—while preserving what the code does.
 
 This definition is precise and important. Refactoring is not adding features. Refactoring is not fixing bugs. Those activities change behavior. Refactoring changes structure only. This distinction matters because behavior-preserving changes can be made with high confidence; tests that passed before should pass after.
 
-### 13.3.1 Why Refactoring Matters
+### Why Refactoring Matters
 
 Code structure degrades over time even with the best intentions. Initial designs make assumptions that prove incorrect. Features are added in ways that weren't anticipated. Different developers bring different styles. Rushed work introduces shortcuts. Without deliberate effort to improve structure, entropy wins.
 
@@ -289,7 +289,7 @@ Refactoring is the antidote. It allows code to evolve alongside understanding. A
 
 The alternative to refactoring is eventual rewriting. Codebases that never refactor eventually become unmaintainable and require replacement—a far more expensive proposition than ongoing maintenance.
 
-### 13.3.2 When to Refactor
+### When to Refactor
 
 Refactoring opportunities appear constantly during regular development:
 
@@ -303,7 +303,7 @@ Refactoring opportunities appear constantly during regular development:
 
 **When tests are difficult to write**: Difficulty testing often indicates structural problems. Code that's hard to test is usually hard to understand and modify. Refactor to improve testability.
 
-### 13.3.3 Refactoring Techniques
+### Refactoring Techniques
 
 Martin Fowler's catalog of refactorings provides a vocabulary for discussing code improvements. Let's explore several fundamental techniques with detailed examples.
 
@@ -752,7 +752,7 @@ function isEventConflicting(existingEvent, proposedTimeRange) {
 
 The parameter objects aren't just containers—they include validation and behavior. `TimeRange` validates that end comes after start and provides useful methods like `overlaps()` and `durationMinutes`. This behavior would otherwise be scattered or duplicated.
 
-### 13.3.4 Refactoring Safely
+### Refactoring Safely
 
 Refactoring's promise—changing structure without changing behavior—requires discipline to keep. Without care, "refactoring" becomes "changing stuff and hoping for the best."
 
@@ -768,13 +768,13 @@ Refactoring's promise—changing structure without changing behavior—requires 
 
 ------------------------------------------------------------------------
 
-## 13.4 Working with Legacy Systems
+## Working with Legacy Systems
 
 **Legacy systems** are existing systems that remain valuable but are difficult to work with. They might use outdated technologies, lack documentation, have minimal tests, or suffer from years of accumulated technical debt. Yet they continue running critical business processes.
 
 The term "legacy" often carries negative connotations, but it's worth recognizing that legacy systems exist because they were successful. They solved real problems well enough that they became essential. The challenge isn't that they're bad systems—it's that they've outlived their architectural assumptions.
 
-### 13.4.1 Understanding Legacy Challenges
+### Understanding Legacy Challenges
 
 Legacy systems present unique challenges:
 
@@ -788,7 +788,7 @@ Legacy systems present unique challenges:
 
 **Business Criticality**: Despite its problems, the system keeps the business running. Taking it offline for replacement isn't feasible. Changes must be made carefully, incrementally, and without disruption.
 
-### 13.4.2 Strategies for Legacy Evolution
+### Strategies for Legacy Evolution
 
 Different strategies suit different situations. The choice depends on the system's condition, business criticality, available resources, and organizational tolerance for risk.
 
@@ -974,7 +974,7 @@ describe('LegacyPricingEngine (characterization)', () => {
 
 Characterization tests don't claim the behavior is correct; they document it. Once documented, you can safely refactor—if tests break, you've changed behavior and need to decide if that's acceptable.
 
-### 13.4.3 Managing Risk During Legacy Evolution
+### Managing Risk During Legacy Evolution
 
 Legacy evolution is inherently risky. These practices help manage that risk:
 
@@ -1017,11 +1017,11 @@ This approach is expensive (running everything twice) but provides high confiden
 
 ------------------------------------------------------------------------
 
-## 13.5 Documentation
+## Documentation
 
 Documentation is often treated as an afterthought—something done reluctantly after "real work" is complete. This attitude is counterproductive. Documentation is a force multiplier that enables others to use, maintain, and extend your work. Time spent on documentation saves multiples of that time in reduced questions, faster onboarding, and fewer misunderstandings.
 
-### 13.5.1 Types of Documentation
+### Types of Documentation
 
 Different audiences need different documentation:
 
@@ -1058,7 +1058,7 @@ Different audiences need different documentation:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 13.5.2 Architectural Decision Records
+### Architectural Decision Records
 
 **Architectural Decision Records (ADRs)** capture the reasoning behind significant decisions. Unlike most documentation that describes *what* the system is, ADRs explain *why* it became that way.
 
@@ -1132,7 +1132,7 @@ See comparison matrix in Appendix A.
 
 Notice the structure: the context explains the problem and constraints, the decision states the choice clearly, the rationale explains why this choice over alternatives, and the consequences acknowledge both benefits and drawbacks. This honest assessment of tradeoffs is crucial—every decision has downsides, and pretending otherwise undermines trust in the documentation.
 
-### 13.5.3 Code Comments
+### Code Comments
 
 Comments in code are often misused. Bad comments restate what code does, becoming noise that readers learn to ignore. Good comments explain what code *can't* say: the why, the context, the warnings.
 
@@ -1199,7 +1199,7 @@ const processedEventIds = new Set();
 
 The best code needs minimal comments because it's self-explanatory. But some things can't be expressed in code: business context, historical reasons, external constraints, and warnings about non-obvious behavior. These deserve comments.
 
-### 13.5.4 README Files
+### README Files
 
 Every project needs a README that answers basic questions: What is this? How do I run it? How do I contribute? A good README makes the difference between a project others can use and one that sits unused.
 
@@ -1307,7 +1307,7 @@ MIT - see [LICENSE](https://claude.ai/chat/LICENSE)
 
 A README should get someone from zero to productive quickly. Start with the minimum: what it is, how to run it, how to test it. Add more documentation as the project grows, but keep the README focused on getting started.
 
-### 13.5.5 Keeping Documentation Current
+### Keeping Documentation Current
 
 Outdated documentation is worse than no documentation—it actively misleads. Keeping documentation current requires treating it as part of the codebase, not a separate artifact.
 
@@ -1323,11 +1323,11 @@ Outdated documentation is worse than no documentation—it actively misleads. Ke
 
 ---
 
-## 13.6 Version Management
+## Version Management
 
 Software changes constantly, and managing those changes requires careful versioning. Good versioning communicates change impact, enables safe upgrades, and provides rollback capability.
 
-### 13.6.1 Semantic Versioning
+### Semantic Versioning
 
 **Semantic Versioning (SemVer)** encodes compatibility information in version numbers. A version number MAJOR.MINOR.PATCH communicates the nature of changes:
 ```
@@ -1356,7 +1356,7 @@ function getAllUsersIncludingInactive() {
 }
 ```
 
-### 13.6.2 Change Management
+### Change Management
 
 Beyond version numbers, managing changes requires process and communication:
 
@@ -1454,7 +1454,7 @@ release/v2.x ●──●──●───────────────�
 
 ```         
 
-### 13.6.3 Database Migrations
+### Database Migrations
 
 Code versioning is relatively simple—you deploy new code, it runs. Data versioning is harder. Databases persist across deployments, and changing schemas requires careful migration.
 
@@ -1498,7 +1498,7 @@ Each migration has an `up` function (apply the change) and a `down` function (re
 -   **Never modify existing migrations**: If a migration is wrong, create a new migration to fix it
 -   **Handle data carefully**: Migrations that modify data need extra scrutiny
 
-### 13.6.4 API Versioning
+### API Versioning
 
 APIs require special versioning consideration because changes affect external consumers who you don't control:
 
@@ -1534,11 +1534,11 @@ Regardless of mechanism, the principles are similar:
 
 ------------------------------------------------------------------------
 
-## 13.7 Designing for Maintainability
+## Designing for Maintainability
 
 The best time to make software maintainable is when you first build it. Retrofitting maintainability into existing systems is expensive. This section explores how to design systems that remain maintainable as they grow.
 
-### 13.7.1 Principles for Maintainable Design
+### Principles for Maintainable Design
 
 **Single Responsibility Principle**: Each module should have one reason to change. When a module has multiple responsibilities, changes to one responsibility risk breaking another. Focused modules are easier to understand, test, and modify.
 
@@ -1548,7 +1548,7 @@ The best time to make software maintainable is when you first build it. Retrofit
 
 **Separation of Concerns**: Different aspects of functionality should be separated into distinct sections. UI logic shouldn't be mixed with business logic. Database access shouldn't be mixed with validation. Separation makes each concern easier to understand and modify independently.
 
-### 13.7.2 Structural Patterns for Maintainability
+### Structural Patterns for Maintainability
 
 **Layered Architecture** separates concerns into distinct layers with clear responsibilities:
 
@@ -1634,7 +1634,7 @@ src/
 
 Modular structure makes it easy to understand a feature in isolation. All the code for tasks is in one folder. Adding a feature means working in one area rather than touching files across the codebase.
 
-### 13.7.3 Testing for Maintainability
+### Testing for Maintainability
 
 Comprehensive tests make refactoring safe. Without tests, changes are risky because you can't verify behavior is preserved. With tests, you can refactor confidently—if tests pass, behavior is preserved.
 
@@ -1693,7 +1693,7 @@ test('createTask returns created task with id', async () => {
 
 ------------------------------------------------------------------------
 
-## 13.8 Chapter Summary
+## Chapter Summary
 
 Software maintenance is the dominant phase of the software lifecycle, consuming 60-80% of total costs. Understanding maintenance isn't optional—it's central to professional software development.
 
@@ -1717,7 +1717,7 @@ Software that's easy to maintain provides value for years. Software that's diffi
 
 ------------------------------------------------------------------------
 
-## 13.9 Key Terms
+## Key Terms
 
 | Term | Definition |
 |------------------------------------|------------------------------------|
@@ -1738,7 +1738,7 @@ Software that's easy to maintain provides value for years. Software that's diffi
 
 ------------------------------------------------------------------------
 
-## 13.10 Review Questions
+## Review Questions
 
 1.  Why does software maintenance typically consume more resources than initial development? What factors contribute to this?
 
@@ -1762,7 +1762,7 @@ Software that's easy to maintain provides value for years. Software that's diffi
 
 ------------------------------------------------------------------------
 
-## 13.11 Hands-On Exercises
+## Hands-On Exercises
 
 ### Exercise 13.1: Technical Debt Audit
 
@@ -1828,7 +1828,7 @@ Measure and improve maintainability:
 
 ------------------------------------------------------------------------
 
-## 13.12 Further Reading
+## Further Reading
 
 **Books:**
 

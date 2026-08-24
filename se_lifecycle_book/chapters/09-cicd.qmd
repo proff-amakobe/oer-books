@@ -1,4 +1,4 @@
-# Chapter 9: Continuous Integration and Continuous Deployment
+# Continuous Integration and Continuous Deployment
 
 ## Learning Objectives
 
@@ -16,11 +16,11 @@ By the end of this chapter, you will be able to:
 
 ------------------------------------------------------------------------
 
-## 9.1 The Evolution of Software Delivery
+## The Evolution of Software Delivery
 
 Software delivery has transformed dramatically over the past decades. What once took months or years now happens in minutes. Understanding this evolution helps appreciate why CI/CD practices exist and why they matter.
 
-### 9.1.1 The Old Way: Manual Releases
+### The Old Way: Manual Releases
 
 In traditional software development, releases were major events:
 
@@ -77,7 +77,7 @@ Post-Release (days)
 -   **Stressful releases**: "Release weekends" became dreaded events
 -   **Fear of change**: Teams avoided changes to avoid risk
 
-### 9.1.2 The CI/CD Revolution
+### The CI/CD Revolution
 
 Modern practices flip this model:
 
@@ -117,7 +117,7 @@ Monitoring and alerting
 -   **Happier teams**: Routine deployments instead of stressful events
 -   **Higher quality**: Automated testing catches issues before users do
 
-### 9.1.3 Key Terminology
+### Key Terminology
 
 Understanding the distinctions between related terms:
 
@@ -174,11 +174,11 @@ Deploy to Prod      ○ Manual          ◐ Manual Trigger  ● Automated
 
 ------------------------------------------------------------------------
 
-## 9.2 Continuous Integration Fundamentals
+## Continuous Integration Fundamentals
 
 **Continuous Integration (CI)** is the practice of frequently integrating code changes into a shared repository, where each integration is verified by automated builds and tests.
 
-### 9.2.1 Core CI Practices
+### Core CI Practices
 
 **1. Maintain a Single Source Repository**
 
@@ -358,7 +358,7 @@ pm2 restart all
 git push origin main  # Triggers automated deployment
 ```
 
-### 9.2.2 The CI Feedback Loop
+### The CI Feedback Loop
 
 CI creates a rapid feedback loop:
 
@@ -388,7 +388,7 @@ When the build breaks:
 
 > "The first rule of Continuous Integration is: when the build breaks, fixing it becomes the team's top priority."
 
-### 9.2.3 CI Anti-Patterns
+### CI Anti-Patterns
 
 **Ignoring Broken Builds:**
 
@@ -432,11 +432,11 @@ When the build breaks:
 
 ------------------------------------------------------------------------
 
-## 9.3 Building CI Pipelines with GitHub Actions
+## Building CI Pipelines with GitHub Actions
 
 **GitHub Actions** is GitHub's built-in CI/CD platform. It's free for public repositories and has generous free tiers for private repositories.
 
-### 9.3.1 GitHub Actions Concepts
+### GitHub Actions Concepts
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -490,7 +490,7 @@ Workflow: ci.yml
     └── Step: Upload artifacts
 ```
 
-### 9.3.2 Basic Workflow Structure
+### Basic Workflow Structure
 
 ``` yaml
 # .github/workflows/ci.yml
@@ -529,7 +529,7 @@ jobs:
           npm test
 ```
 
-### 9.3.3 Complete CI Pipeline Example
+### Complete CI Pipeline Example
 
 Here's a comprehensive CI pipeline for a Node.js application:
 
@@ -789,7 +789,7 @@ jobs:
           path: cypress/videos/
 ```
 
-### 9.3.4 Workflow Triggers
+### Workflow Triggers
 
 ``` yaml
 on:
@@ -838,7 +838,7 @@ on:
     types: [opened, labeled]
 ```
 
-### 9.3.5 Job Dependencies and Parallelization
+### Job Dependencies and Parallelization
 
 ``` yaml
 jobs:
@@ -895,7 +895,7 @@ jobs:
             └────────┘
 ```
 
-### 9.3.6 Matrix Builds
+### Matrix Builds
 
 Test across multiple versions and platforms:
 
@@ -936,7 +936,7 @@ jobs:
 
 This creates 8 parallel jobs (3 OS × 3 Node versions - 1 exclusion).
 
-### 9.3.7 Caching Dependencies
+### Caching Dependencies
 
 Speed up pipelines by caching dependencies:
 
@@ -981,7 +981,7 @@ jobs:
       - run: npm run build
 ```
 
-### 9.3.8 Secrets and Environment Variables
+### Secrets and Environment Variables
 
 ``` yaml
 jobs:
@@ -1037,11 +1037,11 @@ Environment secrets (per environment):
 
 ------------------------------------------------------------------------
 
-## 9.4 Continuous Deployment Strategies
+## Continuous Deployment Strategies
 
 Deploying to production requires careful strategies to minimize risk and enable quick rollbacks.
 
-### 9.4.1 Deployment Strategies Overview
+### Deployment Strategies Overview
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -1076,7 +1076,7 @@ Deploying to production requires careful strategies to minimize risk and enable 
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 9.4.2 Recreate Deployment
+### Recreate Deployment
 
 The simplest strategy: stop everything, deploy, start everything.
 
@@ -1119,7 +1119,7 @@ After:
 -   Causes downtime
 -   All-or-nothing risk
 
-### 9.4.3 Rolling Deployment
+### Rolling Deployment
 
 Update instances one at a time, maintaining availability:
 
@@ -1185,7 +1185,7 @@ spec:
 -   Slower than recreate
 -   Rollback requires another rolling update
 
-### 9.4.4 Blue-Green Deployment
+### Blue-Green Deployment
 
 Maintain two identical environments. Switch traffic instantly.
 
@@ -1268,7 +1268,7 @@ jobs:
 -   More expensive
 -   Database migrations are tricky
 
-### 9.4.5 Canary Deployment
+### Canary Deployment
 
 Deploy to a small percentage of users first, then gradually increase:
 
@@ -1379,7 +1379,7 @@ jobs:
 -   Requires good monitoring
 -   Multiple versions in production
 
-### 9.4.6 Feature Flags
+### Feature Flags
 
 Deploy code to everyone but enable features selectively:
 
@@ -1450,11 +1450,11 @@ app.get('/checkout', async (req, res) => {
 
 ------------------------------------------------------------------------
 
-## 9.5 Environment Management
+## Environment Management
 
 Managing multiple environments (development, staging, production) is crucial for safe deployments.
 
-### 9.5.1 Environment Hierarchy
+### Environment Hierarchy
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -1493,7 +1493,7 @@ Managing multiple environments (development, staging, production) is crucial for
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 9.5.2 Environment Configuration
+### Environment Configuration
 
 **Environment Variables:**
 
@@ -1584,7 +1584,7 @@ const env = process.env.NODE_ENV || 'development';
 module.exports = configs[env];
 ```
 
-### 9.5.3 GitHub Actions Environments
+### GitHub Actions Environments
 
 ``` yaml
 # .github/workflows/deploy.yml
@@ -1646,7 +1646,7 @@ Protection Rules:
   • Selected branches: main, release/*
 ```
 
-### 9.5.4 Secrets Management
+### Secrets Management
 
 **Never commit secrets:**
 
@@ -1707,11 +1707,11 @@ jobs:
 
 ------------------------------------------------------------------------
 
-## 9.6 Infrastructure as Code
+## Infrastructure as Code
 
 **Infrastructure as Code (IaC)** treats infrastructure configuration as software—versioned, reviewed, and automated.
 
-### 9.6.1 Why Infrastructure as Code?
+### Why Infrastructure as Code?
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -1730,7 +1730,7 @@ jobs:
 └────────────────────────────────────┴────────────────────────────────────┘
 ```
 
-### 9.6.2 Docker for Application Infrastructure
+### Docker for Application Infrastructure
 
 **Dockerfile:**
 
@@ -1840,7 +1840,7 @@ volumes:
   redis_data:
 ```
 
-### 9.6.3 Terraform for Cloud Infrastructure
+### Terraform for Cloud Infrastructure
 
 **Basic Terraform structure:**
 
@@ -1993,7 +1993,7 @@ terraform workspace select staging
 terraform apply -var-file="environments/staging.tfvars"
 ```
 
-### 9.6.4 CI/CD for Infrastructure
+### CI/CD for Infrastructure
 
 ``` yaml
 # .github/workflows/infrastructure.yml
@@ -2077,9 +2077,9 @@ jobs:
 
 ------------------------------------------------------------------------
 
-## 9.7 Deployment Automation
+## Deployment Automation
 
-### 9.7.1 Complete Deployment Pipeline
+### Complete Deployment Pipeline
 
 ``` yaml
 # .github/workflows/deploy.yml
@@ -2260,7 +2260,7 @@ jobs:
             })
 ```
 
-### 9.7.2 Database Migrations in CI/CD
+### Database Migrations in CI/CD
 
 ``` yaml
 # Database migration job
@@ -2332,7 +2332,7 @@ exports.up_phase3 = async (knex) => {
 };
 ```
 
-### 9.7.3 Rollback Procedures
+### Rollback Procedures
 
 ``` yaml
 # .github/workflows/rollback.yml
@@ -2424,11 +2424,11 @@ jobs:
 
 ------------------------------------------------------------------------
 
-## 9.8 Monitoring and Observability
+## Monitoring and Observability
 
 Deployment doesn't end when code reaches production. Monitoring ensures the deployment is healthy.
 
-### 9.8.1 The Three Pillars of Observability
+### The Three Pillars of Observability
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -2459,7 +2459,7 @@ Deployment doesn't end when code reaches production. Monitoring ensures the depl
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 9.8.2 Key Metrics to Monitor
+### Key Metrics to Monitor
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -2492,7 +2492,7 @@ Deployment doesn't end when code reaches production. Monitoring ensures the depl
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 9.8.3 Health Checks
+### Health Checks
 
 ``` javascript
 // healthcheck.js
@@ -2560,7 +2560,7 @@ router.get('/health/details', async (req, res) => {
 module.exports = router;
 ```
 
-### 9.8.4 Post-Deployment Verification
+### Post-Deployment Verification
 
 ``` yaml
 # Post-deployment verification in CI/CD
@@ -2605,7 +2605,7 @@ verify-deployment:
         gh workflow run rollback.yml -f environment=production
 ```
 
-### 9.8.5 Alerting
+### Alerting
 
 ``` yaml
 # Example Prometheus alerting rules
@@ -2642,9 +2642,9 @@ groups:
 
 ------------------------------------------------------------------------
 
-## 9.9 Troubleshooting CI/CD
+## Troubleshooting CI/CD
 
-### 9.9.1 Common Issues and Solutions
+### Common Issues and Solutions
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -2716,7 +2716,7 @@ groups:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 9.9.2 Debugging Techniques
+### Debugging Techniques
 
 **Debugging GitHub Actions:**
 
@@ -2765,7 +2765,7 @@ docker history myapp
 docker inspect myapp
 ```
 
-### 9.9.3 CI/CD Best Practices Checklist
+### CI/CD Best Practices Checklist
 
 ```         
 CI/CD BEST PRACTICES CHECKLIST
@@ -2816,7 +2816,7 @@ DOCUMENTATION
 
 ------------------------------------------------------------------------
 
-## 9.10 Chapter Summary
+## Chapter Summary
 
 Continuous Integration and Continuous Deployment transform how teams deliver software. By automating builds, tests, and deployments, teams can ship faster with higher quality and lower risk.
 
@@ -2842,7 +2842,7 @@ Key takeaways from this chapter:
 
 ------------------------------------------------------------------------
 
-## 9.11 Key Terms
+## Key Terms
 
 | Term | Definition |
 |------------------------------------|------------------------------------|
@@ -2864,7 +2864,7 @@ Key takeaways from this chapter:
 
 ------------------------------------------------------------------------
 
-## 9.12 Review Questions
+## Review Questions
 
 1.  Explain the difference between Continuous Integration, Continuous Delivery, and Continuous Deployment.
 
@@ -2888,7 +2888,7 @@ Key takeaways from this chapter:
 
 ------------------------------------------------------------------------
 
-## 9.13 Hands-On Exercises
+## Hands-On Exercises
 
 ### Exercise 9.1: Basic CI Pipeline
 
@@ -2966,7 +2966,7 @@ Build a complete pipeline integrating all concepts:
 
 ------------------------------------------------------------------------
 
-## 9.14 Further Reading
+## Further Reading
 
 **Books:**
 

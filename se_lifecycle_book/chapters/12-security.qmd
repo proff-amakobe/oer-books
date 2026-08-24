@@ -1,4 +1,4 @@
-# Chapter 12: Software Security
+# Software Security
 
 ## Learning Objectives
 
@@ -17,13 +17,13 @@ By the end of this chapter, you will be able to:
 
 ------------------------------------------------------------------------
 
-## 12.1 The Imperative of Software Security
+## The Imperative of Software Security
 
 Security is not a feature you add at the end of development—it's a fundamental quality that must be designed into software from the beginning. Every line of code you write, every architectural decision you make, and every third-party component you integrate affects the security posture of your application.
 
 The consequences of security failures are severe and far-reaching. Data breaches expose sensitive personal information, leading to identity theft and financial fraud. Ransomware attacks halt business operations, sometimes permanently. Compromised systems become platforms for attacking others, spreading harm across the internet. Beyond the direct damages, organizations face regulatory penalties, lawsuits, and lasting reputational harm.
 
-### 12.1.1 The Cost of Security Failures
+### The Cost of Security Failures
 
 Consider some notable breaches that illustrate what can go wrong:
 
@@ -37,7 +37,7 @@ Consider some notable breaches that illustrate what can go wrong:
 
 These weren't attacks on small, under-resourced companies—they were sophisticated organizations with security teams and significant budgets. The lesson is clear: security requires constant vigilance at every level, and even one oversight can have catastrophic consequences.
 
-### 12.1.2 Security Principles
+### Security Principles
 
 Before diving into specific vulnerabilities and mitigations, let's establish foundational security principles that guide secure software development. These principles aren't just theoretical guidelines—they inform every security decision throughout this chapter and your career.
 
@@ -87,7 +87,7 @@ Let's explore each principle in more depth:
 
 **Trust Nothing** is sometimes called "Zero Trust" architecture. Traditional security assumed that once you were inside the network perimeter, you could be trusted. Modern security assumes that any component might be compromised and requires verification at every boundary. Even internal microservices should authenticate to each other and validate all inputs.
 
-### 12.1.3 The Security Mindset
+### The Security Mindset
 
 Developing secure software requires thinking differently than typical feature development. Most programming teaches you to think about the "happy path"—what happens when users provide valid input and systems work correctly. Security requires thinking about the "adversarial path"—what happens when someone actively tries to make things go wrong.
 
@@ -105,13 +105,13 @@ This mindset doesn't mean being paranoid—it means being appropriately cautious
 
 ------------------------------------------------------------------------
 
-## 12.2 OWASP Top 10 Web Application Vulnerabilities
+## OWASP Top 10 Web Application Vulnerabilities
 
 The **Open Web Application Security Project (OWASP)** maintains a regularly updated list of the most critical web application security risks. Understanding these vulnerabilities and their mitigations is essential for any developer building web applications.
 
 The OWASP Top 10 represents a broad consensus about which vulnerabilities pose the greatest risks. It's based on data from hundreds of organizations and reflects real-world attack patterns. The list is updated every few years as the threat landscape evolves. Let's examine each vulnerability in depth.
 
-### 12.2.1 A01: Broken Access Control
+### A01: Broken Access Control
 
 **Broken Access Control** occurs when users can access resources or perform actions beyond their intended permissions. This was the number one vulnerability in OWASP's 2021 list, appearing in 94% of tested applications. It moved up from fifth place in 2017, reflecting both its prevalence and its severity.
 
@@ -299,7 +299,7 @@ app.post('/api/tasks',
 
 Even if the request body contains a `userId` field, we ignore it. The task belongs to whoever is authenticated, period. This prevents attackers from creating resources that belong to other users.
 
-### 12.2.2 A02: Cryptographic Failures
+### A02: Cryptographic Failures
 
 Previously known as "Sensitive Data Exposure," this category covers failures related to cryptography—or lack thereof. This includes transmitting data in clear text, using weak cryptographic algorithms, improper key management, and insufficient protection of sensitive data.
 
@@ -417,7 +417,7 @@ The authentication tag is crucial. Without it, an attacker who intercepts encryp
 
 **Key management is often harder than encryption itself.** Where do you store the encryption key? If it's in your application code, anyone with code access has the key. If it's in an environment variable, anyone with server access has it. Production systems typically use dedicated key management services (AWS KMS, HashiCorp Vault, Azure Key Vault) that provide hardware-protected key storage, access auditing, and key rotation.
 
-### 12.2.3 A03: Injection
+### A03: Injection
 
 **Injection** attacks occur when untrusted data is sent to an interpreter as part of a command or query. The interpreter can't distinguish between intended commands and attacker-supplied data, so it executes whatever it receives. SQL injection, command injection, LDAP injection, and XPath injection are all variants of this fundamental problem.
 
@@ -562,7 +562,7 @@ Using `execFile` instead of `exec` avoids shell invocation entirely. Arguments a
 
 Even better: avoid shell commands entirely when libraries exist. Instead of shelling out to `ping`, use a Node.js library that implements ICMP directly.
 
-### 12.2.4 A04: Insecure Design
+### A04: Insecure Design
 
 **Insecure Design** is a newer OWASP category recognizing that some vulnerabilities stem from missing or ineffective security controls at the design phase. You can't fix insecure design with perfect implementation—the architecture itself must be secure.
 
@@ -738,7 +738,7 @@ The query checks three things: the token matches, it hasn't expired, and it hasn
 
 The session invalidation is a key security feature. If an attacker had compromised the account and the legitimate user recovers it via password reset, all of the attacker's sessions are terminated. Without this, the attacker would remain logged in even after the password change.
 
-### 12.2.5 A05: Security Misconfiguration
+### A05: Security Misconfiguration
 
 **Security Misconfiguration** is the most commonly seen vulnerability. It results from insecure default configurations, incomplete or ad hoc configurations, open cloud storage, misconfigured HTTP headers, verbose error messages containing sensitive information, or unnecessary services enabled.
 
@@ -866,7 +866,7 @@ app.use((err, req, res, next) => {
 
 In production, server errors (500s) get a generic message. We don't want to tell attackers that "PostgreSQL connection failed to 10.0.3.42:5432" or "Cannot read property 'id' of undefined at /app/services/user.js:47." These details help attackers understand our infrastructure and code. In development, we show everything because debugging trumps security concerns.
 
-### 12.2.6 A06: Vulnerable and Outdated Components
+### A06: Vulnerable and Outdated Components
 
 Modern applications rely heavily on third-party code. A typical Node.js application has hundreds of dependencies, each with their own dependencies (transitive dependencies). Any of these might contain security vulnerabilities.
 
@@ -968,7 +968,7 @@ npm install express@latest
 
 Balance security with stability. Patch versions (4.17.1 → 4.17.3) are usually safe to apply immediately. Minor versions might add features but shouldn't break anything. Major versions may have breaking changes requiring code updates. In production systems, test updates in staging before deploying.
 
-### 12.2.7 A07: Identification and Authentication Failures
+### A07: Identification and Authentication Failures
 
 Authentication verifies identity: "Who are you?" This seemingly simple question has many opportunities for failure. Weak passwords, exposed credentials, session hijacking, and brute force attacks all exploit authentication weaknesses.
 
@@ -1091,7 +1091,7 @@ const sessionCookie = {
 
 **SameSite: strict** prevents the browser from sending the cookie with any cross-origin request. This largely eliminates Cross-Site Request Forgery (CSRF) attacks because the attacker's site can't make authenticated requests on the user's behalf.
 
-### 12.2.8 A08: Software and Data Integrity Failures
+### A08: Software and Data Integrity Failures
 
 This category covers failures to protect against unauthorized modifications to code or data. CI/CD pipeline compromises, malicious package updates, and insecure deserialization fall under this heading.
 
@@ -1166,7 +1166,7 @@ app.post('/api/data', (req, res) => {
 
 Even with safe deserialization, always validate that the resulting data structure matches expectations. Validation catches malformed data whether it results from attacks or bugs.
 
-### 12.2.9 A09: Security Logging and Monitoring Failures
+### A09: Security Logging and Monitoring Failures
 
 Without proper logging and monitoring, attacks go undetected. Organizations average 287 days to identify and contain a breach—faster detection significantly reduces damage.
 
@@ -1248,7 +1248,7 @@ Logs are only valuable if someone reviews them. Automated monitoring catches iss
 
 The goal is detecting attacks in progress or immediately after, not discovering them months later during an audit.
 
-### 12.2.10 A10: Server-Side Request Forgery (SSRF)
+### A10: Server-Side Request Forgery (SSRF)
 
 **SSRF** occurs when an attacker can make the server perform requests to unintended locations. This exploits the server's network position and credentials to access resources the attacker couldn't reach directly.
 
@@ -1338,13 +1338,13 @@ The DNS resolution check is crucial. An attacker might control `evil.com` which 
 
 ------------------------------------------------------------------------
 
-## 12.3 Input Validation and Sanitization
+## Input Validation and Sanitization
 
 Every piece of data from outside your system is potentially malicious. This includes form inputs, query parameters, headers, file uploads, and even data from your own database (which might have been compromised through another vector).
 
 Input validation ensures data meets expected criteria before processing. Sanitization transforms potentially dangerous data into a safe form. Both are essential, and they serve different purposes.
 
-### 12.3.1 Validation Strategies
+### Validation Strategies
 
 **Allowlisting** (also called whitelisting) accepts only known good input. Define exactly what's allowed; reject everything else. This is the most secure approach but requires knowing all valid inputs:
 
@@ -1391,7 +1391,7 @@ if (title.length < 1 || title.length > 200) {
 }
 ```
 
-### 12.3.2 Comprehensive Validation with Joi
+### Comprehensive Validation with Joi
 
 Rather than writing ad-hoc validation code throughout your application, use a validation library that provides a declarative, comprehensive approach:
 
@@ -1467,7 +1467,7 @@ app.post('/api/tasks', authenticate, validate('taskCreate'), createTask);
 
 The `stripUnknown: true` option is a security feature. It removes any fields not defined in the schema, preventing attackers from injecting unexpected data. Even if your code doesn't use those fields, they might be passed to libraries that do.
 
-### 12.3.3 Output Encoding
+### Output Encoding
 
 Validation ensures input is safe for processing. **Output encoding** ensures data is safe for the context where it's displayed. The same data might need different encoding for HTML, JavaScript, URL parameters, or SQL.
 
@@ -1515,11 +1515,11 @@ const safeHtml = purify.sanitize(userHtml, {
 
 ------------------------------------------------------------------------
 
-## 12.4 Security Headers
+## Security Headers
 
 HTTP security headers instruct browsers to enable security features. They provide defense against many client-side attacks with minimal implementation effort. However, headers only work if configured correctly—misconfigured headers can break your application or give false confidence.
 
-### 12.4.1 Content Security Policy
+### Content Security Policy
 
 **Content-Security-Policy (CSP)** is the most powerful security header. It controls which resources the browser is allowed to load and execute. Even if an attacker injects malicious content through XSS, CSP can prevent it from executing.
 
@@ -1568,7 +1568,7 @@ Content-Security-Policy-Report-Only: default-src 'self'; report-uri /csp-report
 
 Browsers send violation reports to your endpoint instead of blocking resources. Review reports, fix violations, then enable enforcement.
 
-### 12.4.2 Other Essential Headers
+### Other Essential Headers
 
 **Strict-Transport-Security (HSTS)** forces HTTPS connections:
 
@@ -1602,11 +1602,11 @@ This sends the full URL for same-origin requests but only the origin (scheme + d
 
 ------------------------------------------------------------------------
 
-## 12.5 Security Testing
+## Security Testing
 
 Security testing verifies that your application is protected against known vulnerabilities. It should be integrated into your development process, not treated as a one-time activity before release.
 
-### 12.5.1 Types of Security Testing
+### Types of Security Testing
 
 Different testing approaches find different types of vulnerabilities:
 
@@ -1622,7 +1622,7 @@ Limitations: DAST only tests what it can reach through the interface. Code paths
 
 **Penetration Testing** is manual testing by security experts who think like attackers. Penetration testers find complex vulnerabilities that automated tools miss: business logic flaws, chained vulnerabilities, and creative attack paths. This is the most thorough but most expensive testing.
 
-### 12.5.2 Integrating Security Testing into CI/CD
+### Integrating Security Testing into CI/CD
 
 Automated security testing should run on every code change:
 
@@ -1666,7 +1666,7 @@ jobs:
 
 The daily schedule catches newly disclosed vulnerabilities in dependencies. A library that was safe yesterday might have a CVE published today.
 
-### 12.5.3 Writing Security Tests
+### Writing Security Tests
 
 Security tests verify specific security controls work as intended:
 
@@ -1745,11 +1745,11 @@ These tests serve as regression prevention. If someone accidentally removes a se
 
 ------------------------------------------------------------------------
 
-## 12.6 Incident Response
+## Incident Response
 
 Despite best efforts, security incidents happen. Having a plan ensures you respond effectively, minimizing damage and recovery time. The time to plan is before an incident, not during one.
 
-### 12.6.1 Incident Response Phases
+### Incident Response Phases
 
 Security professionals follow a structured incident response process:
 
@@ -1802,7 +1802,7 @@ Security professionals follow a structured incident response process:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 12.6.2 Containment Actions
+### Containment Actions
 
 When an incident is confirmed, quick containment limits damage. Some actions can be automated for faster response:
 
@@ -1816,7 +1816,7 @@ When an incident is confirmed, quick containment limits damage. Some actions can
 
 The key principle: **prioritize stopping the bleeding over understanding the wound.** Containment comes first; investigation can happen after the immediate threat is neutralized.
 
-### 12.6.3 Communication
+### Communication
 
 During incidents, clear communication is essential:
 
@@ -1828,7 +1828,7 @@ During incidents, clear communication is essential:
 
 ------------------------------------------------------------------------
 
-## 12.7 Chapter Summary
+## Chapter Summary
 
 Software security is a continuous process that must be integrated into every phase of development. This chapter covered the essential knowledge and practices for building secure applications.
 
@@ -1852,7 +1852,7 @@ Security is everyone's responsibility. Every developer should understand securit
 
 ------------------------------------------------------------------------
 
-## 12.8 Key Terms
+## Key Terms
 
 | Term | Definition |
 |------------------------------------|------------------------------------|
@@ -1874,7 +1874,7 @@ Security is everyone's responsibility. Every developer should understand securit
 
 ------------------------------------------------------------------------
 
-## 12.9 Review Questions
+## Review Questions
 
 1.  Explain the principle of defense in depth. How would you apply it to protect against SQL injection?
 
@@ -1898,7 +1898,7 @@ Security is everyone's responsibility. Every developer should understand securit
 
 ------------------------------------------------------------------------
 
-## 12.10 Hands-On Exercises
+## Hands-On Exercises
 
 ### Exercise 12.1: Security Audit
 
@@ -1962,7 +1962,7 @@ Create an incident response plan for your project:
 
 ------------------------------------------------------------------------
 
-## 12.11 Further Reading
+## Further Reading
 
 **Books:**
 

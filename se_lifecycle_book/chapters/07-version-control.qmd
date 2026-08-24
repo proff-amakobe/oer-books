@@ -1,4 +1,4 @@
-# Chapter 7: Version Control Workflows
+# Version Control Workflows
 
 ## Learning Objectives
 
@@ -15,7 +15,7 @@ By the end of this chapter, you will be able to:
 
 ------------------------------------------------------------------------
 
-## 7.1 Why Version Control Workflows Matter
+## Why Version Control Workflows Matter
 
 In Chapter 1, we introduced Git and GitHub as tools for tracking changes and collaborating on code. But knowing Git commands is only the beginning. When multiple developers work on the same codebase simultaneously, chaos can ensue without agreed-upon workflows. Who can commit to which branch? How do changes get reviewed? What happens when two people modify the same file?
 
@@ -26,7 +26,7 @@ A **version control workflow** is a set of conventions and practices that define
 -   Who reviews code, and when?
 -   How do we handle releases and hotfixes?
 
-### 7.1.1 The Cost of Poor Version Control
+### The Cost of Poor Version Control
 
 Without structured workflows, teams encounter predictable problems:
 
@@ -40,7 +40,7 @@ Without structured workflows, teams encounter predictable problems:
 
 **Release chaos**: Without clear release processes, teams don't know what's deployed where. Hotfixes go to the wrong version. Customers get inconsistent experiences.
 
-### 7.1.2 What Good Workflows Provide
+### What Good Workflows Provide
 
 Structured workflows address these problems:
 
@@ -56,25 +56,15 @@ Structured workflows address these problems:
 
 ------------------------------------------------------------------------
 
-## 7.2 Understanding Git Branching
+## Understanding Git Branching
 
 Before exploring workflows, let's deepen our understanding of Git branching—the foundation on which all workflows build.
 
-### 7.2.1 What Is a Branch?
+### What Is a Branch?
 
 A **branch** in Git is simply a lightweight movable pointer to a commit. When you create a branch, Git creates a new pointer; it doesn't copy any files. This makes branching fast and cheap.
 
-```         
-                         main
-                          │
-                          ▼
-    ●────●────●────●────●────●
-                   │
-                   └────●────●
-                             ▲
-                             │
-                         feature
-```
+![Git commit history with main and feature branches](../assets/images/ch7_fig1_git_branching.svg)
 
 In this diagram:
 
@@ -83,45 +73,14 @@ In this diagram:
 -   `feature` points to the latest commit on the feature branch
 -   The branches share history up to where they diverged
 
-### 7.2.2 HEAD: Where You Are
+### HEAD: Where You Are
 
 **HEAD** is a special pointer that indicates your current position—which branch (and commit) you're working on.
-
-```         
-                          HEAD
-                           │
-                           ▼
-                         main
-                          │
-                          ▼
-    ●────●────●────●────●────●
-                   │
-                   └────●────●
-                             ▲
-                             │
-                         feature
-```
+![Git HEAD pointing to the current branch](../assets/images/git_branch_diagram.svg){width=635px}
 
 When you checkout a different branch, HEAD moves:
-
-```         
-    git checkout feature
-
-                         main
-                          │
-                          ▼
-    ●────●────●────●────●────●
-                   │
-                   └────●────●
-                             ▲
-                             │
-                         feature
-                             ▲
-                             │
-                           HEAD
-```
-
-### 7.2.3 Branch Operations
+![Git HEAD after checking out a feature branch](../assets/images/git_checkout_feature_diagram.svg){width=623px}
+### Branch Operations
 
 **Creating a Branch:**
 
@@ -169,67 +128,22 @@ git branch -d feature-login
 git branch -D experimental-feature
 ```
 
-### 7.2.4 Merging Branches
+### Merging Branches
 
 **Merging** combines the changes from one branch into another. Git supports several merge strategies.
 
 **Fast-Forward Merge:**
 
 When the target branch hasn't diverged, Git simply moves the pointer forward:
+![Fast-forward merge before and after](../assets/images/git_merge_before_after.svg){width=695px}
 
-```         
-Before:
-    main
-     │
-     ▼
-    ●────●────●
-              │
-              └────●────●
-                        ▲
-                        │
-                    feature
-
-After git checkout main && git merge feature:
-
-                       main
-                        │
-                        ▼
-    ●────●────●────●────●
-                        ▲
-                        │
-                    feature
-```
-
-No merge commit is created—history stays linear.
+No merge commit is created; history stays linear.
 
 **Three-Way Merge:**
 
 When branches have diverged, Git creates a merge commit with two parents:
+![Three-way Git merge creating a merge commit](../assets/images/git_three_way_merge.svg){width=618px}
 
-```         
-Before:
-              main
-               │
-               ▼
-    ●────●────●────●
-              │
-              └────●────●
-                        ▲
-                        │
-                    feature
-
-After git checkout main && git merge feature:
-
-                        main
-                         │
-                         ▼
-    ●────●────●────●────●────●  (merge commit)
-              │              │
-              └────●────●────┘
-                        ▲
-                        │
-                    feature
-```
 
 **Merge Commands:**
 
@@ -245,32 +159,10 @@ git merge feature-login -m "Merge feature-login into main"
 git merge --abort
 ```
 
-### 7.2.5 Rebasing
+### Rebasing
 
 **Rebasing** rewrites history by moving commits to a new base. Instead of a merge commit, rebase creates a linear history.
-
-```         
-Before:
-              main
-               │
-               ▼
-    ●────●────●────●
-              │
-              └────●────●
-                        ▲
-                        │
-                    feature
-
-After git checkout feature && git rebase main:
-
-                   main
-                    │
-                    ▼
-    ●────●────●────●────●'────●'
-                              ▲
-                              │
-                          feature
-```
+![Git history before and after rebasing a feature branch](../assets/images/git_rebase_diagram.svg){width=690px}
 
 The commits on feature are recreated (●' indicates new commits with same changes but different hashes).
 
@@ -292,13 +184,14 @@ git rebase --continue
 
 **Merge vs. Rebase:**
 
-| Aspect | Merge | Rebase |
-|----|----|----|
-| History | Preserves true history | Creates linear history |
-| Merge commits | Creates merge commits | No merge commits |
-| Conflict resolution | Once per merge | Once per rebased commit |
-| Safety | Safe for shared branches | Don't rebase shared branches |
-| Traceability | Shows when branches joined | Hides branch structure |
+| Aspect              | Merge                      | Rebase                       |     |
+| ------------------- | -------------------------- | ---------------------------- | --- |
+| History             | Preserves true history     | Creates linear history       |     |
+| Merge commits       | Creates merge commits      | No merge commits             |     |
+| Conflict resolution | Once per merge             | Once per rebased commit      |     |
+| Safety              | Safe for shared branches   | Don't rebase shared branches |     |
+| Traceability        | Shows when branches joined | Hides branch structure       |     |
+
 
 **The Golden Rule of Rebasing:**
 
@@ -308,11 +201,11 @@ Rebasing rewrites history. If others have based work on commits you rebase, thei
 
 ------------------------------------------------------------------------
 
-## 7.3 Branching Strategies
+## Branching Strategies
 
 A **branching strategy** defines how teams organize and use branches. Different strategies suit different team sizes, release cycles, and risk tolerances.
 
-### 7.3.1 Gitflow
+### Gitflow
 
 **Gitflow**, introduced by Vincent Driessen in 2010, is a comprehensive branching model designed for projects with scheduled releases.
 
@@ -355,22 +248,7 @@ A **branching strategy** defines how teams organize and use branches. Different 
 ```
 
 **Visual Representation:**
-
-```         
-main      ●───────────────────────●─────────────────●──────●
-           \                     / \               /      /
-            \                   /   \             /      /
-release      \        ●───●───●     \           /      /
-              \      /               \         /      /
-               \    /                 \       /      /
-develop    ●────●──●────●────●────●────●─────●──────●────●
-                \      /          \        /
-                 \    /            \      /
-feature           ●──●              ●────●
-                                          \
-                                           \
-hotfix                                      ●────●
-```
+![Gitflow branching strategy](../assets/images/ch7_fig2_gitflow.svg)
 
 **Gitflow Workflow:**
 
@@ -454,7 +332,7 @@ git branch -d hotfix/critical-security-fix
 -   Products requiring extensive release testing
 -   Compliance environments requiring audit trails
 
-### 7.3.2 GitHub Flow
+### GitHub Flow
 
 **GitHub Flow** is a simpler workflow designed for continuous deployment. Created at GitHub, it has only one rule: anything in `main` is deployable.
 
@@ -481,12 +359,7 @@ git branch -d hotfix/critical-security-fix
 
 **Visual Representation:**
 
-```         
-main      ●────●────●────●────●────●────●────●────●
-               \    /    \   /         \        /
-                \  /      \ /           \      /
-feature          ●         ●             ●────●
-```
+![GitHub Flow branching strategy](../assets/images/ch7_fig3_github_flow.svg)
 
 **GitHub Flow Process:**
 
@@ -579,7 +452,7 @@ git branch -d add-password-reset
 -   Teams practicing continuous integration
 -   Projects prioritizing simplicity
 
-### 7.3.3 Trunk-Based Development
+### Trunk-Based Development
 
 **Trunk-based development** (TBD) takes simplicity further: all developers commit to a single branch (the "trunk," typically `main`), either directly or through very short-lived feature branches.
 
@@ -610,20 +483,7 @@ git branch -d add-password-reset
 ```
 
 **Visual Representation:**
-
-```         
-With short-lived branches (< 1 day):
-
-main      ●────●────●────●────●────●────●────●────●────●
-              / \        / \       |    \      /
-             /   \      /   \      |     \    /
-feature     ●     ●    ●     ●     ●      ●──●
-
-Direct commits (pair programming):
-
-main      ●────●────●────●────●────●────●────●────●────●
-           Alice Bob  Both  Alice Bob  Alice  Bob  Both
-```
+![Trunk-based development with short-lived branches](../assets/images/trunk_based_development.svg){width=669px}
 
 **Feature Flags:**
 
@@ -688,7 +548,7 @@ git branch -d small-fix
 -   Products requiring very fast iteration
 -   Organizations practicing DevOps/continuous deployment
 
-### 7.3.4 Comparing Branching Strategies
+### Comparing Branching Strategies
 
 | Aspect | Gitflow | GitHub Flow | Trunk-Based |
 |------------------|------------------|------------------|------------------|
@@ -700,7 +560,7 @@ git branch -d small-fix
 | Feature isolation | High | Medium | Low (use feature flags) |
 | CI/CD requirement | Helpful | Important | Essential |
 
-### 7.3.5 Choosing a Strategy
+### Choosing a Strategy
 
 Consider these factors when choosing:
 
@@ -732,11 +592,11 @@ Consider these factors when choosing:
 
 ------------------------------------------------------------------------
 
-## 7.4 Pull Requests
+## Pull Requests
 
 A **pull request** (PR) is a request to merge changes from one branch into another. More than just a merge mechanism, pull requests are collaboration tools that enable discussion, review, and quality control.
 
-### 7.4.1 Anatomy of a Good Pull Request
+### Anatomy of a Good Pull Request
 
 ```         
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -796,7 +656,7 @@ A **pull request** (PR) is a request to merge changes from one branch into anoth
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 7.4.2 Writing Effective PR Descriptions
+### Writing Effective PR Descriptions
 
 **Title:**
 
@@ -839,7 +699,7 @@ Any specific areas you'd like extra attention on?
 Any known issues or trade-offs?
 ```
 
-### 7.4.3 Pull Request Best Practices
+### Pull Request Best Practices
 
 **Keep PRs Small:**
 
@@ -896,7 +756,7 @@ Before requesting review:
 -   Push new commits to address feedback
 -   Re-request review when ready
 
-### 7.4.4 Draft Pull Requests
+### Draft Pull Requests
 
 **Draft PRs** indicate work-in-progress that isn't ready for review. Use them to:
 
@@ -932,11 +792,11 @@ Convert to a regular PR when ready for review.
 
 ------------------------------------------------------------------------
 
-## 7.5 Code Review
+## Code Review
 
 **Code review** is the practice of having team members examine code changes before they're merged. It's one of the most valuable practices in software engineering, improving code quality, spreading knowledge, and catching bugs early.
 
-### 7.5.1 Why Code Review Matters
+### Why Code Review Matters
 
 **Quality Improvement:**
 
@@ -958,7 +818,7 @@ Convert to a regular PR when ready for review.
 -   Shared responsibility for quality
 -   Documentation through review comments
 
-### 7.5.2 The Reviewer's Mindset
+### The Reviewer's Mindset
 
 Good reviewers approach code with:
 
@@ -972,7 +832,7 @@ Good reviewers approach code with:
 
 **Efficiency**: Don't make the author wait. Review promptly.
 
-### 7.5.3 What to Look For
+### What to Look For
 
 **Functionality:**
 
@@ -1019,7 +879,7 @@ Good reviewers approach code with:
 -   Are public APIs documented?
 -   Is README updated if needed?
 
-### 7.5.4 Review Checklist
+### Review Checklist
 
 ```         
 CODE REVIEW CHECKLIST
@@ -1066,7 +926,7 @@ DOCUMENTATION
 ☐ README updated if needed
 ```
 
-### 7.5.5 Giving Feedback
+### Giving Feedback
 
 **Be Specific:**
 
@@ -1139,7 +999,7 @@ large datasets this could be slow—was that considered?
 thorough.
 ```
 
-### 7.5.6 Receiving Feedback
+### Receiving Feedback
 
 **Don't Take It Personally:**
 
@@ -1179,7 +1039,7 @@ Response Options:
 ❌ "I don't have time to refactor this."
 ```
 
-### 7.5.7 Review Etiquette
+### Review Etiquette
 
 **For Reviewers:**
 
@@ -1197,7 +1057,7 @@ Response Options:
 -   Re-request review when ready
 -   Thank reviewers for their time
 
-### 7.5.8 Automated Checks
+### Automated Checks
 
 Automated tools complement human review:
 
@@ -1242,11 +1102,11 @@ jobs:
 
 ------------------------------------------------------------------------
 
-## 7.6 Handling Merge Conflicts
+## Handling Merge Conflicts
 
 **Merge conflicts** occur when Git can't automatically combine changes—usually because two branches modified the same lines of code. Conflicts are normal and manageable with the right approach.
 
-### 7.6.1 Why Conflicts Happen
+### Why Conflicts Happen
 
 ```         
 Scenario: Two developers modify the same file
@@ -1276,7 +1136,7 @@ Alice merges first. Now when Bob tries to merge:
 CONFLICT! Git doesn't know which change to keep.
 ```
 
-### 7.6.2 Anatomy of a Conflict
+### Anatomy of a Conflict
 
 When a conflict occurs, Git marks the conflicting sections:
 
@@ -1296,7 +1156,7 @@ function greet(name) {
 -   `=======`: Divider between versions
 -   `>>>>>>> feature/bobs-greeting`: End, with other branch name
 
-### 7.6.3 Resolving Conflicts
+### Resolving Conflicts
 
 **Step 1: Identify conflicting files**
 
@@ -1343,7 +1203,7 @@ git add src/greet.js
 git commit -m "Merge feature/bobs-greeting, combine greeting changes"
 ```
 
-### 7.6.4 Conflict Resolution Strategies
+### Conflict Resolution Strategies
 
 **Keep Current (Ours):** Discard incoming changes, keep current branch's version:
 
@@ -1369,7 +1229,7 @@ git mergetool
 
 Opens a visual merge tool (configure with `git config merge.tool`).
 
-### 7.6.5 Preventing Conflicts
+### Preventing Conflicts
 
 While conflicts can't be entirely prevented, you can minimize them:
 
@@ -1393,7 +1253,7 @@ git merge main  # Or: git rebase main
 -   Clear module boundaries
 -   Avoid monolithic files everyone edits
 
-### 7.6.6 Conflict Resolution Example
+### Conflict Resolution Example
 
 **Scenario**: You're working on a feature branch and need to merge in changes from main.
 
@@ -1484,7 +1344,7 @@ git commit -m "Merge origin/main into feature/user-profile
 git push
 ```
 
-### 7.6.7 Handling Complex Conflicts
+### Handling Complex Conflicts
 
 For complex conflicts, consider:
 
@@ -1512,11 +1372,11 @@ git commit -m "Merge origin/main, resolve Header.jsx conflict"
 
 ------------------------------------------------------------------------
 
-## 7.7 Repository Hygiene
+## Repository Hygiene
 
 A well-maintained repository is easier to navigate, understand, and contribute to. **Repository hygiene** encompasses conventions, documentation, and practices that keep repositories clean and professional.
 
-### 7.7.1 Branch Naming Conventions
+### Branch Naming Conventions
 
 Consistent branch names communicate purpose and improve organization.
 
@@ -1562,7 +1422,7 @@ bugfix/456-login-timeout
 -   Keep names concise but descriptive
 -   Include ticket/issue number if available
 
-### 7.7.2 Commit Message Conventions
+### Commit Message Conventions
 
 Good commit messages explain what changed and why. They're documentation for the future.
 
@@ -1639,7 +1499,7 @@ style: Format code with Prettier
 chore: Update dependencies
 ```
 
-### 7.7.3 Essential Repository Files
+### Essential Repository Files
 
 **README.md:**
 
@@ -1829,7 +1689,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Initial release
 ```
 
-### 7.7.4 Branch Protection
+### Branch Protection
 
 **Branch protection rules** prevent accidental or unauthorized changes to important branches.
 
@@ -1892,7 +1752,7 @@ Automatically request reviews from specific people for specific paths:
 /src/crypto/ @security-team
 ```
 
-### 7.7.5 Cleaning Up Branches
+### Cleaning Up Branches
 
 Stale branches clutter the repository. Clean them up regularly.
 
@@ -1920,7 +1780,7 @@ git fetch --prune
 
 Enable "Automatically delete head branches" in repository settings to auto-delete branches after PR merge.
 
-### 7.7.6 Git Hooks
+### Git Hooks
 
 **Git hooks** run scripts at specific points in the Git workflow. Use them for automation and enforcement.
 
@@ -2005,9 +1865,9 @@ npm run lint-staged
 
 ------------------------------------------------------------------------
 
-## 7.8 Advanced Git Techniques
+## Advanced Git Techniques
 
-### 7.8.1 Interactive Rebase
+### Interactive Rebase
 
 **Interactive rebase** lets you edit, reorder, combine, or delete commits before sharing them.
 
@@ -2067,7 +1927,7 @@ drop def5678 Add user service            # Remove this commit
 pick jkl3456 Add user controller
 ```
 
-### 7.8.2 Cherry-Pick
+### Cherry-Pick
 
 **Cherry-pick** applies a specific commit from one branch to another.
 
@@ -2088,7 +1948,7 @@ git cherry-pick --no-commit abc1234
 -   Port specific features between branches
 -   Recover commits from deleted branches
 
-### 7.8.3 Stashing
+### Stashing
 
 **Stash** temporarily saves uncommitted changes so you can switch contexts.
 
@@ -2137,7 +1997,7 @@ git checkout feature-a
 git stash pop  # Restore your work
 ```
 
-### 7.8.4 Bisect
+### Bisect
 
 **Git bisect** helps find which commit introduced a bug using binary search.
 
@@ -2171,7 +2031,7 @@ git bisect start HEAD abc1234
 git bisect run npm test
 ```
 
-### 7.8.5 Reflog
+### Reflog
 
 The **reflog** records every change to HEAD—even ones not in branch history. It's a safety net for recovering "lost" work.
 
@@ -2205,11 +2065,11 @@ git cherry-pick mno7890
 
 ------------------------------------------------------------------------
 
-## 7.9 Workflow for Your Project
+## Workflow for Your Project
 
 For your course project, here's a recommended workflow combining best practices.
 
-### 7.9.1 Project Setup
+### Project Setup
 
 ``` bash
 # 1. Clone the repository
@@ -2226,7 +2086,7 @@ git config user.email "your.email@example.com"
 #    - Require status checks to pass
 ```
 
-### 7.9.2 Daily Workflow
+### Daily Workflow
 
 ``` bash
 # Morning: Start fresh
@@ -2253,7 +2113,7 @@ git merge origin/main
 git push
 ```
 
-### 7.9.3 Pull Request Process
+### Pull Request Process
 
 ``` markdown
 ## Summary
@@ -2280,7 +2140,7 @@ Closes #45
 - [x] Documentation updated
 ```
 
-### 7.9.4 Code Review Process
+### Code Review Process
 
 **As Author:**
 
@@ -2299,7 +2159,7 @@ Closes #45
 4.  Approve when satisfied
 5.  Follow up on addressed comments
 
-### 7.9.5 Branch Cleanup
+### Branch Cleanup
 
 ``` bash
 # After PR is merged, clean up
@@ -2313,7 +2173,7 @@ git fetch --prune
 
 ------------------------------------------------------------------------
 
-## 7.10 Chapter Summary
+## Chapter Summary
 
 Version control workflows are essential for team collaboration. The right workflow depends on your team size, release cadence, and project needs, but all good workflows share common elements: isolation through branching, quality through review, and stability through protection.
 
@@ -2341,7 +2201,7 @@ Key takeaways from this chapter:
 
 ------------------------------------------------------------------------
 
-## 7.11 Key Terms
+## Key Terms
 
 | Term | Definition |
 |------------------------------------|------------------------------------|
@@ -2363,7 +2223,7 @@ Key takeaways from this chapter:
 
 ------------------------------------------------------------------------
 
-## 7.12 Review Questions
+## Review Questions
 
 1.  Explain the difference between merge and rebase. When would you use each?
 
@@ -2387,7 +2247,7 @@ Key takeaways from this chapter:
 
 ------------------------------------------------------------------------
 
-## 7.13 Hands-On Exercises
+## Hands-On Exercises
 
 ### Exercise 7.1: Branching Practice
 
@@ -2489,7 +2349,7 @@ Implement Git hooks for your project:
 
 ------------------------------------------------------------------------
 
-## 7.14 Further Reading
+## Further Reading
 
 **Books:**
 

@@ -1,4 +1,4 @@
-# Chapter 10: Data Management and APIs
+# Data Management and APIs
 
 ## Learning Objectives
 
@@ -17,13 +17,13 @@ By the end of this chapter, you will be able to:
 
 ------------------------------------------------------------------------
 
-## 10.1 The Role of Data in Software Systems
+## The Role of Data in Software Systems
 
 Data is the lifeblood of modern applications. Every action a user takes—creating an account, posting a message, completing a task—generates data that must be stored, organized, and retrieved efficiently. The decisions you make about data management ripple through every aspect of your application, affecting performance, scalability, maintainability, and user experience.
 
 Consider a task management application like the one we're building throughout this course. When a user creates a task, that data must persist beyond the current session. When they log in from a different device, their tasks should appear. When they share a project with teammates, everyone needs to see the same information. These seemingly simple requirements demand careful thought about how data flows through your system.
 
-### 10.1.1 Data Architecture Overview
+### Data Architecture Overview
 
 Before diving into specific technologies, it's important to understand how data typically moves through a modern application. The architecture below represents a common pattern you'll encounter in production systems:
 
@@ -61,7 +61,7 @@ The primary database (often PostgreSQL, MySQL, or a similar relational database)
 
 Auxiliary data stores serve specialized purposes. A cache like Redis stores frequently-accessed data in memory for lightning-fast retrieval. A search engine like Elasticsearch provides sophisticated full-text search capabilities that would be slow or impossible with a traditional database. Many production systems use multiple data stores, each optimized for specific access patterns—a strategy called "polyglot persistence."
 
-### 10.1.2 Key Data Management Concerns
+### Key Data Management Concerns
 
 As you design your data layer, keep these fundamental concerns in mind:
 
@@ -77,11 +77,11 @@ As you design your data layer, keep these fundamental concerns in mind:
 
 ------------------------------------------------------------------------
 
-## 10.2 Relational Databases
+## Relational Databases
 
 **Relational databases** have been the foundation of data management since Edgar Codd introduced the relational model in 1970. They organize data into tables with rows and columns, using relationships to connect related data. Despite the rise of NoSQL alternatives, relational databases remain the most common choice for applications with structured data and complex querying needs.
 
-### 10.2.1 Core Concepts
+### Core Concepts
 
 To work effectively with relational databases, you need to understand several foundational concepts. Let's explore each one:
 
@@ -164,7 +164,7 @@ This diagram shows three tables and their relationships. The arrows indicate for
 
 These relationships create a web of connected data. A single query can traverse these connections to answer complex questions like "Show me all tasks in projects owned by users who joined this year."
 
-### 10.2.2 SQL Fundamentals
+### SQL Fundamentals
 
 **Structured Query Language (SQL)** is the standard language for interacting with relational databases. Despite being over 50 years old, SQL remains essential because it provides a powerful, declarative way to describe what data you want without specifying how to retrieve it. The database engine optimizes query execution automatically.
 
@@ -496,7 +496,7 @@ The WITH clause defines a temporary result set (task_stats) that we can referenc
 
 The `NULLIF(ts.total_tasks, 0)` prevents division by zero—if a user has zero tasks, the expression returns NULL instead of causing an error.
 
-### 10.2.3 Database Normalization
+### Database Normalization
 
 **Normalization** is the process of organizing data to minimize redundancy and dependency. Redundant data wastes storage and, more importantly, creates opportunities for inconsistency. If a customer's address is stored in multiple places, updating it requires changing multiple records—miss one, and your data becomes inconsistent.
 
@@ -598,7 +598,7 @@ This query joins all four tables to produce a result similar to our original den
 
 Notice the `price_at_time` column in order_items. This is a deliberate denormalization—we store the price at the time of purchase rather than referencing the products table. Why? Product prices change over time, but an order's total should remain constant. This is an example of intentional denormalization for business requirements.
 
-### 10.2.4 Transactions and ACID Properties
+### Transactions and ACID Properties
 
 Real-world operations often require multiple database changes that must succeed or fail together. Consider transferring money between bank accounts: you must debit one account AND credit another. If the system crashes between these operations, money would vanish or appear from nowhere.
 
@@ -706,13 +706,13 @@ The beauty of transactions is that you don't need to write cleanup code for each
 
 ------------------------------------------------------------------------
 
-## 10.3 NoSQL Databases
+## NoSQL Databases
 
 While relational databases excel at structured data with complex relationships, they're not the best tool for every situation. **NoSQL databases** emerged to address specific use cases where relational databases struggle: massive scale, flexible schemas, high write throughput, or specialized data models.
 
 The term "NoSQL" originally meant "No SQL," but it's now commonly understood as "Not Only SQL"—acknowledging that these databases complement rather than replace relational databases.
 
-### 10.3.1 Types of NoSQL Databases
+### Types of NoSQL Databases
 
 NoSQL databases fall into four main categories, each optimized for different use cases:
 
@@ -748,7 +748,7 @@ NoSQL databases fall into four main categories, each optimized for different use
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 10.3.2 Document Databases (MongoDB)
+### Document Databases (MongoDB)
 
 Document databases store data as self-contained documents, typically in JSON or a binary JSON variant (BSON). Unlike relational tables with fixed columns, documents can have varying structures. This flexibility makes document databases excellent for evolving schemas and hierarchical data.
 
@@ -885,7 +885,7 @@ The `$` positional operator is crucial for updating array elements. It refers to
 
 MongoDB's update operators (`$set`, `$push`, `$pull`, `$inc`, etc.) enable atomic modifications without reading and rewriting entire documents. This is both more efficient and safer for concurrent updates.
 
-### 10.3.3 Key-Value Stores (Redis)
+### Key-Value Stores (Redis)
 
 Redis is an in-memory data store that excels at speed. Because data lives in RAM rather than on disk, Redis can handle millions of operations per second with sub-millisecond latency. This makes it ideal for caching, session storage, and real-time features.
 
@@ -1046,7 +1046,7 @@ async function updateUser(userId, updates) {
 
 Deleting rather than updating the cache is usually safer. It ensures the next read gets fresh data from the authoritative source (the database), avoiding any possibility of the cache and database becoming inconsistent.
 
-### 10.3.4 Choosing Between SQL and NoSQL
+### Choosing Between SQL and NoSQL
 
 The choice between SQL and NoSQL isn't about which is "better"—it's about which fits your specific requirements. Here's a framework for making this decision:
 
@@ -1096,11 +1096,11 @@ This approach uses each database for what it does best. The complexity cost is w
 
 ------------------------------------------------------------------------
 
-## 10.4 RESTful API Design
+## RESTful API Design
 
 With data stored in databases, we need a way for applications to access it. **REST (Representational State Transfer)** is an architectural style that has become the dominant approach for web APIs. REST APIs use HTTP methods to perform operations on resources, providing a uniform, stateless interface.
 
-### 10.4.1 REST Principles
+### REST Principles
 
 REST is built on several key principles that guide API design:
 
@@ -1136,7 +1136,7 @@ REST is built on several key principles that guide API design:
 
 The **statelessness** principle deserves emphasis. In a REST API, the server doesn't maintain session state between requests. If a user is logged in, every request must include authentication information (typically a token). This seems redundant, but it enables horizontal scaling—since any server can handle any request, you can add servers to handle more load without worrying about session affinity.
 
-### 10.4.2 Resource-Oriented Design
+### Resource-Oriented Design
 
 In REST, everything is a **resource**—a conceptual entity that can be identified, retrieved, and manipulated. Resources are identified by URIs (Uniform Resource Identifiers) and typically represent nouns in your domain: users, tasks, projects, comments.
 
@@ -1192,7 +1192,7 @@ For our task management API, here's how resources map to URIs:
 
 Notice how the hierarchy expresses relationships. `/projects/456/tasks` and `/users/123/tasks` might return different (or overlapping) sets of tasks, filtered by project or assignee respectively.
 
-### 10.4.3 HTTP Methods and CRUD Operations
+### HTTP Methods and CRUD Operations
 
 REST uses HTTP methods to indicate what operation to perform on a resource. Each method has specific semantics that clients and servers agree on:
 
@@ -1242,7 +1242,7 @@ GET    /api/tasks?sort=due_date&order=asc    Sort results
 
 Query parameters modify GET requests—filtering, pagination, and sorting change which resources are returned and in what order, but they don't create or modify resources.
 
-### 10.4.4 HTTP Status Codes
+### HTTP Status Codes
 
 Status codes communicate the result of an API request. Using appropriate codes makes your API self-documenting and helps clients handle responses correctly:
 
@@ -1283,7 +1283,7 @@ Similarly, 400 vs 422:
 -   **400 Bad Request**: The request is malformed (can't parse JSON, missing required header).
 -   **422 Unprocessable Entity**: The request is valid, but the data fails validation (email format wrong, title too long).
 
-### 10.4.5 Implementing a RESTful API
+### Implementing a RESTful API
 
 Let's build a complete REST API for tasks using Express.js. We'll structure the code into layers: routes (HTTP handling), services (business logic), and a clean separation of concerns.
 
@@ -1552,7 +1552,7 @@ module.exports = new TaskService();
 
 The service layer handles data access and business logic, keeping route handlers thin. This separation makes the code more testable—you can test service methods directly without HTTP, and test routes with a mocked service.
 
-### 10.4.6 Response Structure
+### Response Structure
 
 Consistent response formats make your API predictable and easier to consume. Here's a structure that works well:
 
@@ -1598,11 +1598,11 @@ The consistent `data` wrapper makes responses predictable—clients always look 
 
 ------------------------------------------------------------------------
 
-## 10.5 GraphQL
+## GraphQL
 
 While REST has served us well, it has limitations. Mobile apps with limited bandwidth want minimal data. Complex UIs need data from multiple resources. Different clients have different data needs. **GraphQL** addresses these challenges by letting clients specify exactly what data they need.
 
-### 10.5.1 The Problem GraphQL Solves
+### The Problem GraphQL Solves
 
 Consider a mobile app displaying a task list. With REST, you might face these issues:
 
@@ -1637,7 +1637,7 @@ query Dashboard {
 
 One request, exactly the needed data, no wasted bandwidth.
 
-### 10.5.2 GraphQL Schema
+### GraphQL Schema
 
 A GraphQL API is defined by its **schema**—a type system describing what data is available and how it can be queried. Let's build a schema for our task management application:
 
@@ -1770,7 +1770,7 @@ type Mutation {
 
 Mutations modify data and return the affected resource. This lets clients update their cache without additional requests.
 
-### 10.5.3 Writing GraphQL Queries
+### Writing GraphQL Queries
 
 GraphQL queries declare exactly what data to fetch. Let's explore increasingly complex examples:
 
@@ -1905,7 +1905,7 @@ query GetProjectTasks($projectId: ID!) {
 
 Fragments define reusable field sets. `...TaskFields` spreads those fields into the selection. This reduces repetition and ensures consistency across queries.
 
-### 10.5.4 GraphQL Mutations
+### GraphQL Mutations
 
 Mutations modify data. They look similar to queries but conventionally cause side effects:
 
@@ -1952,7 +1952,7 @@ mutation BatchUpdate {
 
 Mutations execute sequentially (unlike queries, which can parallelize). Aliases (`task1:`, `task2:`) distinguish multiple calls to the same mutation.
 
-### 10.5.5 Implementing GraphQL Resolvers
+### Implementing GraphQL Resolvers
 
 Resolvers are functions that fetch data for each field in your schema. Let's implement resolvers for our task management API:
 
@@ -2097,7 +2097,7 @@ Root Query resolvers have `undefined` as parent since they're entry points.
 
 Field resolvers receive the parent object as their first argument. The `assignee` resolver receives the task, extracts `user_id`, and fetches the corresponding user. GraphQL calls these resolvers automatically when clients request those fields.
 
-### 10.5.6 The N+1 Problem and DataLoader
+### The N+1 Problem and DataLoader
 
 There's a performance trap in the resolvers above. Consider this query:
 
@@ -2162,11 +2162,11 @@ Now the 100-task query makes just 2 database queries: one for tasks, one for all
 
 ------------------------------------------------------------------------
 
-## 10.6 API Documentation
+## API Documentation
 
 An API without documentation is like a library without a catalog—technically usable but practically frustrating. Good documentation transforms your API from "technically correct" to "delightful to use."
 
-### 10.6.1 OpenAPI Specification
+### OpenAPI Specification
 
 **OpenAPI** (formerly Swagger) is the industry standard for REST API documentation. It's a machine-readable format that enables automatic documentation generation, client SDK generation, and validation.
 
@@ -2293,7 +2293,7 @@ components:
 
 The `example` fields populate documentation with realistic data. Validation rules (`minLength`, `maximum`, `enum`) can drive automatic request validation.
 
-### 10.6.2 Serving Documentation
+### Serving Documentation
 
 **Swagger UI** renders OpenAPI specifications as interactive documentation:
 
@@ -2314,11 +2314,11 @@ Swagger UI provides an interactive interface where developers can read documenta
 
 ------------------------------------------------------------------------
 
-## 10.7 Data Validation
+## Data Validation
 
 Never trust client input. Every API request might contain malformed data, missing fields, or malicious payloads. Validation ensures only valid data enters your system.
 
-### 10.7.1 Validation with Joi
+### Validation with Joi
 
 **Joi** is a popular validation library for JavaScript that provides a fluent API for defining schemas:
 
@@ -2406,7 +2406,7 @@ const validate = (schema) => {
 
 The `stripUnknown: true` option is a security feature—it removes any fields not defined in the schema, preventing clients from injecting unexpected data.
 
-### 10.7.2 Centralized Error Handling
+### Centralized Error Handling
 
 Rather than handling errors in every route, centralize error handling in middleware:
 
@@ -2488,11 +2488,11 @@ The error handler transforms various error types into consistent API responses. 
 
 ------------------------------------------------------------------------
 
-## 10.8 API Security
+## API Security
 
 APIs are attack surfaces. Every endpoint is a potential entry point for malicious actors. Security must be designed in, not bolted on.
 
-### 10.8.1 Authentication with JWT
+### Authentication with JWT
 
 **JSON Web Tokens (JWT)** provide stateless authentication. The server issues a signed token upon login; clients include this token in subsequent requests. The server verifies the signature without database lookups.
 
@@ -2568,7 +2568,7 @@ const authenticate = async (req, res, next) => {
 };
 ```
 
-### 10.8.2 Rate Limiting
+### Rate Limiting
 
 Rate limiting prevents abuse by restricting how many requests a client can make in a time window:
 
@@ -2608,11 +2608,11 @@ The authentication limiter uses `skipSuccessfulRequests` so successful logins do
 
 ------------------------------------------------------------------------
 
-## 10.9 Caching Strategies
+## Caching Strategies
 
 Databases are slow compared to memory. Caching stores frequently-accessed data in fast storage (RAM) to reduce latency and database load. The challenge is keeping cached data synchronized with the source of truth.
 
-### 10.9.1 Cache-Aside Pattern
+### Cache-Aside Pattern
 
 The most common caching strategy is **cache-aside** (or "lazy loading"):
 
@@ -2688,7 +2688,7 @@ async function updateTask(taskId, updates) {
 
 We delete rather than update the cache. This is safer—if we tried to update and something went wrong, we'd have inconsistent data. Deletion ensures the next read gets authoritative data from the database.
 
-### 10.9.2 Cache Invalidation Challenges
+### Cache Invalidation Challenges
 
 Phil Karlton famously said there are only two hard problems in computer science: cache invalidation and naming things. The difficulty arises from maintaining consistency between cache and database.
 
@@ -2707,7 +2707,7 @@ Phil Karlton famously said there are only two hard problems in computer science:
 
 ------------------------------------------------------------------------
 
-## 10.10 Chapter Summary
+## Chapter Summary
 
 Data management and APIs form the backbone of modern applications. This chapter covered the essential concepts and practices for storing, accessing, and exposing data effectively.
 
@@ -2731,7 +2731,7 @@ Key takeaways:
 
 ------------------------------------------------------------------------
 
-## 10.11 Key Terms
+## Key Terms
 
 | Term | Definition |
 |------------------------------------|------------------------------------|
@@ -2753,7 +2753,7 @@ Key takeaways:
 
 ------------------------------------------------------------------------
 
-## 10.12 Review Questions
+## Review Questions
 
 1.  Explain the difference between primary keys and foreign keys. How do they work together to establish relationships between tables?
 
@@ -2777,7 +2777,7 @@ Key takeaways:
 
 ------------------------------------------------------------------------
 
-## 10.13 Hands-On Exercises
+## Hands-On Exercises
 
 ### Exercise 10.1: Database Design
 
@@ -2841,7 +2841,7 @@ Implement a GraphQL API alongside your REST API:
 
 ------------------------------------------------------------------------
 
-## 10.14 Further Reading
+## Further Reading
 
 **Books:**
 

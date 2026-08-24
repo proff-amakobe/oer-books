@@ -1,0 +1,16 @@
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const title = document.querySelector("main #title-block-header h1.title");
+  const number = title?.querySelector(".chapter-number");
+  if (number) {
+    number.setAttribute("aria-label", `Chapter ${number.textContent.trim()}`);
+    title.closest("header")?.classList.add("se-chapter-hero");
+  }
+  document.querySelectorAll("main h2").forEach((heading) => {
+    if (heading.textContent.replace(/^\s*\d+(?:\.\d+)*\s*/, "").trim() === "Learning Objectives") {
+      const section = heading.parentElement;
+      if (section?.tagName === "SECTION") section.classList.add("se-learning-objectives");
+    }
+  });
+});
+</script>
