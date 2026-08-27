@@ -1,0 +1,91 @@
+\documentclass{article}
+\usepackage[paperwidth=21in,paperheight=12in,margin=0in]{geometry}
+\usepackage{graphicx,tikz,xcolor,fontspec}
+\usetikzlibrary{calc}
+\pagestyle{empty}
+\setmainfont{TeX Gyre Heros}
+\definecolor{navy}{cmyk}{1,0.82,0.32,0.68}
+\definecolor{royal}{cmyk}{0.92,0.72,0,0.14}
+\definecolor{cyan}{cmyk}{0.72,0.02,0,0}
+\definecolor{cyanlight}{cmyk}{0.34,0,0,0}
+\definecolor{crimson}{cmyk}{0,0.86,0.48,0.08}
+\definecolor{ice}{cmyk}{0.11,0.02,0,0}
+\definecolor{white}{cmyk}{0,0,0,0}
+\begin{document}
+\noindent
+\begin{tikzpicture}[remember picture,overlay,x=1pt,y=1pt]
+\begin{scope}[shift={(current page.south west)}]
+  % Official 21 x 12 inch template is the production coordinate system.
+  \node[anchor=south west,inner sep=0] at (0,0)
+    {\includegraphics[width=1512pt,height=864pt]{template/9798295760709-Perfect.pdf}};
+
+  % Official artwork region: 18.96 x 11.25 inches. Spine: 1.710 inches.
+  \fill[navy] (147,54) rectangle (1512,864);
+  \fill[royal] (147,54) rectangle (768,864);
+  \fill[navy] (768,54) rectangle (891.12,864);
+
+  % Continuous engineered-system grid across back, spine, and front.
+  \begin{scope}[opacity=.13]
+    \foreach \x in {147,183,...,1512} \draw[cyanlight,line width=.35pt] (\x,54)--(\x,864);
+    \foreach \y in {54,90,...,864} \draw[cyanlight,line width=.35pt] (147,\y)--(1512,\y);
+  \end{scope}
+
+  % Back cover.
+  \node[anchor=north west,text=cyanlight,font=\bfseries\fontsize{11}{13}\selectfont] at (192,810)
+    {SOFTWARE LIFECYCLE AS AN ENGINEERED SYSTEM};
+  \node[anchor=north west,text=white,text width=505pt,align=left,font=\bfseries\fontsize{23}{27}\selectfont] at (192,770)
+    {Engineer software from requirements\par through secure evolution.};
+  \draw[crimson,line width=3pt] (192,687)--(325,687);
+  \node[anchor=north west,text=ice,text width=455pt,align=left,font=\fontsize{11.4}{15.4}\selectfont] at (192,657)
+    {\textit{The Complete Software Engineering Lifecycle} provides a practical, project-driven guide to building software from initial requirements through design, development, testing, deployment, maintenance, and professional practice.\\[8pt]
+     The book connects software engineering principles with modern tools and workflows, covering requirements engineering, UML and system modeling, architecture and design patterns, UI/UX, Agile development, version control, testing, CI/CD, APIs and data management, cloud deployment, security, maintenance, ethics, and full lifecycle integration.\\[8pt]
+     Designed for students, instructors, software engineers, and technical professionals, the text emphasizes not only how software is written, but how reliable, maintainable, secure, and scalable systems are engineered.};
+
+  \node[anchor=north west,text=cyanlight,font=\bfseries\fontsize{10.5}{12}\selectfont] at (310,333) {ABOUT THE AUTHOR};
+  \node[anchor=north west,text=white,font=\bfseries\fontsize{14}{17}\selectfont] at (310,306) {Moody Amakobe};
+  \node[anchor=north west,text=ice,text width=338pt,align=left,font=\fontsize{8.6}{11.3}\selectfont] at (310,280)
+    {Moody Amakobe is an academic, applied researcher, and technology professional with extensive experience in software engineering, systems architecture, artificial intelligence, and graduate computing education. He holds a Doctor of Computer Science from Colorado Technical University and has held senior engineering and architecture roles with T-Mobile, Accenture, Wipro, and Deloitte. His teaching and research connect rigorous computing concepts with real-world engineering practice.};
+  \begin{scope}
+    \clip[rounded corners=5pt] (192,228) rectangle (292,333);
+    \node[anchor=center,inner sep=0] at (242,280.5)
+      {\includegraphics[width=145pt]{assets/moody-amakobe-cmyk.jpg}};
+  \end{scope}
+  \draw[cyanlight,line width=.8pt,rounded corners=5pt] (192,228) rectangle (292,333);
+  % Keep the lower back cover clear so Ingram Studio can place its barcode.
+
+  % Spine: 768 to 891.12 points, centered at 829.56.
+  \node[rotate=90,text=white,font=\bfseries\fontsize{12.2}{14}\selectfont] at (829.56,472)
+    {THE COMPLETE SOFTWARE ENGINEERING LIFECYCLE};
+  \node[rotate=90,text=cyanlight,font=\fontsize{9.5}{11}\selectfont] at (829.56,166) {MOODY AMAKOBE};
+
+  % Front cover.
+  \fill[crimson] (930,780) rectangle (937,826);
+  \node[anchor=north west,text=cyanlight,font=\bfseries\fontsize{11}{13}\selectfont] at (957,820)
+    {2026 EDITION \textbar{} SOFTWARE ENGINEERING};
+  \node[anchor=north west,text=white,text width=510pt,align=left,font=\bfseries\fontsize{39}{43}\selectfont] at (957,744)
+    {The Complete\par Software Engineering\par Lifecycle};
+  \draw[cyan,line width=4pt] (957,537)--(1128,537);
+  \node[anchor=north west,text=ice,text width=500pt,align=left,font=\fontsize{17}{22}\selectfont] at (957,507)
+    {Methods, Patterns, and Implementation};
+
+  % Requirements-to-evolution pathway: a modular lifecycle graph.
+  \begin{scope}[shift={(978,224)},draw=cyan,line width=1.7pt]
+    \draw (0,90)--(70,90)--(115,135)--(200,135)--(245,90)--(330,90)--(375,135)--(465,135);
+    \draw (70,90)--(115,45)--(200,45)--(245,90);
+    \draw (330,90)--(375,45)--(465,45);
+    \foreach \p in {(0,90),(70,90),(115,135),(200,135),(115,45),(200,45),(245,90),(330,90),(375,135),(465,135),(375,45),(465,45)}
+      \fill[cyanlight] \p circle (4pt);
+    \node[anchor=south,text=ice,font=\fontsize{7.5}{9}\selectfont] at (0,102) {REQUIRE};
+    \node[anchor=south,text=ice,font=\fontsize{7.5}{9}\selectfont] at (115,147) {DESIGN};
+    \node[anchor=north,text=ice,font=\fontsize{7.5}{9}\selectfont] at (115,33) {BUILD};
+    \node[anchor=south,text=ice,font=\fontsize{7.5}{9}\selectfont] at (245,102) {TEST};
+    \node[anchor=south,text=ice,font=\fontsize{7.5}{9}\selectfont] at (375,147) {DEPLOY};
+    \node[anchor=north,text=ice,font=\fontsize{7.5}{9}\selectfont] at (375,33) {EVOLVE};
+  \end{scope}
+  \node[anchor=south west,text=white,font=\bfseries\fontsize{20}{23}\selectfont] at (957,126) {Moody Amakobe};
+  \node[anchor=south west,text=cyanlight,font=\fontsize{9.5}{11}\selectfont] at (957,93)
+    {GLOBAL DATA SCIENCE INSTITUTE};
+\end{scope}
+\end{tikzpicture}
+\null
+\end{document}
