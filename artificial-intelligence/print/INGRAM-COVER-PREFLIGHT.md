@@ -8,14 +8,14 @@ Report date: 2026-08-27
 |---|---|
 | Title | *Engineering Intelligent Systems: Designing, Building, and Deploying Modern Artificial Intelligence* |
 | Author | Moody Amakobe |
-| Print ISBN | 979-8-2408-4413-3 |
+| Print ISBN | 979-8-2408-8991-2 |
 | Final print PDF | `_book/Engineering-Intelligent-Systems-Print.pdf` |
 | Verified page count | 298 |
 | Verification methods | `pdfinfo` (298 pages); `pdfseparate` complete split (298 output pages) |
 | Page box | 612 × 792 points |
 | Trim size | 8.5 × 11 inches (US Letter) |
 | PDF version | 1.7 |
-| File size | 1,161,975 bytes |
+| File size | 1,161,981 bytes |
 | First physical PDF page | Interior half title: “Engineering Intelligent Systems” |
 | Last physical PDF page | Intentional blank verso |
 | External cover pages in interior | None |
@@ -30,7 +30,7 @@ artifacts are not the Ingram interior.
 
 | Field | Production target |
 |---|---|
-| ISBN | 9798240844133 |
+| ISBN | 9798240889912 |
 | Binding | Perfect Bound |
 | Trim | 8.5 × 11 inches |
 | Interior | Color |
@@ -60,8 +60,8 @@ cover now uses the current official Ingram geometry listed below.
 
 | Field | Status |
 |---|---|
-| Current official Ingram template filename | `9798240844133-Perfect (1).pdf` |
-| Template ISBN | 9798240844133 |
+| Current official Ingram template filename | Not yet supplied for the new ISBN |
+| Template ISBN | 9798240844133 (old template) |
 | Template page count | 298 |
 | Template trim | 8.5 × 11 inches |
 | Template binding/paper | Perfect Bound, Color, 50 White |
@@ -70,39 +70,43 @@ cover now uses the current official Ingram geometry listed below.
 | Bleed artwork dimensions | 17.875 × 11.25 inches (1287 × 810 points) |
 | Panel safe areas | 8.25 × 10.75 inches; 0.25-inch inset from outer bleed edges |
 | Spine safe area | 0.5 inches wide; 0.0625-inch inset from each fold |
-| Barcode | Supplied by Ingram; retained in the back-cover safe area |
-| Template status | **CURRENT** |
+| Barcode | Old supplied barcode is obsolete; zone reserved for replacement |
+| Template status | **OBSOLETE — WRONG ISBN** |
 
-The official template matches the verified ISBN, page count, trim, binding,
-interior type, and paper. It is retained only in the temporary QA workspace and
-is not committed as a generated printer template.
+The available official template and barcode were generated for ISBN
+9798240844133. They became obsolete when the print ISBN changed to
+9798240889912. Download a new official Ingram template for the new ISBN using
+the same verified 298-page, 8.5 × 11-inch, Perfect Bound, Color, 50 White,
+Gloss Laminate configuration before generating another upload cover.
 
 ## Corrected Cover
 
 | Field | Result |
 |---|---|
 | Output filename | `output/pdf/Engineering-Intelligent-Systems-Ingram-Cover.pdf` |
-| Page dimensions | 21 × 12 inches (1512 × 864 points) |
-| Template difference | 0 × 0 points |
+| Upload page dimensions | 17.875 × 11.25 inches (1287 × 810 points) |
+| Design Studio fit | Artwork-only canvas; full 21 × 12-inch instruction sheet removed |
 | Bleed artwork | 17.875 × 11.25 inches |
 | Spine width | 0.625 inches |
-| Barcode zone | Official Ingram barcode retained at 697–824 × 85–159 points |
-| Color space | CMYK vector palette; official PDF/X-1 template/barcode vector content retained |
+| Barcode zone | Old official barcode is invalid; new official barcode required |
+| Color space | CMYK vector palette |
 | Resolution | Vector artwork and text; `pdfimages` reports no raster images |
 | Fonts | TeX Gyre Heros Regular, Bold, and Italic; all embedded and subset |
-| PDF | One page, PDF 1.7, 255,178 bytes |
-| SHA-256 | `b03be5c13abced7a05b16918f186cbe95f152412bce0be4b2f29b82a50a2c893` |
-| Status | **CURRENT — GENERATED AND VERIFIED** |
+| PDF | One page, PDF 1.7, 16,546 bytes |
+| SHA-256 | `787a8ee1117ed9f7d2b58c25b0b927e168f50f39e5d14d242e7f08be716b1ede` |
+| Status | **ARTWORK FIT VERIFIED — NEW ISBN BARCODE STILL REQUIRED** |
 
-The cover was rebuilt panel-by-panel while preserving the navy/cyan technical
-identity. Template guides were used in the temporary QA overlay and are not
-visible over the production artwork.
+The upload canvas was corrected after Ingram Design Studio showed that the full
+21 × 12-inch printer instruction sheet was being treated as cover artwork. The
+new PDF contains only the 17.875 × 11.25-inch bleed artwork bounded by the red
+lines. Its reserved barcode area is blank because the old barcode encoded ISBN
+9798240844133.
 
 ## Consistency Check
 
 | Field | Interior | Cover Template | Ingram Target | Match |
 |---|---|---|---|---|
-| ISBN | 9798240844133 | 9798240844133 | 9798240844133 | Yes |
+| ISBN | 9798240889912 | 9798240844133 (obsolete) | 9798240889912 | No: new template required |
 | Trim | 8.5 × 11 in | 8.5 × 11 in | 8.5 × 11 in | Yes |
 | Page Count | 298 | 298 | 298 | Yes |
 | Binding | N/A to PDF geometry | Perfect Bound | Perfect Bound | Yes |
@@ -118,7 +122,7 @@ visible over the production artwork.
 | Front cover | Pass: centered, undistorted, all text inside safe area |
 | Spine | Pass: title and author centered inside 0.5-inch safe area |
 | Back cover | Pass: description and author section inside safe area |
-| Barcode | Pass: supplied vector barcode retained; no artwork interference |
+| Barcode | Reserved zone is clear; new official 9798240889912 barcode pending |
 | Safe areas | Pass: verified with 55% official-template overlay |
 | Bleed | Pass: CMYK background covers the full blue/pink artwork canvas |
 
@@ -131,6 +135,7 @@ no unexpected Type 3 fonts reported by `pdffonts`.
 2. Select trim size **8.5 × 11 inches**.
 3. Select **Perfect Bound**.
 4. Select **Color interior, 50 White paper, Gloss Laminate cover finish**.
-5. Upload `output/pdf/Engineering-Intelligent-Systems-Ingram-Cover.pdf` as the cover.
-6. Upload `_book/Engineering-Intelligent-Systems-Print.pdf` as the interior.
-7. Do not upload the temporary official template or QA overlay.
+5. Download a new official template and barcode for ISBN **9798240889912**.
+6. Add the new official barcode and run the final overlay before production upload.
+7. Upload `_book/Engineering-Intelligent-Systems-Print.pdf` as the interior.
+8. Do not upload the retired old-ISBN cover, old template, or QA overlay.
