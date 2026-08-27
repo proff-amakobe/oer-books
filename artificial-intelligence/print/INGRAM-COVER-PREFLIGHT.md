@@ -88,19 +88,19 @@ Gloss Laminate configuration before generating another upload cover.
 | Design Studio fit | Artwork-only canvas; full 21 × 12-inch instruction sheet removed |
 | Bleed artwork | 17.875 × 11.25 inches |
 | Spine width | 0.625 inches |
-| Barcode zone | Old official barcode is invalid; new official barcode required |
+| Barcode zone | Artwork continues beneath the zone; barcode will be placed in Ingram Studio |
 | Color space | CMYK vector palette |
 | Resolution | Vector artwork and text; `pdfimages` reports no raster images |
 | Fonts | TeX Gyre Heros Regular, Bold, and Italic; all embedded and subset |
-| PDF | One page, PDF 1.7, 16,546 bytes |
-| SHA-256 | `787a8ee1117ed9f7d2b58c25b0b927e168f50f39e5d14d242e7f08be716b1ede` |
+| PDF | One page, PDF 1.7, 16,498 bytes |
+| SHA-256 | `3ea4ffbfc5dfc3e3b8e6dad2baec9e49c8faa6e16b4f3e92e8ea087a9df3ad1b` |
 | Status | **ARTWORK FIT VERIFIED — NEW ISBN BARCODE STILL REQUIRED** |
 
 The upload canvas was corrected after Ingram Design Studio showed that the full
 21 × 12-inch printer instruction sheet was being treated as cover artwork. The
 new PDF contains only the 17.875 × 11.25-inch bleed artwork bounded by the red
-lines. Its reserved barcode area is blank because the old barcode encoded ISBN
-9798240844133.
+lines. The back-cover artwork continues through the barcode area so the official
+barcode can be placed inside Ingram Studio.
 
 ## Consistency Check
 
@@ -122,7 +122,7 @@ lines. Its reserved barcode area is blank because the old barcode encoded ISBN
 | Front cover | Pass: centered, undistorted, all text inside safe area |
 | Spine | Pass: title and author centered inside 0.5-inch safe area |
 | Back cover | Pass: description and author section inside safe area |
-| Barcode | Reserved zone is clear; new official 9798240889912 barcode pending |
+| Barcode | Placement delegated to Ingram Studio for ISBN 9798240889912 |
 | Safe areas | Pass: verified with 55% official-template overlay |
 | Bleed | Pass: CMYK background covers the full blue/pink artwork canvas |
 
@@ -135,7 +135,7 @@ no unexpected Type 3 fonts reported by `pdffonts`.
 2. Select trim size **8.5 × 11 inches**.
 3. Select **Perfect Bound**.
 4. Select **Color interior, 50 White paper, Gloss Laminate cover finish**.
-5. Download a new official template and barcode for ISBN **9798240889912**.
-6. Add the new official barcode and run the final overlay before production upload.
+5. Select Ingram Studio's barcode placement for ISBN **9798240889912**.
+6. Confirm the barcode remains inside the designated back-cover safe area.
 7. Upload `_book/Engineering-Intelligent-Systems-Print.pdf` as the interior.
 8. Do not upload the retired old-ISBN cover, old template, or QA overlay.
