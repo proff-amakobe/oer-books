@@ -49,7 +49,7 @@ Update IngramSpark Page Count: **886 -> 864**
 | Binding/paper | Perfect Bound, Standard Color, 50 White |
 | Trim panels | 8.5 x 11 inches each |
 | Spine width | **1.710 inches (43.43 mm / 123.12 points)** |
-| Full document dimensions | **21 x 12 inches (1512 x 864 points)** |
+| Full template dimensions | **21 x 12 inches (1512 x 864 points), including instruction margins** |
 | Bleed artwork dimensions | 18.96 x 11.25 inches |
 | Outer bleed | 0.125 inches |
 | Spine safe inset | 0.0625 inches from each fold |
@@ -76,7 +76,8 @@ The historical 886-page template geometry and 1.75180-inch spine are obsolete an
 | Check | Result |
 |---|---|
 | Cover pages | 1 |
-| Cover dimensions match template | **MATCH - 1512 x 864 points; difference 0 x 0** |
+| Design Studio upload dimensions | **MATCH - 1365.12 x 810 points (18.96 x 11.25 inches)** |
+| Template instruction margins | Cropped from upload PDF; no left or bottom white bands |
 | Interior trim | **MATCH - 612 x 792 points** |
 | Fonts | TeX Gyre Heros Regular, Bold, and Italic; all embedded and subset |
 | Type 3 fonts in cover | None |
@@ -102,15 +103,15 @@ Current official Ingram guidance requires a separate single-page PDF cover, CMYK
 | Interior | Color target | Standard Color | CMYK cover | MATCH |
 | Paper | Color 50 target | 50 White | 1.710-in spine geometry | MATCH |
 | Spine width | N/A | 1.710 in | 1.710 in | MATCH |
-| Full dimensions | N/A | 21 x 12 in | 21 x 12 in | MATCH |
+| Bleed-art dimensions | N/A | 18.96 x 11.25 in | 18.96 x 11.25 in | MATCH |
 
 ## Output
 
 | Artifact | Value |
 |---|---|
 | Final cover PDF | `output/pdf/The-Complete-Software-Engineering-Lifecycle-Ingram-Cover.pdf` |
-| File size | 1,630,152 bytes |
-| SHA-256 | `a18501b1cf4eafd8138c6495d2e191854522f18cf0e4499ae972046a5c733e0c` |
+| File size | 1,386,884 bytes |
+| SHA-256 | `fe3dd499761b166886fd920863d46e87aa3717dfae2c92e82dcb27228ab9c45b` |
 
 ## Ingram Upload Instructions
 

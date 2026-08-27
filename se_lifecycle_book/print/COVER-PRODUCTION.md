@@ -13,11 +13,17 @@
 | Interior / paper | Color / Color 50 |
 | Cover finish | Matte |
 | Spine | 1.710 inches |
-| Full template sheet | 21 x 12 inches |
+| Official template sheet | 21 x 12 inches, including non-art instruction margins |
 | Bleed artwork | 18.96 x 11.25 inches |
+| Design Studio upload PDF | 18.96 x 11.25 inches; instruction margins cropped away |
 | Final cover | `output/pdf/The-Complete-Software-Engineering-Lifecycle-Ingram-Cover.pdf` |
 
 The previous 886-page count and 1.75180-inch spine are **OBSOLETE - DO NOT REUSE**.
+
+Do not upload a 21 x 12-inch cover export. That size includes the official
+template's instruction margin and lower information strip, which appear as white
+bands and shift the wrap in Design Studio. Upload only the 18.96 x 11.25-inch
+bleed-art PDF.
 
 ## Build
 
