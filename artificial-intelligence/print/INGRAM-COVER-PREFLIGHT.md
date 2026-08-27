@@ -53,72 +53,61 @@ bind-type mismatch. The rejection was therefore most likely caused by a cover
 canvas/template that did not match the selected Ingram trim/binding metadata,
 not by the current interior page count.
 
-Previous wraparound dimensions and spine width are unknown. The repository
-contains only a front-cover identity asset (`assets/cover.svg` and
-`assets/cover.png`); `print/PRINT-COVER.md` explicitly says it is not a
-printer-ready wraparound cover.
+The previous submitted wraparound dimensions remain unknown. The corrected
+cover now uses the current official Ingram geometry listed below.
 
 ## Cover Template
 
 | Field | Status |
 |---|---|
-| Current official Ingram template filename | Not present in the repository |
-| Template ISBN | Unverified |
-| Template page count | Unverified |
-| Template trim | Unverified |
-| Template spine width | Unverified; must not be estimated |
-| Template total dimensions | Unverified |
-| Template status | **MISSING — NEW OFFICIAL TEMPLATE REQUIRED** |
+| Current official Ingram template filename | `9798240844133-Perfect (1).pdf` |
+| Template ISBN | 9798240844133 |
+| Template page count | 298 |
+| Template trim | 8.5 × 11 inches |
+| Template binding/paper | Perfect Bound, Color, 50 White |
+| Template spine width | 0.625 inches (45 points) |
+| Template total dimensions | 21 × 12 inches (1512 × 864 points) |
+| Bleed artwork dimensions | 17.875 × 11.25 inches (1287 × 810 points) |
+| Panel safe areas | 8.25 × 10.75 inches; 0.25-inch inset from outer bleed edges |
+| Spine safe area | 0.5 inches wide; 0.0625-inch inset from each fold |
+| Barcode | Supplied by Ingram; retained in the back-cover safe area |
+| Template status | **CURRENT** |
 
-No PDF, EPS, or other official Ingram template is stored in this project. No
-verified Ingram spine formula is present in project documentation. Consequently,
-production wrap geometry, bleed, fold lines, safe zones, barcode zone, and
-spine width cannot be stated with certainty and no production cover PDF should
-be generated yet.
-
-Enter the following in IngramSpark's Cover Template Generator:
-
-- ISBN: 9798240844133
-- Binding: Perfect Bound
-- Trim: 8.5 × 11 inches
-- Page Count: 298
-- Interior: Color
-- Paper: 50 White
-- Cover Finish: Gloss Laminate
-
-**Download a new IngramSpark cover template using these verified specifications.**
-
-Do not reuse any earlier template unless every value above matches. Any template
-generated for different metadata is **OBSOLETE — WRONG SPECIFICATION**.
+The official template matches the verified ISBN, page count, trim, binding,
+interior type, and paper. It is retained only in the temporary QA workspace and
+is not committed as a generated printer template.
 
 ## Corrected Cover
 
 | Field | Result |
 |---|---|
-| Intended output filename | `Engineering-Intelligent-Systems-Ingram-Cover.pdf` |
-| Page dimensions | Pending current official template |
-| Bleed | Pending current official template |
-| Spine width | Pending current official template |
-| Barcode zone | Pending current official template |
-| Color space | Pending current official Ingram template/instructions |
-| Resolution | Minimum 300 DPI effective for raster elements; vector text/graphics preferred |
-| Fonts | Must be embedded; final `pdffonts` check pending cover generation |
-| Status | **BLOCKED BY MISSING OFFICIAL TEMPLATE; NOT GENERATED** |
+| Output filename | `output/pdf/Engineering-Intelligent-Systems-Ingram-Cover.pdf` |
+| Page dimensions | 21 × 12 inches (1512 × 864 points) |
+| Template difference | 0 × 0 points |
+| Bleed artwork | 17.875 × 11.25 inches |
+| Spine width | 0.625 inches |
+| Barcode zone | Official Ingram barcode retained at 697–824 × 85–159 points |
+| Color space | CMYK vector palette; official PDF/X-1 template/barcode vector content retained |
+| Resolution | Vector artwork and text; `pdfimages` reports no raster images |
+| Fonts | TeX Gyre Heros Regular, Bold, and Italic; all embedded and subset |
+| PDF | One page, PDF 1.7, 255,178 bytes |
+| SHA-256 | `b03be5c13abced7a05b16918f186cbe95f152412bce0be4b2f29b82a50a2c893` |
+| Status | **CURRENT — GENERATED AND VERIFIED** |
 
-The final cover must be rebuilt panel-by-panel under the official template,
-preserving the navy/cyan technical identity. The template guides must be used
-for overlay QA but omitted from the upload PDF.
+The cover was rebuilt panel-by-panel while preserving the navy/cyan technical
+identity. Template guides were used in the temporary QA overlay and are not
+visible over the production artwork.
 
 ## Consistency Check
 
 | Field | Interior | Cover Template | Ingram Target | Match |
 |---|---|---|---|---|
-| ISBN | 9798240844133 | Template missing | 9798240844133 | Pending template |
-| Trim | 8.5 × 11 in | Template missing | 8.5 × 11 in | Pending template |
-| Page Count | 298 | Template missing | 298 | Pending template |
-| Binding | N/A to PDF geometry | Template missing | Perfect Bound | Pending template |
-| Paper | N/A to interior PDF geometry | Template missing | 50 White | Pending template |
-| Interior Color | Intended color edition | Template missing | Color | Pending template |
+| ISBN | 9798240844133 | 9798240844133 | 9798240844133 | Yes |
+| Trim | 8.5 × 11 in | 8.5 × 11 in | 8.5 × 11 in | Yes |
+| Page Count | 298 | 298 | 298 | Yes |
+| Binding | N/A to PDF geometry | Perfect Bound | Perfect Bound | Yes |
+| Paper | N/A to interior PDF geometry | 50 White | 50 White | Yes |
+| Interior Color | Intended color edition | Color | Color | Yes |
 
 ## Visual QA
 
@@ -126,11 +115,12 @@ for overlay QA but omitted from the upload PDF.
 |---|---|
 | Interior first page | Pass: half title, no external cover |
 | Interior last page | Pass: intentional blank verso |
-| Front cover | Pending official template and corrected wrap |
-| Spine | Pending official template and corrected wrap |
-| Back cover | Pending official template and corrected wrap |
-| Barcode | Pending official template and corrected wrap |
-| Safe areas | Pending official template and corrected wrap |
+| Front cover | Pass: centered, undistorted, all text inside safe area |
+| Spine | Pass: title and author centered inside 0.5-inch safe area |
+| Back cover | Pass: description and author section inside safe area |
+| Barcode | Pass: supplied vector barcode retained; no artwork interference |
+| Safe areas | Pass: verified with 55% official-template overlay |
+| Bleed | Pass: CMYK background covers the full blue/pink artwork canvas |
 
 The rebuilt interior fonts are embedded, subset, Unicode-mapped CID fonts, with
 no unexpected Type 3 fonts reported by `pdffonts`.
@@ -141,11 +131,6 @@ no unexpected Type 3 fonts reported by `pdffonts`.
 2. Select trim size **8.5 × 11 inches**.
 3. Select **Perfect Bound**.
 4. Select **Color interior, 50 White paper, Gloss Laminate cover finish**.
-5. Generate and download the official Ingram cover template for those exact values.
-6. Do not upload a corrected cover until a single-page wraparound PDF has been rebuilt and verified against that template.
-7. Upload `_book/Engineering-Intelligent-Systems-Print.pdf` as the interior after its final metadata rebuild and preflight.
-
-Once the official template is available, record its filename, page count, trim,
-spine width, total dimensions, bleed, barcode zone, and safe areas in this
-report; build the wrap; run the zero-difference page-size comparison, template
-overlay, rendered front/spine/back/barcode inspection, and final font check.
+5. Upload `output/pdf/Engineering-Intelligent-Systems-Ingram-Cover.pdf` as the cover.
+6. Upload `_book/Engineering-Intelligent-Systems-Print.pdf` as the interior.
+7. Do not upload the temporary official template or QA overlay.
