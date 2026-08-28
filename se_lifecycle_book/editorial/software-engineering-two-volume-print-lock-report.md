@@ -70,10 +70,22 @@ quarto render --profile print --to pdf
 
 - Volume I final page count: **450**
 - Volume II final page count: **409**
-- Volume I Print ISBN: **TBD**
-- Volume II Print ISBN: **TBD**
+- Volume I Print ISBN: **979-8-2408-9097-0**
+- Volume II Print ISBN: **979-8-2408-9370-4**
 - Volume I Ebook ISBN: **TBD**
 - Volume II Ebook ISBN: **TBD**
+
+## ISBN Lock
+
+| Check | Result |
+|---|---|
+| Volume I Print ISBN | 979-8-2408-9097-0 |
+| Volume II Print ISBN | 979-8-2408-9370-4 |
+| Ebook ISBNs | TBD |
+| ISBN cross-contamination | PASS |
+| Volume I page count after ISBN update | 450 |
+| Volume II page count after ISBN update | 409 |
+| Interior pagination unchanged | PASS |
 
 ## Ingram Preparation
 

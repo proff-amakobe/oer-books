@@ -9,10 +9,10 @@ Series: *The Complete Software Engineering Lifecycle*
 - Title: *Software Engineering Foundations and Design*
 - Series line: *The Complete Software Engineering Lifecycle — Volume I*
 - Chapters: 1–8
-- Final page count: **468**
+- Final page count: **450**
 - PDF: `output/volume1/Software-Engineering-Foundations-and-Design.pdf`
 - EPUB: `output/volume1/Software-Engineering-Foundations-and-Design.epub`
-- Print ISBN: TBD
+- Print ISBN: 979-8-2408-9097-0
 - Ebook ISBN: TBD
 
 ## Volume II
@@ -21,10 +21,10 @@ Series: *The Complete Software Engineering Lifecycle*
 - Series line: *The Complete Software Engineering Lifecycle — Volume II*
 - Chapters: 1–7
 - Master source chapters: 9–15
-- Final page count: **430**
+- Final page count: **409**
 - PDF: `output/volume2/Software-Delivery-Operations-and-Evolution.pdf`
 - EPUB: `output/volume2/Software-Delivery-Operations-and-Evolution.epub`
-- Print ISBN: TBD
+- Print ISBN: 979-8-2408-9370-4
 - Ebook ISBN: TBD
 
 ## Architecture

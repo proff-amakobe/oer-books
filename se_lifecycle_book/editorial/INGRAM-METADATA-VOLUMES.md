@@ -1,60 +1,34 @@
-# Volume Publication Metadata
+# IngramSpark Metadata — Standalone Software Engineering Volumes
 
 ## Volume I
 
-| Field | Value |
-|---|---|
-| Title | Software Engineering Foundations and Design |
-| Series | The Complete Software Engineering Lifecycle |
-| Volume | I |
-| Series number | 1 |
-| Author | Moody Amakobe |
-| Publisher | Global Data Science Institute |
-| Edition | 2026 Edition |
-| Trim | 8.5 × 11 inches |
-| Interior | Color |
-| Binding | Paperback Perfect Bound |
-| Final PDF pages | 450 |
-| Print ISBN | 979-8-2408-9097-0 |
-| Ebook ISBN | TBD |
-| License | CC BY 4.0 |
-| Publication status | INTERIOR LOCKED / ISBN ASSIGNED |
+**TITLE:** Software Engineering Foundations and Design
 
-## Volume II
+**SERIES:** The Complete Software Engineering Lifecycle
 
-| Field | Value |
-|---|---|
-| Title | Software Delivery, Operations, and Evolution |
-| Series | The Complete Software Engineering Lifecycle |
-| Volume | II |
-| Series number | 2 |
-| Author | Moody Amakobe |
-| Publisher | Global Data Science Institute |
-| Edition | 2026 Edition |
-| Trim | 8.5 × 11 inches |
-| Interior | Color |
-| Binding | Paperback Perfect Bound |
-| Final PDF pages | 409 |
-| Print ISBN | 979-8-2408-9370-4 |
-| Ebook ISBN | TBD |
-| License | CC BY 4.0 |
-| Publication status | INTERIOR LOCKED / ISBN ASSIGNED |
+**SERIES NUMBER:** 1
 
-These page counts and print ISBN assignments are publication-locked for official cover-template generation. Ebook ISBNs remain unassigned. Do not reuse the complete-edition ISBNs, page count, barcode, template, or spine for either volume.
+**AUTHOR:** Moody Amakobe
 
-## Distribution Metadata — Volume I
+**PUBLISHER:** Global Data Science Institute
 
-### BISAC
+**EDITION:** 2026 Edition
 
-1. `COM051230` — COMPUTERS / Software Development & Engineering / General
-2. `COM051240` — COMPUTERS / Software Development & Engineering / Systems Analysis & Design
-3. `COM051330` — COMPUTERS / Software Development & Engineering / Quality Assurance & Testing
+**PRINT ISBN:** 979-8-2408-9097-0
 
-### Short Description
+**PAGE COUNT:** 450
 
-A practical guide to software engineering foundations, covering requirements, UML, architecture, UI/UX, Agile, version control, testing, and quality assurance.
+**TRIM:** 8.5 × 11 inches
 
-### Full Description
+**BINDING:** Perfect Bound Paperback
+
+**INTERIOR:** Color
+
+**LICENSE:** CC BY 4.0
+
+**SHORT DESCRIPTION:** A practical guide to software engineering foundations, covering requirements, UML, architecture, UI/UX, Agile, version control, testing, and quality assurance.
+
+**FULL DESCRIPTION:**
 
 Software Engineering Foundations and Design is a practical, systems-oriented introduction to the principles, methods, and professional practices that shape modern software development. As Volume I of The Complete Software Engineering Lifecycle series, the book guides readers from early problem definition and requirements analysis through system modeling, software architecture, user experience design, collaborative development, version control, testing, and quality assurance.
 
@@ -66,23 +40,47 @@ The volume concludes with software testing and quality assurance, including test
 
 Throughout the book, concepts are reinforced through examples, diagrams, terminal demonstrations, review questions, hands-on exercises, and project-based activities. It is suitable for students, instructors, aspiring software engineers, developers, analysts, and technology professionals seeking a strong foundation in how reliable, maintainable, usable, and high-quality software systems are designed and built.
 
-### Keywords
+**KEYWORDS:** software engineering; requirements engineering; UML; systems modeling; software architecture; design patterns; SOLID principles; UI/UX design; Agile methodologies; Git; version control; software testing; test-driven development; quality assurance; software development lifecycle
 
-software engineering; requirements engineering; UML; systems modeling; software architecture; design patterns; SOLID principles; UI/UX design; Agile methodologies; Git; version control; software testing; test-driven development; quality assurance; software development lifecycle
+**BISAC 1:** COM051230 — COMPUTERS / Software Development & Engineering / General
 
-## Distribution Metadata — Volume II
+**BISAC 2:** COM051240 — COMPUTERS / Software Development & Engineering / Systems Analysis & Design
 
-### BISAC
+**BISAC 3:** COM051330 — COMPUTERS / Software Development & Engineering / Quality Assurance & Testing
 
-1. `COM051230` — COMPUTERS / Software Development & Engineering / General
-2. `COM091000` — COMPUTERS / Distributed Systems / Cloud Computing
-3. `COM053000` — COMPUTERS / Security / General
+**COVER TEMPLATE STATUS:** PENDING
 
-### Short Description
+**SPINE:** DO NOT CALCULATE — USE INGRAM TEMPLATE
 
-A practical guide to software delivery and operations, covering CI/CD, APIs, cloud deployment, security, maintenance, professional practice, and lifecycle integration.
+## Volume II
 
-### Full Description
+**TITLE:** Software Delivery, Operations, and Evolution
+
+**SERIES:** The Complete Software Engineering Lifecycle
+
+**SERIES NUMBER:** 2
+
+**AUTHOR:** Moody Amakobe
+
+**PUBLISHER:** Global Data Science Institute
+
+**EDITION:** 2026 Edition
+
+**PRINT ISBN:** 979-8-2408-9370-4
+
+**PAGE COUNT:** 409 source interior PDF pages
+
+**TRIM:** 8.5 × 11 inches
+
+**BINDING:** Perfect Bound Paperback
+
+**INTERIOR:** Color
+
+**LICENSE:** CC BY 4.0
+
+**SHORT DESCRIPTION:** A practical guide to software delivery and operations, covering CI/CD, APIs, cloud deployment, security, maintenance, professional practice, and lifecycle integration.
+
+**FULL DESCRIPTION:**
 
 Software Delivery, Operations, and Evolution is a practical guide to the technologies, processes, and professional practices required to move software from development into reliable production environments. As Volume II of The Complete Software Engineering Lifecycle series, the book focuses on how modern software is integrated, delivered, deployed, secured, operated, maintained, and evolved over time.
 
@@ -96,6 +94,16 @@ The final chapter brings these areas together through lifecycle integration, com
 
 Throughout the volume, concepts are reinforced through practical examples, terminal demonstrations, diagrams, exercises, review activities, and project-based applications. The book is designed for students, instructors, software engineers, DevOps practitioners, cloud engineers, developers, systems professionals, and technical leaders seeking to understand how software systems are delivered, operated, secured, and continuously improved in real-world environments.
 
-### Keywords
+**KEYWORDS:** software engineering; DevOps; CI/CD; continuous integration; continuous deployment; cloud computing; Docker; Kubernetes; APIs; REST APIs; software security; infrastructure as code; software maintenance; technical debt; software operations
 
-software engineering; DevOps; CI/CD; continuous integration; continuous deployment; cloud computing; Docker; Kubernetes; APIs; REST APIs; software security; infrastructure as code; software maintenance; technical debt; software operations
+**BISAC 1:** COM051230 — COMPUTERS / Software Development & Engineering / General
+
+**BISAC 2:** COM091000 — COMPUTERS / Distributed Systems / Cloud Computing
+
+**BISAC 3:** COM053000 — COMPUTERS / Security / General
+
+**COVER TEMPLATE STATUS:** PENDING
+
+**SPINE:** DO NOT CALCULATE — USE INGRAM TEMPLATE
+
+For Volume II, use the final page-count value required by Ingram's production workflow when generating the official template. Do not alter the 409-page source interior silently, and do not calculate either spine independently.
