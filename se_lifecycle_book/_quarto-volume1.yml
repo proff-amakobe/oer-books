@@ -1,0 +1,68 @@
+project:
+  output-dir: output/volume1
+  post-render: []
+
+title: ""
+author: ""
+date: ""
+
+book:
+  title: "Software Engineering Foundations and Design"
+  subtitle: "The Complete Software Engineering Lifecycle — Volume I"
+  author: "Moody Amakobe"
+  publisher: "Global Data Science Institute"
+  date: "2026-01-01"
+  output-file: Software-Engineering-Foundations-and-Design
+  chapters:
+    - index.qmd
+    - frontmatter/volume1/frontmatter.qmd
+    - part: "Foundations"
+      chapters:
+        - chapters/01-introduction.qmd
+        - chapters/02-requirements-engineering.qmd
+        - chapters/03-systems-modeling.qmd
+    - part: "Architecture and Experience"
+      chapters:
+        - chapters/04-software-architecture.qmd
+        - chapters/05-ui-ux.qmd
+    - part: "Development Practice and Quality"
+      chapters:
+        - chapters/06-agile-methodologies.qmd
+        - chapters/07-version-control.qmd
+        - chapters/08-testing-quality.qmd
+
+volume-number: 1
+
+format:
+  pdf:
+    documentclass: scrbook
+    classoption: [twoside, openany, cleardoublepage=empty]
+    pdf-engine: lualatex
+    latex-min-runs: 2
+    papersize: letter
+    fontsize: 10.15pt
+    linestretch: 1.22
+    toc: false
+    number-sections: true
+    number-depth: 2
+    colorlinks: true
+    linkcolor: SEText
+    urlcolor: SEDeepBlue
+    citecolor: SEText
+    fig-align: center
+    fig-pos: "htbp"
+    keep-tex: true
+    filters:
+      - filters/volume-content.lua
+      - print/filters/print-components.lua
+      - filters/volume-crossrefs.lua
+    include-in-header:
+      - print/preamble.tex
+      - print/volume1-preamble.tex
+  epub:
+    toc: true
+    number-sections: true
+    epub-chapter-level: 1
+    filters:
+      - filters/volume-content.lua
+      - filters/volume-crossrefs.lua

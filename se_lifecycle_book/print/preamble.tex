@@ -40,6 +40,7 @@
 \usepackage{fancyvrb}
 \usepackage{listings}
 \usepackage{graphicx}
+\usepackage[export]{adjustbox}
 \usepackage{enumitem}
 
 \AtBeginDocument{\hypersetup{
@@ -124,7 +125,9 @@
 \newtcblisting{SETerminal}[1][]{enhanced,breakable,listing only,listing engine=listings,listing options={style=SECode,#1},colback=SETerminal,colframe=SETerminal,coltext=white,arc=3mm,boxrule=0pt,left=5mm,right=5mm,top=9mm,bottom=4mm,before skip=7pt,after skip=9pt,breakable,overlay unbroken and first={\fill[SECrimson] ([xshift=6mm,yshift=-4.7mm]frame.north west) circle (1.2mm);\fill[SEGold] ([xshift=10mm,yshift=-4.7mm]frame.north west) circle (1.2mm);\fill[SEGreen] ([xshift=14mm,yshift=-4.7mm]frame.north west) circle (1.2mm);\node[anchor=north,text=white!70,font=\ttfamily\fontsize{7.5}{8}\selectfont] at ([yshift=-2.5mm]frame.north) {Terminal};},overlay middle and last={\node[anchor=north east,text=white!55,font=\ttfamily\fontsize{7}{8}\selectfont] at ([xshift=-4mm,yshift=-2mm]frame.north east) {Terminal -- continued};}}
 
 \captionsetup{font={small,it},labelfont={bf,color=SEAcademicBlue},textfont={color=SEMuted},justification=centering,singlelinecheck=true,skip=7pt}
-\setkeys{Gin}{width=.72\linewidth,height=.62\textheight,keepaspectratio}
+% Print-lock every raster/vector include to the text block. Explicit figure
+% widths remain content-driven, but can never enlarge beyond these bounds.
+\setkeys{Gin}{max width=\linewidth,max totalheight=.72\textheight,keepaspectratio}
 \rowcolors{2}{SESoftGray}{white}
 \arrayrulecolor{white}
 \AtBeginEnvironment{longtable}{\fontsize{8.8}{10.7}\selectfont}

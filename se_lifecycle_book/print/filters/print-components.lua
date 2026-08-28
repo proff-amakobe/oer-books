@@ -21,37 +21,127 @@ local toc_exclusions = {
   ["Development"] = true
 }
 
+-- Figure policy for print: every instructional image gets one stable Quarto
+-- label and a content-driven width. The LaTeX preamble supplies the final hard
+-- maximum, so a source can never escape the text block or page-height limit.
+local compact_figures = {
+  ch1_fig1_waterfall_model = true,
+  ch1_fig5_repo_structure = true,
+  ch4_fig17_singleton_structure = true,
+  ch4_fig18_factory_hierarchy = true,
+  ch4_fig19_builder_pattern = true,
+  ch4_fig20_adapter_structure = true,
+  ch4_fig22_facade_structure = true,
+  ch4_fig23_template_method = true
+}
+
+local complex_figures = {
+  git_merge_before_after = true,
+  git_three_way_merge = true,
+  git_rebase_diagram = true,
+  trunk_based_development = true,
+  testing_pyramid = true,
+  ch3_fig3_usecase_example = true,
+  ch3_fig5_activity_example = true,
+  ch3_fig7_sequence_example = true,
+  ch3_fig10_class_example = true,
+  ch3_fig11_activity_algorithm = true,
+  ch3_fig14_diagram_selection = true,
+  ch4_fig3_microservices = true,
+  ch4_fig10_architecture_comparison = true,
+  ch4_fig24_four_plus_one = true,
+  ch5_fig4_nielsens_heuristics = true,
+  ch5_fig10_design_system = true,
+  ch5_fig11_journey_map = true,
+  ch5_fig13_wireframe_examples = true,
+  ch5_fig14_research_methods = true,
+  ch6_fig2_scrum_framework = true,
+  ch6_fig3_kanban_board = true
+}
+
+function Image(image)
+  if not FORMAT:match("latex") then return nil end
+  local stem = image.src:match("([^/]+)%.%w+$")
+  if not stem or stem == "cover" then return nil end
+  stem = stem:gsub("[^%w_-]", "-")
+  if image.identifier == "" then image.identifier = "fig-" .. stem end
+  if not image.attributes.width then
+    if compact_figures[stem] then
+      image.attributes.width = "62%"
+    elseif complex_figures[stem] then
+      image.attributes.width = "90%"
+    else
+      image.attributes.width = "74%"
+    end
+  end
+  return image
+end
+
 function CodeBlock(block)
   if not FORMAT:match("latex") then return nil end
+  -- Latin Modern Mono does not cover the Unicode box-drawing block. Preserve
+  -- the diagrams' technical meaning in print with dependable ASCII glyphs;
+  -- HTML and EPUB retain the canonical Unicode source unchanged.
+  local print_text = block.text
+  local replacements = {
+    ["─"] = "-", ["═"] = "=", ["│"] = "|", ["┃"] = "|", ["┊"] = "|",
+    ["┌"] = "+", ["┐"] = "+", ["└"] = "+", ["┘"] = "+",
+    ["├"] = "+", ["┤"] = "+", ["┬"] = "+", ["┴"] = "+", ["┼"] = "+",
+    ["╭"] = "+", ["╮"] = "+", ["╯"] = "+", ["╰"] = "+",
+    ["╱"] = "/", ["╲"] = "\\", ["→"] = "->", ["←"] = "<-",
+    ["✓"] = "PASS", ["✗"] = "FAIL"
+  }
+  for source, replacement in pairs(replacements) do
+    print_text = print_text:gsub(source, replacement)
+  end
   local language = listing_languages[block.classes[1] or ""]
   local option = language and language ~= "" and ("language=" .. language) or ""
-  return pandoc.RawBlock("latex", "\\begin{SETerminal}[" .. option .. "]\n" .. block.text .. "\n\\end{SETerminal}")
+  return pandoc.RawBlock("latex", "\\begin{SETerminal}[" .. option .. "]\n" .. print_text .. "\n\\end{SETerminal}")
 end
 
 function Pandoc(doc)
   if not FORMAT:match("latex") then return doc end
+  local volume = doc.meta["volume-number"] and
+    tonumber(pandoc.utils.stringify(doc.meta["volume-number"])) or nil
   -- The designed title pages below replace Pandoc's automatic \maketitle.
   doc.meta.title = nil
   doc.meta.subtitle = nil
   doc.meta.author = nil
   doc.meta.date = nil
-  -- Quarto combines every book input into one Pandoc document. Replace the
-  -- landing-page blocks before the first chapter H1 with print front matter.
-  local handle = assert(io.open("print/frontmatter.qmd", "r"))
-  local text = handle:read("*a")
-  handle:close()
-  local frontmatter = pandoc.read(text, "markdown").blocks
-  local manuscript = pandoc.List()
-  local found_first_chapter = false
-  for _, block in ipairs(doc.blocks) do
-    if block.t == "Header" and block.level == 1 and
-       stringify(block) == "Introduction to Software Engineering" then
-      found_first_chapter = true
+  if volume then
+    -- Volume profiles provide their own front matter. Discard only the shared
+    -- website landing page and preserve the first volume-specific \frontmatter
+    -- block onward.
+    local volume_blocks = pandoc.List()
+    local found_volume_frontmatter = false
+    for _, block in ipairs(doc.blocks) do
+      if block.t == "RawBlock" and block.format:match("latex") and
+         block.text:match("\\frontmatter") then
+        found_volume_frontmatter = true
+      end
+      if found_volume_frontmatter then volume_blocks:insert(block) end
     end
-    if found_first_chapter then manuscript:insert(block) end
+    doc.blocks = volume_blocks
+  else
+    -- Quarto combines every book input into one Pandoc document. Replace the
+    -- landing-page blocks before the first chapter H1 with complete-edition
+    -- print front matter.
+    local handle = assert(io.open("print/frontmatter.qmd", "r"))
+    local text = handle:read("*a")
+    handle:close()
+    local frontmatter = pandoc.read(text, "markdown").blocks
+    local manuscript = pandoc.List()
+    local found_first_chapter = false
+    for _, block in ipairs(doc.blocks) do
+      if block.t == "Header" and block.level == 1 and
+         stringify(block) == "Introduction to Software Engineering" then
+        found_first_chapter = true
+      end
+      if found_first_chapter then manuscript:insert(block) end
+    end
+    frontmatter:extend(manuscript)
+    doc.blocks = frontmatter
   end
-  frontmatter:extend(manuscript)
-  doc.blocks = frontmatter
   local out = pandoc.List()
   local blocks = doc.blocks
   local i = 1
