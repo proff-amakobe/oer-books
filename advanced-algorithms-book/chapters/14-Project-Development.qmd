@@ -64,7 +64,7 @@ You've probably built your project in pieces: a segment tree here, a string matc
 **Example**: Your segment tree works with Python lists, but you want to use it with NumPy arrays.
 
 **Solution**: Create an adapter
-```python
+```{.python .program-code chapter=14}
 class SegmentTreeAdapter:
     """
     Adapts segment tree to work with NumPy arrays.
@@ -91,7 +91,7 @@ class SegmentTreeAdapter:
 **Example**: Your string processing library has KMP, Rabin-Karp, suffix arrays, etc. Users just want to search.
 
 **Solution**: Create a simple facade
-```python
+```{.python .program-code chapter=14}
 class StringSearcher:
     """
     Simple interface for complex string algorithms.
@@ -131,7 +131,7 @@ class StringSearcher:
 **Example**: Building a complete data analysis pipeline.
 
 **Solution**: Use a builder
-```python
+```{.python .program-code chapter=14}
 class AnalysisPipelineBuilder:
     """
     Fluent interface for building analysis pipelines.
@@ -177,7 +177,7 @@ pipeline = (AnalysisPipelineBuilder()
 **Best practices**:
 
 **1. Layered Architecture**:
-```
+```{.technical-other chapter=14}
 Presentation Layer (GUI, CLI)
         ↓
 Application Layer (Use cases, workflows)
@@ -192,14 +192,14 @@ Infrastructure Layer (File I/O, databases, external APIs)
 **2. Dependency Inversion**:
 
 Instead of:
-```python
+```{.python .program-code chapter=14}
 class DataProcessor:
     def __init__(self):
         self.storage = FileStorage()  # Concrete dependency
 ```
 
 Do this:
-```python
+```{.python .program-code chapter=14}
 class DataProcessor:
     def __init__(self, storage: StorageInterface):
         self.storage = storage  # Abstract dependency
@@ -210,7 +210,7 @@ class DataProcessor:
 **3. Configuration Files**:
 
 Don't hardcode dependencies. Use configuration:
-```yaml
+```{.yaml .configuration chapter=14}
 # config.yaml
 algorithms:
   string_search: kmp
@@ -233,7 +233,7 @@ output:
 **Unit tests** verify individual components work. **Integration tests** verify they work together.
 
 **Example integration test**:
-```python
+```{.python .program-code chapter=14}
 def test_complete_pipeline():
     """
     Test entire data processing pipeline end-to-end.
@@ -316,7 +316,7 @@ Record the processor, memory, operating system, runtime and compiler versions, d
 
 #### **Python's cProfile**
 
-```python
+```{.python .program-code chapter=14}
 import cProfile
 import pstats
 
@@ -348,7 +348,7 @@ def profile_function():
 
 #### **Line-by-Line Profiling**
 
-```python
+```{.python .program-code chapter=14}
 from line_profiler import LineProfiler
 
 def profile_line_by_line():
@@ -366,7 +366,7 @@ def profile_line_by_line():
 
 #### **Memory Profiling**
 
-```python
+```{.python .program-code chapter=14}
 from memory_profiler import profile
 
 @profile
@@ -385,7 +385,7 @@ def memory_intensive_function():
 #### **1. Avoid Redundant Work**
 
 **Bad**:
-```python
+```{.python .program-code chapter=14}
 def process_data(items):
     for item in items:
         # Recomputes expensive value every iteration!
@@ -395,7 +395,7 @@ def process_data(items):
 ```
 
 **Good**:
-```python
+```{.python .program-code chapter=14}
 def process_data(items):
     threshold = compute_threshold(items)  # Once
     for item in items:
@@ -406,14 +406,14 @@ def process_data(items):
 #### **2. Use Appropriate Data Structures**
 
 **Bad** (for frequent membership tests):
-```python
+```{.python .program-code chapter=14}
 allowed_items = [...]  # List
 if item in allowed_items:  # O(n) lookup
     ...
 ```
 
 **Good**:
-```python
+```{.python .program-code chapter=14}
 allowed_items = set([...])  # Set
 if item in allowed_items:  # O(1) lookup
     ...
@@ -424,14 +424,14 @@ if item in allowed_items:  # O(1) lookup
 #### **3. Vectorize with NumPy**
 
 **Bad** (Python loops):
-```python
+```{.python .program-code chapter=14}
 result = []
 for i in range(len(arr)):
     result.append(arr[i] ** 2 + 2 * arr[i] + 1)
 ```
 
 **Good** (NumPy vectorization):
-```python
+```{.python .program-code chapter=14}
 result = arr**2 + 2*arr + 1
 ```
 
@@ -441,7 +441,7 @@ result = arr**2 + 2*arr + 1
 
 #### **4. Cache Expensive Computations**
 
-```python
+```{.python .program-code chapter=14}
 from functools import lru_cache
 
 @lru_cache(maxsize=1000)
@@ -457,7 +457,7 @@ def expensive_function(n):
 #### **5. Use Generators for Large Data**
 
 **Bad** (loads everything into memory):
-```python
+```{.python .program-code chapter=14}
 def read_file(filename):
     with open(filename) as f:
         return [line.strip() for line in f]
@@ -466,7 +466,7 @@ data = read_file('huge_file.txt')  # Out of memory!
 ```
 
 **Good** (streams data):
-```python
+```{.python .program-code chapter=14}
 def read_file(filename):
     with open(filename) as f:
         for line in f:
@@ -478,7 +478,7 @@ for line in read_file('huge_file.txt'):  # Memory efficient
 
 #### **6. Parallelize Independent Work**
 
-```python
+```{.python .program-code chapter=14}
 from concurrent.futures import ProcessPoolExecutor
 
 def process_chunk(chunk):
@@ -534,7 +534,7 @@ Good documentation is the difference between code that others can use and code t
 ### The Documentation Pyramid
 
 **Level 1: Code Comments** (for understanding implementation)
-```python
+```{.python .program-code chapter=14}
 def segment_tree_query(node, start, end, L, R):
     """Recursive query helper."""
     # No overlap: this segment irrelevant to query
@@ -553,7 +553,7 @@ def segment_tree_query(node, start, end, L, R):
 ```
 
 **Level 2: Docstrings** (for API users)
-```python
+```{.python .program-code chapter=14}
 def segment_tree_query(node, start, end, L, R):
     """
     Query sum of elements in range [L, R].
@@ -579,10 +579,11 @@ def segment_tree_query(node, start, end, L, R):
 ```
 
 **Level 3: README** (for getting started)
-````markdown
+````{.markdown .configuration chapter=14}
 # Advanced Data Structures Library
 
-Efficient implementations of advanced data structures for competitive programming and real-world applications.
+Efficient advanced data structures for competitive programming
+and real-world applications.
 
 ## Features
 
@@ -620,7 +621,7 @@ Full documentation: https://advds.readthedocs.io
 ````
 
 **Level 4: Tutorials** (for learning)
-````markdown
+````{.markdown .configuration chapter=14}
 # Tutorial: Understanding Segment Trees
 
 ## What is a Segment Tree?
@@ -650,7 +651,7 @@ Use segment trees when you have:
 ````
 
 **Level 5: API Reference** (for looking up details)
-````markdown
+````{.markdown .configuration chapter=14}
 ## SegmentTree
 
 ### Constructor
@@ -705,7 +706,7 @@ result = st.query(1, 3)  # Query indices 1-3
 - Good: "We sort the array to enable binary search, reducing lookup from O(n) to O(log n)"
 
 **4. Document edge cases**
-```python
+```{.python .program-code chapter=14}
 def binary_search(arr, target):
     """
     Binary search in sorted array.
@@ -729,7 +730,7 @@ def binary_search(arr, target):
 - Draw.io or Excalidraw for architecture diagrams
 
 **Example ASCII diagram**:
-```python
+```{.python .program-code chapter=14}
 def build_segment_tree(arr):
     """
     Build segment tree from array.
@@ -751,7 +752,7 @@ def build_segment_tree(arr):
 
 Here's a battle-tested README template:
 
-````markdown
+````{.markdown .configuration chapter=14}
 # Project Name
 
 Brief description (one sentence)
@@ -865,7 +866,7 @@ If you use this in research, please cite:
 **Characteristics of good tests**:
 
 **1. Independent**: Each test should run in isolation
-```python
+```{.python .program-code chapter=14}
 # Bad: Tests depend on order
 def test_first():
     global_state = setup()
@@ -885,7 +886,7 @@ def test_second():
 ```
 
 **2. Repeatable**: Same input → same output
-```python
+```{.python .program-code chapter=14}
 # Bad: Random failures
 def test_random_algorithm():
     result = random_algorithm()
@@ -899,7 +900,7 @@ def test_random_algorithm():
 ```
 
 **3. Self-validating**: Pass or fail, no human judgment needed
-```python
+```{.python .program-code chapter=14}
 # Bad: Requires human to check
 def test_output():
     result = generate_report()
@@ -913,7 +914,7 @@ def test_output():
 ```
 
 **4. Timely**: Fast enough to run frequently
-```python
+```{.python .program-code chapter=14}
 # Bad: Takes minutes
 def test_slow():
     large_data = generate_huge_dataset()
@@ -926,7 +927,7 @@ def test_fast():
 ```
 
 **5. Thorough**: Cover edge cases
-```python
+```{.python .program-code chapter=14}
 def test_binary_search():
     # Normal case
     assert binary_search([1,2,3,4,5], 3) == 2
@@ -948,7 +949,7 @@ def test_binary_search():
 3. **Refactor**: Improve code while keeping tests green
 
 **Example**:
-```python
+```{.python .program-code chapter=14}
 # Step 1: Write failing test
 def test_segment_tree_query():
     st = SegmentTree([1, 3, 5, 7, 9])
@@ -983,7 +984,7 @@ class SegmentTree:
 - Faster feedback cycle
 
 **2. Write good commit messages**
-```
+```{.technical-other chapter=14}
 Bad:  "Fixed bug"
 Good: "Fix off-by-one error in segment tree query
 
@@ -1004,7 +1005,7 @@ causing it to include one extra element. Updated and added test case."
 **For reviewers (reviewing others' code)**:
 
 **1. Be constructive, not destructive**
-```
+```{.technical-other chapter=14}
 Bad:  "This is terrible code"
 Good: "Consider using a dictionary here for O(1) lookup instead of 
        scanning the list (O(n)). For large inputs, this could be a 
@@ -1012,7 +1013,7 @@ Good: "Consider using a dictionary here for O(1) lookup instead of
 ```
 
 **2. Ask questions**
-```
+```{.inline-example chapter=14}
 "I'm not familiar with this algorithm. Could you add a comment 
  explaining how it works?"
 "What happens if the input array is empty?"
@@ -1025,7 +1026,7 @@ Good: "Consider using a dictionary here for O(1) lookup instead of
 - Personal preferences: Skip
 
 **4. Praise good code**
-```
+```{.inline-example chapter=14}
 "Nice use of the builder pattern here! Makes the API much cleaner."
 "I like how you handled this edge case. Good defensive programming."
 ```
@@ -1122,7 +1123,7 @@ You've built something amazing. Now you need to convince others it's amazing.
 - **30 point font**: If it's smaller, it's too detailed for a slide
 
 **One idea per slide**:
-```
+```{.technical-other chapter=14}
 Bad slide:
 Title: "Our Approach"
 - Algorithm design
@@ -1137,7 +1138,7 @@ Good approach: Split into 7 slides, each with one focus
 ```
 
 **More text ≠ better**:
-```
+```{.data-example chapter=14}
 Bad:
 "We implemented a segment tree data structure that allows 
 for efficient range queries and point updates with logarithmic 
@@ -1196,26 +1197,26 @@ Instead of text, use:
 **Handling questions**:
 
 **The good question**:
-```
+```{.data-example chapter=14}
 "Great question! Let me show you..."
 [Answer confidently]
 ```
 
 **The question you don't know**:
-```
+```{.data-example chapter=14}
 "That's an interesting point I haven't explored yet. I'd 
  love to discuss it with you after the talk."
 [Don't fake knowledge]
 ```
 
 **The hostile question**:
-```
+```{.data-example chapter=14}
 "I appreciate your concern. Let me clarify..."
 [Stay calm and professional]
 ```
 
 **The off-topic question**:
-```
+```{.data-example chapter=14}
 "That's a bit outside the scope of today's talk, but I'd 
  be happy to chat about it afterward."
 [Politely redirect]
@@ -1228,13 +1229,13 @@ Instead of text, use:
 **1. Have a backup**: Pre-recorded video of the demo if live fails
 
 **2. Use realistic but reliable inputs**: 
-```
+```{.inline-example chapter=14}
 Bad: Random data (might expose bug you haven't seen)
 Good: Carefully prepared test cases
 ```
 
 **3. Narrate as you go**:
-```
+```{.data-example chapter=14}
 "Now I'm loading a DNA sequence with 1 million base pairs...
  [wait for load]
  And searching for this motif...
@@ -1243,7 +1244,7 @@ Good: Carefully prepared test cases
 ```
 
 **4. Have checkpoints**:
-```
+```{.data-example chapter=14}
 "If the live demo fails, I have these pre-generated results..."
 [Show screenshot]
 ```

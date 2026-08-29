@@ -40,7 +40,7 @@ Spielman and Teng proved a polynomial smoothed-complexity bound for a particular
 
 **Impact**: This earned Spielman the Nevanlinna Prize (essentially the Nobel of computer science). It explained why many algorithms work far better than their worst-case suggests.
 
-```python
+```{.python .program-code chapter=13}
 import random
 
 def demonstrate_smoothed_analysis():
@@ -209,7 +209,7 @@ Learned index structures model the position of a key in an ordered collection an
 **Learned index**: Train neural network to predict position of key in sorted array. When predictions are accurate, lookup is O(1)!
 
 **The trick**: Use B-tree as safety net. Structure is:
-```
+```{.inline-example chapter=13}
 Prediction: NN(key) → approximate position
 Verify: Check nearby positions
 Fallback: If not found quickly, use B-tree
@@ -281,7 +281,7 @@ Removing direct identifiers is not, by itself, a privacy guarantee. Auxiliary in
 **How it works**: Add carefully calibrated random noise to results.
 
 **Example**: Census data
-```
+```{.technical-other chapter=13}
 True count of city population: 1,234,567
 Add Laplace noise: ±300 (depending on privacy parameter ε)
 Released count: 1,234,823
@@ -297,13 +297,13 @@ Differential privacy has moved from theory into official statistics and telemetr
 #### **The Algorithms**
 
 **Laplace mechanism**: For numeric queries (counts, sums)
-```
+```{.algorithm chapter=13}
 Add noise from Laplace(Δf/ε) distribution
 where Δf = sensitivity (max change from one person)
 ```
 
 **Exponential mechanism**: For choosing from a set of options
-```
+```{.inline-example chapter=13}
 Probability of choosing option o ∝ exp(ε × quality(o) / 2Δ)
 Better options more likely, but randomized for privacy
 ```
@@ -414,7 +414,7 @@ But how do neural networks actually learn?
 **The challenge**: Networks have millions of parameters. How do we compute ∂L/∂θ for each one?
 
 **Naive approach**: Finite differences
-```
+```{.inline-example chapter=13}
 ∂L/∂θᵢ ≈ (L(θ + εeᵢ) - L(θ)) / ε
 ```
 For n parameters, this requires n forward passes. For a million parameters, that's impossibly slow!
@@ -424,7 +424,7 @@ For n parameters, this requires n forward passes. For a million parameters, that
 **How it works**:
 
 1. **Forward pass**: Compute network output
-```
+```{.program-output chapter=13}
 Layer 1: h₁ = σ(W₁x + b₁)
 Layer 2: h₂ = σ(W₂h₁ + b₂)
 ...
@@ -433,7 +433,7 @@ Loss: L = (ŷ - y)²
 ```
 
 2. **Backward pass**: Compute gradients layer by layer
-```
+```{.technical-other chapter=13}
 ∂L/∂ŷ = 2(ŷ - y)
 ∂L/∂Wₙ = ∂L/∂ŷ × ∂ŷ/∂Wₙ = ∂L/∂ŷ × hₙ₋₁
 ∂L/∂hₙ₋₁ = ∂L/∂ŷ × ∂ŷ/∂hₙ₋₁ = ∂L/∂ŷ × Wₙ
@@ -455,7 +455,7 @@ Once we have gradients, how do we optimize?
 **Problem**: Computing L(θ) requires entire dataset. For millions of examples, one update takes forever!
 
 **Stochastic Gradient Descent (SGD)**: Use one random example at a time
-```
+```{.algorithm chapter=13}
 Pick random example (x, y)
 Compute gradient ∇L(f(x; θ), y)
 Update: θ ← θ - η∇L
@@ -471,14 +471,14 @@ Update: θ ← θ - η∇L
 #### **Modern Optimizers**
 
 **Momentum** (1964): Accelerate in consistent directions
-```
+```{.algorithm chapter=13}
 v ← βv + ∇L    (velocity accumulates gradients)
 θ ← θ - ηv     (update includes momentum)
 ```
 Effect: Smoother optimization, faster convergence, dampens oscillations.
 
 **Adam** (Kingma & Ba, 2014): Adaptive learning rates per parameter
-```
+```{.algorithm chapter=13}
 m ← β₁m + (1-β₁)∇L           (first moment: mean)
 v ← β₂v + (1-β₂)(∇L)²        (second moment: variance)
 m̂ = m/(1-β₁ᵗ), v̂ = v/(1-β₂ᵗ)  (bias correction)
@@ -507,24 +507,24 @@ The Transformer introduced a sequence architecture based primarily on attention 
 For each position i, compute how much to "attend" to each other position j:
 
 1. **Query, Key, Value**: For each word, compute three vectors
-```
+```{.inline-example chapter=13}
 Qᵢ = Wᵠxᵢ  (what I'm looking for)
 Kᵢ = Wₖxᵢ  (what I contain)
 Vᵢ = Wᵥxᵢ  (what I'll contribute)
 ```
 
 2. **Attention scores**: How relevant is position j to position i?
-```
+```{.inline-example chapter=13}
 scoreᵢⱼ = Qᵢ · Kⱼ / √d  (dot product, scaled)
 ```
 
 3. **Softmax**: Convert scores to probabilities
-```
+```{.inline-example chapter=13}
 αᵢⱼ = exp(scoreᵢⱼ) / Σₖ exp(scoreᵢₖ)
 ```
 
 4. **Weighted sum**: Output is weighted combination of values
-```
+```{.program-output chapter=13}
 outputᵢ = Σⱼ αᵢⱼVⱼ
 ```
 
@@ -537,7 +537,7 @@ outputᵢ = Σⱼ αᵢⱼVⱼ
 #### **Multi-Head Attention**
 
 Run attention multiple times in parallel with different learned projections:
-```
+```{.technical-other chapter=13}
 head₁ = Attention(Q₁, K₁, V₁)
 head₂ = Attention(Q₂, K₂, V₂)
 ...
@@ -553,7 +553,7 @@ The number and width of heads are architectural hyperparameters; more heads do n
 **Problem**: Attention is permutation-invariant. "Dog bites man" and "Man bites dog" look the same!
 
 **Solution**: Add position information to input embeddings
-```
+```{.inline-example chapter=13}
 PE(pos, 2i) = sin(pos/10000^(2i/d))
 PE(pos, 2i+1) = cos(pos/10000^(2i/d))
 ```
@@ -563,7 +563,7 @@ PE(pos, 2i+1) = cos(pos/10000^(2i/d))
 #### **The Full Transformer Architecture**
 
 **Encoder** (for understanding):
-```
+```{.technical-other chapter=13}
 Input → Embedding + Positional Encoding
      → Multi-Head Attention
      → Add & Normalize
@@ -573,13 +573,13 @@ Input → Embedding + Positional Encoding
 ```
 
 **Decoder** (for generation):
-```
+```{.inline-example chapter=13}
 (similar to encoder, but with masked attention 
  to prevent looking at future tokens)
 ```
 
 **Training objective**: Predict next token
-```
+```{.inline-example chapter=13}
 Given "The cat sat on the"
 Predict "mat"
 ```
@@ -633,7 +633,7 @@ How does RL work?
 **Q-function**: Q(s,a) = expected cumulative reward from state s after action a
 
 **The Bellman equation**:
-```
+```{.inline-example chapter=13}
 Q(s,a) = r + γ × max_a' Q(s',a')
 where s' = next state after action a
       γ = discount factor (typically 0.99)
@@ -646,7 +646,7 @@ where s' = next state after action a
 **Q-learning** (Watkins, 1989): Learn Q-function through experience
 
 **Algorithm**:
-```
+```{.algorithm chapter=13}
 Initialize Q(s,a) arbitrarily
 Loop:
     Observe state s
@@ -666,12 +666,12 @@ Loop:
 **The scaling problem**: Q-learning stores Q(s,a) in table. For Atari games: 10^9 states × 18 actions = 18 billion entries!
 
 **Solution** (Mnih et al., 2015): Approximate Q with neural network
-```
+```{.inline-example chapter=13}
 Q(s,a; θ) ≈ Q*(s,a)
 ```
 
 **Training**: Use TD (temporal difference) error as loss
-```
+```{.inline-example chapter=13}
 Loss = [r + γ max_a' Q(s',a'; θ⁻) - Q(s,a; θ)]²
 where θ⁻ = target network parameters (updated periodically)
 ```
@@ -693,7 +693,7 @@ where θ⁻ = target network parameters (updated periodically)
 **Alternative approach**: Learn policy π(a|s) directly (probability of action a in state s).
 
 **REINFORCE** (Williams, 1992): Increase probability of actions that led to high reward
-```
+```{.inline-example chapter=13}
 ∇J(θ) = E[∇ log π(a|s; θ) × R]
 where R = cumulative reward
 ```
@@ -701,7 +701,7 @@ where R = cumulative reward
 **Intuition**: If an action led to good outcome, make it more likely. If bad outcome, make it less likely.
 
 **Actor-Critic**: Combine value function (critic) with policy (actor)
-```
+```{.inline-example chapter=13}
 Actor: π(a|s; θ)
 Critic: V(s; w)
 Update actor using critic's value estimate as baseline
@@ -716,7 +716,7 @@ Update actor using critic's value estimate as baseline
 **The problem**: Policy gradients are unstable. One bad update can destroy learned policy.
 
 **PPO's solution**: Constrain policy updates
-```
+```{.technical-other chapter=13}
 Maximize: min(ratio × A, clip(ratio, 1-ε, 1+ε) × A)
 where ratio = π_new(a|s) / π_old(a|s)
       A = advantage estimate
@@ -735,19 +735,19 @@ where ratio = π_new(a|s) / π_old(a|s)
 **AlphaGo** combined multiple techniques:
 
 1. **Supervised learning**: Train on expert human games
-```
+```{.inline-example chapter=13}
 Policy network: predict human moves
 Value network: evaluate board positions
 ```
 
 2. **Self-play RL**: Play against itself millions of times
-```
+```{.inline-example chapter=13}
 Policy improvement via policy gradient
 Value updates via TD learning
 ```
 
 3. **Monte Carlo Tree Search**: Smart exploration during game play
-```
+```{.technical-other chapter=13}
 Selection: Choose promising moves (UCB formula)
 Expansion: Add new nodes
 Simulation: Use neural nets to evaluate
@@ -788,7 +788,7 @@ The engineering setting described by the original MapReduce work included:
 2. **Reduce**: Aggregate results
 
 **Example - Word Count**:
-```
+```{.technical-other chapter=13}
 Input: Millions of documents
 
 Map phase:
@@ -830,26 +830,26 @@ Reduce phase:
 Many algorithms can be expressed in MapReduce:
 
 **PageRank**:
-```
+```{.algorithm chapter=13}
 Map: For each page, emit (link_target, pagerank/num_links)
 Reduce: Sum contributions to get new pagerank
 Iterate until convergence
 ```
 
 **Inverted index** (Google Search):
-```
+```{.inline-example chapter=13}
 Map: For each document, emit (word, doc_id)
 Reduce: Collect all doc_ids for each word
 ```
 
 **Join** (database operation):
-```
+```{.inline-example chapter=13}
 Map: Emit (join_key, (table_name, record))
 Reduce: Combine records with same key from different tables
 ```
 
 **Matrix multiplication**:
-```
+```{.inline-example chapter=13}
 A × B where A is n×m, B is m×p
 
 Map: For each A[i,k], emit ((i,j), A[i,k] × B[k,j]) for all j
@@ -890,7 +890,7 @@ Reduce: Sum all contributions for each (i,j)
 **Naive approach**: Hash table → O(n) space where n = number of distinct items. If n = billions, you're out of memory.
 
 **Count-Min Sketch** [@cormode2005countmin]:
-```
+```{.algorithm chapter=13}
 Data structure: w × d array of counters (typically w=2000, d=5)
 Hash functions: h₁, h₂, ..., hₐ
 
@@ -921,7 +921,7 @@ Its one-sided error is useful when overestimation is acceptable and the width an
 **Naive approach**: Hash set → O(n) space.
 
 **HyperLogLog** [@flajolet2007hyperloglog]:
-```
+```{.technical-other chapter=13}
 Per-register space: O(log log n) bits for cardinality n
 Total register space: O(m log log n) bits for m registers
 
@@ -947,7 +947,7 @@ Implementations often expose HyperLogLog-style cardinality estimation as a compa
 **Problem**: Test set membership ("have I seen this before?") with limited memory.
 
 **Bloom filter** [@bloom1970filter]:
-```
+```{.algorithm chapter=13}
 Data structure: bit array of size m
 Hash functions: k different hash functions
 
@@ -985,7 +985,7 @@ The false-positive rate must be included in system-level cost analysis: a positi
 **Pregel** introduced a vertex-centric bulk-synchronous abstraction for large graph computations [@malewicz2010pregel].
 
 **Programming model**:
-```
+```{.technical-other chapter=13}
 class Vertex:
     def compute(self, messages):
         # Process messages from neighbors
@@ -1000,7 +1000,7 @@ Computation proceeds in supersteps:
 ```
 
 **Example - PageRank**:
-```
+```{.algorithm chapter=13}
 def compute(self, messages):
     if superstep > 0:
         self.pagerank = 0.15 + 0.85 × sum(messages)
@@ -1062,7 +1062,7 @@ Diffie and Hellman established the public-key model and key-agreement direction 
 **RSA** is based on modular exponentiation and a trapdoor construction related to the difficulty of factoring a product of large primes [@rivest1978rsa].
 
 **Key generation**:
-```
+```{.technical-other chapter=13}
 1. Choose two large primes p, q (typically 1024 bits each)
 2. Compute N = p × q (the modulus)
 3. Compute φ(N) = (p-1)(q-1) (Euler's totient)
@@ -1078,7 +1078,7 @@ Private key: (N, d)
 **Decryption**: ciphertext^d mod N = message
 
 **Why it works (mathematically)**:
-```
+```{.inline-example chapter=13}
 (message^e)^d ≡ message^(ed) (mod N)
 Since ed ≡ 1 (mod φ(N)), by Euler's theorem:
 message^(ed) ≡ message (mod N)
@@ -1120,7 +1120,7 @@ Cryptocurrency protocols provide useful case studies in consensus, incentives, c
 #### **Bitcoin's Proof-of-Work**
 
 **The algorithm**:
-```
+```{.algorithm chapter=13}
 Block contains:
 - Previous block hash
 - Transactions
@@ -1157,7 +1157,7 @@ Proof of work intentionally makes leader election computationally expensive. Its
 **Proof of stake** selects and penalizes validators using locked economic stake rather than repeated hashing.
 
 **Algorithm**:
-```
+```{.algorithm chapter=13}
 1. Validators lock protocol-defined stake
 2. Randomly selected to propose blocks (probability ∝ stake)
 3. Other validators vote on validity
@@ -1190,7 +1190,7 @@ Energy and finality comparisons depend on protocol design and system boundary. T
 **Original protocol** (Goldwasser, Micali, Rackoff, 1985):
 
 **Prover-Verifier interaction** (for graph 3-coloring):
-```
+```{.algorithm chapter=13}
 Prover knows valid coloring of graph
 Verifier wants to verify, but not learn coloring
 
@@ -1221,7 +1221,7 @@ After n rounds:
 - Verification is fast (milliseconds)
 
 **How it works** (simplified):
-```
+```{.technical-other chapter=13}
 1. Convert statement to arithmetic circuit
 2. Use cryptographic pairing to create proof
 3. Proof: π = combination of circuit values and randomness
@@ -1614,7 +1614,7 @@ Choose an algorithmic research paper whose publication date and venue are clearl
 
 ### Analysis Template
 
-```markdown
+```{.markdown .configuration chapter=13}
 # Paper Analysis: [Title]
 
 ## 1. Citation

@@ -108,7 +108,7 @@ Before we tackle sorting, let's see divide and conquer in action with a simpler 
 
 **Iterative Solution (from Chapter 1):**
 
-```python
+```{.python .program-code chapter=2}
 def find_max_iterative(arr):
     """O(n) time, O(1) space - simple and effective"""
     max_val = arr[0]
@@ -120,7 +120,7 @@ def find_max_iterative(arr):
 
 **Divide and Conquer Solution:**
 
-```python
+```{.python .program-code chapter=2}
 def find_max_divide_conquer(arr, left, right):
     """
     Find maximum using divide and conquer.
@@ -274,7 +274,7 @@ Before we look at the full merge sort algorithm, let's understand how to merge t
 
 **Example:**
 
-```
+```{.algorithm chapter=2}
 Left:  [2, 5, 7, 9]
 Right: [1, 3, 6, 8]
 Result: [1, 2, 3, 5, 6, 7, 8, 9]
@@ -284,7 +284,7 @@ Result: [1, 2, 3, 5, 6, 7, 8, 9]
 
 **The Merge Algorithm:**
 
-```python
+```{.python .program-code chapter=2}
 def merge(left, right):
     """
     Merge two sorted arrays into one sorted array.
@@ -324,7 +324,7 @@ def merge(left, right):
 
 **Let's trace through the example:**
 
-```
+```{.technical-other chapter=2}
 Initial state:
 left = [2, 5, 7, 9],  right = [1, 3, 6, 8]
 i = 0, j = 0
@@ -368,7 +368,7 @@ This linear-time merge is what makes merge sort efficient!
 
 Now we can build the full algorithm:
 
-```python
+```{.python .program-code chapter=2}
 def merge_sort(arr):
     """
     Sort an array using merge sort (divide and conquer).
@@ -428,7 +428,7 @@ def merge(left, right):
 
 Let's sort `[38, 27, 43, 3]` step by step:
 
-```
+```{.algorithm chapter=2}
 Initial call: merge_sort([38, 27, 43, 3])
     ↓
     Split into [38, 27] and [43, 3]
@@ -502,14 +502,14 @@ Now let's rigorously analyze merge sort's performance.
 
 **Recurrence relation:**
 
-```
+```{.inline-example chapter=2}
 T(n) = 2T(n/2) + O(n)
 T(1) = O(1)
 ```
 
 **Solving the recurrence (using the recursion tree method):**
 
-```
+```{.technical-other chapter=2}
 Level 0: 1 problem of size n          → Work: cn
 Level 1: 2 problems of size n/2       → Work: 2 × c(n/2) = cn
 Level 2: 4 problems of size n/4       → Work: 4 × c(n/4) = cn
@@ -534,7 +534,7 @@ Let's refine: T(n) ≤ cn log n + d for constants c, d
 
 **Inductive step:**
 
-```
+```{.technical-other chapter=2}
 T(n) = 2T(n/2) + cn
      ≤ 2[c(n/2)log(n/2) + d] + cn          (by hypothesis)
      = cn log(n/2) + 2d + cn
@@ -611,7 +611,7 @@ While the basic merge sort is elegant, we can make it faster in practice:
 
 **Optimization 1: Switch to insertion sort for small subarrays**
 
-```python
+```{.python .program-code chapter=2}
 def merge_sort_optimized(arr):
     """Merge sort with insertion sort for small arrays."""
     # Switch to insertion sort for small arrays (faster due to lower overhead)
@@ -637,7 +637,7 @@ def merge_sort_optimized(arr):
 
 **Optimization 2: Check if already sorted**
 
-```python
+```{.python .program-code chapter=2}
 def merge_sort_smart(arr):
     """Skip merge if already sorted."""
     if len(arr) <= 1:
@@ -664,7 +664,7 @@ def merge_sort_smart(arr):
 
 The standard merge creates a new array. We can reduce space usage with an in-place merge, but it's more complex and slower:
 
-```python
+```{.python .program-code chapter=2}
 def merge_inplace(arr, left, mid, right):
     """
     In-place merge (harder to implement correctly).
@@ -723,7 +723,7 @@ Here's the pattern:
 
 Let's sort `[8, 3, 1, 7, 0, 10, 2]` using quicksort:
 
-```
+```{.technical-other chapter=2}
 Initial array: [8, 3, 1, 7, 0, 10, 2]
 
 Step 1: Choose pivot (let's pick the last element: 2)
@@ -762,7 +762,7 @@ The heart of quicksort is the partition operation. Let's understand it deeply:
 
 **Lomuto Partition Scheme (simpler, what we'll use):**
 
-```python
+```{.python .program-code chapter=2}
 def partition(arr, low, high):
     """
     Partition array around pivot (last element).
@@ -807,7 +807,7 @@ def partition(arr, low, high):
 
 **Let's trace through an example step by step:**
 
-```
+```{.technical-other chapter=2}
 Array: [8, 3, 1, 7, 0, 10, 2], pivot = 2 (at index 6)
 low = 0, high = 6, i = -1
 
@@ -860,7 +860,7 @@ This invariant ensures correctness!
 
 Now we can implement the full algorithm:
 
-```python
+```{.python .program-code chapter=2}
 def quicksort(arr, low=0, high=None):
     """
     Sort array using quicksort (divide and conquer).
@@ -918,7 +918,7 @@ def partition(arr, low, high):
 
 **Example execution:**
 
-```
+```{.technical-other chapter=2}
 quicksort([8, 3, 1, 7, 0, 10, 2])
     ↓
     Partition around 2 → [1, 0, 2, 8, 3, 7, 10]
@@ -961,7 +961,7 @@ QuickSort's performance varies dramatically based on pivot selection:
 
 **Occurs when:** Pivot always divides array perfectly in half
 
-```
+```{.inline-example chapter=2}
 T(n) = 2T(n/2) + O(n)
 
 This is the same recurrence as merge sort!
@@ -978,7 +978,7 @@ Solution: T(n) = O(n log n)
 
 **Example:** Array is already sorted, we always pick the last element
 
-```
+```{.data-example chapter=2}
 [1, 2, 3, 4, 5]
 Pick 5 as pivot → partition into [1,2,3,4] and []
 Pick 4 as pivot → partition into [1,2,3] and []
@@ -988,7 +988,7 @@ Pick 3 as pivot → partition into [1,2] and []
 
 **Recurrence:**
 
-```
+```{.technical-other chapter=2}
 T(n) = T(n-1) + O(n)
      = T(n-2) + O(n-1) + O(n)
      = T(n-3) + O(n-2) + O(n-1) + O(n)
@@ -1026,7 +1026,7 @@ The worst case O(n²) behavior is unacceptable for a production sorting algorith
 
 Instead of always picking the last element as pivot, we pick a **random element**:
 
-```python
+```{.python .program-code chapter=2}
 import random
 
 def randomized_partition(arr, low, high):
@@ -1085,7 +1085,7 @@ Besides randomization, other pivot selection methods exist:
 
 **1. Median-of-Three:**
 
-```python
+```{.python .program-code chapter=2}
 def median_of_three(arr, low, high):
     """
     Choose median of first, middle, and last elements as pivot.
@@ -1116,7 +1116,7 @@ def median_of_three(arr, low, high):
 
 **2. Ninther (median-of-medians-of-three):**
 
-```python
+```{.python .program-code chapter=2}
 def ninther(arr, low, high):
     """
     Choose median of three medians.
@@ -1142,7 +1142,7 @@ def ninther(arr, low, high):
 
 **3. True Median (too expensive):**
 
-```python
+```{.python .program-code chapter=2}
 # DON'T DO THIS in quicksort!
 def true_median(arr, low, high):
     """Finding true median takes O(n) time... 
@@ -1204,7 +1204,7 @@ Real-world implementations include several optimizations:
 
 **Optimization 1: Switch to insertion sort for small partitions**
 
-```python
+```{.python .program-code chapter=2}
 INSERTION_SORT_THRESHOLD = 10
 
 def quicksort_optimized(arr, low, high):
@@ -1242,7 +1242,7 @@ Standard partition creates two regions: ≤ pivot and > pivot. But what if we ha
 
 **Better approach: Dutch National Flag partitioning**
 
-```python
+```{.python .program-code chapter=2}
 def three_way_partition(arr, low, high):
     """
     Partition into three regions: < pivot, = pivot, > pivot
@@ -1289,7 +1289,7 @@ def quicksort_3way(arr, low, high):
 
 **Optimization 3: Tail recursion elimination**
 
-```python
+```{.python .program-code chapter=2}
 def quicksort_iterative(arr, low, high):
     """
     QuickSort with tail recursion eliminated.
@@ -1336,7 +1336,7 @@ A **recurrence relation** expresses the running time of a recursive algorithm in
 
 **General form:**
 
-```
+```{.algorithm chapter=2}
 T(n) = aT(n/b) + f(n)
 
 where:
@@ -1349,7 +1349,7 @@ where:
 
 **Merge Sort:**
 
-```
+```{.technical-other chapter=2}
 T(n) = 2T(n/2) + O(n)
 
 Explanation:
@@ -1360,7 +1360,7 @@ Explanation:
 
 **QuickSort (best case):**
 
-```
+```{.inline-example chapter=2}
 T(n) = 2T(n/2) + O(n)
 
 Same as merge sort!
@@ -1368,7 +1368,7 @@ Same as merge sort!
 
 **Finding Maximum (divide & conquer):**
 
-```
+```{.technical-other chapter=2}
 T(n) = 2T(n/2) + O(1)
 
 Explanation:
@@ -1379,7 +1379,7 @@ Explanation:
 
 **Binary Search:**
 
-```
+```{.technical-other chapter=2}
 T(n) = T(n/2) + O(1)
 
 Explanation:
@@ -1398,7 +1398,7 @@ We've used this already. Let's formalize it:
 
 **Example:** T(n) = 2T(n/2) + cn
 
-```
+```{.technical-other chapter=2}
 Level 0:                cn                      Total: cn
 Level 1:        cn/2         cn/2               Total: cn  
 Level 2:    cn/4  cn/4   cn/4  cn/4            Total: cn
@@ -1438,7 +1438,7 @@ _Refined guess:_ T(n) ≤ cn log n + d
 
 _Inductive step:_
 
-```
+```{.technical-other chapter=2}
 T(n) = 2T(n/2) + n
      ≤ 2[c(n/2)log(n/2) + d] + n          [by hypothesis]
      = cn log(n/2) + 2d + n
@@ -1466,7 +1466,7 @@ The Master Theorem provides a cookbook for solving many common recurrences insta
 
 **Theorem:** Let a ≥ 1 and b > 1 be constants, let f(n) be a function, and let T(n) be defined on non-negative integers by the recurrence:
 
-```
+```{.inline-example chapter=2}
 T(n) = aT(n/b) + f(n)
 ```
 
@@ -1474,19 +1474,19 @@ Then T(n) has the following asymptotic bounds:
 
 **Case 1:** If f(n) = O(n^(log_b(a) - ε)) for some constant ε > 0, then:
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(n^(log_b(a)))
 ```
 
 **Case 2:** If f(n) = Θ(n^(log_b(a))), then:
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(n^(log_b(a)) log n)
 ```
 
 **Case 3:** If f(n) = Ω(n^(log_b(a) + ε)) for some constant ε > 0, AND if af(n/b) ≤ cf(n) for some constant c < 1 and sufficiently large n, then:
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(f(n))
 ```
 
@@ -1531,13 +1531,13 @@ Let's apply the Master Theorem to algorithms we know:
 
 **Calculate critical exponent:**
 
-```
+```{.inline-example chapter=2}
 log_b(a) = log₂(2) = 1
 ```
 
 **Compare f(n) with n^(log_b(a)):**
 
-```
+```{.algorithm chapter=2}
 f(n) = n
 n^(log_b(a)) = n¹ = n
 
@@ -1548,7 +1548,7 @@ f(n) = Θ(n^(log_b(a)))  ← They're equal!
 
 **Solution:**
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(n^(log_b(a)) log n)
      = Θ(n¹ log n)
      = Θ(n log n) ✓
@@ -1568,13 +1568,13 @@ Matches what we found before!
 
 **Calculate critical exponent:**
 
-```
+```{.inline-example chapter=2}
 log_b(a) = log₂(1) = 0
 ```
 
 **Compare:**
 
-```
+```{.algorithm chapter=2}
 f(n) = 1 = Θ(1)
 n^(log_b(a)) = n⁰ = 1
 
@@ -1585,7 +1585,7 @@ f(n) = Θ(n^(log_b(a)))  ← Equal again!
 
 **Solution:**
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(n⁰ log n) = Θ(log n) ✓
 ```
 
@@ -1603,13 +1603,13 @@ Perfect! Binary search is O(log n).
 
 **Calculate critical exponent:**
 
-```
+```{.inline-example chapter=2}
 log_b(a) = log₂(2) = 1
 ```
 
 **Compare:**
 
-```
+```{.algorithm chapter=2}
 f(n) = 1 = O(n⁰)
 n^(log_b(a)) = n¹ = n
 
@@ -1620,7 +1620,7 @@ f(n) = O(n^(1-ε)) for ε = 1  ← f(n) is polynomially smaller!
 
 **Solution:**
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(n^(log_b(a)))
      = Θ(n¹)
      = Θ(n) ✓
@@ -1640,13 +1640,13 @@ Makes sense! We still need to look at every element.
 
 **Calculate critical exponent:**
 
-```
+```{.inline-example chapter=2}
 log_b(a) = log₂(7) ≈ 2.807
 ```
 
 **Compare:**
 
-```
+```{.algorithm chapter=2}
 f(n) = n² = O(n²)
 n^(log_b(a)) = n^2.807
 
@@ -1657,7 +1657,7 @@ f(n) = O(n^(2.807 - ε)) for ε ≈ 0.807  ← f(n) is smaller!
 
 **Solution:**
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(n^(log₂(7)))
      = Θ(n^2.807) ✓
 ```
@@ -1676,13 +1676,13 @@ Better than naive O(n³) matrix multiplication!
 
 **Calculate critical exponent:**
 
-```
+```{.inline-example chapter=2}
 log_b(a) = log₂(2) = 1
 ```
 
 **Compare:**
 
-```
+```{.algorithm chapter=2}
 f(n) = n²
 n^(log_b(a)) = n¹ = n
 
@@ -1691,7 +1691,7 @@ f(n) = Ω(n^(1+ε)) for ε = 1  ← f(n) is polynomially larger!
 
 **Check regularity condition:** af(n/b) ≤ cf(n)
 
-```
+```{.technical-other chapter=2}
 2·(n/2)² ≤ c·n²
 2·n²/4 ≤ c·n²
 n²/2 ≤ c·n²
@@ -1703,7 +1703,7 @@ Choose c = 1/2, this works! ✓
 
 **Solution:**
 
-```
+```{.inline-example chapter=2}
 T(n) = Θ(f(n))
      = Θ(n²) ✓
 ```
@@ -1718,7 +1718,7 @@ The Master Theorem is powerful but not universal. It **cannot** be used when:
 
 **Example:** T(n) = 2T(n/2) + n log n
 
-```
+```{.technical-other chapter=2}
 log_b(a) = log₂(2) = 1
 f(n) = n log n
 n^(log_b(a)) = n
@@ -1735,7 +1735,7 @@ Need recursion tree or substitution method.
 
 **Example:** T(n) = T(n/3) + T(2n/3) + n
 
-```
+```{.inline-example chapter=2}
 Subproblems of different sizes!
 Master Theorem doesn't apply! ❌
 ```
@@ -1744,7 +1744,7 @@ Master Theorem doesn't apply! ❌
 
 **Example:** T(n) = 2T(n/2) + n/log n
 
-```
+```{.inline-example chapter=2}
 f(n) involves log n in denominator
 Doesn't fit standard comparison
 Master Theorem doesn't apply! ❌
@@ -1754,7 +1754,7 @@ Master Theorem doesn't apply! ❌
 
 **Example:** T(n) = 2T(n/2) + n²/log n
 
-```
+```{.technical-other chapter=2}
 log_b(a) = 1
 f(n) = n²/log n is larger than n
 
@@ -1773,7 +1773,7 @@ Here's a quick reference for applying the Master Theorem:
 
 **Step 1:** Calculate critical exponent
 
-```
+```{.inline-example chapter=2}
 E = log_b(a)
 ```
 
@@ -1862,7 +1862,7 @@ For recurrences that don't fit the Master Theorem, we have additional techniques
 
 Handles unequal subproblem sizes:
 
-```
+```{.inline-example chapter=2}
 T(n) = T(n/3) + T(2n/3) + n
 
 Solution: Still Θ(n log n) using Akra-Bazzi
@@ -1872,7 +1872,7 @@ Solution: Still Θ(n log n) using Akra-Bazzi
 
 For more complex recurrences:
 
-```
+```{.inline-example chapter=2}
 T(n) = T(n-1) + T(n-2) + n
 
 This is like Fibonacci with extra term!
@@ -1896,7 +1896,7 @@ Now that we understand the paradigm deeply, let's explore fascinating applicatio
 
 **Naive approach:** Grade-school multiplication
 
-```
+```{.algorithm chapter=2}
   1234
 ×  5678
 ------
@@ -1907,7 +1907,7 @@ T(n) = O(n²) operations
 
 Split each n-digit number into two halves:
 
-```
+```{.inline-example chapter=2}
 x = x₁ · 10^(n/2) + x₀
 y = y₁ · 10^(n/2) + y₀
 
@@ -1916,7 +1916,7 @@ Example: 1234 = 12 · 10² + 34
 
 **Naive recursive multiplication:**
 
-```
+```{.technical-other chapter=2}
 xy = (x₁ · 10^(n/2) + x₀)(y₁ · 10^(n/2) + y₀)
    = x₁y₁ · 10^n + (x₁y₀ + x₀y₁) · 10^(n/2) + x₀y₀
 
@@ -1932,7 +1932,7 @@ Solution: Θ(n²) - no improvement! ❌
 
 **Karatsuba's insight (1960):** Compute the middle term differently!
 
-```
+```{.technical-other chapter=2}
 (x₁y₀ + x₀y₁) = (x₁ + x₀)(y₁ + y₀) - x₁y₁ - x₀y₀
 
 Now we only need 3 multiplications:
@@ -1945,7 +1945,7 @@ Result: z₂ · 10^n + z₁ · 10^(n/2) + z₀
 
 **Implementation:**
 
-```python
+```{.python .program-code chapter=2}
 def karatsuba(x, y):
     """
     Fast integer multiplication using Karatsuba algorithm.
@@ -1983,7 +1983,7 @@ def karatsuba(x, y):
 
 **Analysis:**
 
-```
+```{.technical-other chapter=2}
 Recurrence: T(n) = 3T(n/2) + O(n)
 
 Using Master Theorem:
@@ -2009,7 +2009,7 @@ Used in cryptography for large prime multiplication!
 
 **Naive approach:**
 
-```python
+```{.python .program-code chapter=2}
 def closest_pair_naive(points):
     """Check all pairs - O(n²)"""
     min_dist = float('inf')
@@ -2025,7 +2025,7 @@ def closest_pair_naive(points):
 
 **Divide and conquer approach: O(n log n)**
 
-```python
+```{.python .program-code chapter=2}
 import math
 
 def distance(p1, p2):
@@ -2134,7 +2134,7 @@ def _strip_closest(strip, d):
 
 **Analysis:**
 
-```
+```{.technical-other chapter=2}
 Recurrence: T(n) = 2T(n/2) + O(n)
             (sorting strip takes O(n))
 
@@ -2148,7 +2148,7 @@ T(n) = Θ(n log n) ✓
 
 **Naive approach:** Three nested loops
 
-```python
+```{.python .program-code chapter=2}
 def naive_matrix_multiply(A, B):
     """Standard matrix multiplication - O(n³)"""
     n = len(A)
@@ -2166,7 +2166,7 @@ def naive_matrix_multiply(A, B):
 
 Split each matrix into 4 quadrants:
 
-```
+```{.data-example chapter=2}
 [A B] × [E F] = [AE+BG  AF+BH]
 [C D]   [G H]   [CE+DG  CF+DH]
 
@@ -2177,7 +2177,7 @@ T(n) = 8T(n/2) + O(n²)
 
 **Strassen's algorithm (1969):** Use only 7 multiplications!
 
-```
+```{.algorithm chapter=2}
 Define 7 products:
 M₁ = (A + D)(E + H)
 M₂ = (C + D)E
@@ -2220,7 +2220,7 @@ Solution: T(n) = Θ(n^log₂(7)) ≈ Θ(n^2.807) ✓
 
 This **revolutionized digital signal processing** in the 1960s!
 
-```python
+```{.python .program-code chapter=2}
 import numpy as np
 
 def fft(x):
@@ -2262,7 +2262,7 @@ def fft(x):
 
 **Recurrence:**
 
-```
+```{.inline-example chapter=2}
 T(n) = 2T(n/2) + O(n)
 T(n) = Θ(n log n) ✓
 ```
@@ -2277,7 +2277,7 @@ T(n) = Θ(n log n) ✓
 
 Let's bring everything together and build a practical sorting implementation that combines the best techniques we've learned.
 
-```python
+```{.python .program-code chapter=2}
 """
 production_sort.py - High-performance sorting implementation
 
@@ -2486,7 +2486,7 @@ def is_sorted(arr: List[T], key: Callable = None) -> bool:
 
 Let's create comprehensive benchmarks:
 
-```python
+```{.python .program-code chapter=2}
 """
 benchmark_sorting.py - Comprehensive performance analysis
 """
@@ -2674,7 +2674,7 @@ Based on extensive testing, here are practical insights:
 
 **❌ Pitfall 1: Not handling duplicates well**
 
-```python
+```{.python .program-code chapter=2}
 # Bad: Standard partition performs poorly with many duplicates
 def bad_partition(arr, low, high):
     pivot = arr[high]
@@ -2690,7 +2690,7 @@ def bad_partition(arr, low, high):
 
 **❌ Pitfall 2: Deep recursion on sorted data**
 
-```python
+```{.python .program-code chapter=2}
 # Bad: Always picking last element as pivot
 def bad_quicksort(arr, low, high):
     if low < high:
@@ -2704,7 +2704,7 @@ def bad_quicksort(arr, low, high):
 
 **❌ Pitfall 3: Unnecessary copying in merge sort**
 
-```python
+```{.python .program-code chapter=2}
 # Bad: Creating many temporary arrays
 def bad_merge_sort(arr):
     if len(arr) <= 1:
@@ -2720,7 +2720,7 @@ def bad_merge_sort(arr):
 
 **❌ Pitfall 4: Not tail-call optimizing**
 
-```python
+```{.python .program-code chapter=2}
 # Bad: Both recursive calls can cause deep stack
 def bad_quicksort(arr, low, high):
     if low < high:
@@ -2740,7 +2740,7 @@ def bad_quicksort(arr, low, high):
 
 Modern computers have multiple cores. Divide and conquer is naturally parallelizable!
 
-```python
+```{.python .program-code chapter=2}
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
@@ -2800,7 +2800,7 @@ Modern CPUs have complex memory hierarchies. Cache-oblivious algorithms perform 
 
 **Example: Cache-oblivious matrix multiplication**
 
-```python
+```{.python .program-code chapter=2}
 def cache_oblivious_matrix_mult(A, B):
     """
     Matrix multiplication optimized for cache performance.
@@ -2909,7 +2909,7 @@ Congratulations! You've mastered divide and conquer—one of the most powerful a
 
 **Choose your weapon wisely:**
 
-```
+```{.algorithm chapter=2}
 If (need guaranteed performance):
     use Merge Sort
 Else if (have many duplicates):
@@ -3040,7 +3040,7 @@ Implement a hybrid sorting algorithm that:
 
 **Requirements:**
 
-```python
+```{.python .program-code chapter=2}
 def hybrid_sort(arr: List[int], threshold: int = 10) -> List[int]:
     """
     Your implementation here.
@@ -3063,7 +3063,7 @@ Generate performance plots for different input types and sizes.
 
 Implement the following binary search variants:
 
-```python
+```{.python .program-code chapter=2}
 def find_first_occurrence(arr: List[int], target: int) -> int:
     """Find the first occurrence of target in sorted array."""
     pass
@@ -3089,7 +3089,7 @@ Write comprehensive tests for each function.
 
 Implement QuickSelect to find the k-th smallest element in O(n) average time:
 
-```python
+```{.python .program-code chapter=2}
 def quickselect(arr: List[int], k: int) -> int:
     """
     Find the k-th smallest element (0-indexed).
@@ -3114,7 +3114,7 @@ def quickselect(arr: List[int], k: int) -> int:
 
 **Problem:** Given k sorted lists, merge them into one sorted list efficiently.
 
-```python
+```{.python .program-code chapter=2}
 def merge_k_lists(lists: List[List[int]]) -> List[int]:
     """
     Merge k sorted lists.
@@ -3142,7 +3142,7 @@ Implement both approaches and compare:
 
 Find the median of two sorted arrays in O(log(min(m,n))) time:
 
-```python
+```{.python .program-code chapter=2}
 def find_median_sorted_arrays(arr1: List[int], arr2: List[int]) -> float:
     """
     Find median of two sorted arrays.
@@ -3171,7 +3171,7 @@ def find_median_sorted_arrays(arr1: List[int], arr2: List[int]) -> float:
 
 **Problem:** Given n rectangular buildings, each represented as [left, right, height], compute the "skyline" outline.
 
-```python
+```{.python .program-code chapter=2}
 def get_skyline(buildings: List[List[int]]) -> List[List[int]]:
     """
     Compute skyline using divide and conquer.

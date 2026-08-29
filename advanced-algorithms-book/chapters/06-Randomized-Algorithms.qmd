@@ -229,7 +229,7 @@ Notice how even with one bad split (step 1), we still got good overall performan
 
 Now that we understand WHY it works, here's the code:
 
-```python
+```{.python .program-code chapter=6}
 import random
 
 def randomized_quicksort(arr):
@@ -309,7 +309,7 @@ Think of it like a "prime number detector" test:
 
 Let's implement this powerful algorithm:
 
-```python
+```{.python .program-code chapter=6}
 def miller_rabin_primality(n, k=10):
     """
     Monte Carlo algorithm: Tests if n is prime.
@@ -414,7 +414,7 @@ This same principle explains why hash tables have collisions sooner than expecte
 
 Let's see this in action:
 
-```python
+```{.python .program-code chapter=6}
 def birthday_paradox_simulation(n_people=23, n_days=365, trials=10000):
     """
     Simulate the birthday paradox to verify probability.
@@ -467,7 +467,7 @@ If error probability = p, and we run k independent trials:
 - Error probability ≤ p^(k/2) (approximately)
 
 **Example:**
-```python
+```{.python .program-code chapter=6}
 def amplify_accuracy(monte_carlo_func, input_data, desired_accuracy=0.99):
     """
     Boost accuracy by running algorithm multiple times.
@@ -557,7 +557,7 @@ That's linear time! Much better than O(n log n) for sorting.
 
 #### The Implementation
 
-```python
+```{.python .program-code chapter=6}
 import random
 
 def quickselect(arr, k):
@@ -661,7 +661,7 @@ A family of hash functions is universal if:
 
 One elegant universal hash family:
 
-```
+```{.inline-example chapter=6}
 h(x) = ((ax + b) mod p) mod m
 ```
 
@@ -673,7 +673,7 @@ Where:
 
 Let's implement this:
 
-```python
+```{.python .program-code chapter=6}
 import random
 
 class UniversalHashTable:
@@ -695,7 +695,10 @@ class UniversalHashTable:
         self.buckets = [[] for _ in range(self.size)]
         self.num_items = 0
         
-        print(f"Selected hash function: h(x) = (({self.a}*x + {self.b}) mod {self.prime}) mod {self.size}")
+        print(
+            f"Selected hash function: h(x) = "
+            f"(({self.a}*x + {self.b}) mod {self.prime}) mod {self.size}"
+        )
     
     def _next_prime(self, n):
         """Find the next prime number >= n."""
@@ -821,7 +824,7 @@ To track 1 million URLs with 1% false positive rate:
 
 Let's implement it:
 
-```python
+```{.python .program-code chapter=6}
 import math
 import random
 
@@ -1006,7 +1009,7 @@ For any item to be in the final sample:
 
 Let's implement it:
 
-```python
+```{.python .program-code chapter=6}
 import random
 
 class ReservoirSampler:
@@ -1116,7 +1119,7 @@ Count how many times each hashtag appears in Twitter:
 - We COUNT in multiple tables
 - Take the MINimum to reduce error from hash collisions
 
-```python
+```{.python .program-code chapter=6}
 class CountMinSketch:
     """
     Estimate frequencies in data streams with limited memory.
@@ -1255,7 +1258,7 @@ When we analyze randomized algorithms, we can't just say "it takes X steps" beca
 **Definition:** If an algorithm has different possible running times, the expected value is the average, weighted by probability.
 
 **Example - Finding an Item in Random Position:**
-```
+```{.algorithm chapter=6}
 Array has 4 slots: [_, _, _, _]
 Item could be in position: 1, 2, 3, or 4 (each with probability 1/4)
 Comparisons needed: 1, 2, 3, or 4
@@ -1304,7 +1307,7 @@ This is why randomized algorithms are reliable despite using randomness!
 
 Let's see these principles in action:
 
-```python
+```{.python .program-code chapter=6}
 import random
 import math
 import time
@@ -1331,7 +1334,11 @@ class RandomizedAnalysis:
             right = [x for x in arr if x > pivot]
             
             # Recursively count comparisons
-            return comparisons + count_comparisons_quicksort(left) + count_comparisons_quicksort(right)
+            return (
+                comparisons
+                + count_comparisons_quicksort(left)
+                + count_comparisons_quicksort(right)
+            )
         
         # Run many trials
         comparison_counts = []
@@ -1354,7 +1361,10 @@ class RandomizedAnalysis:
         print(f"  Actual average: {actual_mean:.0f}")
         print(f"  Min comparisons: {min(comparison_counts)}")
         print(f"  Max comparisons: {max(comparison_counts)}")
-        print(f"  Runs >50% from expected: {far_from_expected}/{trials} = {far_from_expected/trials:.1%}")
+        print(
+            f"  Runs >50% from expected: {far_from_expected}/{trials} "
+            f"= {far_from_expected/trials:.1%}"
+        )
         print(f"  Conclusion: QuickSort strongly concentrates around expected value!")
         
         return comparison_counts
@@ -1449,7 +1459,7 @@ Find the minimum cut in a network - the smallest number of connections that, if 
 - Multiple runs find the true min-cut with high probability
 
 Let's implement this beautiful algorithm:
-```python
+```{.python .program-code chapter=6}
 import random
 import copy
 
@@ -1605,7 +1615,7 @@ Calculate the area under a complex curve or the value of π.
 2. Count how many land in the circle
 3. π ≈ 4 × (points in circle) / (total points)
 
-```python
+```{.python .program-code chapter=6}
 import random
 import math
 
@@ -1686,7 +1696,7 @@ You have 1000 servers and millions of requests. How do you distribute load fairl
 - Random choice alone: Maximum load ≈ log n / log log n
 - Power of two choices: Maximum load ≈ log log n (MUCH better!)
 
-```python
+```{.python .program-code chapter=6}
 class LoadBalancer:
     """
     Demonstrate different load balancing strategies.
@@ -1745,7 +1755,7 @@ balancer.compare_strategies()
 
 In web development and product design, randomized experiments help make data-driven decisions.
 
-```python
+```{.python .program-code chapter=6}
 class ABTest:
     """
     Simple A/B testing framework with statistical significance.

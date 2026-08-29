@@ -43,7 +43,7 @@ The **Fourier Transform** is the mathematical magic that converts between these 
 - **Time domain**: amplitude over time (what you hear)
 - **Frequency domain**: amplitude at each frequency (what the engineer sees)
 
-```
+```{.data-example chapter=11}
 Time Domain:           Frequency Domain:
 [audio waveform]  ⟺   [frequency spectrum]
    "when"                  "what notes"
@@ -61,7 +61,7 @@ Once you're in the frequency domain, you can:
 
 For a signal with N samples x₀, x₁, ..., x_{N-1}, the **Discrete Fourier Transform (DFT)** is:
 
-```
+```{.technical-other chapter=11}
 X_k = Σ(n=0 to N-1) x_n * e^(-2πikn/N)
 
 where:
@@ -79,7 +79,7 @@ In plain English: to find the amplitude at frequency k, we multiply each time sa
 
 The straightforward implementation computes each X_k independently:
 
-```python
+```{.python .program-code chapter=11}
 def dft_naive(x):
     """
     Naive Discrete Fourier Transform.
@@ -110,7 +110,7 @@ The FFT (Cooley-Tukey algorithm, 1965) is based on a brilliant observation: **th
 
 **Main idea**: Split the DFT into odd and even indices:
 
-```
+```{.algorithm chapter=11}
 X_k = Σ(even n) x_n * e^(-2πikn/N) + Σ(odd n) x_n * e^(-2πikn/N)
 
 Let n = 2m for even, n = 2m+1 for odd:
@@ -135,7 +135,7 @@ Where:
 Keep dividing until you reach size 1 (base case: DFT of one element is itself).
 
 **Time complexity analysis**:
-```
+```{.algorithm chapter=11}
 T(N) = 2T(N/2) + O(N)  (two recursive calls + combining)
      = O(N log N)       (by Master Theorem)
 ```
@@ -149,7 +149,7 @@ This is why FFT changed everything. What took hours now takes milliseconds.
 
 ### Implementation: Recursive FFT
 
-```python
+```{.python .program-code chapter=11}
 import numpy as np
 
 def fft_recursive(x):
@@ -197,7 +197,7 @@ def ifft_recursive(X):
 
 **Let's trace through a small example**:
 
-```python
+```{.python .program-code chapter=11}
 def fft_trace_example():
     """Trace FFT execution on a small signal."""
     x = np.array([1, 2, 3, 4])
@@ -231,7 +231,7 @@ def fft_trace_example():
 
 The recursive slicing version is elegant but performs O(N log N) total allocation over the run; its peak auxiliary space is O(N). The iterative version also uses O(N) auxiliary space and usually has lower allocation overhead:
 
-```python
+```{.python .program-code chapter=11}
 def fft_iterative(x):
     """
     Iterative FFT using bit-reversal.
@@ -288,7 +288,7 @@ def ifft_iterative(X):
 
 **The bit-reversal trick**: The iterative FFT processes samples in "bit-reversed" order. For N=8:
 
-```
+```{.technical-other chapter=11}
 Original: 0 1 2 3 4 5 6 7
 Binary:   000 001 010 011 100 101 110 111
 Reversed: 000 100 010 110 001 101 011 111
@@ -299,7 +299,7 @@ This reordering allows us to process the FFT in-place, bottom-up, instead of top
 
 ### Complete FFT Implementation
 
-```python
+```{.python .program-code chapter=11}
 class FFT:
     """
     Comprehensive FFT implementation with utilities.
@@ -547,7 +547,7 @@ if __name__ == "__main__":
 ### The Problem
 
 You have two polynomials:
-```
+```{.inline-example chapter=11}
 A(x) = a₀ + a₁x + a₂x² + ... + aₙxⁿ
 B(x) = b₀ + b₁x + b₂x² + ... + bₘxᵐ
 ```
@@ -556,7 +556,7 @@ B(x) = b₀ + b₁x + b₂x² + ... + bₘxᵐ
 
 **Naive approach**: Multiply every term in A by every term in B.
 
-```python
+```{.python .program-code chapter=11}
 def multiply_polynomials_naive(A, B):
     """
     Naive polynomial multiplication.
@@ -574,7 +574,7 @@ def multiply_polynomials_naive(A, B):
 ```
 
 **Example**:
-```
+```{.technical-other chapter=11}
 A(x) = 1 + 2x + 3x²  →  [1, 2, 3]
 B(x) = 4 + 5x + 6x²  →  [4, 5, 6]
 
@@ -593,7 +593,7 @@ Here's the key insight: **polynomial multiplication in coefficient form is convo
 
 Think of polynomials as signals. The coefficients are like time-domain samples. When we multiply polynomials, we're convolving their coefficients. By the convolution theorem:
 
-```
+```{.inline-example chapter=11}
 FFT(A × B) = FFT(A) * FFT(B)  (pointwise multiplication)
 ```
 
@@ -605,7 +605,7 @@ For large polynomials, this is HUGE!
 
 ### Implementation
 
-```python
+```{.python .program-code chapter=11}
 def multiply_polynomials_fft(A, B):
     """
     Fast polynomial multiplication using FFT.
@@ -706,7 +706,7 @@ if __name__ == "__main__":
 
 You can use FFT to multiply huge integers in O(n log n) time!
 
-```python
+```{.python .program-code chapter=11}
 def multiply_large_integers(a, b, base=10):
     """
     Multiply large integers using FFT.
@@ -784,7 +784,7 @@ The speed of matrix operations directly determines:
 **Given**: A (m×n) and B (n×p)  
 **Compute**: C = AB (m×p)
 
-```python
+```{.python .program-code chapter=11}
 def matmul_naive(A, B):
     """
     Naive matrix multiplication.
@@ -815,13 +815,13 @@ Yes! But it's complicated...
 Volker Strassen (1969) discovered that you can multiply 2×2 matrices with only 7 multiplications instead of 8:
 
 **Normal method** (8 multiplications):
-```
+```{.algorithm chapter=11}
 [a b]   [e f]   [ae+bg  af+bh]
 [c d] × [g h] = [ce+dg  cf+dh]
 ```
 
 **Strassen's method** (7 multiplications):
-```
+```{.technical-other chapter=11}
 M₁ = (a + d)(e + h)
 M₂ = (c + d)e
 M₃ = a(f - h)
@@ -839,7 +839,7 @@ C₂₂ = M₁ - M₂ + M₃ + M₆
 
 By recursively applying this, you get O(n^log₂(7)) ≈ O(n^2.807).
 
-```python
+```{.python .program-code chapter=11}
 def strassen_matmul(A, B):
     """
     Strassen's matrix multiplication algorithm.
@@ -909,7 +909,7 @@ Modern CPUs are FAST, but memory is SLOW. The key is using the cache efficiently
 
 **Blocked (Tiled) Matrix Multiplication**:
 
-```python
+```{.python .program-code chapter=11}
 def matmul_blocked(A, B, block_size=64):
     """
     Blocked matrix multiplication for better cache usage.
@@ -950,7 +950,7 @@ When blocks fit in cache, we get many more cache hits. For a 1000×1000 matrix:
 
 ### Matrix Operations Library
 
-```python
+```{.python .program-code chapter=11}
 class MatrixOps:
     """
     Efficient matrix operations with multiple implementations.
@@ -1181,7 +1181,7 @@ if __name__ == "__main__":
 
 Computers can't represent real numbers exactly. They use floating-point numbers with limited precision.
 
-```python
+```{.python .program-code chapter=11}
 def demonstrate_floating_point_errors():
     """Show how floating-point arithmetic can be surprising."""
     print("=== Floating-Point Surprises ===\n")
@@ -1214,14 +1214,14 @@ def demonstrate_floating_point_errors():
 The **condition number** measures how sensitive a problem is to small changes in input.
 
 For solving Ax = b:
-```
+```{.inline-example chapter=11}
 κ(A) = ||A|| × ||A⁻¹||
 
 If κ(A) is large, the problem is ill-conditioned:
 small changes in A or b cause large changes in x.
 ```
 
-```python
+```{.python .program-code chapter=11}
 def compute_condition_number(A):
     """
     Compute condition number of matrix A.
@@ -1273,7 +1273,7 @@ def demonstrate_ill_conditioning():
 
 **Unstable algorithm**: Subtracting nearly equal numbers
 
-```python
+```{.python .program-code chapter=11}
 def quadratic_formula_unstable(a, b, c):
     """
     Unstable: loses precision when b² >> 4ac.
@@ -1331,7 +1331,7 @@ def demonstrate_numerical_stability():
 
 ### Best Practices for Numerical Computing
 
-```python
+```{.python .program-code chapter=11}
 class NumericalBestPractices:
     """Guidelines for writing numerically stable code."""
     
@@ -1444,7 +1444,7 @@ if __name__ == "__main__":
 
 ### Audio Processing
 
-```python
+```{.python .program-code chapter=11}
 class AudioProcessor:
     """Audio signal processing using FFT."""
     
@@ -1687,7 +1687,7 @@ if __name__ == "__main__":
 
 ### Image Processing with FFT
 
-```python
+```{.python .program-code chapter=11}
 class ImageProcessor:
     """Image processing using 2D FFT."""
     
@@ -1836,7 +1836,7 @@ Let's build a comprehensive signal processing library!
 
 ### Project Structure
 
-```
+```{.text-diagram chapter=11}
 FFTAnalyzer/
 ├── fft_analyzer/
 │   ├── __init__.py
@@ -1866,7 +1866,7 @@ FFTAnalyzer/
 
 ### Core FFT Module
 
-```python
+```{.python .program-code chapter=11}
 # fft_analyzer/__init__.py
 """
 FFT Analyzer: Comprehensive signal processing toolkit.
@@ -1903,7 +1903,7 @@ __all__ = [
 
 ### Signal Generator Module
 
-```python
+```{.python .program-code chapter=11}
 # fft_analyzer/signal/generators.py
 """
 Signal generation utilities for testing and demonstration.
@@ -2123,7 +2123,7 @@ if __name__ == "__main__":
 
 ### Complete Audio Processor Application
 
-```python
+```{.python .program-code chapter=11}
 # fft_analyzer/applications/audio_processor.py
 """
 Complete audio processing application.
@@ -2358,7 +2358,7 @@ if __name__ == "__main__":
 
 ### Command-Line Interface
 
-```python
+```{.python .program-code chapter=11}
 # fft_analyzer/cli.py
 """
 Command-line interface for FFT Analyzer.

@@ -44,7 +44,7 @@ Consider this simple problem: given a list of students' test scores, find the hi
 
 Here's an algorithm to solve this:
 
-```
+```{.algorithm chapter=1}
 Algorithm: FindMaximumScore
 Input: A list of scores S = [s₁, s₂, ..., sₙ]
 Output: The maximum score in the list
@@ -75,7 +75,7 @@ Let's see this with our maximum-finding algorithm:
 
 **Algorithm (language-independent):**
 
-```
+```{.algorithm chapter=1}
 For each element in the list:
     If element > current_maximum:
         Update current_maximum to element
@@ -83,7 +83,7 @@ For each element in the list:
 
 **Python Implementation:**
 
-```python
+```{.python .program-code chapter=1}
 def find_maximum(scores):
     max_score = scores[0]
     for score in scores:
@@ -94,7 +94,7 @@ def find_maximum(scores):
 
 **Java Implementation:**
 
-```java
+```{.java .program-code chapter=1}
 public static int findMaximum(int[] scores) {
     int maxScore = scores[0];
     for (int score : scores) {
@@ -108,7 +108,7 @@ public static int findMaximum(int[] scores) {
 
 **JavaScript Implementation:**
 
-```javascript
+```{.javascript .program-code chapter=1}
 function findMaximum(scores) {
     let maxScore = scores[0];
     for (let score of scores) {
@@ -158,7 +158,7 @@ The most fundamental requirement for any algorithm is **correctness**—it must 
 
 Consider this seemingly reasonable algorithm for finding the maximum element:
 
-```
+```{.algorithm chapter=1}
 Flawed Algorithm: FindMax_Wrong
 1. Look at the first element
 2. If it's bigger than 50, return it
@@ -204,7 +204,7 @@ Let's look at two different correct algorithms for determining if a number is pr
 
 **Algorithm 1: Brute Force Trial Division**
 
-```
+```{.algorithm chapter=1}
 Algorithm: IsPrime_Slow(n)
 1. If n ≤ 1, return false
 2. For i = 2 to n-1:
@@ -214,7 +214,7 @@ Algorithm: IsPrime_Slow(n)
 
 **Algorithm 2: Optimized Trial Division**
 
-```
+```{.algorithm chapter=1}
 Algorithm: IsPrime_Fast(n)
 1. If n ≤ 1, return false
 2. If n ≤ 3, return true
@@ -241,7 +241,7 @@ A good algorithm should be easy to understand, implement, and modify. Consider t
 
 **Clear and Simple:**
 
-```python
+```{.python .program-code chapter=1}
 # Swap a and b using a temporary variable
 temp = a
 a = b
@@ -250,7 +250,7 @@ b = temp
 
 **Clever but Confusing:**
 
-```python
+```{.python .program-code chapter=1}
 # Swap a and b using XOR operations
 a = a ^ b
 b = a ^ b
@@ -272,7 +272,7 @@ A robust algorithm handles unexpected situations gracefully. This includes:
 
 **Input Validation:**
 
-```python
+```{.python .program-code chapter=1}
 def find_maximum(scores):
     # Handle edge cases
     if not scores:  # Empty list
@@ -289,7 +289,7 @@ def find_maximum(scores):
 
 **Error Recovery:**
 
-```python
+```{.python .program-code chapter=1}
 def safe_divide(a, b):
     try:
         return a / b
@@ -409,7 +409,7 @@ For our duplicate problem, the greedy and hash-based approaches seem most promis
 
 **Strategy A: Greedy with Hash Table**
 
-```
+```{.technical-other chapter=1}
 1. Create an empty hash table to count elements
 2. Create an empty result list
 3. For each element in the input:
@@ -422,7 +422,7 @@ For our duplicate problem, the greedy and hash-based approaches seem most promis
 
 **Strategy B: Two-Pass Approach**
 
-```
+```{.inline-example chapter=1}
 1. First pass: Count frequency of each element
 2. Second pass: Add elements to result if their frequency > 1
 ```
@@ -433,7 +433,7 @@ Strategy A is more efficient (single pass), while Strategy B is conceptually sim
 
 Now we translate our chosen strategy into a precise algorithm:
 
-```
+```{.algorithm chapter=1}
 Algorithm: FindDuplicates
 Input: A list L of integers
 Output: A list of integers that appear more than once in L
@@ -501,7 +501,7 @@ This is quite efficient! We can't do better than O(n) time because we must exami
 
 Now we can confidently implement our algorithm:
 
-```python
+```{.python .program-code chapter=1}
 def find_duplicates(numbers):
     """
     Find all elements that appear more than once in a list.
@@ -533,7 +533,7 @@ def find_duplicates(numbers):
 
 Finally, we test our implementation with our examples and additional edge cases:
 
-```python
+```{.python .program-code chapter=1}
 # Test cases
 assert find_duplicates([1, 2, 3, 2, 4, 3, 5]) == [2, 3]
 assert find_duplicates([1, 2, 3, 4, 5]) == []
@@ -585,7 +585,7 @@ Let's look at three different approaches:
 
 #### Approach 1: The "Correct" Way
 
-```python
+```{.python .program-code chapter=1}
 def find_median_exact(numbers):
     """Find the exact median by sorting."""
     sorted_nums = sorted(numbers)
@@ -605,7 +605,7 @@ def find_median_exact(numbers):
 
 #### Approach 2: The "Fast" Way (QuickSelect)
 
-```python
+```{.python .program-code chapter=1}
 import random
 
 def find_median_quickselect(numbers):
@@ -644,7 +644,7 @@ def quickselect(arr, k):
 
 #### Approach 3: The "Approximate" Way
 
-```python
+```{.python .program-code chapter=1}
 def find_median_approximate(numbers, sample_size=100):
     """Find approximate median by sampling."""
     if len(numbers) <= sample_size:
@@ -735,7 +735,7 @@ Sometimes the best solution isn't choosing between correct and fast—it's makin
 
 **Adaptive Algorithms:** Adjust their strategy based on input characteristics
 
-```python
+```{.python .program-code chapter=1}
 def smart_sort(arr):
     if len(arr) < 50:
         return insertion_sort(arr)  # Fast for small arrays
@@ -747,7 +747,7 @@ def smart_sort(arr):
 
 **Cache-Aware Algorithms:** Optimize for memory access patterns
 
-```python
+```{.python .program-code chapter=1}
 def matrix_multiply_blocked(A, B):
     """Matrix multiplication optimized for cache performance."""
     # Process data in blocks that fit in cache
@@ -756,7 +756,7 @@ def matrix_multiply_blocked(A, B):
 
 **Preprocessing Strategies:** Do work upfront to make queries faster
 
-```python
+```{.python .program-code chapter=1}
 class FastMedianFinder:
     def __init__(self, numbers):
         self.sorted_numbers = sorted(numbers)  # O(n log n) preprocessing
@@ -826,7 +826,7 @@ Now let's make these intuitions mathematically rigorous. Don't worry if the nota
 
 **Definition:** We say f(n) = O(g(n)) if there exist positive constants c and n₀ such that:
 
-```
+```{.inline-example chapter=1}
 0 ≤ f(n) ≤ c·g(n) for all n ≥ n₀
 ```
 
@@ -838,7 +838,7 @@ Now let's make these intuitions mathematically rigorous. Don't worry if the nota
 
 We need to find constants c and n₀ such that:
 
-```
+```{.inline-example chapter=1}
 3n² + 5n + 2 ≤ c·n² for all n ≥ n₀
 ```
 
@@ -851,7 +851,7 @@ For n ≥ 1:
 
 Therefore:
 
-```
+```{.inline-example chapter=1}
 3n² + 5n + 2 ≤ 3n² + 5n² + 2n² = 10n²
 ```
 
@@ -861,7 +861,7 @@ So we can choose c = 10 and n₀ = 1, proving that 3n² + 5n + 2 = O(n²). ✓
 
 **Definition:** We say f(n) = Ω(g(n)) if there exist positive constants c and n₀ such that:
 
-```
+```{.inline-example chapter=1}
 0 ≤ c·g(n) ≤ f(n) for all n ≥ n₀
 ```
 
@@ -871,13 +871,13 @@ So we can choose c = 10 and n₀ = 1, proving that 3n² + 5n + 2 = O(n²). ✓
 
 We need:
 
-```
+```{.inline-example chapter=1}
 c·n² ≤ 3n² + 5n + 2 for all n ≥ n₀
 ```
 
 This is easier! For any n ≥ 1:
 
-```
+```{.inline-example chapter=1}
 3n² ≤ 3n² + 5n + 2
 ```
 
@@ -891,7 +891,7 @@ So we can choose c = 3 and n₀ = 1. ✓
 
 **Example:** Since we proved both 3n² + 5n + 2 = O(n²) and 3n² + 5n + 2 = Ω(n²), we can conclude:
 
-```
+```{.inline-example chapter=1}
 3n² + 5n + 2 = Θ(n²)
 ```
 
@@ -911,7 +911,7 @@ Understanding asymptotic notation correctly is crucial, but there are several co
 
 **Example:**
 
-```python
+```{.python .program-code chapter=1}
 def linear_search(arr, target):
     for i, element in enumerate(arr):
         if element == target:
@@ -971,7 +971,7 @@ However, we prefer the tightest bound, so we say it's O(n).
 
 **Example:** Insertion sort vs. Merge sort
 
-```python
+```{.python .program-code chapter=1}
 # For very small arrays (n < 50), insertion sort often wins!
 def hybrid_sort(arr):
     if len(arr) < 50:
@@ -986,8 +986,9 @@ Many production sorting algorithms use this hybrid approach!
 
 Understanding the relative growth rates of common functions is essential for algorithm analysis. Here's the hierarchy from slowest to fastest growing:
 
-```
-O(1) < O(log log n) < O(log n) < O(n^(1/3)) < O(√n) < O(n) < O(n log n) < O(n²) < O(n³) < O(2ⁿ) < O(n!) < O(nⁿ)
+```{.algorithm chapter=1}
+O(1) < O(log log n) < O(log n) < O(n^(1/3)) < O(√n) < O(n)
+< O(n log n) < O(n²) < O(n³) < O(2ⁿ) < O(n!) < O(nⁿ)
 ```
 
 Let's explore each with intuitive explanations and real-world examples:
@@ -1098,7 +1099,7 @@ Let's practice analyzing the time complexity of actual algorithms:
 
 #### Example 1: Nested Loops
 
-```python
+```{.python .program-code chapter=1}
 def print_pairs(arr):
     n = len(arr)
     for i in range(n):        # n iterations
@@ -1115,7 +1116,7 @@ def print_pairs(arr):
 
 #### Example 2: Variable Inner Loop
 
-```python
+```{.python .program-code chapter=1}
 def print_triangular_pairs(arr):
     n = len(arr)
     for i in range(n):           # n iterations
@@ -1135,7 +1136,7 @@ def print_triangular_pairs(arr):
 
 #### Example 3: Logarithmic Loop
 
-```python
+```{.python .program-code chapter=1}
 def binary_search_iterative(arr, target):
     left, right = 0, len(arr) - 1
     
@@ -1160,7 +1161,7 @@ def binary_search_iterative(arr, target):
 
 #### Example 4: Divide and Conquer
 
-```python
+```{.python .program-code chapter=1}
 def merge_sort(arr):
     if len(arr) <= 1:          # Base case: O(1)
         return arr
@@ -1201,7 +1202,7 @@ Asymptotic analysis might seem very theoretical, but it has immediate practical 
 
 #### Performance Prediction
 
-```python
+```{.python .program-code chapter=1}
 # If an O(n²) algorithm takes 1 second for n=1000:
 # How long for n=10000?
 
@@ -1218,7 +1219,7 @@ print(f"Predicted time: {predicted_time} seconds")  # 100 seconds!
 
 #### Algorithm Selection
 
-```python
+```{.python .program-code chapter=1}
 def choose_sorting_algorithm(n):
     """Choose the best sorting algorithm based on input size."""
     if n < 50:
@@ -1231,7 +1232,7 @@ def choose_sorting_algorithm(n):
 
 #### Bottleneck Identification
 
-```python
+```{.python .program-code chapter=1}
 def complex_algorithm(data):
     # Phase 1: Preprocessing - O(n)
     preprocessed = preprocess(data)
@@ -1283,7 +1284,7 @@ Many algorithms have different performance characteristics depending on the inpu
 
 Time isn't the only resource that matters—memory usage is also crucial:
 
-```python
+```{.python .program-code chapter=1}
 def recursive_factorial(n):
     if n <= 1:
         return 1
@@ -1331,7 +1332,7 @@ For this course, we'll use Python because it strikes the perfect balance between
 
 **Installing Python:**
 
-```bash
+```{.bash .terminal chapter=1}
 # Check if you have Python 3.9 or later
 python --version
 
@@ -1349,7 +1350,7 @@ sudo apt-get install python3 python3-pip
 
 Virtual environments prevent dependency conflicts and make your projects reproducible:
 
-```bash
+```{.bash .terminal chapter=1}
 # Create a virtual environment for this course
 python -m venv algorithms_course
 cd algorithms_course
@@ -1365,7 +1366,7 @@ source bin/activate
 
 #### Essential Libraries
 
-```bash
+```{.bash .terminal chapter=1}
 # Install our core toolkit
 pip install numpy matplotlib pandas jupyter pytest
 
@@ -1389,7 +1390,7 @@ pip install scipy scikit-learn plotly seaborn
 
 Let's create a project structure that will serve you well throughout the course:
 
-```
+```{.text-diagram chapter=1}
 algorithms_course/
 ├── README.md                 # Project overview and setup instructions
 ├── requirements.txt          # List of required packages
@@ -1449,7 +1450,7 @@ algorithms_course/
 
 **Creating this structure:**
 
-```bash
+```{.bash .terminal chapter=1}
 # Create the directory structure
 mkdir -p src/{sorting,searching,graph,dynamic_programming,data_structures,utils}
 mkdir -p tests benchmarks notebooks docs examples/interactive_demos
@@ -1465,7 +1466,7 @@ touch benchmarks/__init__.py
 
 Git is essential for any serious programming project:
 
-```bash
+```{.bash .terminal chapter=1}
 # Initialize git repository
 git init
 
@@ -1545,7 +1546,7 @@ Let's create a professional-grade benchmarking system that you'll use throughout
 
 python
 
-```python
+```{.python .program-code chapter=1}
 # File: src/utils/benchmark.py
 """
 Professional benchmarking framework for algorithm analysis.
@@ -1748,7 +1749,10 @@ class AlgorithmBenchmark:
                         
                         # Progress indicator
                         progress = current_test / total_tests * 100
-                        print(f"    {name:20}: {result.average_time:8.6f}s ± {result.std_deviation:.6f}s [{progress:5.1f}%]")
+                        print(
+                            f"    {name:20}: {result.average_time:8.6f}s "
+                            f"± {result.std_deviation:.6f}s [{progress:5.1f}%]"
+                        )
                         
                     except Exception as e:
                         print(f"    {name:20}: ERROR - {e}")
@@ -1799,7 +1803,11 @@ class AlgorithmBenchmark:
             
         # Add complexity reference lines
         if log_scale and len(results) > 0:
-            sample_sizes = sorted(set(r.input_size for results_list in results.values() for r in results_list))
+            sample_sizes = sorted({
+                r.input_size
+                for results_list in results.values()
+                for r in results_list
+            })
             if len(sample_sizes) >= 2:
                 min_size, max_size = min(sample_sizes), max(sample_sizes)
                 
@@ -1892,10 +1900,14 @@ class AlgorithmBenchmark:
             'best_fit_r_squared': best_fit[1]['r_squared'],
             'all_fits': complexity_fits,
             'average_doubling_ratio': avg_ratio,
-            'interpretation': self._interpret_complexity(best_fit[0], best_fit[1]['r_squared'], avg_ratio)
+            'interpretation': self._interpret_complexity(
+                best_fit[0], best_fit[1]['r_squared'], avg_ratio
+            )
         }
     
-    def _interpret_complexity(self, complexity: str, r_squared: float, doubling_ratio: float) -> str:
+    def _interpret_complexity(
+        self, complexity: str, r_squared: float, doubling_ratio: float
+    ) -> str:
         """Provide human-readable interpretation of complexity analysis."""
         interpretation = f"Best fit: {complexity} (R² = {r_squared:.3f})\n"
         
@@ -1946,7 +1958,7 @@ Professional development requires thorough testing. Let's create a comprehensive
 
 python
 
-```python
+```{.python .program-code chapter=1}
 # File: tests/conftest.py
 """Shared test configuration and fixtures."""
 import pytest
@@ -1988,7 +2000,7 @@ Let's implement your first algorithms using the framework we've built:
 
 python
 
-```python
+```{.python .program-code chapter=1}
 # File: src/sorting/basic_sorts.py
 """
 Basic sorting algorithms implementation with comprehensive documentation.
@@ -2200,7 +2212,7 @@ Now let's create a complete example that demonstrates everything we've built:
 
 python
 
-```python
+```{.python .program-code chapter=1}
 # File: examples/week01_complete_demo.py
 """
 Complete Week 1 demonstration: From theory to practice.
@@ -2359,7 +2371,10 @@ def demonstrate_best_vs_worst_case():
     print(f"  Average/Best ratio:  {avg_time/best_time:.1f}x")
     print(f"  Worst/Average ratio: {worst_time/avg_time:.1f}x")
     
-    print(f"\n💡 Insight: Insertion sort is {worst_time/best_time:.0f}x slower on reverse-sorted data!")
+    print(
+        f"\nInsight: Insertion sort is {worst_time/best_time:.0f}x slower "
+        "on reverse-sorted data!"
+    )
 
 def main():
     """Run the complete Week 1 demonstration."""
@@ -2382,7 +2397,7 @@ Edit
 
 python
 
-```python
+```{.python .program-code chapter=1}
     print("• Empirical complexity validation")
     print("=" * 60)
     
@@ -2570,7 +2585,7 @@ Analyze the time complexity of these code fragments. For recursive functions, wr
 
 python
 
-```python
+```{.python .program-code chapter=1}
 # Fragment A
 def mystery_a(n):
     total = 0
@@ -2678,7 +2693,7 @@ Extend one of the basic sorting algorithms (bubble, selection, or insertion sort
 
 python
 
-```python
+```{.python .program-code chapter=1}
 def enhanced_sort(arr, compare_func=None, reverse=False):
     """
     Sort with custom comparison function.
@@ -2698,7 +2713,7 @@ def enhanced_sort(arr, compare_func=None, reverse=False):
 
 python
 
-```python
+```{.python .program-code chapter=1}
 def sort_students(students, criteria):
     """
     Sort list of student dictionaries by multiple criteria.
@@ -2716,7 +2731,7 @@ def sort_students(students, criteria):
 
 python
 
-```python
+```{.python .program-code chapter=1}
 def verify_stability(sort_func, test_data):
     """
     Test if a sorting function is stable.
@@ -2735,7 +2750,7 @@ Implement a smart sorting function that automatically chooses the best algorithm
 
 python
 
-```python
+```{.python .program-code chapter=1}
 def smart_sort(arr, analysis_level='basic'):
     """
     Automatically choose and apply the best sorting algorithm.
@@ -2895,7 +2910,7 @@ Write a thoughtful response (300-500 words) with specific examples.
 
 **File Organization:**
 
-```
+```{.text-diagram chapter=1}
 chapter1_solutions/
 ├── README.md                    # Overview and setup instructions
 ├── theoretical/

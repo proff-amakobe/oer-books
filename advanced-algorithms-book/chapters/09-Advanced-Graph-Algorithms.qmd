@@ -159,7 +159,7 @@ Why does this work? If a vertex is still reachable in the residual network, ther
 
 Ford–Fulkerson has a compact central idea:
 
-```
+```{.algorithm chapter=9}
 Start with zero flow everywhere
 
 While you can find ANY path from source to sink in the residual network:
@@ -235,7 +235,7 @@ This might seem like a small tweak, but it's huge. By always taking the shortest
 
 Here's a complete, production-ready implementation:
 
-```python
+```{.python .program-code chapter=9}
 from collections import deque, defaultdict
 
 class EdmondsKarp:
@@ -464,7 +464,7 @@ Think of height as elevation. Flow "falls downhill" from high vertices to low ve
 
 ### The Algorithm
 
-```
+```{.algorithm chapter=9}
 Push-Relabel(G, s, t):
     # Initialize
     for each vertex v:
@@ -486,7 +486,7 @@ Push-Relabel(G, s, t):
 ```
 
 **Push operation** (when h(u) = h(v) + 1 and excess at u):
-```
+```{.technical-other chapter=9}
 δ = min(e(u), c_f(u,v))  # amount to push
 f(u,v) += δ
 e(u) -= δ
@@ -494,7 +494,7 @@ e(v) += δ
 ```
 
 **Relabel operation** (when u has excess but can't push):
-```
+```{.inline-example chapter=9}
 h(u) = 1 + min{h(v) : (u,v) has residual capacity}
 ```
 
@@ -513,7 +513,7 @@ The algorithm terminates because:
 
 Here's a clean implementation:
 
-```python
+```{.python .program-code chapter=9}
 from collections import defaultdict, deque
 
 class PushRelabel:
@@ -709,7 +709,7 @@ The maximum flow equals the maximum matching!
 
 ### Implementation
 
-```python
+```{.python .program-code chapter=9}
 class BipartiteMatching:
     """
     Solve maximum bipartite matching using network flow.
@@ -829,7 +829,7 @@ Where N(S) is the set of neighbors of S.
 In plain English: every subset of k people on the left must have at least k possible matches on the right.
 
 **Example where Hall's condition fails**:
-```
+```{.inline-example chapter=9}
 L1 --→ R1
 L2 --→ R1
 L3 --→ R2
@@ -862,7 +862,7 @@ Each edge (u,v) now has:
 - Cost per unit a(u,v)
 
 Goal: send d units from s to t minimizing:
-```
+```{.inline-example chapter=9}
 total cost = Σ a(u,v) × f(u,v)
 ```
 
@@ -870,7 +870,7 @@ total cost = Σ a(u,v) × f(u,v)
 
 Basic idea: send flow along cheapest paths one unit at a time.
 
-```
+```{.algorithm chapter=9}
 Algorithm: Min-Cost Max-Flow
     Initialize flow to zero
     
@@ -890,7 +890,7 @@ For the residual network:
 
 ### Implementation
 
-```python
+```{.python .program-code chapter=9}
 import heapq
 from collections import defaultdict
 
@@ -1046,7 +1046,7 @@ if __name__ == "__main__":
 
 Alternative approach: start with any feasible flow, then repeatedly find and cancel negative-cost cycles.
 
-```
+```{.algorithm chapter=9}
 1. Find any feasible flow (e.g., using max flow)
 2. While there exists a negative-cost cycle in residual network:
        Push flow around the cycle
@@ -1139,7 +1139,7 @@ Let's build a comprehensive tool that handles all flow problems!
 
 ### Architecture
 
-```
+```{.text-diagram chapter=9}
 FlowNetworkSolver/
 ├── core/
 │   ├── network.py          # Network representation
@@ -1161,7 +1161,7 @@ FlowNetworkSolver/
 
 ### Core Network Class
 
-```python
+```{.python .program-code chapter=9}
 # core/network.py
 from collections import defaultdict
 import json
@@ -1284,7 +1284,8 @@ class FlowNetwork:
     
     def __str__(self):
         """String representation."""
-        lines = [f"Flow Network ({self.n} vertices, {sum(len(v) for v in self.adj.values()) // 2} edges)"]
+        edge_count = sum(len(v) for v in self.adj.values()) // 2
+        lines = [f"Flow Network ({self.n} vertices, {edge_count} edges)"]
         for u in range(self.n):
             label_u = self.vertex_labels.get(u, u)
             for v in self.adj[u]:
@@ -1299,7 +1300,7 @@ class FlowNetwork:
 
 ### Algorithm Interface
 
-```python
+```{.python .program-code chapter=9}
 # core/algorithm.py
 from abc import ABC, abstractmethod
 
@@ -1331,7 +1332,7 @@ class FlowAlgorithm(ABC):
 
 ### Application: Matching Solver
 
-```python
+```{.python .program-code chapter=9}
 # applications/matching.py
 from core.network import FlowNetwork
 from core.edmonds_karp import EdmondsKarp
@@ -1452,7 +1453,7 @@ if __name__ == "__main__":
 
 ### Visualization Module
 
-```python
+```{.python .program-code chapter=9}
 # visualization/plot_network.py
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -1568,7 +1569,7 @@ def animate_algorithm(algorithm, source, sink, output_prefix="frame"):
 
 ### Command-Line Interface
 
-```python
+```{.python .program-code chapter=9}
 # main.py
 import argparse
 from core.network import FlowNetwork
@@ -1657,7 +1658,7 @@ if __name__ == '__main__':
 
 ### Testing Suite
 
-```python
+```{.python .program-code chapter=9}
 # tests/test_algorithms.py
 import unittest
 from core.network import FlowNetwork
@@ -1780,7 +1781,7 @@ Often, the answer is yes, and suddenly you have 60 years of algorithmic research
 ### Warm-Up Problems
 
 1. **Manual Trace**: Find maximum flow by hand:
-   ```
+   ```{.text-diagram chapter=9}
    s --[8]--> a --[6]--> t
    |          |          ^
    [10]      [4]        [5]

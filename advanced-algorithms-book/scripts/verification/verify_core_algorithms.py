@@ -8,6 +8,7 @@ import contextlib
 import io
 import math
 import random
+import re
 from pathlib import Path
 
 
@@ -20,7 +21,7 @@ def load_block(chapter: str, symbol: str) -> dict:
     in_python = False
     body: list[str] = []
     for line in lines + ["```"]:
-        if not in_python and line.startswith("```python"):
+        if not in_python and re.match(r"^```(?:python|\{[^}]*\.python(?:\s|\}))", line):
             in_python = True
             body = []
         elif in_python and line.startswith("```"):

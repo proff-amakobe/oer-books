@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CHAPTERS = sorted((ROOT / "chapters").glob("*.qmd"))
 OUTPUT = ROOT / "editorial" / "code-verification-results.csv"
-FENCE = re.compile(r"^```\s*\{?([A-Za-z0-9_+.-]*)")
+FENCE = re.compile(r"^\s{0,3}(`{3,})\s*(?:\{\s*\.?([A-Za-z0-9_+.-]*)|([A-Za-z0-9_+.-]*))")
 CHAPTER = re.compile(r"/(\d{2})-")
 SAFE_IMPORTS = {
     "bisect", "collections", "dataclasses", "functools", "heapq", "itertools",
@@ -55,11 +55,12 @@ def blocks() -> list[Block]:
             if not fence:
                 i += 1
                 continue
-            language = fence.group(1).lower()
+            fence_width = len(fence.group(1))
+            language = (fence.group(2) or fence.group(3) or "").lower()
             start = i + 1
             i += 1
             body: list[str] = []
-            while i < len(lines) and not lines[i].startswith("```"):
+            while i < len(lines) and not re.match(r"^\s{0,3}`{" + str(fence_width) + r",}\s*$", lines[i]):
                 body.append(lines[i])
                 i += 1
             found.append(Block(chapter, section, source, language, start, "\n".join(body) + "\n"))

@@ -39,7 +39,7 @@ You have:
 **Goal**: Find all positions in T where P occurs.
 
 **Example**:
-```
+```{.technical-other chapter=10}
 Text:    "ABABCABABA"
 Pattern: "ABA"
 
@@ -53,7 +53,7 @@ Answer: Positions 0, 5, 7
 
 The obvious solution: try every position!
 
-```python
+```{.python .program-code chapter=10}
 def naive_search(text, pattern):
     """The obvious way to search. Works, but slow!"""
     n = len(text)
@@ -85,7 +85,7 @@ def naive_search(text, pattern):
 
 **When is this bad?**
 
-```python
+```{.python .program-code chapter=10}
 # Worst case: almost matches everywhere
 text = "AAAAAAAAAA"  # n = 10,000
 pattern = "AAAAB"     # m = 5
@@ -112,7 +112,7 @@ The **Knuth-Morris-Pratt (KMP)** algorithm uses preprocessing to avoid rescannin
 
 Let's see this in action:
 
-```
+```{.technical-other chapter=10}
 Text:    "ABABCABABA"
 Pattern: "ABABD"
 
@@ -143,7 +143,7 @@ For each position j in the pattern, the failure function tells us: *"If we misma
 
 Let's compute this for pattern "ABABD":
 
-```
+```{.technical-other chapter=10}
 Position:  0 1 2 3 4
 Pattern:   A B A B D
 Failure:   0 0 1 2 0
@@ -157,7 +157,7 @@ Position 4 ('ABABD'): No match. failure[4] = 0
 
 **Another example**: Pattern "AABAAB"
 
-```
+```{.technical-other chapter=10}
 Position:  0 1 2 3 4 5
 Pattern:   A A B A A B
 Failure:   0 1 0 1 2 3
@@ -174,7 +174,7 @@ Position 5 ('AABAAB'): 'AAB' matches. failure[5] = 3
 
 Here's where KMP gets really clever: we use KMP to build the failure function!
 
-```python
+```{.python .program-code chapter=10}
 def compute_failure_function(pattern):
     """
     Compute the failure function (LPS array) for KMP.
@@ -211,7 +211,7 @@ def compute_failure_function(pattern):
 
 **Let's trace this for pattern "AABAAB"**:
 
-```
+```{.technical-other chapter=10}
 Initial: failure = [0, 0, 0, 0, 0, 0], length = 0, i = 1
 
 i=1: pattern[1]='A' == pattern[0]='A'
@@ -242,7 +242,7 @@ i=5: pattern[5]='B' == pattern[2]='B'
 
 Now that we have the failure function, searching is straightforward:
 
-```python
+```{.python .program-code chapter=10}
 def kmp_search(text, pattern):
     """
     Find all occurrences of pattern in text using KMP algorithm.
@@ -290,7 +290,7 @@ def kmp_search(text, pattern):
 
 Let's trace through a complete example:
 
-```
+```{.technical-other chapter=10}
 Text:    "ABABDABACDABABCABABA"
 Pattern: "ABABCABABA"
 
@@ -342,7 +342,7 @@ Found at position 10!
 
 ### Full Implementation with Examples
 
-```python
+```{.python .program-code chapter=10}
 class KMPMatcher:
     """
     Knuth-Morris-Pratt string matching algorithm.
@@ -546,7 +546,7 @@ The magic is in the **rolling hash**: we can compute the hash of the next substr
 
 Think of the string as a number in base d (where d = alphabet size):
 
-```
+```{.algorithm chapter=10}
 For string "ABC" with A=1, B=2, C=3, base d=10:
 hash("ABC") = 1×10² + 2×10¹ + 3×10⁰ = 123
 
@@ -555,7 +555,7 @@ hash("BCD") = 2×10² + 3×10¹ + 4×10⁰ = 234
 ```
 
 **Rolling property**:
-```
+```{.technical-other chapter=10}
 If we know hash("ABC") = 123, we can compute hash("BCD"):
 
 1. Subtract contribution of 'A': 123 - 1×10² = 23
@@ -564,7 +564,7 @@ If we know hash("ABC") = 123, we can compute hash("BCD"):
 ```
 
 In one formula:
-```
+```{.inline-example chapter=10}
 hash(s[1..m]) = (hash(s[0..m-1]) - s[0]×d^(m-1)) × d + s[m]
 ```
 
@@ -572,7 +572,7 @@ hash(s[1..m]) = (hash(s[0..m-1]) - s[0]×d^(m-1)) × d + s[m]
 
 For long strings, hashes become huge numbers. Solution: **modular arithmetic**!
 
-```
+```{.inline-example chapter=10}
 hash(s) = (Σ s[i] × d^(m-1-i)) mod q
 ```
 
@@ -582,7 +582,7 @@ Where q is a large prime number (e.g., 10^9 + 7).
 
 ### Implementation
 
-```python
+```{.python .program-code chapter=10}
 class RabinKarp:
     """
     Rabin-Karp string matching using rolling hash.
@@ -842,7 +842,7 @@ if __name__ == "__main__":
 
 A **suffix** of a string is any substring that starts at some position and goes to the end.
 
-```
+```{.technical-other chapter=10}
 String: "banana"
 
 Suffixes:
@@ -872,7 +872,7 @@ Once you have a suffix array, you can:
 
 The simplest approach: generate all suffixes, sort them.
 
-```python
+```{.python .program-code chapter=10}
 def build_suffix_array_naive(text):
     """
     Build suffix array by sorting all suffixes.
@@ -900,7 +900,7 @@ Modern algorithms build suffix arrays in O(n log n) or even O(n) time! The key: 
 
 **DC3/Skew Algorithm** (simplified version):
 
-```python
+```{.python .program-code chapter=10}
 class SuffixArray:
     """
     Efficient suffix array construction and queries.
@@ -1148,7 +1148,7 @@ if __name__ == "__main__":
 ### Applications of Suffix Arrays
 
 **Text compression** (BWT - Burrows-Wheeler Transform):
-```python
+```{.python .program-code chapter=10}
 def bwt_encode(text):
     """Burrows-Wheeler Transform using suffix array."""
     sa = SuffixArray(text + '$')
@@ -1157,7 +1157,7 @@ def bwt_encode(text):
 ```
 
 **Longest common substring of two strings**:
-```python
+```{.python .program-code chapter=10}
 def longest_common_substring(s1, s2):
     """Find longest substring common to both s1 and s2."""
     combined = s1 + '#' + s2 + '$'
@@ -1193,7 +1193,7 @@ A **suffix tree** is like a suffix array, but in tree form. It's a compressed tr
 
 **Example for "banana$"**:
 
-```
+```{.terminal chapter=10}
                     root
                /     |      \
             $      a        na
@@ -1230,7 +1230,7 @@ A **suffix tree** is like a suffix array, but in tree form. It's a compressed tr
 DNA is just a string over the alphabet {A, C, G, T}. String algorithms are perfect for:
 
 **Finding genes**:
-```python
+```{.python .program-code chapter=10}
 def find_gene_markers(genome, start_codon="ATG", stop_codons=["TAA", "TAG", "TGA"]):
     """Find potential genes (regions between start and stop codons)."""
     sa = SuffixArray(genome)
@@ -1255,7 +1255,7 @@ def find_gene_markers(genome, start_codon="ATG", stop_codons=["TAA", "TAG", "TGA
 ```
 
 **Detecting mutations**:
-```python
+```{.python .program-code chapter=10}
 def find_mutations(reference, sample, min_length=10):
     """Find differences between reference and sample genomes."""
     # Build suffix array for combined sequence
@@ -1270,7 +1270,7 @@ def find_mutations(reference, sample, min_length=10):
 
 When sequencing DNA, you get millions of short "reads" (fragments). You need to align them to a reference genome.
 
-```python
+```{.python .program-code chapter=10}
 class ReadAligner:
     """Align short DNA reads to a reference genome."""
     
@@ -1307,7 +1307,7 @@ class ReadAligner:
 
 Tandem repeats are patterns that repeat consecutively in DNA (like "CAGCAGCAG").
 
-```python
+```{.python .program-code chapter=10}
 def find_tandem_repeats(genome, min_period=2, min_copies=3):
     """Find tandem repeats in genome."""
     repeats = []
@@ -1345,7 +1345,7 @@ Let's build a comprehensive, production-ready string algorithm library!
 
 ### Project Structure
 
-```
+```{.text-diagram chapter=10}
 StringAlgorithms/
 ├── stringalgo/
 │   ├── __init__.py
@@ -1387,7 +1387,7 @@ StringAlgorithms/
 
 ### Core Library Implementation
 
-```python
+```{.python .program-code chapter=10}
 # stringalgo/__init__.py
 """
 StringAlgo: A comprehensive string algorithm library.
@@ -1414,7 +1414,7 @@ __all__ = [
 ]
 ```
 
-```python
+```{.python .program-code chapter=10}
 # stringalgo/applications/genomics.py
 """
 DNA and protein sequence analysis tools.
@@ -1643,7 +1643,8 @@ def example_dna_analysis():
     # Sample DNA sequence (part of human beta-globin gene)
     dna = """
     ATGGTGCACCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG
-    TTGGTATCAAGGTTACAAGACAGGTTTAAGGAGACCAATAGAAACTGGGCATGTGGAGACAGAGAAGACTCTTGGGTTTCTGATAGGCACTGACTCTCTCTGCCTATTGGTCTATTTTCCCACCCTTAGG
+    TTGGTATCAAGGTTACAAGACAGGTTTAAGGAGACCAATAGAAACTGGGCATGTGGAGAC
+    AGAGAAGACTCTTGGGTTTCTGATAGGCACTGACTCTCTCTGCCTATTGGTCTATTTTCCCACCCTTAGG
     """
     dna = ''.join(dna.split())  # Remove whitespace
     
@@ -1682,7 +1683,7 @@ if __name__ == "__main__":
 
 ### Text Compression Application
 
-```python
+```{.python .program-code chapter=10}
 # stringalgo/applications/compression.py
 """
 Text compression using string algorithms.
@@ -1850,7 +1851,7 @@ if __name__ == "__main__":
 
 ### Command-Line Tool
 
-```python
+```{.python .program-code chapter=10}
 # stringalgo/cli.py
 """
 Command-line interface for StringAlgo library.

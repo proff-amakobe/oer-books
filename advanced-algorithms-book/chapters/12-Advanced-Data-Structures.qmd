@@ -71,7 +71,7 @@ A **segment tree** is a binary tree where:
 
 ### Building a Segment Tree
 
-```python
+```{.python .program-code chapter=12}
 class SegmentTree:
     """
     Segment Tree for range queries and point updates.
@@ -215,7 +215,7 @@ class SegmentTree:
 
 Let's build a segment tree for array [1, 3, 5, 7, 9, 11] and query sum from index 1 to 4:
 
-```python
+```{.python .program-code chapter=12}
 def example_segment_tree_trace():
     """Trace segment tree operations step by step."""
     print("=== Segment Tree Example ===\n")
@@ -268,7 +268,7 @@ Naive approach: Update each element individually → O(n log n)
 
 **Key idea**: Mark nodes as "lazy" and propagate updates only when needed.
 
-```python
+```{.python .program-code chapter=12}
 class LazySegmentTree:
     """
     Segment tree with lazy propagation for range updates.
@@ -430,7 +430,7 @@ if __name__ == "__main__":
 4. **Graphics** (collision detection)
 
 **Variants**:
-```python
+```{.python .program-code chapter=12}
 class SegmentTreeVariants:
     """Various segment tree applications."""
     
@@ -517,7 +517,7 @@ The key insight: represent cumulative sums using binary representation of indice
 
 **Example**: Array of size 8 (indices 1-8 in 1-indexed)
 
-```
+```{.technical-other chapter=12}
 Index (binary):  001  010  011  100  101  110  111  1000
 BIT stores:      [1]  [1-2] [3] [1-4] [5] [5-6] [7] [1-8]
 
@@ -548,7 +548,7 @@ To compute prefix sum up to index i:
 
 ### Implementation
 
-```python
+```{.python .program-code chapter=12}
 class FenwickTree:
     """
     Fenwick Tree (Binary Indexed Tree).
@@ -717,7 +717,7 @@ if __name__ == "__main__":
 
 The core operations use a beautiful bit trick:
 
-```python
+```{.python .program-code chapter=12}
 def explain_bit_tricks():
     """Explain the bit manipulation tricks in Fenwick trees."""
     print("=== Fenwick Tree Bit Tricks ===\n")
@@ -774,7 +774,7 @@ if __name__ == "__main__":
 
 Fenwick trees extend beautifully to 2D!
 
-```python
+```{.python .program-code chapter=12}
 class FenwickTree2D:
     """
     2D Fenwick Tree for rectangle sum queries.
@@ -886,7 +886,7 @@ if __name__ == "__main__":
 
 ### Fenwick Tree vs Segment Tree
 
-```python
+```{.python .program-code chapter=12}
 def compare_fenwick_vs_segment():
     """Compare Fenwick tree and Segment tree."""
     import time
@@ -983,7 +983,7 @@ Imagine you're building a text editor with unlimited undo/redo. How do you store
 
 ### Persistent Array
 
-```python
+```{.python .program-code chapter=12}
 class PersistentArray:
     """
     Persistent array using path copying.
@@ -1150,7 +1150,7 @@ if __name__ == "__main__":
 
 ### Persistent Segment Tree
 
-```python
+```{.python .program-code chapter=12}
 class PersistentSegmentTree:
     """
     Persistent segment tree for range queries with history.
@@ -1311,7 +1311,7 @@ if __name__ == "__main__":
 
 ### Applications of Persistence
 
-```python
+```{.python .program-code chapter=12}
 class ApplicationExamples:
     """Real-world applications of persistent data structures."""
     
@@ -1416,7 +1416,7 @@ You have a billion-element bit vector (125 MB). You need to support:
 
 ### Succinct Bit Vector
 
-```python
+```{.python .program-code chapter=12}
 class SuccinctBitVector:
     """
     Succinct bit vector with rank/select support.
@@ -1498,7 +1498,11 @@ class SuccinctBitVector:
         
         # Find superblock
         superblock_idx = i // self.superblock_size
-        superblock_rank = self.superblock_ranks[superblock_idx] if superblock_idx < len(self.superblock_ranks) else 0
+        superblock_rank = (
+            self.superblock_ranks[superblock_idx]
+            if superblock_idx < len(self.superblock_ranks)
+            else 0
+        )
         
         # Find block within superblock
         block_idx = i // self.block_size
@@ -1590,7 +1594,7 @@ A **wavelet tree** is a succinct structure for storing sequences that supports:
 
 All in O(log σ) time, where σ = alphabet size!
 
-```python
+```{.python .program-code chapter=12}
 class WaveletTree:
     """
     Wavelet tree for sequence queries.
@@ -1708,7 +1712,8 @@ def example_wavelet_tree():
     for i in [0, 3, 7]:
         result = wt.access(i)
         expected = sequence[i]
-        print(f"  access({i}) = {result} (expected {expected}) {'✓' if result == expected else '✗'}")
+        status = "PASS" if result == expected else "FAIL"
+        print(f"  access({i}) = {result} (expected {expected}) {status}")
     
     # Test rank
     print("\nRank operations:")
@@ -1716,7 +1721,8 @@ def example_wavelet_tree():
         for i in [4, 7, 9]:
             result = wt.rank(char, i)
             expected = sequence[:i+1].count(char)
-            print(f"  rank({char}, {i}) = {result} (expected {expected}) {'✓' if result == expected else '✗'}")
+            status = "PASS" if result == expected else "FAIL"
+            print(f"  rank({char}, {i}) = {result} (expected {expected}) {status}")
 
 if __name__ == "__main__":
     example_wavelet_tree()
@@ -1724,7 +1730,7 @@ if __name__ == "__main__":
 
 ### Applications of Succinct Structures
 
-```python
+```{.python .program-code chapter=12}
 class SuccinctApplications:
     """Real-world applications of succinct data structures."""
     
@@ -1845,7 +1851,7 @@ Modern CPUs have multiple cache levels (L1, L2, L3). Accessing L1 is ~100x faste
 
 ### Cache-Oblivious Matrix Transpose
 
-```python
+```{.python .program-code chapter=12}
 import numpy as np
 
 class CacheObliviousAlgorithms:
@@ -2021,7 +2027,7 @@ if __name__ == "__main__":
 
 ### Van Emde Boas Layout
 
-```python
+```{.python .program-code chapter=12}
 class VanEmdeBoasLayout:
     """
     Van Emde Boas layout for cache-oblivious binary trees.
@@ -2099,7 +2105,7 @@ Let's build a comprehensive library!
 
 ### Project Structure
 
-```
+```{.text-diagram chapter=12}
 AdvancedDataStructures/
 ├── advds/
 │   ├── __init__.py
@@ -2128,7 +2134,7 @@ AdvancedDataStructures/
 
 ### Unified Interface
 
-```python
+```{.python .program-code chapter=12}
 # advds/__init__.py
 """
 Advanced Data Structures Library
@@ -2176,7 +2182,7 @@ __all__ = [
 
 ### Range Query Solver Application
 
-```python
+```{.python .program-code chapter=12}
 # advds/applications/range_queries.py
 """
 Unified interface for range query problems.
@@ -2309,7 +2315,7 @@ if __name__ == "__main__":
 
 ### Comprehensive Benchmarking Suite
 
-```python
+```{.python .program-code chapter=12}
 # advds/benchmarks/performance.py
 """
 Comprehensive benchmarking of all data structures.
