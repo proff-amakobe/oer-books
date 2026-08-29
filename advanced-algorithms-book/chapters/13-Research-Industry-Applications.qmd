@@ -56,19 +56,42 @@ Spielman and Teng proved: under smoothed analysis, simplex runs in polynomial ti
 **Impact**: This earned Spielman the Nevanlinna Prize (essentially the Nobel of computer science). It explained why many algorithms work far better than their worst-case suggests.
 
 ```python
-import numpy as np
-import time
+import random
 
 def demonstrate_smoothed_analysis():
     """
-    Demonstrate smoothed analysis with quicksort.
+    Illustrate input perturbation with an explicit deterministic quicksort.
     
     Worst-case input: sorted array → O(n²)
-    But add tiny noise → back to O(n log n)!
+    Perturbation often reduces the comparison count substantially.
+
+    This experiment is an illustration, not a proof of a smoothed bound.
     """
     print("=== Smoothed Analysis: Quicksort ===\n")
     
-    n = 10000
+    def quicksort_comparisons(values):
+        """Sort a copy using last-element pivots and count comparisons."""
+        values = values.copy()
+        comparisons = 0
+        stack = [(0, len(values) - 1)]
+
+        while stack:
+            low, high = stack.pop()
+            if low >= high:
+                continue
+            pivot = values[high]
+            boundary = low
+            for index in range(low, high):
+                comparisons += 1
+                if values[index] <= pivot:
+                    values[boundary], values[index] = values[index], values[boundary]
+                    boundary += 1
+            values[boundary], values[high] = values[high], values[boundary]
+            stack.extend(((low, boundary - 1), (boundary + 1, high)))
+
+        return values, comparisons
+
+    n = 2000
     
     # Worst-case input: sorted array
     sorted_array = list(range(n))
@@ -76,27 +99,23 @@ def demonstrate_smoothed_analysis():
     # Add tiny noise (smoothing)
     smoothed_array = sorted_array.copy()
     noise_level = 0.01  # Swap 1% of elements
-    num_swaps = int(n * noise_level)
+    num_swaps = max(1, int(n * noise_level))
+    rng = random.Random(2026)
     for _ in range(num_swaps):
-        i, j = np.random.randint(0, n, 2)
+        i, j = rng.randrange(n), rng.randrange(n)
         smoothed_array[i], smoothed_array[j] = smoothed_array[j], smoothed_array[i]
     
-    # Time worst-case (approximation with Python's sort)
-    start = time.time()
-    _ = sorted(sorted_array)
-    worst_time = time.time() - start
-    
-    # Time smoothed case
-    start = time.time()
-    _ = sorted(smoothed_array)
-    smoothed_time = time.time() - start
+    worst_result, worst_comparisons = quicksort_comparisons(sorted_array)
+    smoothed_result, smoothed_comparisons = quicksort_comparisons(smoothed_array)
+    assert worst_result == sorted(sorted_array)
+    assert smoothed_result == sorted(smoothed_array)
     
     print(f"Array size: {n:,}")
     print(f"Noise level: {noise_level*100}% element swaps")
-    print(f"\nWorst-case input (sorted): {worst_time*1000:.3f}ms")
-    print(f"Smoothed input (1% noise): {smoothed_time*1000:.3f}ms")
-    print(f"\nKey insight: Tiny perturbations destroy worst cases!")
-    print("This explains why many algorithms work better than theory predicts.")
+    print(f"\nSorted-input comparisons: {worst_comparisons:,}")
+    print(f"Perturbed-input comparisons: {smoothed_comparisons:,}")
+    print("\nKey insight: this pivot rule is highly sensitive to input order.")
+    print("A single experiment does not establish an asymptotic smoothed bound.")
 ```
 
 #### **Instance-Optimal Algorithms**
@@ -979,7 +998,8 @@ Query(item):
 
 **HyperLogLog** (Flajolet et al., 2007):
 ```
-Space: O(log log n) → Yes, double logarithm!
+Per-register space: O(log log n) bits for cardinality n
+Total register space: O(m log log n) bits for m registers
 
 Algorithm:
 1. Hash each item to binary string

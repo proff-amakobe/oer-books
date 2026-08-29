@@ -1,5 +1,9 @@
 # Citation and Reference Audit
 
+## Phase 2 update
+
+The original trust finding remains unchanged: `references.bib` contains one **INVALID — METADATA COLLISION** record and must not be treated as authoritative. Phase 2 created `citation-manifest.csv` with 230 unresolved claim-level candidates plus nine verified foundational source mappings, and `references-second-edition.staging.bib` with those nine independently checked records. No production bibliography replacement or full citation insertion has occurred.
+
 Status: **CRITICAL — bibliography is not publication-ready and must be treated as untrusted.** No records were changed or invented in this pass.
 
 ## Evidence
@@ -23,4 +27,3 @@ Minimum discrete citation-integrity issues: **22** (one suspicious record, one u
 3. Convert verified author-year mentions to citation keys only after checking primary sources.
 4. Source quotations, theorem attributions, historical claims, approximation ratios, deployment statistics, and date-sensitive claims.
 5. Run BibTeX parsing, duplicate-key, DOI-resolution, cited/uncited, and rendered-reference QA. Any unresolved item remains **REQUIRES VERIFICATION**.
-

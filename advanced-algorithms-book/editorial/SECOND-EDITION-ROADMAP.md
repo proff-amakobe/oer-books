@@ -1,5 +1,12 @@
 # Advanced Computational Algorithms — Second Edition Roadmap
 
+## Progress update — Phase 2 technical pass
+
+- Phase 1 structural foundation: **COMPLETE** (commit `15f62da`).
+- Phase 2 technical correctness and citation preparation: **COMPLETE WITH DOCUMENTED MANUAL-REVIEW ITEMS**. All 537 fenced blocks were classified, safe definition-only Python blocks were executed, representative core algorithms received behavioral edge-case tests, local evidence-backed defects were repaired, and claim/citation manifests plus a verified staging bibliography were created. Untested snippets, dependency-bound examples, informal proofs, and the Chapter 13 freshness rewrite are explicitly not reported as passing.
+
+The numbered roadmap below is retained as historical planning context; Phase 1 also absorbed its original metadata/frontmatter objective, and the current Phase 2 combined its technical and citation-preparation objectives without replacing the production bibliography.
+
 | Phase | Objective and scope | Risk / dependencies | Expected files changed | QA requirements |
 |---|---|---|---|---|
 | 1. Structural and numbering repair | Separate unnumbered front matter; give every chapter one semantic H1; remove manual Chapter/Section prefixes while preserving URL filenames | Critical; depends on URL map and cross-format test fixture | `_quarto.yml`, front matter, 15 chapter headings | HTML/TOC/bookmarks/EPUB nav show Chapters 1–15; URL regression |
@@ -24,4 +31,3 @@
 - **Low:** minor copy refinements, decorative flourishes, low-value project directory diagrams.
 
 No phase should change the public URL map without a redirect and regression plan. Publication metadata, ISBN, cover, and printer files remain locked until Phase 13.
-

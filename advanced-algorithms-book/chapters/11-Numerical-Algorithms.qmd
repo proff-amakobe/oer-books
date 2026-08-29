@@ -157,7 +157,8 @@ def fft_recursive(x):
     Recursive Fast Fourier Transform.
     
     Time: O(N log N)
-    Space: O(N log N) due to recursion
+    Peak auxiliary space: O(N) for this slicing implementation;
+    total allocation over the run is O(N log N)
     
     Args:
         x: Input array (length must be power of 2)
@@ -228,7 +229,7 @@ def fft_trace_example():
 
 ### Iterative FFT (Cooley-Tukey)
 
-The recursive version is elegant but uses O(N log N) space. The iterative version uses O(N) space and is faster in practice:
+The recursive slicing version is elegant but performs O(N log N) total allocation over the run; its peak auxiliary space is O(N). The iterative version also uses O(N) auxiliary space and usually has lower allocation overhead:
 
 ```python
 def fft_iterative(x):
@@ -853,6 +854,8 @@ def strassen_matmul(A, B):
     Faster than naive for large matrices, but overhead
     makes it slower for small matrices.
     """
+    original_rows = len(A)
+    original_cols = len(B[0])
     n = len(A)
     
     # Base case: use naive for small matrices
@@ -893,7 +896,7 @@ def strassen_matmul(A, B):
         np.hstack([C21, C22])
     ])
     
-    return C[:len(A), :len(B[0])]
+    return C[:original_rows, :original_cols]
 ```
 
 **In practice**: Strassen's algorithm is rarely used because:
