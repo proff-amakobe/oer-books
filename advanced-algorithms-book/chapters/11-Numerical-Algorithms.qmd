@@ -1,4 +1,4 @@
-# Chapter 11: Matrix & Numerical Algorithms - When Math Meets Speed
+# Matrix & Numerical Algorithms - When Math Meets Speed
 
 **From MP3s to MRI Scans: The Algorithms That Process Reality**
 
@@ -6,7 +6,7 @@
 
 *"And yet, most programmers have no idea how it works, even though they use it every day."* - Every signal processing engineer ever
 
-## 11.1 Introduction: The Algorithm That Changed Everything
+## Introduction: The Algorithm That Changed Everything
 
 Here's a mind-blowing fact: Every time you listen to music on Spotify, watch a YouTube video, make a phone call, or take a digital photo, the Fast Fourier Transform is working behind the scenes. It's compressing your audio files, cleaning up your voice on calls, filtering your photos, and analyzing medical images.
 
@@ -33,9 +33,9 @@ These aren't just academic concerns. Ask any quant trader whose model lost milli
 
 Ready to dive into the beautiful world where algorithms meet calculus? Let's start with the most influential algorithm of the 20th century: the Fast Fourier Transform.
 
-## 11.2 The Fourier Transform: Seeing Through Time
+## The Fourier Transform: Seeing Through Time
 
-### 11.2.1 The Big Idea
+### The Big Idea
 
 Imagine you're listening to a song. You hear it as sound over time—drums, guitar, vocals flowing together. But a sound engineer hears something different: they hear **frequencies**. They know the bass is vibrating at 100 Hz, the vocals are around 1000 Hz, and there's a guitar note at 440 Hz.
 
@@ -57,7 +57,7 @@ Once you're in the frequency domain, you can:
 - **Analyze**: Find the dominant frequencies
 - **Modify**: Auto-tune, equalizer effects, etc.
 
-### 11.2.2 The Mathematical Foundation
+### The Mathematical Foundation
 
 For a signal with N samples x₀, x₁, ..., x_{N-1}, the **Discrete Fourier Transform (DFT)** is:
 
@@ -75,7 +75,7 @@ In plain English: to find the amplitude at frequency k, we multiply each time sa
 
 **The complex exponential** e^(iθ) = cos(θ) + i*sin(θ) might look scary, but it's just a rotation in the complex plane. Think of it as asking "how much of frequency k is present in the signal?"
 
-### 11.2.3 The Naive DFT: O(N²)
+### The Naive DFT: O(N²)
 
 The straightforward implementation computes each X_k independently:
 
@@ -102,9 +102,9 @@ def dft_naive(x):
 
 Can we do better?
 
-## 11.3 The Fast Fourier Transform: A Divide-and-Conquer Miracle
+## The Fast Fourier Transform: A Divide-and-Conquer Miracle
 
-### 11.3.1 The Key Insight
+### The Key Insight
 
 The FFT (Cooley-Tukey algorithm, 1965) is based on a brilliant observation: **the DFT has symmetry we can exploit**.
 
@@ -130,7 +130,7 @@ Where:
 
 **This is huge!** We've reduced a size-N DFT to two size-N/2 DFTs!
 
-### 11.3.2 The Recursive Algorithm
+### The Recursive Algorithm
 
 Keep dividing until you reach size 1 (base case: DFT of one element is itself).
 
@@ -147,7 +147,7 @@ T(N) = 2T(N/2) + O(N)  (two recursive calls + combining)
 
 This is why FFT changed everything. What took hours now takes milliseconds.
 
-### 11.3.3 Implementation: Recursive FFT
+### Implementation: Recursive FFT
 
 ```python
 import numpy as np
@@ -226,7 +226,7 @@ def fft_trace_example():
     print(f"Match: {np.allclose(result, numpy_result)}")
 ```
 
-### 11.3.4 Iterative FFT (Cooley-Tukey)
+### Iterative FFT (Cooley-Tukey)
 
 The recursive version is elegant but uses O(N log N) space. The iterative version uses O(N) space and is faster in practice:
 
@@ -296,7 +296,7 @@ Result:   0 4 2 6 1 5 3 7
 
 This reordering allows us to process the FFT in-place, bottom-up, instead of top-down recursively.
 
-### 11.3.5 Complete FFT Implementation
+### Complete FFT Implementation
 
 ```python
 class FFT:
@@ -541,9 +541,9 @@ if __name__ == "__main__":
     benchmark_fft()
 ```
 
-## 11.4 Polynomial Multiplication: FFT's Secret Superpower
+## Polynomial Multiplication: FFT's Secret Superpower
 
-### 11.4.1 The Problem
+### The Problem
 
 You have two polynomials:
 ```
@@ -582,7 +582,7 @@ C(x) = A(x) × B(x)
      = [4, 13, 28, 27, 18]
 ```
 
-### 11.4.2 The FFT Trick
+### The FFT Trick
 
 Here's the key insight: **polynomial multiplication in coefficient form is convolution, and convolution in time domain is multiplication in frequency domain!**
 
@@ -608,7 +608,7 @@ FFT(A × B) = FFT(A) * FFT(B)  (pointwise multiplication)
 
 For large polynomials, this is HUGE!
 
-### 11.4.3 Implementation
+### Implementation
 
 ```python
 def multiply_polynomials_fft(A, B):
@@ -707,7 +707,7 @@ if __name__ == "__main__":
     benchmark_polynomial_multiplication()
 ```
 
-### 11.4.4 Application: Big Integer Multiplication
+### Application: Big Integer Multiplication
 
 You can use FFT to multiply huge integers in O(n log n) time!
 
@@ -766,9 +766,9 @@ if __name__ == "__main__":
     example_big_integer_multiplication()
 ```
 
-## 11.5 Matrix Operations: The Foundation of Modern Computing
+## Matrix Operations: The Foundation of Modern Computing
 
-### 11.5.1 Why Matrices Matter
+### Why Matrices Matter
 
 Matrices are EVERYWHERE in modern computing:
 - **Machine learning**: Neural networks are just matrix multiplications
@@ -784,7 +784,7 @@ The speed of matrix operations directly determines:
 - How quickly simulations run
 - Whether real-time applications are possible
 
-### 11.5.2 Matrix Multiplication: The Naive Way
+### Matrix Multiplication: The Naive Way
 
 **Given**: A (m×n) and B (n×p)  
 **Compute**: C = AB (m×p)
@@ -815,7 +815,7 @@ For square matrices (n×n), this is **O(n³)**.
 
 Yes! But it's complicated...
 
-### 11.5.3 Strassen's Algorithm: O(n^2.807)
+### Strassen's Algorithm: O(n^2.807)
 
 Volker Strassen (1969) discovered that you can multiply 2×2 matrices with only 7 multiplications instead of 8:
 
@@ -904,7 +904,7 @@ def strassen_matmul(A, B):
 
 Modern matrix libraries use **blocked algorithms** instead (see below).
 
-### 11.5.4 Cache-Efficient Matrix Multiplication
+### Cache-Efficient Matrix Multiplication
 
 The real bottleneck in matrix multiplication isn't the number of operations—it's **memory access**!
 
@@ -951,7 +951,7 @@ When blocks fit in cache, we get many more cache hits. For a 1000×1000 matrix:
 - Blocked: ~15 million cache misses
 - **Speedup: 5-10x just from better cache usage!**
 
-### 11.5.5 Matrix Operations Library
+### Matrix Operations Library
 
 ```python
 class MatrixOps:
@@ -1178,9 +1178,9 @@ if __name__ == "__main__":
     benchmark_matrix_multiplication()
 ```
 
-## 11.6 Numerical Stability: When Math Meets Reality
+## Numerical Stability: When Math Meets Reality
 
-### 11.6.1 The Floating-Point Problem
+### The Floating-Point Problem
 
 Computers can't represent real numbers exactly. They use floating-point numbers with limited precision.
 
@@ -1212,7 +1212,7 @@ def demonstrate_floating_point_errors():
     print(f"Expected: 1.0, Got: {x}\n")
 ```
 
-### 11.6.2 Condition Numbers
+### Condition Numbers
 
 The **condition number** measures how sensitive a problem is to small changes in input.
 
@@ -1272,7 +1272,7 @@ def demonstrate_ill_conditioning():
     print("Small input change → HUGE output change!")
 ```
 
-### 11.6.3 Numerically Stable Algorithms
+### Numerically Stable Algorithms
 
 **Unstable algorithm**: Subtracting nearly equal numbers
 
@@ -1332,7 +1332,7 @@ def demonstrate_numerical_stability():
     print(f"Improvement: {error_unstable / error_stable:.0f}x better!")
 ```
 
-### 11.6.4 Best Practices for Numerical Computing
+### Best Practices for Numerical Computing
 
 ```python
 class NumericalBestPractices:
@@ -1443,9 +1443,9 @@ if __name__ == "__main__":
     example_numerical_best_practices()
 ```
 
-## 11.7 Applications in Signal Processing
+## Applications in Signal Processing
 
-### 11.7.1 Audio Processing
+### Audio Processing
 
 ```python
 class AudioProcessor:
@@ -1688,7 +1688,7 @@ if __name__ == "__main__":
     example_spectrogram()
 ```
 
-### 11.7.2 Image Processing with FFT
+### Image Processing with FFT
 
 ```python
 class ImageProcessor:
@@ -1833,11 +1833,11 @@ if __name__ == "__main__":
     example_image_processing()
 ```
 
-## 11.8 Chapter Project: Complete FFT Analysis Toolkit
+## Chapter Project: Complete FFT Analysis Toolkit
 
 Let's build a comprehensive signal processing library!
 
-### 11.8.1 Project Structure
+### Project Structure
 
 ```
 FFTAnalyzer/
@@ -1867,7 +1867,7 @@ FFTAnalyzer/
 └── setup.py
 ```
 
-### 11.8.2 Core FFT Module
+### Core FFT Module
 
 ```python
 # fft_analyzer/__init__.py
@@ -1904,7 +1904,7 @@ __all__ = [
 ]
 ```
 
-### 11.8.3 Signal Generator Module
+### Signal Generator Module
 
 ```python
 # fft_analyzer/signal/generators.py
@@ -2124,7 +2124,7 @@ if __name__ == "__main__":
     example_signal_generation()
 ```
 
-### 11.8.4 Complete Audio Processor Application
+### Complete Audio Processor Application
 
 ```python
 # fft_analyzer/applications/audio_processor.py
@@ -2359,7 +2359,7 @@ if __name__ == "__main__":
     interactive_audio_demo()
 ```
 
-### 11.8.5 Command-Line Interface
+### Command-Line Interface
 
 ```python
 # fft_analyzer/cli.py
@@ -2419,7 +2419,7 @@ if __name__ == '__main__':
     main()
 ```
 
-## 11.9 Summary and Key Takeaways
+## Summary and Key Takeaways
 
 **Core Algorithms**:
 1. **FFT**: O(n log n) frequency analysis, revolutionized signal processing
@@ -2445,7 +2445,7 @@ if __name__ == '__main__':
 - Profile before optimizing
 - Consider numerical stability from the start
 
-## 11.10 Exercises
+## Exercises
 
 ### Conceptual Understanding
 
@@ -2479,7 +2479,7 @@ if __name__ == '__main__':
 
 12. **Parallel FFT**: Implement parallel FFT using threading or GPU.
 
-## 11.11 Further Reading
+## Further Reading
 
 **Classic Papers**:
 - Cooley & Tukey (1965): "An Algorithm for the Machine Calculation of Complex Fourier Series"

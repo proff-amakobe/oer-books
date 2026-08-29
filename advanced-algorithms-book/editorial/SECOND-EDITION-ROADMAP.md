@@ -1,0 +1,27 @@
+# Advanced Computational Algorithms — Second Edition Roadmap
+
+| Phase | Objective and scope | Risk / dependencies | Expected files changed | QA requirements |
+|---|---|---|---|---|
+| 1. Structural and numbering repair | Separate unnumbered front matter; give every chapter one semantic H1; remove manual Chapter/Section prefixes while preserving URL filenames | Critical; depends on URL map and cross-format test fixture | `_quarto.yml`, front matter, 15 chapter headings | HTML/TOC/bookmarks/EPUB nav show Chapters 1–15; URL regression |
+| 2. Metadata/frontmatter normalization | Establish one metadata source; freeze publication date; canonicalize publisher presentation | Critical; publisher wording and date need author confirmation | `_quarto.yml`, title/edition/copyright/index/about files | Metadata snapshot in HTML/PDF/EPUB; no duplicated visible title blocks |
+| 3. Technical correctness and code verification | Verify algorithms, claims, complexities, and runnable examples in isolated harnesses | Critical; language/dependency ambiguity and 537 blocks | Chapters, `tests/examples/`, scripts | Unit/property tests, complexity review, failure log, Unicode/width lint |
+| 4. Reference and citation reconstruction | Replace untrusted bibliography with verified records and claim-level citations | Critical; primary-source verification required | `references.bib`, `references.qmd`, chapters | Bib parse, DOI/title/author validation, cited/uncited report, quotation audit |
+| 5. Content modernization | Date and source fast-moving Ch. 13 claims; decide modern algorithm gaps | High; follows technical/citation audit | Primarily Chs. 6, 12, 13–15 | 2026 fact check with dated primary sources; scope review |
+| 6. Pedagogical standardization | Apply standard chapter model and reconcile promised features | High; avoid formulaic repetition | All chapters, how-to-use, preface | Chapter matrix complete; objectives/exercises aligned |
+| 7. Instructional SVG figure system | Create design tokens and replace high-priority ASCII diagrams | High; depends on stable content and accessibility spec | `assets/figures/`, captions, chapter references | SVG validation, contrast/grayscale, alt text, print/mobile proof |
+| 8. Code/pseudocode/terminal system | Distinguish executable code, numbered algorithms, output, and terminal sessions | High; depends on verified code inventory | Chapters, SCSS/TeX/Lua filters | Highlighting, line length, page breaks, copy behavior, EPUB wrap |
+| 9. Print redesign | Implement verified trim, typography, running heads, parts, openers, tables | High; follows content stabilization | `_quarto-print.yml`, print styles/templates | PDF boxes, fonts, overflow scan, 300 ppi images, physical/Ingram proof |
+| 10. Web redesign | Modernize hierarchy and metadata without URL changes | Medium; depends on brand tokens | `_quarto.yml`, `styles/web.scss`, includes | URL crawl, mobile/keyboard/WCAG, search, SEO/schema, downloads |
+| 11. EPUB optimization | Repair navigation/language/metadata and optimize code/tables/equations/images | High; follows structure/style work | EPUB profile/styles/metadata | EPUBCheck, ACE/accessibility review, device tests, TOC 1–15 |
+| 12. Cover redesign | Produce “Geometry of Computation” family across print/web/EPUB | Medium; needs trim/page count/edition lock | `assets/cover/`, print cover package | Printer template, bleed/safe area, grayscale/thumbnail, proof approval |
+| 13. ISBN/Ingram/publication lock | Apply confirmed Second Edition identity and freeze release artifacts | Critical and irreversible; depends on all prior phases | Metadata, copyright, distribution package | ISBN/publisher/date sign-off, checksums, final preflight, tagged archive |
+
+## Priority matrix
+
+- **Critical:** numbering (HTML proves 9–23), technical correctness, citation integrity (one suspicious uncited record), metadata consistency, deterministic builds, effective print size.
+- **High:** code semantics and testing, instructional figure replacement, PDF/EPUB layout and accessibility, consistent chapter structure, Chapters 14–15 refocus.
+- **Medium:** tone calibration, web visual redesign/SEO, selected modern topics, author-bio variants.
+- **Low:** minor copy refinements, decorative flourishes, low-value project directory diagrams.
+
+No phase should change the public URL map without a redirect and regression plan. Publication metadata, ISBN, cover, and printer files remain locked until Phase 13.
+

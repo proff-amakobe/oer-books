@@ -1,4 +1,4 @@
-# Chapter 10: String Algorithms - Finding Needles in Haystacks at Light Speed
+# String Algorithms - Finding Needles in Haystacks at Light Speed
 
 **When Ctrl+F Meets Computer Science**
 
@@ -6,7 +6,7 @@
 
 *"And finding all occurrences of 'ACGT' in 3 billion base pairs of DNA in under a second."* - Modern bioinformatics
 
-## 10.1 Introduction: The Search for Patterns
+## Introduction: The Search for Patterns
 
 Here's something you probably do dozens of times a day without thinking: press Ctrl+F and search for text. Finding "pizza" in a restaurant menu. Searching your email for "flight confirmation." Looking for your name in a document.
 
@@ -28,9 +28,9 @@ In this chapter, we'll go from the naive O(nm) approach to algorithms that run i
 
 Ready to become a string algorithm wizard? Let's dive in!
 
-## 10.2 The Pattern Matching Problem
+## The Pattern Matching Problem
 
-### 10.2.1 The Setup
+### The Setup
 
 You have:
 - A **text** T of length n (the haystack)
@@ -49,7 +49,7 @@ Answer: Positions 0, 5, 7
                 ABA    (position 7)
 ```
 
-### 10.2.2 The Naive Approach
+### The Naive Approach
 
 The obvious solution: try every position!
 
@@ -92,15 +92,15 @@ pattern = "AAAAB"     # m = 5
 
 For short patterns and texts, naive search is fine. But we can do *much* better!
 
-### 10.2.3 The Key Insight
+### The Key Insight
 
 When a mismatch occurs, **we've learned something about the text**. Can we use this information to skip ahead smartly instead of just moving one position forward?
 
 That's the key idea behind both KMP and Boyer-Moore algorithms!
 
-## 10.3 The KMP Algorithm: Never Look Back
+## The KMP Algorithm: Never Look Back
 
-### 10.3.1 The Big Idea
+### The Big Idea
 
 The **Knuth-Morris-Pratt (KMP)** algorithm is based on a brilliant observation:
 
@@ -129,7 +129,7 @@ and end of what we matched. So we can skip ahead!
 
 The KMP algorithm never moves backward in the text. It only moves forward, using information about the pattern itself to make smart jumps.
 
-### 10.3.2 The Failure Function (Longest Proper Prefix-Suffix)
+### The Failure Function (Longest Proper Prefix-Suffix)
 
 The magic of KMP is in preprocessing the pattern to build a **failure function** (also called the LPS array: Longest Proper Prefix which is also Suffix).
 
@@ -166,7 +166,7 @@ Position 4 ('AABAA'): 'AA' matches. failure[4] = 2
 Position 5 ('AABAAB'): 'AAB' matches. failure[5] = 3
 ```
 
-### 10.3.3 Computing the Failure Function
+### Computing the Failure Function
 
 Here's where KMP gets really clever: we use KMP to build the failure function!
 
@@ -234,7 +234,7 @@ i=5: pattern[5]='B' == pattern[2]='B'
 
 **Time complexity**: O(m) - we process each character at most twice!
 
-### 10.3.4 The KMP Search Algorithm
+### The KMP Search Algorithm
 
 Now that we have the failure function, searching is straightforward:
 
@@ -282,7 +282,7 @@ def kmp_search(text, pattern):
     return positions
 ```
 
-### 10.3.5 Complete KMP Example Trace
+### Complete KMP Example Trace
 
 Let's trace through a complete example:
 
@@ -336,7 +336,7 @@ Found at position 10!
 - The pattern pointer j only moves forward or jumps back via the failure function
 - Total time: O(n + m)
 
-### 10.3.6 Full Implementation with Examples
+### Full Implementation with Examples
 
 ```python
 class KMPMatcher:
@@ -521,9 +521,9 @@ if __name__ == "__main__":
     benchmark_comparison()
 ```
 
-## 10.4 Rabin-Karp: Hashing to the Rescue
+## Rabin-Karp: Hashing to the Rescue
 
-### 10.4.1 The Hashing Idea
+### The Hashing Idea
 
 The **Rabin-Karp algorithm** takes a completely different approach: treat strings as numbers!
 
@@ -536,7 +536,7 @@ The **Rabin-Karp algorithm** takes a completely different approach: treat string
 
 If we can compute hashes efficiently, we can compare a pattern against a text position in O(1) time!
 
-### 10.4.2 Rolling Hash Function
+### Rolling Hash Function
 
 The magic is in the **rolling hash**: we can compute the hash of the next substring from the previous hash in O(1) time!
 
@@ -564,7 +564,7 @@ In one formula:
 hash(s[1..m]) = (hash(s[0..m-1]) - s[0]×d^(m-1)) × d + s[m]
 ```
 
-### 10.4.3 Dealing with Large Numbers
+### Dealing with Large Numbers
 
 For long strings, hashes become huge numbers. Solution: **modular arithmetic**!
 
@@ -576,7 +576,7 @@ Where q is a large prime number (e.g., 10^9 + 7).
 
 **Important caveat**: With modular hashing, collisions can occur (different strings with same hash). So we must verify matches!
 
-### 10.4.4 Implementation
+### Implementation
 
 ```python
 class RabinKarp:
@@ -813,7 +813,7 @@ if __name__ == "__main__":
     example_plagiarism_detection()
 ```
 
-### 10.4.5 When to Use Rabin-Karp
+### When to Use Rabin-Karp
 
 **Advantages**:
 - ✅ Great for multiple pattern matching
@@ -832,9 +832,9 @@ if __name__ == "__main__":
 - Finding duplicate files
 - 2D pattern matching in images
 
-## 10.5 Suffix Arrays: The Swiss Army Knife
+## Suffix Arrays: The Swiss Army Knife
 
-### 10.5.1 What's a Suffix?
+### What's a Suffix?
 
 A **suffix** of a string is any substring that starts at some position and goes to the end.
 
@@ -850,7 +850,7 @@ Suffixes:
 5: a
 ```
 
-### 10.5.2 The Suffix Array
+### The Suffix Array
 
 A **suffix array** is simply an array of integers representing the starting positions of all suffixes, sorted in lexicographical order.
 
@@ -877,7 +877,7 @@ Once you have a suffix array, you can:
 - Find longest common substring between two strings
 - Build compressed text indices
 
-### 10.5.3 Building a Suffix Array (Naive)
+### Building a Suffix Array (Naive)
 
 The simplest approach: generate all suffixes, sort them.
 
@@ -903,7 +903,7 @@ def build_suffix_array_naive(text):
 
 **Problem**: Comparing strings takes O(n) time, so sorting takes O(n² log n). Too slow for large texts!
 
-### 10.5.4 Building a Suffix Array Efficiently
+### Building a Suffix Array Efficiently
 
 Modern algorithms build suffix arrays in O(n log n) or even O(n) time! The key: don't compare full suffixes, use integer comparisons instead.
 
@@ -1154,7 +1154,7 @@ if __name__ == "__main__":
     example_dna_analysis()
 ```
 
-### 10.5.5 Applications of Suffix Arrays
+### Applications of Suffix Arrays
 
 **Text compression** (BWT - Burrows-Wheeler Transform):
 ```python
@@ -1188,9 +1188,9 @@ def longest_common_substring(s1, s2):
     return combined[max_pos:max_pos + max_lcp]
 ```
 
-## 10.6 Suffix Trees: Suffix Arrays on Steroids
+## Suffix Trees: Suffix Arrays on Steroids
 
-### 10.6.1 What's a Suffix Tree?
+### What's a Suffix Tree?
 
 A **suffix tree** is like a suffix array, but in tree form. It's a compressed trie of all suffixes.
 
@@ -1214,7 +1214,7 @@ A **suffix tree** is like a suffix array, but in tree form. It's a compressed tr
                       $
 ```
 
-### 10.6.2 When to Use Suffix Trees vs Arrays
+### When to Use Suffix Trees vs Arrays
 
 **Suffix Trees**:
 - ✅ Fastest queries: O(m) pattern matching
@@ -1232,9 +1232,9 @@ A **suffix tree** is like a suffix array, but in tree form. It's a compressed tr
 
 (For brevity, we'll focus on suffix arrays in our project, but know that suffix trees exist for when you need that extra speed!)
 
-## 10.7 Applications to Genomics
+## Applications to Genomics
 
-### 10.7.1 DNA Sequence Matching
+### DNA Sequence Matching
 
 DNA is just a string over the alphabet {A, C, G, T}. String algorithms are perfect for:
 
@@ -1275,7 +1275,7 @@ def find_mutations(reference, sample, min_length=10):
     return lcs
 ```
 
-### 10.7.2 Read Alignment
+### Read Alignment
 
 When sequencing DNA, you get millions of short "reads" (fragments). You need to align them to a reference genome.
 
@@ -1312,7 +1312,7 @@ class ReadAligner:
         return sorted(results, key=lambda x: x[1])[:10]  # Best 10 alignments
 ```
 
-### 10.7.3 Detecting Tandem Repeats
+### Detecting Tandem Repeats
 
 Tandem repeats are patterns that repeat consecutively in DNA (like "CAGCAGCAG").
 
@@ -1348,11 +1348,11 @@ def find_tandem_repeats(genome, min_period=2, min_copies=3):
     return repeats
 ```
 
-## 10.8 Chapter Project: Professional String Processing Library
+## Chapter Project: Professional String Processing Library
 
 Let's build a comprehensive, production-ready string algorithm library!
 
-### 10.8.1 Project Structure
+### Project Structure
 
 ```
 StringAlgorithms/
@@ -1394,7 +1394,7 @@ StringAlgorithms/
 └── README.md
 ```
 
-### 10.8.2 Core Library Implementation
+### Core Library Implementation
 
 ```python
 # stringalgo/__init__.py
@@ -1689,7 +1689,7 @@ if __name__ == "__main__":
     example_dna_analysis()
 ```
 
-### 10.8.3 Text Compression Application
+### Text Compression Application
 
 ```python
 # stringalgo/applications/compression.py
@@ -1857,7 +1857,7 @@ if __name__ == "__main__":
     example_compression()
 ```
 
-### 10.8.4 Command-Line Tool
+### Command-Line Tool
 
 ```python
 # stringalgo/cli.py
@@ -2004,7 +2004,7 @@ if __name__ == '__main__':
     sys.exit(main())
 ```
 
-## 10.9 Summary and Key Takeaways
+## Summary and Key Takeaways
 
 **Core Algorithms**:
 1. **Naive search**: O(nm) - simple but slow
@@ -2032,7 +2032,7 @@ String algorithms show us that sometimes the "obvious" solution (check every pos
 
 These aren't just academic exercises—they're the backbone of tools you use every day, from Google Search to genome sequencing to your text editor. String algorithms have literally helped sequence the human genome, catch criminals through DNA evidence, and make the internet searchable.
 
-## 10.10 Exercises
+## Exercises
 
 ### Basic Understanding
 
@@ -2080,7 +2080,7 @@ These aren't just academic exercises—they're the backbone of tools you use eve
 
 15. **Compressed Pattern Matching**: Search directly on BWT-compressed text without decompression.
 
-## 10.11 Further Reading
+## Further Reading
 
 **Classic Papers**:
 - Knuth, Morris, Pratt (1977): "Fast Pattern Matching in Strings"

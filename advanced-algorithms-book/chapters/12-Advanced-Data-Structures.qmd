@@ -1,4 +1,4 @@
-# Chapter 12: Advanced Data Structures - When Arrays and Trees Aren't Enough
+# Advanced Data Structures - When Arrays and Trees Aren't Enough
 
 **Answering "What's the sum from index 47 to 891?" in Microseconds**
 
@@ -6,7 +6,7 @@
 
 *"The difference between a great programmer and a wizard is knowing the ADVANCED data structures."* - Every competitive programmer ever
 
-## 12.1 Introduction: Beyond the Basics
+## Introduction: Beyond the Basics
 
 You know arrays, linked lists, hash tables, and binary search trees. These are the bread and butter of programming. But what happens when you need to:
 
@@ -35,9 +35,9 @@ In this chapter, we'll explore data structures that competitive programmers swea
 
 Let's dive into the wonderful world of advanced data structures!
 
-## 12.2 Segment Trees: Range Queries on Steroids
+## Segment Trees: Range Queries on Steroids
 
-### 12.2.1 The Problem
+### The Problem
 
 You have an array of n elements and need to:
 1. **Query**: Find the sum (or min, max, etc.) of elements from index L to R
@@ -53,7 +53,7 @@ OR
 
 **Can we do better?** Yes! O(log n) for both operations!
 
-### 12.2.2 The Segment Tree Idea
+### The Segment Tree Idea
 
 A **segment tree** is a binary tree where:
 - Each **leaf** represents a single element
@@ -81,7 +81,7 @@ Segment Tree (storing sums):
 - Or even better: [1:3] + [2:5] + [3:7] + [4:9]
 - Total: 3 + 5 + 7 + 9 = 24
 
-### 12.2.3 Building a Segment Tree
+### Building a Segment Tree
 
 ```python
 class SegmentTree:
@@ -223,7 +223,7 @@ class SegmentTree:
         return f"SegmentTree({self.arr})"
 ```
 
-### 12.2.4 Step-by-Step Example
+### Step-by-Step Example
 
 Let's build a segment tree for array [1, 3, 5, 7, 9, 11] and query sum from index 1 to 4:
 
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     example_segment_tree_trace()
 ```
 
-### 12.2.5 Lazy Propagation: Range Updates
+### Lazy Propagation: Range Updates
 
 What if we want to **update an entire range** [L, R] at once?
 
@@ -433,7 +433,7 @@ if __name__ == "__main__":
     example_lazy_propagation()
 ```
 
-### 12.2.6 Applications and Variants
+### Applications and Variants
 
 **Common applications**:
 1. **Range sum/min/max queries** with updates
@@ -509,9 +509,9 @@ if __name__ == "__main__":
     example_segment_tree_applications()
 ```
 
-## 12.3 Fenwick Trees: Elegant Simplicity
+## Fenwick Trees: Elegant Simplicity
 
-### 12.3.1 The Inspiration
+### The Inspiration
 
 Segment trees are powerful but... they're a bit heavy. 4n space, lots of pointer chasing, somewhat complex code.
 
@@ -523,7 +523,7 @@ Segment trees are powerful but... they're a bit heavy. 4n space, lots of pointer
 
 The catch? Less flexible than segment trees (mainly for cumulative operations like sum).
 
-### 12.3.2 The Brilliant Idea
+### The Brilliant Idea
 
 The key insight: represent cumulative sums using binary representation of indices!
 
@@ -558,7 +558,7 @@ To compute prefix sum up to index i:
 - Add BIT[100 = 4] (covers [1-4])
 - Done! Sum = BIT[7] + BIT[6] + BIT[4]
 
-### 12.3.3 Implementation
+### Implementation
 
 ```python
 class FenwickTree:
@@ -725,7 +725,7 @@ if __name__ == "__main__":
     visualize_fenwick_tree()
 ```
 
-### 12.3.4 The Magic of Bit Manipulation
+### The Magic of Bit Manipulation
 
 The core operations use a beautiful bit trick:
 
@@ -782,7 +782,7 @@ if __name__ == "__main__":
     explain_bit_tricks()
 ```
 
-### 12.3.5 2D Fenwick Tree
+### 2D Fenwick Tree
 
 Fenwick trees extend beautifully to 2D!
 
@@ -896,7 +896,7 @@ if __name__ == "__main__":
     example_2d_fenwick()
 ```
 
-### 12.3.6 Fenwick Tree vs Segment Tree
+### Fenwick Tree vs Segment Tree
 
 ```python
 def compare_fenwick_vs_segment():
@@ -981,9 +981,9 @@ if __name__ == "__main__":
     compare_fenwick_vs_segment()
 ```
 
-## 12.4 Persistent Data Structures: Time Travel!
+## Persistent Data Structures: Time Travel!
 
-### 12.4.1 The Problem
+### The Problem
 
 Imagine you're building a text editor with unlimited undo/redo. How do you store every version efficiently?
 
@@ -993,7 +993,7 @@ Imagine you're building a text editor with unlimited undo/redo. How do you store
 
 **Key idea**: When you "modify" a persistent structure, you create a new version that shares most data with the old version.
 
-### 12.4.2 Persistent Array
+### Persistent Array
 
 ```python
 class PersistentArray:
@@ -1160,7 +1160,7 @@ if __name__ == "__main__":
     example_persistent_array()
 ```
 
-### 12.4.3 Persistent Segment Tree
+### Persistent Segment Tree
 
 ```python
 class PersistentSegmentTree:
@@ -1321,7 +1321,7 @@ if __name__ == "__main__":
     example_version_control()
 ```
 
-### 12.4.4 Applications of Persistence
+### Applications of Persistence
 
 ```python
 class ApplicationExamples:
@@ -1413,9 +1413,9 @@ if __name__ == "__main__":
     example_text_editor()
 ```
 
-## 12.5 Succinct Data Structures: Data Compression on Steroids
+## Succinct Data Structures: Data Compression on Steroids
 
-### 12.5.1 The Problem
+### The Problem
 
 You have a billion-element bit vector (125 MB). You need to support:
 - `access(i)`: Get bit at position i
@@ -1426,7 +1426,7 @@ You have a billion-element bit vector (125 MB). You need to support:
 
 **Succinct**: Store in just n + o(n) bits (barely more than the data itself!) with O(1) operations!
 
-### 12.5.2 Succinct Bit Vector
+### Succinct Bit Vector
 
 ```python
 class SuccinctBitVector:
@@ -1593,7 +1593,7 @@ if __name__ == "__main__":
     example_succinct_bit_vector()
 ```
 
-### 12.5.3 Wavelet Tree
+### Wavelet Tree
 
 A **wavelet tree** is a succinct structure for storing sequences that supports:
 - `access(i)`: Get element at position i
@@ -1734,7 +1734,7 @@ if __name__ == "__main__":
     example_wavelet_tree()
 ```
 
-### 12.5.4 Applications of Succinct Structures
+### Applications of Succinct Structures
 
 ```python
 class SuccinctApplications:
@@ -1845,9 +1845,9 @@ if __name__ == "__main__":
     example_dna_index()
 ```
 
-## 12.6 Cache-Oblivious Algorithms: Automatically Efficient
+## Cache-Oblivious Algorithms: Automatically Efficient
 
-### 12.6.1 The Cache Problem
+### The Cache Problem
 
 Modern CPUs have multiple cache levels (L1, L2, L3). Accessing L1 is ~100x faster than RAM!
 
@@ -1855,7 +1855,7 @@ Modern CPUs have multiple cache levels (L1, L2, L3). Accessing L1 is ~100x faste
 
 **Cache-oblivious approach**: Design algorithms that are efficient for ALL cache sizes automatically!
 
-### 12.6.2 Cache-Oblivious Matrix Transpose
+### Cache-Oblivious Matrix Transpose
 
 ```python
 import numpy as np
@@ -2031,7 +2031,7 @@ if __name__ == "__main__":
     benchmark_cache_oblivious()
 ```
 
-### 12.6.3 Van Emde Boas Layout
+### Van Emde Boas Layout
 
 ```python
 class VanEmdeBoasLayout:
@@ -2105,11 +2105,11 @@ if __name__ == "__main__":
     VanEmdeBoasLayout.visualize_layout(15)
 ```
 
-## 12.7 Chapter Project: Advanced Data Structure Library
+## Chapter Project: Advanced Data Structure Library
 
 Let's build a comprehensive library!
 
-### 12.7.1 Project Structure
+### Project Structure
 
 ```
 AdvancedDataStructures/
@@ -2138,7 +2138,7 @@ AdvancedDataStructures/
 └── setup.py
 ```
 
-### 12.7.2 Unified Interface
+### Unified Interface
 
 ```python
 # advds/__init__.py
@@ -2186,7 +2186,7 @@ __all__ = [
 ]
 ```
 
-### 12.7.3 Range Query Solver Application
+### Range Query Solver Application
 
 ```python
 # advds/applications/range_queries.py
@@ -2319,7 +2319,7 @@ if __name__ == "__main__":
     example_range_query_solver()
 ```
 
-### 12.7.4 Comprehensive Benchmarking Suite
+### Comprehensive Benchmarking Suite
 
 ```python
 # advds/benchmarks/performance.py
@@ -2445,7 +2445,7 @@ if __name__ == "__main__":
     Benchmarks.run_all()
 ```
 
-## 12.8 Summary and Key Takeaways
+## Summary and Key Takeaways
 
 **Core Data Structures**:
 1. **Segment Trees**: O(log n) range queries with updates, very flexible
@@ -2474,7 +2474,7 @@ if __name__ == "__main__":
 - **Version control**: Git uses persistent structures
 - **High-performance computing**: Cache-oblivious algorithms
 
-## 12.9 Exercises
+## Exercises
 
 ### Understanding
 
@@ -2508,7 +2508,7 @@ if __name__ == "__main__":
 
 12. **Cache-Oblivious B-Tree**: Implement a cache-oblivious search tree.
 
-## 12.10 Further Reading
+## Further Reading
 
 **Classic Papers**:
 - Bentley (1980): "Multidimensional Divide-and-Conquer"

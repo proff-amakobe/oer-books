@@ -1,4 +1,4 @@
-# Chapter 9: Advanced Graph Algorithms - Making Things Flow
+# Advanced Graph Algorithms - Making Things Flow
 
 **When Pipes, Traffic, and Romance All Follow the Same Rules**
 
@@ -6,7 +6,7 @@
 
 *"But you can prove mathematically that you're pushing the maximum possible gallon through your network of pint tubes."* - Modern computer science
 
-## 9.1 Introduction: The Universal Language of Flow
+## Introduction: The Universal Language of Flow
 
 Here's a wild fact: the algorithm that finds the maximum number of cars that can flow through a highway network is **exactly the same algorithm** that:
 
@@ -26,9 +26,9 @@ And here's the beautiful part: we're going to prove that finding maximum flow is
 
 Ready to dive in? Let's start with the basics and build up to some seriously cool applications.
 
-## 9.2 Network Flow: The Big Picture
+## Network Flow: The Big Picture
 
-### 9.2.1 What is a Flow Network?
+### What is a Flow Network?
 
 Imagine you're designing the plumbing for a new building. You have:
 
@@ -46,7 +46,7 @@ In graph terms, a **flow network** is just a directed graph with some extra info
 
 The "stuff" could be water, cars, data packets, electricity, or (as we'll see later) something completely abstract like "matching potential."
 
-### 9.2.2 The Two Sacred Rules of Flow
+### The Two Sacred Rules of Flow
 
 Flow has to follow two non-negotiable rules:
 
@@ -64,7 +64,7 @@ Think of a busy intersection: if 100 cars per minute enter from all directions, 
 
 Formally: Σ flow-in = Σ flow-out for every vertex except s and t.
 
-### 9.2.3 A Simple Example
+### A Simple Example
 
 Let's look at a tiny network:
 
@@ -95,7 +95,7 @@ Let's look at a tiny network:
 
 Can we do better? Nope! And soon we'll prove why.
 
-### 9.2.4 The Genius Idea: The Residual Network
+### The Genius Idea: The Residual Network
 
 Here's where things get clever. Imagine you've already sent some flow through the network. Now you're wondering: "Can I push more?"
 
@@ -126,9 +126,9 @@ If you later find a better path that uses the backward edge from v to u, you're 
 
 This idea—that we can undo bad routing decisions—is what makes flow algorithms work!
 
-## 9.3 The Max-Flow Min-Cut Theorem: One of CS's Greatest Hits
+## The Max-Flow Min-Cut Theorem: One of CS's Greatest Hits
 
-### 9.3.1 What's a Cut?
+### What's a Cut?
 
 Imagine taking scissors and cutting your flow network into two pieces: one piece containing the source, one containing the sink. The **capacity of the cut** is the total capacity of edges you cut.
 
@@ -149,7 +149,7 @@ In this example, cutting between {s,a,b} and {t} means we cut edges a→t and b�
 
 Different cuts have different capacities. The **minimum cut** is the cut with the smallest capacity.
 
-### 9.3.2 The Theorem That Changes Everything
+### The Theorem That Changes Everything
 
 **Max-Flow Min-Cut Theorem** (Ford & Fulkerson, 1956):
 
@@ -168,7 +168,7 @@ Read that again. It's saying that two seemingly different problems—maximizing 
 
 Think of a busy highway system. The maximum traffic flow is limited by the narrowest bottleneck. If you removed that bottleneck, traffic would just be limited by the next bottleneck. The minimum cut identifies all the bottlenecks at once.
 
-### 9.3.3 Finding the Min Cut (It's Free!)
+### Finding the Min Cut (It's Free!)
 
 Once you've computed maximum flow, finding the minimum cut is trivial:
 
@@ -180,9 +180,9 @@ The edges crossing from the reachable to unreachable vertices form your minimum 
 
 Why does this work? If a vertex is still reachable in the residual network, there's unused capacity toward it. The unreachable vertices are cut off—we've maxed out all paths to them.
 
-## 9.4 Ford-Fulkerson: The Classic Algorithm
+## Ford-Fulkerson: The Classic Algorithm
 
-### 9.4.1 The Basic Idea
+### The Basic Idea
 
 Ford-Fulkerson is almost insultingly simple:
 
@@ -199,7 +199,7 @@ Return the total flow
 
 That's it! Find a path, push flow, repeat until no paths remain.
 
-### 9.4.2 Let's Trace Through an Example Step by Step
+### Let's Trace Through an Example Step by Step
 
 Let's work through a complete example so you really see how this works:
 
@@ -251,7 +251,7 @@ Initial network (numbers show capacities):
 
 See how we kept finding paths and pushing flow until we couldn't anymore? That's the entire algorithm!
 
-### 9.4.3 Edmonds-Karp: Making It Actually Fast
+### Edmonds-Karp: Making It Actually Fast
 
 There's a problem with basic Ford-Fulkerson: **which path should we choose?**
 
@@ -459,7 +459,7 @@ if __name__ == "__main__":
     example_max_flow()
 ```
 
-### 9.4.4 Why BFS Makes All the Difference
+### Why BFS Makes All the Difference
 
 Here's the key insight about Edmonds-Karp:
 
@@ -469,9 +469,9 @@ When you saturate an edge on a shortest path, the next shortest path must be lon
 
 It's one of those proofs where the intuition is beautiful but the formal details are technical. The takeaway: **using BFS isn't just convenient, it's provably efficient**.
 
-## 9.5 Push-Relabel: The Modern Approach
+## Push-Relabel: The Modern Approach
 
-### 9.5.1 A Completely Different Philosophy
+### A Completely Different Philosophy
 
 Ford-Fulkerson thinks about flow globally: find a complete path from source to sink, push flow along it.
 
@@ -483,7 +483,7 @@ It's like the difference between:
 
 Surprisingly, the local approach can be faster! The best push-relabel variants run in O(V³), better than Edmonds-Karp's O(VE²) on dense graphs.
 
-### 9.5.2 The Key Concepts
+### The Key Concepts
 
 **Preflow**: Like a flow, but we relax the conservation constraint. Vertices can have excess flow—more coming in than going out.
 
@@ -499,7 +499,7 @@ Think of height as elevation. Flow "falls downhill" from high vertices to low ve
 
 2. **Relabel**: If vertex u has excess but can't push to any neighbor, increase its height.
 
-### 9.5.3 The Algorithm
+### The Algorithm
 
 ```
 Push-Relabel(G, s, t):
@@ -535,7 +535,7 @@ e(v) += δ
 h(u) = 1 + min{h(v) : (u,v) has residual capacity}
 ```
 
-### 9.5.4 Why Does This Work?
+### Why Does This Work?
 
 The height function ensures that flow moves "downhill" toward the sink. When we can't push from a vertex, we raise its height until we can.
 
@@ -689,7 +689,7 @@ if __name__ == "__main__":
     example_push_relabel()
 ```
 
-### 9.5.5 Which Algorithm Should You Use?
+### Which Algorithm Should You Use?
 
 **Edmonds-Karp (Ford-Fulkerson with BFS)**:
 - ✅ Simple to understand and implement
@@ -705,9 +705,9 @@ if __name__ == "__main__":
 
 **Rule of thumb**: Start with Edmonds-Karp. Switch to push-relabel if you're dealing with massive dense networks and performance matters.
 
-## 9.6 Bipartite Matching: When Flow Solves Romance
+## Bipartite Matching: When Flow Solves Romance
 
-### 9.6.1 The Matching Problem
+### The Matching Problem
 
 Imagine you're running a dating service. You have:
 - n people looking for dates on the left
@@ -722,7 +722,7 @@ This is the **maximum bipartite matching** problem, and it's everywhere:
 - Tasks ↔ workers
 - Organs ↔ transplant recipients
 
-### 9.6.2 The Flow Network Trick
+### The Flow Network Trick
 
 Here's the magic: we can solve matching using maximum flow!
 
@@ -753,7 +753,7 @@ All edges have capacity 1
 
 The maximum flow equals the maximum matching!
 
-### 9.6.3 Implementation
+### Implementation
 
 ```python
 class BipartiteMatching:
@@ -862,7 +862,7 @@ if __name__ == "__main__":
     example_residency_matching()
 ```
 
-### 9.6.4 Hall's Marriage Theorem
+### Hall's Marriage Theorem
 
 Here's a beautiful theorem about when perfect matching is possible:
 
@@ -885,9 +885,9 @@ The subset {L1, L2} has only 1 neighbor (R1), violating Hall's condition. Indeed
 
 This theorem gives us a certificate of impossibility. If you can't find a perfect matching, you can prove why by finding a violating subset!
 
-## 9.7 Minimum Cost Flow: Optimizing While Flowing
+## Minimum Cost Flow: Optimizing While Flowing
 
-### 9.7.1 The Problem
+### The Problem
 
 Maximum flow answers "how much?" but sometimes we also care about "how cheaply?"
 
@@ -901,7 +901,7 @@ Maximum flow answers "how much?" but sometimes we also care about "how cheaply?"
 - Network routing: minimize latency
 - Resource allocation: minimize waste
 
-### 9.7.2 The Setup
+### The Setup
 
 Each edge (u,v) now has:
 - Capacity c(u,v)
@@ -912,7 +912,7 @@ Goal: send d units from s to t minimizing:
 total cost = Σ a(u,v) × f(u,v)
 ```
 
-### 9.7.3 Successive Shortest Paths Algorithm
+### Successive Shortest Paths Algorithm
 
 Basic idea: send flow along cheapest paths one unit at a time.
 
@@ -934,7 +934,7 @@ For the residual network:
 - Forward edges keep their original cost
 - Backward edges have negative cost (we "save" money by undoing flow)
 
-### 9.7.4 Implementation
+### Implementation
 
 ```python
 import heapq
@@ -1088,7 +1088,7 @@ if __name__ == "__main__":
     example_shipping()
 ```
 
-### 9.7.5 Cycle-Canceling Algorithm
+### Cycle-Canceling Algorithm
 
 Alternative approach: start with any feasible flow, then repeatedly find and cancel negative-cost cycles.
 
@@ -1101,9 +1101,9 @@ Alternative approach: start with any feasible flow, then repeatedly find and can
 
 This works because negative-cost cycles represent opportunities to reduce cost by rerouting flow.
 
-## 9.8 Real-World Applications
+## Real-World Applications
 
-### 9.8.1 Image Segmentation
+### Image Segmentation
 
 **Problem**: Separate an image into foreground and background.
 
@@ -1120,7 +1120,7 @@ This is used in:
 - Medical imaging (tumor detection)
 - Object recognition
 
-### 9.8.2 Airline Scheduling
+### Airline Scheduling
 
 **Problem**: Assign crews to flights.
 
@@ -1132,7 +1132,7 @@ This is used in:
 
 Maximum matching finds the best assignment!
 
-### 9.8.3 Network Reliability
+### Network Reliability
 
 **Problem**: What's the minimum number of edges to remove to disconnect s from t?
 
@@ -1143,7 +1143,7 @@ This is used for:
 - Infrastructure planning
 - Social network analysis
 
-### 9.8.4 Project Selection
+### Project Selection
 
 **Problem**: Choose projects to maximize profit, subject to dependencies.
 
@@ -1155,7 +1155,7 @@ This is used for:
 
 The minimum cut identifies which projects to select!
 
-### 9.8.5 Baseball Elimination
+### Baseball Elimination
 
 Here's a fun one: can your favorite team still win the league?
 
@@ -1170,11 +1170,11 @@ Here's a fun one: can your favorite team still win the league?
 
 If max flow equals total remaining games, team X can still win!
 
-## 9.9 Chapter Project: Universal Flow Network Solver
+## Chapter Project: Universal Flow Network Solver
 
 Let's build a comprehensive tool that handles all flow problems!
 
-### 9.9.1 Project Specification
+### Project Specification
 
 **Goal**: Create a flexible flow network solver with:
 
@@ -1183,7 +1183,7 @@ Let's build a comprehensive tool that handles all flow problems!
 3. **Applications**: Built-in solvers for matching, image seg, etc.
 4. **Performance**: Handle networks with 10,000+ vertices
 
-### 9.9.2 Architecture
+### Architecture
 
 ```
 FlowNetworkSolver/
@@ -1205,7 +1205,7 @@ FlowNetworkSolver/
 └── main.py                 # CLI interface
 ```
 
-### 9.9.3 Core Network Class
+### Core Network Class
 
 ```python
 # core/network.py
@@ -1343,7 +1343,7 @@ class FlowNetwork:
         return '\n'.join(lines)
 ```
 
-### 9.9.4 Algorithm Interface
+### Algorithm Interface
 
 ```python
 # core/algorithm.py
@@ -1375,7 +1375,7 @@ class FlowAlgorithm(ABC):
         })
 ```
 
-### 9.9.5 Application: Matching Solver
+### Application: Matching Solver
 
 ```python
 # applications/matching.py
@@ -1496,7 +1496,7 @@ if __name__ == "__main__":
     example_job_matching()
 ```
 
-### 9.9.6 Visualization Module
+### Visualization Module
 
 ```python
 # visualization/plot_network.py
@@ -1612,7 +1612,7 @@ def animate_algorithm(algorithm, source, sink, output_prefix="frame"):
         algorithm.network.flow = old_flow
 ```
 
-### 9.9.7 Command-Line Interface
+### Command-Line Interface
 
 ```python
 # main.py
@@ -1701,7 +1701,7 @@ if __name__ == '__main__':
     main()
 ```
 
-### 9.9.8 Testing Suite
+### Testing Suite
 
 ```python
 # tests/test_algorithms.py
@@ -1782,7 +1782,7 @@ if __name__ == '__main__':
     unittest.main()
 ```
 
-## 9.10 Summary and Key Takeaways
+## Summary and Key Takeaways
 
 We've covered a LOT in this chapter! Let's recap the big ideas:
 
@@ -1821,7 +1821,7 @@ When you see a problem involving:
 
 Often, the answer is yes, and suddenly you have 60 years of algorithmic research at your fingertips!
 
-## 9.11 Exercises
+## Exercises
 
 ### Warm-Up Problems
 
@@ -1873,7 +1873,7 @@ Often, the answer is yes, and suddenly you have 60 years of algorithmic research
 
 15. **Multi-Commodity Flow**: Solve the problem of routing multiple different "commodities" through a shared network (e.g., different data types through internet).
 
-## 9.12 Further Reading
+## Further Reading
 
 **Classic Papers**:
 - Ford & Fulkerson (1956): "Maximal Flow Through a Network"
