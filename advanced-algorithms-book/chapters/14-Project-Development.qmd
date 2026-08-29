@@ -1,14 +1,10 @@
-# Project Development & Presentation Prep - Bringing It All Together
+# Algorithm Engineering and Performance Evaluation
 
-**From Code to Masterpiece: The Final Push**
+**From asymptotic analysis to dependable evidence**
 
-*"The last 10% of the project takes 90% of the time."* - Ancient programmer wisdom
+## From Algorithm Analysis to Algorithm Engineering
 
-*"But that last 10% is what separates a good project from a great one."* - Everyone who's shipped something amazing
-
-## Introduction: The Art of Finishing
-
-You've learned dozens of algorithms. You've implemented data structures. You've solved complex problems. But here's what separates students from professionals: **finishing and presenting your work.**
+An asymptotic bound describes how resource use grows; an engineered implementation shows how that algorithm behaves under explicit assumptions on a real system. Algorithm engineering connects these views through careful implementation, testing, measurement, and interpretation.
 
 Anyone can start a project. The hard parts are:
 - **Integration**: Making all the pieces work together seamlessly
@@ -17,7 +13,18 @@ Anyone can start a project. The hard parts are:
 - **Testing**: Ensuring it actually works correctly
 - **Presentation**: Communicating what you built and why it matters
 
-This chapter is about that final push—taking your project from "it works on my machine" to "it's ready for the world."
+### Learning Objectives
+
+After completing this chapter, you should be able to:
+
+- define interfaces and invariants between algorithmic components;
+- construct correctness, integration, and regression tests;
+- design repeatable benchmarks with controlled inputs and environments;
+- distinguish asymptotic improvement from constant-factor and systems effects;
+- report uncertainty, limitations, and reproducibility information; and
+- communicate performance conclusions without exceeding the evidence.
+
+This chapter develops a repeatable workflow for turning an algorithmic prototype into a dependable experimental implementation.
 
 **What makes a great project?**
 
@@ -28,9 +35,9 @@ Not just clever algorithms. Great projects have:
 - **Excellent documentation**: Others can use and extend it
 - **Compelling presentation**: Communicates value effectively
 
-Let's learn how to transform your Advanced Algorithms project into something you'll be proud to show employers, professors, and peers.
+The same workflow applies to research prototypes, production experiments, and independent projects.
 
-## System Integration: Making the Pieces Fit
+## Building Reliable Experimental Implementations
 
 You've probably built your project in pieces: a segment tree here, a string matching algorithm there, maybe a visualization module. Now comes the tricky part: **making them work together as a unified system.**
 
@@ -48,7 +55,7 @@ You've probably built your project in pieces: a segment tree here, a string matc
 
 **State management**: Who owns the data? When is it modified? Multiple components trying to update the same state leads to bugs.
 
-### Design Patterns for Integration
+### Implementation Boundaries
 
 #### **The Adapter Pattern**
 
@@ -281,9 +288,9 @@ Before you consider integration complete:
 
 **✓ Examples**: Working examples demonstrate common integration patterns.
 
-## Performance Optimization: Making It Fast
+## Benchmark Design and Measurement
 
-Your algorithms have good time complexity. But does your code actually run fast? Let's bridge theory and practice.
+An asymptotically efficient algorithm can still perform poorly on relevant inputs, and a fast result on one machine can be an artifact of caching, compilation, or measurement noise. Benchmarking connects the cost model to observed behavior.
 
 ### The Performance Mindset
 
@@ -293,7 +300,15 @@ Your algorithms have good time complexity. But does your code actually run fast?
 
 **Third rule**: Optimize the bottleneck, not everything.
 
-**The 90/10 rule**: 90% of execution time is spent in 10% of the code. Find that 10%.
+Concentrated bottlenecks are common, but their location and magnitude must be measured rather than assumed.
+
+### Experimental Protocol
+
+Before collecting results, specify the research question, competing implementations, input distributions, correctness oracle, measured quantities, and stopping rule. Include adversarial or boundary cases when the algorithm's analysis predicts different behavior from average inputs.
+
+Run warm-up iterations when the language runtime, cache hierarchy, or accelerator has startup effects. Then collect multiple independent measurements and report the distribution—such as median and interquartile range or a confidence interval—rather than only the fastest run. Retain raw observations so that plots and summary statistics can be regenerated.
+
+Record the processor, memory, operating system, runtime and compiler versions, dependency lockfile, parallelism settings, random seeds, and relevant power or accelerator configuration. Compare implementations under equivalent conditions and verify outputs before comparing speed. A log-log slope can support a growth-rate hypothesis, but finite measurements do not prove an asymptotic bound.
 
 ### Profiling: Finding the Bottlenecks
 
@@ -512,7 +527,7 @@ def parallel_process(items, num_workers=4):
 
 **Remember**: Premature optimization is the root of all evil. But timely optimization is the path to success.
 
-## Documentation: Making Your Work Understandable
+## Reproducibility and Documentation
 
 Good documentation is the difference between code that others can use and code that languishes unused on GitHub.
 
@@ -826,7 +841,7 @@ If you use this in research, please cite:
 ```
 ````
 
-## Testing and Code Review: Ensuring Quality
+## Testing Algorithm Implementations
 
 ### The Testing Pyramid
 
@@ -1044,7 +1059,7 @@ Good: "Consider using a dictionary here for O(1) lookup instead of
 - ☐ Are errors handled safely?
 - ☐ Are there security implications?
 
-## Presentation Skills: Communicating Your Work
+## Interpreting and Communicating Results
 
 You've built something amazing. Now you need to convince others it's amazing.
 
@@ -1235,7 +1250,7 @@ Good: Carefully prepared test cases
 
 **5. Keep it short**: 2-3 minutes maximum for demo
 
-## Final Project Integration Checklist
+## Applied Project Framework
 
 Before you present, ensure you've addressed:
 
@@ -1275,26 +1290,26 @@ Before you present, ensure you've addressed:
 - Demo is prepared and tested
 - Practiced multiple times
 
-**✅ Submission**:
-- All files in repository
-- Repository is public (or shared with instructor)
-- README includes link to presentation
-- License file included
+**✅ Artifact packaging**:
+- Source, tests, and scripts are versioned
+- Access conditions and license are stated
+- README links the report and generated results
+- Environment and dependency versions are recorded
 
-## Summary: The Home Stretch
+## Summary and Exercises
 
-Congratulations! You've reached the final push. This chapter covered the skills that transform projects from "working on my laptop" to "ready for the world":
+This chapter connected algorithm analysis to evidence-producing implementation:
 
 - **System integration**: Making components work together seamlessly
-- **Performance optimization**: Finding and fixing bottlenecks
-- **Documentation**: Making your work understandable and usable
+- **Benchmark design**: Measuring repeated trials under controlled conditions
+- **Reproducibility**: Recording inputs, environments, randomness, and raw results
 - **Testing and review**: Ensuring quality and correctness
 - **Presentation**: Communicating your work effectively
 
-**Remember**: The best algorithm is one that actually gets used. Integration, documentation, and presentation are what make that happen.
+**Exercises**:
 
-Next chapter: We'll bring it all together with your final presentations, peer review, and reflection on your journey through advanced algorithms.
-
-You're almost there. Time to show the world what you've built! 🚀
+1. Design a benchmark that distinguishes two implementations with the same asymptotic complexity. State the input distribution and uncertainty summary.
+2. Reproduce one timing result on a second environment and explain plausible causes of any difference.
+3. Identify three threats to validity in a published algorithm benchmark and propose controls for each.
 
 ---

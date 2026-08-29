@@ -1,25 +1,10 @@
 # Research and Industry Applications - Where Algorithms Meet Reality
 
-**From Theory to Trillion-Dollar Industries**
-
-*"The best way to predict the future is to invent it."* - Alan Kay
-
-*"And the best way to invent it is to understand the algorithms that make it possible."* - Every algorithm researcher ever
+**From theory to durable computational ideas**
 
 ## Introduction: Algorithms in the Wild
 
-Here's something that might surprise you: **every major technological breakthrough of the last 50 years has algorithms at its core.**
-
-Think about it:
-- **Google Search** (1998): PageRank algorithm turned web search from terrible to magical, creating a $2 trillion company
-- **Netflix recommendations** (2006): Matrix factorization algorithms keep 230 million subscribers binge-watching
-- **Bitcoin** (2009): Cryptographic hash algorithms enabled decentralized currency, spawning a trillion-dollar market
-- **AlphaGo** (2016): Monte Carlo tree search + deep learning beat the world Go champion, a feat experts thought was decades away
-- **COVID-19 vaccines** (2020): Sequence alignment algorithms helped develop vaccines in record time, saving millions of lives
-- **ChatGPT** (2022): Transformer algorithms changed how we interact with computers
-- **AlphaFold** (2020): Deep learning algorithms solved the 50-year-old protein folding problem
-
-But here's what's really exciting: **we're just getting started.** The algorithms you've learned in this book aren't just academic exercises—they're the foundation for the next generation of breakthroughs.
+Algorithms connect mathematical models to deployed systems. Search and recommendation combine indexing, graph methods, optimization, and learning; distributed data processing relies on partitioning and fault-tolerant coordination; and scientific computing combines numerical algorithms with learned models. AlphaGo demonstrated how tree search and deep learning can work together [@silver2016alphago], while AlphaFold showed that learned systems can produce highly accurate protein-structure predictions [@jumper2021alphafold]. These examples matter because of their algorithmic structure, not transient valuations or usage statistics.
 
 In this chapter, we'll explore:
 1. What problems algorithm researchers are tackling right now
@@ -31,7 +16,7 @@ In this chapter, we'll explore:
 
 Let's see where algorithms are taking us!
 
-## Current Research Trends in Algorithms
+## Current Directions in Algorithm Research
 
 ### Beyond Worst-Case Analysis: Algorithms for the Real World
 
@@ -43,7 +28,7 @@ This led to several revolutionary frameworks:
 
 #### **Smoothed Analysis**
 
-Proposed by Spielman and Teng (2001), smoothed analysis asks: *What's the average performance when inputs are slightly perturbed by random noise?*
+Smoothed analysis asks how an algorithm performs when an adversarial input is subjected to a small random perturbation [@spielman2004smoothed].
 
 **Why this matters**: Real-world inputs are never perfectly adversarial. There's always some randomness—measurement errors, rounding, unpredictable human behavior.
 
@@ -51,7 +36,7 @@ Proposed by Spielman and Teng (2001), smoothed analysis asks: *What's the averag
 
 The simplex algorithm (1947) for linear programming has exponential worst-case complexity, but works incredibly well in practice. For 50 years, this was a mystery.
 
-Spielman and Teng proved: under smoothed analysis, simplex runs in polynomial time! The "worst cases" are so fragile that the tiniest random perturbation destroys them.
+Spielman and Teng proved a polynomial smoothed-complexity bound for a particular simplex pivot rule under a Gaussian perturbation model [@spielman2004smoothed]. This is more precise than claiming that arbitrary noise makes every simplex implementation polynomial.
 
 **Impact**: This earned Spielman the Nevanlinna Prize (essentially the Nobel of computer science). It explained why many algorithms work far better than their worst-case suggests.
 
@@ -137,43 +122,32 @@ If SETH is true, it implies lower bounds for hundreds of problems:
 - Longest common subsequence requires Ω(n²)
 - Frequent itemset mining requires exponential time
 
-**Impact**: This explains why, despite 50 years of effort, we haven't found faster algorithms for certain problems. They're probably impossible!
+**Impact**: Conditional lower bounds explain why improving one problem beyond a conjectured threshold would also require breakthroughs for a broader class of problems. They are conditional results, not unconditional proofs of impossibility.
 
-**Current research**: Mapping the landscape of which problems are "equivalent" in difficulty. If you solve one problem faster, you can solve hundreds of others faster.
+**Research direction**: Fine-grained reductions map which problems share conjectured time barriers. An improvement for one problem can therefore imply improvements for others connected by those reductions.
 
-### Quantum Algorithms: The Revolution That's Actually Happening
+### Quantum Algorithms and Engineering Constraints
 
-Quantum computing used to be science fiction. Not anymore.
-
-**Current state (2024)**:
-- Google's Willow chip (2024): 105 qubits with error correction
-- IBM's quantum computers: Available via cloud
-- Amazon Braket: Quantum computing as a service
-- IonQ, Rigetti, and others: Commercial quantum computers
+Quantum processors are available through laboratories and cloud services, but qubit count alone does not measure useful computational capability. Gate fidelity, connectivity, error rates, circuit depth, and error-correction overhead determine which algorithms can run meaningfully. Large-scale fault-tolerant quantum computation remains an active engineering challenge.
 
 But here's the crucial question: **What can quantum computers actually do?**
 
-#### **Shor's Algorithm: Breaking the Internet**
+#### **Shor's Algorithm and Public-Key Cryptography**
 
-In 1994, Peter Shor proved that quantum computers can factor integers in polynomial time: O((log N)³).
+Shor gave polynomial-time quantum algorithms for integer factorization and discrete logarithms [@shor1997factoring]. Exact gate complexity depends on the arithmetic model and implementation, so a single simplified exponent is not universal.
 
-**Why this matters**: RSA encryption (which secures most of the internet) relies on factoring being hard. A large quantum computer would break RSA instantly.
+**Why this matters**: RSA relies on arithmetic assumptions that do not hold against a sufficiently capable fault-tolerant quantum computer. Running the attack would still require a large error-corrected computation; “polynomial time” does not mean instantaneous.
 
 **How it works** (simplified):
 1. Factoring N reduces to finding the period of a function f(x) = a^x mod N
 2. Quantum computers can find periods exponentially faster using the Quantum Fourier Transform
 3. Once you know the period, you can factor N efficiently
 
-**The quantum threat timeline**:
-- 2024: Current quantum computers can factor ~10-digit numbers
-- ~2030-2035: Cryptographically relevant quantum computers predicted
-- **Right now**: Organizations are transitioning to "post-quantum cryptography"
-
-**Real-world response**: NIST standardized post-quantum cryptographic algorithms in 2024. Banks, governments, and tech companies are already upgrading their systems.
+No reliable date can be assigned to a cryptographically relevant quantum computer. The durable engineering response is risk-managed migration: NIST finalized FIPS 203, 204, and 205 in 2024 for quantum-resistant key establishment and signatures and continues to publish transition guidance [@nist2024pqc].
 
 #### **Grover's Algorithm: Quantum Search**
 
-Grover's algorithm (1996) searches an unsorted database in O(√N) instead of O(N).
+Grover's algorithm gives a quadratic quantum query improvement for unstructured search, from linear to O(√N) oracle queries [@grover1996search].
 
 **Why this matters**: This is a *provable* quadratic speedup for a fundamental problem.
 
@@ -184,19 +158,15 @@ Grover's algorithm (1996) searches an unsorted database in O(√N) instead of O(
 
 **The intuition**: Classical search checks possibilities one by one. Quantum search uses "amplitude amplification" to boost the probability of the correct answer, checking many possibilities simultaneously through superposition.
 
-#### **Quantum Simulation: The Killer App**
+#### **Quantum Simulation**
 
-The most promising quantum application isn't breaking codes—it's simulating quantum systems.
+Quantum simulation is a central motivation for quantum computing because the state space of a general quantum system grows exponentially with the number of modeled components.
 
 **Why classical computers struggle**: Simulating n quantum particles requires 2^n classical bits. For just 300 particles, that's more atoms than in the universe!
 
 **Quantum advantage**: Quantum computers naturally simulate quantum systems efficiently.
 
-**Applications already being explored**:
-- **Drug discovery**: Simulating molecular interactions (Pfizer, Biogen are investing heavily)
-- **Materials science**: Designing better batteries, superconductors, catalysts
-- **Optimization**: Portfolio optimization, route planning (D-Wave's quantum annealers)
-- **Machine learning**: Quantum neural networks (jury still out on practical advantage)
+**Research targets** include molecular energy estimation, materials models, optimization subroutines, and quantum machine-learning methods. A proposed quantum algorithm should be evaluated against the best classical baseline and include state preparation, error correction, and measurement costs.
 
 #### **The Limitations**
 
@@ -208,9 +178,9 @@ Important reality check: Quantum computers aren't magic.
 - Matrix multiplication: No proven speedup
 - Database operations: No fundamental speedup beyond Grover
 
-**The engineering challenge**: Quantum states are fragile. Noise and "decoherence" corrupt calculations. Current quantum computers work for seconds before errors dominate.
+**The engineering challenge**: Noise and decoherence corrupt quantum states. Useful resource estimates must model gate errors, circuit depth, connectivity, measurement, and correction overhead.
 
-**Error correction**: Requires ~1000 physical qubits per logical qubit. This is why we're still years from breaking RSA despite having quantum computers today.
+**Error correction**: A logical qubit is encoded across many physical components, with overhead determined by the code, hardware error model, and target reliability. Fixed ratios and arrival dates quickly become misleading; resource estimates must state their assumptions.
 
 ### Learning-Augmented Algorithms: When ML Meets Classical CS
 
@@ -224,7 +194,7 @@ Machine learning: Learn from data, work great on typical inputs, no guarantees.
 
 **Learning-augmented algorithms**: Use ML predictions + classical algorithms as backup.
 
-**The framework** (Lykouris & Vassilvitskii, 2018):
+**The framework** [@lykouris2018caching]:
 - ML provides "hints" or predictions
 - Algorithm uses hints when they're good
 - Falls back to classical algorithm when predictions are wrong
@@ -232,7 +202,7 @@ Machine learning: Learn from data, work great on typical inputs, no guarantees.
 
 #### **Learned Index Structures**
 
-One of the most successful examples: **learned indexes** (Kraska et al., 2018).
+Learned index structures model the position of a key in an ordered collection and use a conventional correction step when the prediction is imperfect [@kraska2018learned].
 
 **Traditional B-tree index**: O(log n) lookup, works for any data distribution.
 
@@ -245,7 +215,7 @@ Verify: Check nearby positions
 Fallback: If not found quickly, use B-tree
 ```
 
-**Results**: Google reported 3-5x speedup on real database workloads.
+Reported results depend on the dataset, baseline, model size, and hardware. Prediction and correction costs must both be included in a comparison.
 
 **Why it works**: Real data has patterns! Dates, IDs, names follow distributions ML can learn.
 
@@ -262,9 +232,7 @@ Cache eviction (which item to remove when cache is full) is fundamental to syste
 - Evict item that won't be needed for longest time
 - Falls back to LRU if predictions are poor
 
-**Results** (Lykouris & Vassilvitskii, 2018): Up to 50% improvement in cache hit rate.
-
-**Real deployment**: Partially deployed in CDN systems, file systems.
+The theoretical objective is **consistency** when predictions are accurate and **robustness** when they are not; empirical hit-rate improvements remain workload-dependent [@lykouris2018caching].
 
 #### **Learned Optimizers**
 
@@ -296,19 +264,17 @@ Database query optimization is NP-hard. Traditional optimizers use heuristics.
 
 ### Differential Privacy: Computing on Sensitive Data
 
-With data breaches everywhere, researchers asked: **Can we learn from data without violating privacy?**
+Statistical disclosure risk motivates a precise question: **Can an analysis reveal population-level information while limiting what it reveals about any one participant?**
 
 #### **The Problem**
 
-Traditional anonymization fails. AOL released "anonymized" search logs in 2006—journalists identified specific users within days.
-
-Netflix released "anonymized" viewing data in 2007—researchers de-anonymized users by correlating with IMDB reviews.
+Removing direct identifiers is not, by itself, a privacy guarantee. Auxiliary information and distinctive behavioral patterns can permit records in a nominally anonymized release to be linked back to individuals.
 
 **The insight**: Simply removing names doesn't protect privacy. Statistical patterns can reveal individuals.
 
-#### **Differential Privacy (Dwork et al., 2006)**
+#### **Differential Privacy**
 
-**Definition**: An algorithm is ε-differentially private if changing one person's data changes the output distribution by at most e^ε.
+**Definition**: An algorithm is ε-differentially private if changing one person's data changes the output distribution by at most e^ε [@dwork2006privacy].
 
 **Intuitive meaning**: Observing the output teaches you almost nothing about any individual.
 
@@ -324,16 +290,9 @@ Privacy guarantee: Even if you know everyone else's data,
 you can't tell if any specific person is in the dataset.
 ```
 
-#### **Real-World Deployment**
+#### **Deployment Considerations**
 
-**U.S. Census Bureau (2020)**: First census using differential privacy. Injected noise to protect individuals while maintaining statistical accuracy.
-
-**Apple (2016-)**: Uses local differential privacy for:
-- Autocorrect suggestions
-- Safari web tracking data
-- Health data trends
-
-**Google (2014-)**: RAPPOR (Randomized Aggregatable Privacy-Preserving Ordinal Response) for Chrome telemetry.
+Differential privacy has moved from theory into official statistics and telemetry systems. A deployment must document its adjacency relation, privacy accounting, clipping or sensitivity bounds, and the interpretation of its published privacy parameters. Merely adding unspecified noise does not establish the guarantee.
 
 #### **The Algorithms**
 
@@ -355,14 +314,11 @@ Better options more likely, but randomized for privacy
 
 **Accuracy vs. Privacy tradeoff**: More privacy (smaller ε) means more noise, less accurate results.
 
-**Typical values**:
-- ε = 0.1: Very strong privacy, significant noise
-- ε = 1: Strong privacy, moderate noise
-- ε = 10: Weak privacy, little noise
+The meaning of a numerical ε value depends on the threat model, unit of privacy, composition across releases, and the consequences of disclosure. It should therefore be justified for the application rather than classified by a universal table of “strong” or “weak” values.
 
 **Composition**: Privacy budget depletes with each query. Answer n queries → effective privacy ≈ √n × ε (with advanced composition).
 
-**Current research**: 
+**Research questions**:
 - How to allocate privacy budget optimally?
 - Can we get better accuracy for the same privacy?
 - Local vs. central differential privacy tradeoffs
@@ -373,9 +329,7 @@ Algorithms are making life-changing decisions: loan approvals, hiring, criminal 
 
 #### **How Bias Creeps In**
 
-**Historical bias**: Training data reflects past discrimination
-- Example: Amazon's hiring algorithm (discontinued 2018) penalized résumés mentioning "women's" (as in "women's chess club")
-- Why: Historical hires were mostly male, algorithm learned to prefer male candidates
+**Historical bias**: Training data can encode earlier institutional decisions, causing a model to reproduce patterns that should not be treated as desirable targets.
 
 **Representation bias**: Training data doesn't represent everyone
 - Example: Facial recognition works worse for darker skin tones (Buolamwini & Gebru, 2018)
@@ -425,25 +379,11 @@ Turns out, "fairness" isn't one thing. Multiple mathematical definitions exist, 
 - Hardt et al. (2016): Calibrate thresholds per group to achieve equal opportunity
 - Pleiss et al. (2017): Isotonic regression for calibration across groups
 
-#### **Real-World Examples**
+#### **Applied Evaluation**
 
-**COMPAS (Correctional Offender Management Profiling for Alternative Sanctions)**:
-- Used in criminal sentencing across the U.S.
-- ProPublica investigation (2016): Found racial disparities in false positive rates
-- Northpointe response: Algorithm is calibrated (predictions equally accurate across races)
-- **The controversy**: Both sides were mathematically correct! Different fairness definitions.
+In consequential domains such as hiring, lending, health care, and criminal justice, aggregate accuracy is insufficient. An evaluation should report error rates by relevant groups, examine calibration and threshold choices, document the provenance of labels, and identify who bears the cost of each error type. Because fairness definitions can conflict, the selected criterion is a normative design decision that must be stated and defended.
 
-**Hiring algorithms**:
-- Amazon shut down AI recruiting tool (2018) due to gender bias
-- HireVue uses video interviews + AI scoring (ongoing fairness concerns)
-- LinkedIn's approach: Separate models for different groups, combined carefully
-
-**Credit scoring**:
-- Apple Card investigation (2019): Appeared to give men higher limits than women
-- Problem: Hard to debug—algorithm is proprietary, individual factors confidential
-- Regulation: EU's GDPR includes "right to explanation" for algorithmic decisions
-
-#### **Current Research**
+#### **Research Questions**
 
 **Multi-objective optimization**: Can we be fair to multiple groups simultaneously?
 
@@ -552,12 +492,7 @@ Effect: Parameters with large gradients get smaller updates (more conservative).
 
 ### Transformers: The Architecture Revolution
 
-In 2017, "Attention is All You Need" (Vaswani et al.) introduced Transformers. They now power:
-- GPT (ChatGPT, GPT-4)
-- BERT (Google Search)
-- T5 (translation)
-- DALL-E, Midjourney (image generation)
-- AlphaFold (protein folding)
+The Transformer introduced a sequence architecture based primarily on attention rather than recurrence [@vaswani2017attention]. Variants now support language modeling, translation, vision, and scientific prediction, but their task-specific behavior depends on training data, objective, scale, and inference design.
 
 #### **The Self-Attention Mechanism**
 
@@ -611,7 +546,7 @@ output = Concat(head₁, head₂, ...) × Wₒ
 
 **Why**: Different heads learn different relationships. One might focus on syntax, another on semantics, another on coreference.
 
-**Typical setup**: 8-16 heads. GPT-3 uses 96 heads!
+The number and width of heads are architectural hyperparameters; more heads do not automatically imply a better model.
 
 #### **Positional Encoding**
 
@@ -656,10 +591,7 @@ Predict "mat"
 
 Power law: Loss ∝ N^(-α) where N is model size.
 
-This led to:
-- GPT-2 (2019): 1.5B parameters
-- GPT-3 (2020): 175B parameters
-- GPT-4 (2023): ~1.7T parameters (estimated)
+Scaling results are empirical relationships within a stated experimental regime, not a guarantee that increasing a single resource will improve every downstream property. Parameter counts also reveal little about data quality, inference cost, or reliability on a particular task.
 
 #### **Efficient Transformers**
 
@@ -679,15 +611,11 @@ This led to:
 - Same complexity, but 2-4x faster wall-clock time
 - Key innovation: algorithmic improvements for GPUs
 
-**Current state**: Can now handle sequences up to 100k+ tokens (vs. 512 in original Transformer).
+Efficient-attention methods trade exactness, memory traffic, sparsity structure, and implementation complexity in different ways. Context length is therefore a model-and-system parameter, not a stable field-wide threshold.
 
 ### Reinforcement Learning: Learning by Doing
 
-Reinforcement learning (RL) achieved:
-- AlphaGo beating world champion (2016)
-- OpenAI Five beating Dota 2 pros (2018)
-- AlphaStar mastering StarCraft II (2019)
-- ChatGPT's human-like responses (2022)
+Reinforcement learning (RL) has produced strong results in games, control, and preference-guided model adaptation. AlphaGo is a prominent example of combining search, learned value estimates, and policy networks [@silver2016alphago].
 
 How does RL work?
 
@@ -837,9 +765,7 @@ Backpropagation: Update statistics
 
 ## Big Data Algorithms: Computing at Planetary Scale
 
-When Google processes 8.5 billion searches per day, Facebook handles 4 petabytes of new data daily, and Netflix streams 250 million hours of video daily, traditional algorithms break down.
-
-Welcome to **big data algorithms**: techniques for when data doesn't fit in memory.
+When a data set exceeds the memory, storage bandwidth, or fault-tolerance capacity of one machine, algorithm design must account for partitioning and communication. **Large-scale data algorithms** explicitly model those costs.
 
 ### The MapReduce Revolution
 
@@ -847,7 +773,7 @@ Welcome to **big data algorithms**: techniques for when data doesn't fit in memo
 
 Traditional algorithm analysis assumes: data fits in RAM, you can access any element instantly.
 
-**Reality in 2004** (when Google invented MapReduce):
+The engineering setting described by the original MapReduce work included:
 - Web: billions of pages
 - Indexing: terabytes of data
 - Distributed across thousands of machines
@@ -897,9 +823,7 @@ Reduce phase:
 - Minimize network transfer
 - Process data where it's stored
 
-**Scalability**: Add more machines → proportionally faster
-- Google runs MapReduce on 100,000+ machines
-- No algorithmic changes needed
+**Scalability**: Independent tasks can be distributed, but speedup is limited by skew, shuffle volume, synchronization, stragglers, and serial work. MapReduce made these tradeoffs accessible through a simple programming abstraction [@dean2004mapreduce].
 
 #### **MapReduce Algorithms**
 
@@ -965,7 +889,7 @@ Reduce: Sum all contributions for each (i,j)
 
 **Naive approach**: Hash table → O(n) space where n = number of distinct items. If n = billions, you're out of memory.
 
-**Count-Min Sketch** (Cormode & Muthukrishnan, 2005):
+**Count-Min Sketch** [@cormode2005countmin]:
 ```
 Data structure: w × d array of counters (typically w=2000, d=5)
 Hash functions: h₁, h₂, ..., hₐ
@@ -988,7 +912,7 @@ Query(item):
 - Top-k frequent items
 - Heavy hitters detection
 
-**Real deployment**: Google uses Count-Min Sketch in their data centers for monitoring.
+Its one-sided error is useful when overestimation is acceptable and the width and depth are selected from explicit error and failure-probability targets.
 
 #### **HyperLogLog**
 
@@ -996,7 +920,7 @@ Query(item):
 
 **Naive approach**: Hash set → O(n) space.
 
-**HyperLogLog** (Flajolet et al., 2007):
+**HyperLogLog** [@flajolet2007hyperloglog]:
 ```
 Per-register space: O(log log n) bits for cardinality n
 Total register space: O(m log log n) bits for m registers
@@ -1016,16 +940,13 @@ Refinement: Use m buckets, combine estimates
 
 **Example**: 1% error with just 16 KB of memory, for billions of distinct items!
 
-**Real deployment**:
-- Reddit uses HyperLogLog for unique visitor counts
-- Azure CosmosDB uses it internally
-- Redis has HyperLogLog built-in
+Implementations often expose HyperLogLog-style cardinality estimation as a compact alternative to retaining every distinct key. Production variants may differ in hashing, bias correction, sparse representation, and register width.
 
 #### **Bloom Filters**
 
 **Problem**: Test set membership ("have I seen this before?") with limited memory.
 
-**Bloom Filter** (Bloom, 1970):
+**Bloom filter** [@bloom1970filter]:
 ```
 Data structure: bit array of size m
 Hash functions: k different hash functions
@@ -1053,7 +974,7 @@ Query(item):
 - Databases: Avoid expensive disk lookups
 - Distributed systems: Check if data is cached
 
-**Chrome's Safe Browsing**: Uses Bloom filter to check 1M+ malicious URLs locally before querying Google's servers.
+The false-positive rate must be included in system-level cost analysis: a positive result ordinarily triggers a more authoritative lookup rather than a final decision.
 
 ### Graph Processing at Scale
 
@@ -1061,7 +982,7 @@ Query(item):
 
 #### **Pregel: Thinking Like a Vertex**
 
-**Pregel** (Google, 2010): Framework for graph algorithms on billions of nodes.
+**Pregel** introduced a vertex-centric bulk-synchronous abstraction for large graph computations [@malewicz2010pregel].
 
 **Programming model**:
 ```
@@ -1097,7 +1018,7 @@ def compute(self, messages):
 - Automatic fault tolerance (rerun failed partitions)
 - Graph partitioning optimizes locality
 
-**Deployed at**: Google (Pregel), Facebook (Apache Giraph), Twitter (Cassovary)
+Related systems differ in partitioning strategy, recovery model, messaging semantics, and integration with general-purpose dataflow engines.
 
 #### **GraphX and GraphFrames**
 
@@ -1115,7 +1036,7 @@ Built on Spark, these provide graph algorithms with:
 
 ## Security and Cryptographic Algorithms
 
-Every secure website, encrypted message, digital signature, and blockchain depends on clever algorithms. Let's explore the algorithms keeping the digital world secure—and the ones threatening to break it.
+Cryptographic systems combine mathematical assumptions, protocols, implementations, and operational key management. This section focuses on the algorithmic ideas and the assumptions on which their guarantees depend.
 
 ### Public-Key Cryptography: The Mathematics of Secrets
 
@@ -1128,7 +1049,7 @@ Before 1976, secret communication required shared secret keys. If Alice and Bob 
 
 **For the internet**: How do billions of people establish shared secrets?
 
-**The miracle**: **Public-key cryptography** (Diffie-Hellman 1976, RSA 1977)
+Diffie and Hellman established the public-key model and key-agreement direction [@diffie1976cryptography]; RSA supplied an influential public-key encryption and signature construction [@rivest1978rsa].
 
 **The idea**: Two keys
 - **Public key**: Freely shared, used to encrypt
@@ -1136,9 +1057,9 @@ Before 1976, secret communication required shared secret keys. If Alice and Bob 
 
 **Amazing property**: Knowing the public key doesn't help you figure out the private key (assuming certain mathematical problems are hard).
 
-#### **RSA: The Algorithm That Secured the Internet**
+#### **RSA and Its Security Assumption**
 
-**RSA** (Rivest, Shamir, Adleman, 1977) is based on a simple idea: multiplying primes is easy, factoring is hard.
+**RSA** is based on modular exponentiation and a trapdoor construction related to the difficulty of factoring a product of large primes [@rivest1978rsa].
 
 **Key generation**:
 ```
@@ -1163,33 +1084,24 @@ Since ed ≡ 1 (mod φ(N)), by Euler's theorem:
 message^(ed) ≡ message (mod N)
 ```
 
-**Security basis**: Factoring N to find p and q is believed to be hard. Best known classical algorithm: General Number Field Sieve, time ≈ exp((log N)^(1/3)).
-
-For 2048-bit N: Would take millions of years with current computers.
+**Security basis**: Recovering the factors of a properly generated modulus is believed to be computationally infeasible for suitable parameters with known classical methods. Secure practice also requires standardized padding, protected key generation, and resistance to implementation attacks; textbook RSA alone is not a deployable encryption scheme.
 
 #### **The Quantum Threat to RSA**
 
-**Shor's algorithm** (1994): Quantum computer can factor N in polynomial time: O((log N)³).
+Shor's algorithm shows that integer factorization has a polynomial-time quantum algorithm [@shor1997factoring]. Whether and when hardware can run it against cryptographic parameters is an engineering question involving logical error rates, correction overhead, circuit depth, and architecture; a calendar prediction is not an algorithmic guarantee.
 
-**Timeline**:
-- 2012: Factor 21 using quantum computer
-- 2019: Factor 35 (still pathetic)
-- 2024: Still nowhere near breaking real RSA
-- **But**: Cryptographically relevant quantum computers might arrive by 2030-2035
-
-**The response**: NIST's post-quantum cryptography standardization (completed 2024).
+NIST finalized its first three post-quantum cryptography standards in 2024 and continues related evaluation and migration work [@nist2024pqc].
 
 **Selected algorithms**:
-- **CRYSTALS-Kyber** (key exchange): Based on "learning with errors" (LWE)
-- **CRYSTALS-Dilithium** (digital signatures): Based on lattice problems
-- **FALCON** (signatures): Based on NTRU lattices
-- **SPHINCS+** (signatures): Based on hash functions
+- **ML-KEM**, derived from CRYSTALS-Kyber, for key establishment
+- **ML-DSA**, derived from CRYSTALS-Dilithium, for digital signatures
+- **SLH-DSA**, derived from SPHINCS+, for hash-based digital signatures
 
 **Why lattices**: Best known quantum algorithms only achieve modest speedup against lattice problems. Believed to be quantum-resistant.
 
 ### Blockchain and Cryptocurrencies
 
-Love them or hate them, cryptocurrencies are a triumph of algorithm design. Let's understand the algorithms, not the hype.
+Cryptocurrency protocols provide useful case studies in consensus, incentives, cryptographic commitments, and adversarial distributed computation. Their guarantees must be separated from claims about price or social value.
 
 #### **The Byzantine Generals Problem**
 
@@ -1223,48 +1135,43 @@ Mining:
             break
 ```
 
-**The target**: Adjusted so blocks found every ~10 minutes. Currently requires ~80 zeros in binary representation (2^80 hashes expected).
+**The target**: Periodically adjusted so the expected block interval remains near the protocol target. The required work changes with the target and should not be represented by a fixed number of leading zero bits.
 
 **Why this secures Bitcoin**:
 
 **Immutability**: To change past transaction, you'd need to:
-1. Remine that block (2^80 hashes)
+1. Recompute proof of work for that block under the applicable target
 2. Remine all subsequent blocks
 3. Outpace the rest of the network
 
-**Consensus**: Longest chain wins. Attackers would need 51% of network's computational power to create longer chain.
+**Consensus**: Nodes follow the valid chain with the greatest accumulated proof of work. Majority hash power is a useful simplified attack threshold, but network behavior, confirmation depth, incentives, and attack duration also matter.
 
-**Incentives**: Miners get reward (currently 6.25 BTC ≈ $260k) + transaction fees. More profitable to mine honestly than attack.
+**Incentives**: Miners receive protocol-defined issuance and transaction fees. Security arguments analyze when honest participation is more profitable than deviations; they do not follow from a fixed coin price or reward value.
 
 #### **The Energy Cost**
 
-**Current state** (2024):
-- Bitcoin network: ~400 EH/s (exahashes per second = 10^18)
-- Energy consumption: ~150 TWh/year (comparable to Argentina)
-- Carbon footprint: ~90 MT CO₂/year
-
-**The inefficiency**: Only one miner wins per block. All other computation is "wasted" (though it provides security).
+Proof of work intentionally makes leader election computationally expensive. Its resource cost varies with hardware efficiency, energy sources, market incentives, and protocol parameters, so empirical comparisons must state their measurement date and methodology. Most attempted hashes do not become blocks, although their aggregate cost is the mechanism used to deter rewriting history.
 
 #### **Alternative Consensus: Proof-of-Stake**
 
-**Proof-of-Stake** (Ethereum 2.0, 2022): Validators chosen based on stake (how much cryptocurrency they hold), not computational work.
+**Proof of stake** selects and penalizes validators using locked economic stake rather than repeated hashing.
 
 **Algorithm**:
 ```
-1. Validators lock up stake (32 ETH minimum)
+1. Validators lock protocol-defined stake
 2. Randomly selected to propose blocks (probability ∝ stake)
 3. Other validators vote on validity
 4. Rewards for honest behavior, penalties for malicious behavior
 ```
 
-**Advantages**:
-- 99.95% less energy than proof-of-work
-- Faster finality (blocks confirmed in minutes, not hours)
-- 51% attack requires owning 51% of currency (very expensive)
+**Potential advantages**:
+- substantially lower computational energy demand than proof of work
+- explicit finality mechanisms in some designs
+- attacks can expose bonded assets to protocol penalties
 
 **Challenge**: "Nothing at stake" problem—validators could vote for multiple chains. Solved through slashing (destroying stake of malicious validators).
 
-**Results**: Ethereum's "Merge" (Sept 2022) reduced energy consumption from 112 TWh/year to 0.01 TWh/year.
+Energy and finality comparisons depend on protocol design and system boundary. They should be reported from a dated, reproducible measurement rather than treated as permanent constants.
 
 ### Zero-Knowledge Proofs: Proving Without Revealing
 
@@ -1435,29 +1342,9 @@ Algorithms aren't neutral. They encode choices, reflect biases, and have real im
 - **Manipulation**: Political microtargeting, radicalization
 - **Surveillance**: Everything tracked, profiled, monetized
 
-#### **Case Study: Cambridge Analytica**
+#### **Case Study Pattern: Profiling and Microtargeting**
 
-**What happened** (2018 disclosure):
-- Harvested data from 87 million Facebook users
-- Built psychological profiles
-- Microtargeted political ads in 2016 elections
-- Attempted to manipulate voter behavior
-
-**The algorithm**: Psychographic modeling
-- Five-factor personality model (OCEAN)
-- Predict personality from Facebook likes
-- Target messages based on personality
-
-**Questions**:
-- Was this illegal? (Debatable)
-- Was it effective? (Disputed)
-- Should microtargeting be allowed?
-- What regulations are needed?
-
-**Responses**:
-- GDPR (EU): Strict data protection, consent requirements
-- CCPA (California): Consumer data rights
-- Proposed federal regulations (U.S.)
+A recurring risk pattern is the reuse of data collected for one purpose to infer personal traits and target persuasive messages for another. A rigorous assessment asks whether consent covered the secondary use, whether inferred attributes are valid, how targeting outcomes are measured, and whether affected people can inspect or contest the process. Applicable legal requirements vary by jurisdiction and change over time, so a project making legal claims should cite the current authoritative text.
 
 ### Autonomous Weapons
 
@@ -1671,7 +1558,7 @@ Let's put it all together by analyzing a real research paper.
 
 ### Project Description
 
-Choose a recent algorithmic research paper (published in the last 5 years) and perform a comprehensive analysis:
+Choose an algorithmic research paper whose publication date and venue are clearly stated. Select either a recent contribution or a historically important paper whose claims can be evaluated against later work, and perform a comprehensive analysis:
 
 1. **Summary**: Summarize the paper in your own words (1-2 pages)
    - What problem does it solve?
@@ -1851,7 +1738,7 @@ We've journeyed through the cutting edge of algorithmic research and seen how al
 
 ### Analysis
 
-4. **Paper Reading**: Choose a paper from STOC/FOCS/SODA 2023. Apply the three-pass method. Write a 5-page analysis.
+4. **Paper Reading**: Choose a paper from a recent or historically significant STOC, FOCS, or SODA proceedings. Apply the three-pass method. Write a five-page analysis.
 
 5. **Algorithm Comparison**: Compare Count-Min Sketch vs. exact counting. For what error rates does Count-Min Sketch use less space?
 
@@ -1871,7 +1758,7 @@ We've journeyed through the cutting edge of algorithmic research and seen how al
 
 11. **Fairness Metrics**: Design a new fairness metric for recommendation systems. Prove it's achievable (or show it conflicts with existing metrics).
 
-12. **Literature Survey**: Survey recent papers (last 3 years) on one topic from this chapter. Identify trends and open problems.
+12. **Literature Survey**: State a defensible publication window, survey papers on one topic from this chapter, and identify trends and open problems. Record the search date and databases used.
 
 ## Further Reading
 

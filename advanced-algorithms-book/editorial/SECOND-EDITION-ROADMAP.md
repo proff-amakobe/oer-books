@@ -1,9 +1,10 @@
 # Advanced Computational Algorithms — Second Edition Roadmap
 
-## Progress update — Phase 2 technical pass
+## Progress update — Phase 3 content modernization
 
 - Phase 1 structural foundation: **COMPLETE** (commit `15f62da`).
 - Phase 2 technical correctness and citation preparation: **COMPLETE WITH DOCUMENTED MANUAL-REVIEW ITEMS**. All 537 fenced blocks were classified, safe definition-only Python blocks were executed, representative core algorithms received behavioral edge-case tests, local evidence-backed defects were repaired, and claim/citation manifests plus a verified staging bibliography were created. Untested snippets, dependency-bound examples, informal proofs, and the Chapter 13 freshness rewrite are explicitly not reported as passing.
+- Phase 3 content modernization: **COMPLETE**. The 121-item freshness scope and 230 unresolved citation claims have claim-level dispositions; the verified bibliography is active; Chapter 13 is edition-durable; Chapters 14–15 have been refocused on algorithm engineering, empirical evaluation, reproducibility, and research synthesis; and HTML, PDF, and EPUB builds passed final QA.
 
 The numbered roadmap below is retained as historical planning context; Phase 1 also absorbed its original metadata/frontmatter objective, and the current Phase 2 combined its technical and citation-preparation objectives without replacing the production bibliography.
 

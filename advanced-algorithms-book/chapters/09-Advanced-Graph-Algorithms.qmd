@@ -8,7 +8,7 @@
 
 ## Introduction: The Universal Language of Flow
 
-Here's a wild fact: the algorithm that finds the maximum number of cars that can flow through a highway network is **exactly the same algorithm** that:
+A useful unifying fact is that the same maximum-flow model used for transportation capacity also supports:
 
 - Matches medical students to residency programs
 - Routes data through the internet
@@ -24,7 +24,7 @@ This question, first studied seriously in the 1950s, turned out to be one of the
 
 And here's the beautiful part: we're going to prove that finding maximum flow is **exactly equivalent** to finding the smallest bottleneck in the network. Two completely different-sounding problems, one elegant solution.
 
-Ready to dive in? Let's start with the basics and build up to some seriously cool applications.
+We begin with feasible flows and residual networks, then build toward matching and allocation applications.
 
 ## Network Flow: The Big Picture
 
@@ -184,7 +184,7 @@ Why does this work? If a vertex is still reachable in the residual network, ther
 
 ### The Basic Idea
 
-Ford-Fulkerson is almost insultingly simple:
+Ford–Fulkerson has a compact central idea:
 
 ```
 Start with zero flow everywhere
@@ -251,17 +251,17 @@ Initial network (numbers show capacities):
 
 See how we kept finding paths and pushing flow until we couldn't anymore? That's the entire algorithm!
 
-### Edmonds-Karp: Making It Actually Fast
+### Edmonds-Karp: Breadth-First Augmenting Paths
 
 There's a problem with basic Ford-Fulkerson: **which path should we choose?**
 
 If you choose paths badly, the algorithm can be horribly slow. In fact, with irrational capacities, it might not even terminate! (This is one of those weird theoretical cases, but it's important to know.)
 
-**Edmonds-Karp** solves this by making one simple choice:
+**Edmonds-Karp** obtains a polynomial running-time bound by choosing shortest augmenting paths in the residual graph [@edmonds1972networkflow]:
 
 **Always pick the shortest path (in terms of number of edges).**
 
-Use BFS to find the path, and boom—you get a polynomial-time guarantee!
+Using BFS to choose augmenting paths yields a polynomial-time guarantee.
 
 **Time complexity**: O(VE²)
 
