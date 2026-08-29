@@ -86,7 +86,7 @@ function CodeBlock(el)
     if kind == "terminal" then
       local raw = "\\begin{ACATerminal}{" .. safe .. "}\n" ..
         "\\begin{Verbatim}[fontsize=\\fontsize{8.5}{10}\\selectfont,formatcom=\\color{white}]\n" ..
-        el.text .. "\n\\end{Verbatim}\n\\end{ACATerminal}"
+        el.text .. "\n\\end{Verbatim}\n\\end{ACATerminal}\\color{black}"
       return pandoc.RawBlock("latex", raw)
     end
     return {pandoc.RawBlock("latex", "\\begin{" .. env .. "}{" .. safe .. "}"),

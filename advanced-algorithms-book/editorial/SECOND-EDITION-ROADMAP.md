@@ -1,12 +1,13 @@
 # Advanced Computational Algorithms — Second Edition Roadmap
 
-## Progress update — Phase 5 technical-block design
+## Progress update — Phase 6 print design
 
 - Phase 1 structural foundation: **COMPLETE** (commit `15f62da`).
 - Phase 2 technical correctness and citation preparation: **COMPLETE WITH DOCUMENTED MANUAL-REVIEW ITEMS**. All 537 fenced blocks were classified, safe definition-only Python blocks were executed, representative core algorithms received behavioral edge-case tests, local evidence-backed defects were repaired, and claim/citation manifests plus a verified staging bibliography were created. Untested snippets, dependency-bound examples, informal proofs, and the Chapter 13 freshness rewrite are explicitly not reported as passing.
 - Phase 3 content modernization: **COMPLETE**. The 121-item freshness scope and 230 unresolved citation claims have claim-level dispositions; the verified bibliography is active; Chapter 13 is edition-durable; Chapters 14–15 have been refocused on algorithm engineering, empirical evaluation, reproducibility, and research synthesis; and HTML, PDF, and EPUB builds passed final QA.
 - Phase 4 instructional figures and visual pedagogy: **COMPLETE**. Fourteen canonical SVG figures replace 15 high-value legacy candidates using a shared accessible visual system. All 38 audit candidates have final dispositions; cross-format builds, chapter-based numbering, geometry, accessibility metadata, SVG/EPUB assets, and Phase 2 behavioral regression checks pass.
 - Phase 5 code, pseudocode, terminal, output, and configuration design: **COMPLETE**. All 514 rendered technical blocks have canonical semantic classes and coordinated HTML/PDF/EPUB treatments. Sixteen substantial algorithms use automatic chapter-based numbering; 17 long-line candidates were resolved; physical overflow, duplicate numbering, missing glyph, and title-only-page checks are zero; and all 12 Phase 2 behavioral groups pass.
+- Phase 6 print typography and page architecture: **COMPLETE**. The 653-page US Letter proof now has mirrored book margins, restrained running matter, numbered part dividers, explicit chapter openers, a six-page section-depth TOC, coordinated semantic panels, and safe multipage technical blocks. Physical/live-area overflow, unintended blank pages, stranded numbered headings, unembedded fonts, duplicate algorithm numbers, missing glyph tokens, and technical title-only pages are zero. HTML and EPUB regressions pass without URL, structure, or metadata changes.
 
 The numbered roadmap below is retained as historical planning context; Phase 1 also absorbed its original metadata/frontmatter objective, and the current Phase 2 combined its technical and citation-preparation objectives without replacing the production bibliography.
 

@@ -1,0 +1,119 @@
+% Phase 6 print-only design system for Advanced Computational Algorithms.
+\usepackage[automark,headsepline=.35pt]{scrlayer-scrpage}
+\usepackage{microtype}
+\usepackage{ragged2e}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{etoolbox}
+\usepackage{needspace}
+\usepackage[most]{tcolorbox}
+
+\definecolor{ACAPrintNavy}{HTML}{17345F}
+\definecolor{ACAPrintBlue}{HTML}{275DAD}
+\definecolor{ACAPrintTeal}{HTML}{087F78}
+\definecolor{ACAPrintGold}{HTML}{B27A18}
+\definecolor{ACAPrintInk}{HTML}{172033}
+\definecolor{ACAPrintRule}{HTML}{CBD5E2}
+\definecolor{ACAPrintPale}{HTML}{F4F7FB}
+
+\KOMAoptions{parskip=half-,open=any,headings=normal}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{.48\baselineskip plus .08\baselineskip minus .06\baselineskip}
+\setlength{\emergencystretch}{1.5em}
+\clubpenalty=6500
+\widowpenalty=6500
+\displaywidowpenalty=6500
+\brokenpenalty=3000
+\interfootnotelinepenalty=7000
+
+\setkomafont{chapter}{\sffamily\bfseries\color{ACAPrintNavy}}
+\setkomafont{section}{\sffamily\bfseries\color{ACAPrintNavy}}
+\setkomafont{subsection}{\sffamily\bfseries\color{ACAPrintInk}}
+\setkomafont{subsubsection}{\sffamily\bfseries\color{ACAPrintInk}}
+\setkomafont{disposition}{\sffamily\bfseries}
+\RedeclareSectionCommand[beforeskip=1.65\baselineskip,afterskip=.58\baselineskip]{section}
+\RedeclareSectionCommand[beforeskip=1.25\baselineskip,afterskip=.42\baselineskip]{subsection}
+\RedeclareSectionCommand[beforeskip=1.05\baselineskip,afterskip=.32\baselineskip]{subsubsection}
+\pretocmd{\section}{\Needspace{5\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace{4\baselineskip}}{}{}
+\pretocmd{\subsubsection}{\Needspace{3\baselineskip}}{}{}
+
+\newcommand{\ACAChapter}[2]{%
+  \clearpage\phantomsection\addcontentsline{toc}{chapter}{#2}\chaptermark{#2}%
+  \thispagestyle{empty}\vspace*{1.2\baselineskip}%
+  \noindent\makebox[0pt][l]{\raisebox{-1.4ex}{\color{ACAPrintBlue!13}%
+    \fontsize{62}{62}\selectfont\sffamily\bfseries #1}}%
+  {\color{ACAPrintBlue}\sffamily\bfseries\fontsize{8.5}{10}\selectfont CHAPTER~#1}\par
+  \vspace{1.5ex}{\color{ACAPrintNavy}\sffamily\bfseries\fontsize{25}{29}\selectfont
+    \raggedright #2\par}\vspace{1.2ex}%
+  {\color{ACAPrintTeal}\rule{3.6em}{1.5pt}}\par\vspace{1.45\baselineskip}}
+
+\newcommand{\ACAPart}[2]{%
+  \clearpage\phantomsection\addcontentsline{toc}{part}{#2}\thispagestyle{empty}\vspace*{.18\textheight}%
+  \begin{tcolorbox}[enhanced,colback=ACAPrintNavy,colframe=ACAPrintNavy,boxrule=0pt,
+    arc=0pt,left=11mm,right=11mm,top=12mm,bottom=13mm,borderline south={2pt}{0pt}{ACAPrintTeal}]
+  {\color{white!72}\sffamily\bfseries\fontsize{10}{12}\selectfont PART~#1}\par\vspace{2.2ex}
+  {\color{white}\sffamily\bfseries\fontsize{26}{30}\selectfont\raggedright #2}
+  \end{tcolorbox}\clearpage}
+
+\clearpairofpagestyles
+\automark[chapter]{chapter}
+\ihead{\sffamily\fontsize{7.5}{9}\selectfont\color{ACAPrintNavy}ADVANCED COMPUTATIONAL ALGORITHMS}
+\ohead{\sffamily\fontsize{7.5}{9}\selectfont\color{ACAPrintInk}\headmark}
+\ofoot{\sffamily\bfseries\fontsize{8}{9}\selectfont\color{ACAPrintNavy}\pagemark}
+\renewcommand*{\chapterpagestyle}{empty}
+\renewcommand*{\partpagestyle}{empty}
+
+\renewcommand*{\chaptermarkformat}{\thechapter\autodot\enskip}
+\setkomafont{pageheadfoot}{\normalfont}
+\setkomafont{pagenumber}{\sffamily\bfseries\color{ACAPrintNavy}}
+
+\setcounter{tocdepth}{2}
+\setkomafont{partentry}{\sffamily\bfseries\color{ACAPrintNavy}}
+\setkomafont{chapterentry}{\sffamily\bfseries}
+\setkomafont{chapterentrypagenumber}{\sffamily\bfseries\color{ACAPrintNavy}}
+
+\AtBeginEnvironment{longtable}{\small\renewcommand{\arraystretch}{1.16}\setlength{\tabcolsep}{5pt}}
+\AtBeginEnvironment{table}{\small\renewcommand{\arraystretch}{1.16}\setlength{\tabcolsep}{5pt}}
+\AtBeginEnvironment{figure}{\setlength{\abovecaptionskip}{5pt}\setlength{\belowcaptionskip}{2pt}}
+\setkomafont{caption}{\small}
+\setkomafont{captionlabel}{\sffamily\bfseries\color{ACAPrintNavy}}
+
+\newtcolorbox{ACAObjectives}{enhanced,breakable,pad at break*=4mm,colback=ACAPrintPale,colframe=ACAPrintRule,
+  borderline west={2pt}{0pt}{ACAPrintTeal},boxrule=.4pt,arc=.8mm,left=3mm,right=3mm,
+  top=2mm,bottom=2mm,before skip=7pt,after skip=9pt,title={LEARNING OBJECTIVES},
+  coltitle=ACAPrintNavy,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont}
+\newtcolorbox{ACATheorem}[1]{enhanced,breakable,pad at break*=4mm,colback=white,colframe=ACAPrintNavy,
+  borderline west={1.8pt}{0pt}{ACAPrintNavy},boxrule=.35pt,arc=.5mm,left=3mm,right=3mm,
+  top=2mm,bottom=2mm,before skip=7pt,after skip=8pt,title={#1},
+  coltitle=ACAPrintNavy,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont}
+\newtcolorbox{ACAProof}[1]{enhanced,breakable,blanker,borderline west={1.1pt}{0pt}{ACAPrintRule},
+  left=3mm,right=1mm,top=1mm,bottom=1mm,before skip=5pt,after skip=6pt,title={#1},
+  coltitle=ACAPrintInk,fonttitle=\itshape\bfseries}
+\newtcolorbox{ACAInsight}[1]{enhanced,breakable,blanker,borderline west={1.7pt}{0pt}{ACAPrintTeal},
+  left=3mm,right=1mm,top=1mm,bottom=1mm,before skip=5pt,after skip=6pt,title={#1},
+  coltitle=ACAPrintTeal,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont}
+\newtcolorbox{ACAComplexity}[1]{enhanced,breakable,colback=ACAPrintPale,colframe=ACAPrintRule,
+  boxrule=.35pt,arc=.5mm,left=3mm,right=3mm,top=1.5mm,bottom=1.5mm,before skip=5pt,
+  after skip=6pt,title={#1},coltitle=ACAPrintNavy,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont}
+\newtcolorbox{ACAPitfall}[1]{enhanced,breakable,colback=ACAPrintGold!5,colframe=ACAPrintGold!55,
+  borderline west={1.7pt}{0pt}{ACAPrintGold},boxrule=.35pt,arc=.5mm,left=3mm,right=3mm,
+  top=1.5mm,bottom=1.5mm,before skip=5pt,after skip=6pt,title={#1},
+  coltitle=ACAPrintGold!70!black,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont}
+
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{titlepage}\thispagestyle{empty}
+  \vspace*{.13\textheight}
+  {\color{ACAPrintTeal}\rule{4.5em}{2pt}}\par\vspace{2.8ex}
+  {\sffamily\bfseries\fontsize{31}{35}\selectfont\color{ACAPrintNavy}\@title\par}
+  \vspace{2.2ex}
+  {\sffamily\fontsize{16}{20}\selectfont\color{ACAPrintInk}\@subtitle\par}
+  \vfill
+  {\sffamily\bfseries\large\color{ACAPrintNavy}\@author\par}
+  \vspace{2ex}
+  {\sffamily\small Global Data Science Institute\par}
+  \vspace{5ex}
+  {\sffamily\footnotesize First Edition · 2025\par}
+  \end{titlepage}}
+\makeatother

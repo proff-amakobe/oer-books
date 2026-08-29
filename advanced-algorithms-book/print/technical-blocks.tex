@@ -11,29 +11,29 @@
 \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},fontsize=\fontsize{8.5}{10}\selectfont}
 \fvset{fontsize=\fontsize{8.5}{10}\selectfont}
 \newcommand{\ACABoxTitle}[1]{\if\relax\detokenize{#1}\relax\else#1\fi}
-\newtcolorbox{ACAProgram}[1]{enhanced,breakable,colback=ACACodeBg,colframe=ACALine,
+\newtcolorbox{ACAProgram}[1]{enhanced,breakable,pad at break*=4mm,colback=ACACodeBg,colframe=ACALine,
   borderline west={1.4pt}{0pt}{ACABlue},boxrule=.45pt,arc=1mm,left=2.2mm,right=2.2mm,
   top=1.6mm,bottom=1.6mm,before skip=6pt,after skip=7pt,title={\ACABoxTitle{#1}},
   coltitle=ACANavy,fonttitle=\sffamily\bfseries\fontsize{7.5}{8.5}\selectfont,
   attach boxed title to top left={xshift=2mm,yshift*=-1mm},boxed title style={colback=ACACodeBg,colframe=ACALine,boxrule=.35pt,arc=.6mm}}
-\newtcolorbox{ACAAlgorithm}[1]{enhanced,breakable,colback=ACAAlgBg,colframe=ACALine,
+\newtcolorbox{ACAAlgorithm}[1]{enhanced,breakable,pad at break*=4mm,colback=ACAAlgBg,colframe=ACALine,
   borderline west={1.7pt}{0pt}{ACATeal},boxrule=.45pt,arc=.6mm,left=2.5mm,right=2.5mm,
   top=2mm,bottom=2mm,before skip=7pt,after skip=8pt,title={#1},
   coltitle=ACATeal,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont,
   attach boxed title to top left={xshift=2mm,yshift*=-1mm},boxed title style={colback=ACAAlgBg,colframe=ACALine,boxrule=.35pt,arc=.6mm}}
-\newtcolorbox{ACATerminal}[1]{enhanced,breakable,colback=ACATerminalBg,colframe=ACATerminalBg,
+\newtcolorbox{ACATerminal}[1]{enhanced,breakable,pad at break*=4mm,colback=ACATerminalBg,colframe=ACATerminalBg,
   coltext=white,boxrule=0pt,arc=1mm,left=2.5mm,right=2.5mm,top=2mm,bottom=2mm,
   before skip=7pt,after skip=8pt,title={#1},coltitle=white,fonttitle=\ttfamily\bfseries\fontsize{7.5}{8.5}\selectfont,
   overlay middle and last={\node[anchor=north east,text=white!60,font=\ttfamily\fontsize{6.8}{7.5}\selectfont]
   at ([xshift=-2mm,yshift=-1.5mm]frame.north east) {Terminal -- continued};}}
-\newtcolorbox{ACAOutput}[1]{enhanced,breakable,colback=black!4,colframe=black!28,
+\newtcolorbox{ACAOutput}[1]{enhanced,breakable,pad at break*=4mm,colback=black!4,colframe=black!28,
   borderline west={1.3pt}{0pt}{black!50},boxrule=.4pt,arc=.6mm,left=2.2mm,right=2.2mm,
   top=1.5mm,bottom=1.5mm,before skip=6pt,after skip=7pt,title={#1},fonttitle=\sffamily\bfseries\fontsize{7.5}{8.5}\selectfont}
-\newtcolorbox{ACAConfig}[1]{enhanced,breakable,colback=violet!3,colframe=violet!28,
+\newtcolorbox{ACAConfig}[1]{enhanced,breakable,pad at break*=4mm,colback=violet!3,colframe=violet!28,
   borderline west={1.3pt}{0pt}{violet!60!black},boxrule=.4pt,arc=.6mm,left=2.2mm,right=2.2mm,
   top=1.5mm,bottom=1.5mm,before skip=6pt,after skip=7pt,title={#1},fonttitle=\sffamily\bfseries\fontsize{7.5}{8.5}\selectfont}
 \newtcolorbox{ACANeutral}[1]{enhanced,breakable,colback=black!2,colframe=black!20,
   boxrule=.35pt,arc=.4mm,left=2mm,right=2mm,top=1.2mm,bottom=1.2mm,before skip=5pt,after skip=6pt}
-\AtBeginEnvironment{ACAProgram}{\Needspace{5\baselineskip}}
-\AtBeginEnvironment{ACAAlgorithm}{\Needspace{6\baselineskip}}
-\AtBeginEnvironment{ACATerminal}{\Needspace{5\baselineskip}}
+% These panels are breakable. Applying Needspace from inside the environment
+% confuses tcolorbox's split calculation and can strand a fragment below the
+% live page; tcolorbox itself chooses the safe break point.
