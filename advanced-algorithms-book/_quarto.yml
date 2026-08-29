@@ -1,6 +1,10 @@
 project:
   type: book
   output-dir: _book
+  post-render:
+    - python3 scripts/web/postprocess_html.py
+  resources:
+    - robots.txt
 
 book:
   title: &publication-title "Advanced Computational Algorithms"
@@ -8,8 +12,31 @@ book:
   author: &publication-author "Moody Amakobe"
   publisher: &publication-publisher "Global Data Science Institute"
   license: &publication-license "CC BY 4.0"
-  date: &publication-date "2025-01-01"
+  date: &publication-date "2026-01-01"
   cover-image: images/cover.png
+  description: >-
+    A rigorous, implementation-minded open textbook on algorithm design,
+    complexity, data structures, optimization, experimentation, and applied
+    computational systems.
+  site-url: https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/
+  repo-url: https://github.com/proff-amakobe/oer-books
+  repo-subdir: advanced-algorithms-book
+  repo-actions: [source, issue]
+  downloads: [pdf, epub]
+  search:
+    location: sidebar
+    type: textbox
+  sidebar:
+    style: docked
+    collapse-level: 1
+  page-footer:
+    left: >-
+      Advanced Computational Algorithms · Second Edition · 2026
+    center: >-
+      Moody Amakobe · Global Data Science Institute
+    right: >-
+      [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) ·
+      [GitHub](https://github.com/proff-amakobe/oer-books/tree/main/advanced-algorithms-book)
   
   chapters:
     - index.qmd
@@ -56,13 +83,27 @@ book:
 
 format:
   html:
-    theme: cosmo
-    css: styles/technical-blocks.css
+    theme:
+      - cosmo
+      - styles/web.scss
+    css:
+      - styles/technical-blocks.css
+    include-in-header:
+      - includes/web-metadata.html
+    include-after-body:
+      - includes/web-accessibility.html
     filters:
       - filters/technical-blocks.lua
     toc: true
+    toc-depth: 3
     code-copy: true
+    code-overflow: scroll
     number-sections: true
+    anchor-sections: true
+    link-external-newwindow: true
+    html-math-method: mathjax
+    open-graph: true
+    twitter-card: true
 
   pdf:
     documentclass: scrbook
@@ -107,9 +148,8 @@ lang: en-US
 bibliography: references.bib
 
 metadata:
-  edition: "First Edition"
-  publication-year: "2025"
-  isbn: "979-8-2754-2277-1"
+  edition: "Second Edition"
+  publication-year: "2026"
   publisher: *publication-publisher
   publisher-imprint: "Global Data Science Institute (GDSI Press)"
   license: *publication-license

@@ -83,6 +83,11 @@ function CodeBlock(el)
       ["text-diagram"]="ACANeutral", ["inline-example"]="ACANeutral",
       ["technical-other"]="ACANeutral"})[kind]
     local safe = (label or ""):gsub("([%%#&{}_])", "\\%1")
+    if kind ~= "terminal" and lines > 24 then
+      local heading = label or language_name(el) or (kind == "algorithm" and "Algorithm" or "Program Code")
+      heading = heading:gsub("([%%#&{}_])", "\\%1")
+      return {pandoc.RawBlock("latex", "\\ACALongCodeHeader{" .. heading .. "}"), el}
+    end
     if kind == "terminal" then
       local raw = "\\begin{ACATerminal}{" .. safe .. "}\n" ..
         "\\begin{Verbatim}[fontsize=\\fontsize{8.5}{10}\\selectfont,formatcom=\\color{white}]\n" ..

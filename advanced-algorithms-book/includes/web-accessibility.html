@@ -1,0 +1,23 @@
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("button.code-copy-button").forEach((button) => {
+    button.setAttribute("aria-label", "Copy code to clipboard");
+  });
+
+  window.requestAnimationFrame(() => {
+    const root = document.documentElement;
+    root.dataset.viewportWidth = String(root.clientWidth);
+    root.dataset.scrollWidth = String(root.scrollWidth);
+    root.dataset.horizontalOverflow = String(root.scrollWidth > root.clientWidth + 1);
+  });
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("button.code-copy-button");
+    if (!button) return;
+    window.setTimeout(() => {
+      const copied = button.classList.contains("code-copy-button-checked");
+      button.setAttribute("aria-label", copied ? "Code copied" : "Copy code to clipboard");
+    }, 50);
+  });
+});
+</script>

@@ -38,18 +38,19 @@
 \pretocmd{\subsection}{\Needspace{4\baselineskip}}{}{}
 \pretocmd{\subsubsection}{\Needspace{3\baselineskip}}{}{}
 
-\newcommand{\ACAChapter}[2]{%
-  \clearpage\phantomsection\addcontentsline{toc}{chapter}{#2}\chaptermark{#2}%
+\newcommand{\ACAChapter}[3]{%
+  \clearpage\phantomsection\addcontentsline{toc}{chapter}{#3}\chaptermark{#3}%
   \thispagestyle{empty}\vspace*{1.2\baselineskip}%
   \noindent\makebox[0pt][l]{\raisebox{-1.4ex}{\color{ACAPrintBlue!13}%
     \fontsize{62}{62}\selectfont\sffamily\bfseries #1}}%
-  {\color{ACAPrintBlue}\sffamily\bfseries\fontsize{8.5}{10}\selectfont CHAPTER~#1}\par
+  {\color{ACAPrintBlue}\sffamily\bfseries\fontsize{8.5}{10}\selectfont CHAPTER~#2}\par
   \vspace{1.5ex}{\color{ACAPrintNavy}\sffamily\bfseries\fontsize{25}{29}\selectfont
-    \raggedright #2\par}\vspace{1.2ex}%
+    \raggedright #3\par}\vspace{1.2ex}%
   {\color{ACAPrintTeal}\rule{3.6em}{1.5pt}}\par\vspace{1.45\baselineskip}}
 
 \newcommand{\ACAPart}[2]{%
-  \clearpage\phantomsection\addcontentsline{toc}{part}{#2}\thispagestyle{empty}\vspace*{.18\textheight}%
+  \ifdim\pagetotal>0pt\clearpage\fi%
+  \phantomsection\addcontentsline{toc}{part}{#2}\thispagestyle{empty}\vspace*{.18\textheight}%
   \begin{tcolorbox}[enhanced,colback=ACAPrintNavy,colframe=ACAPrintNavy,boxrule=0pt,
     arc=0pt,left=11mm,right=11mm,top=12mm,bottom=13mm,borderline south={2pt}{0pt}{ACAPrintTeal}]
   {\color{white!72}\sffamily\bfseries\fontsize{10}{12}\selectfont PART~#1}\par\vspace{2.2ex}
@@ -79,7 +80,7 @@
 \setkomafont{caption}{\small}
 \setkomafont{captionlabel}{\sffamily\bfseries\color{ACAPrintNavy}}
 
-\newtcolorbox{ACAObjectives}{enhanced,breakable,pad at break*=4mm,colback=ACAPrintPale,colframe=ACAPrintRule,
+\newtcolorbox{ACAObjectives}{enhanced,colback=ACAPrintPale,colframe=ACAPrintRule,
   borderline west={2pt}{0pt}{ACAPrintTeal},boxrule=.4pt,arc=.8mm,left=3mm,right=3mm,
   top=2mm,bottom=2mm,before skip=7pt,after skip=9pt,title={LEARNING OBJECTIVES},
   coltitle=ACAPrintNavy,fonttitle=\sffamily\bfseries\fontsize{8}{9}\selectfont}
@@ -114,6 +115,6 @@
   \vspace{2ex}
   {\sffamily\small Global Data Science Institute\par}
   \vspace{5ex}
-  {\sffamily\footnotesize First Edition · 2025\par}
+  {\sffamily\footnotesize Second Edition · 2026\par}
   \end{titlepage}}
 \makeatother

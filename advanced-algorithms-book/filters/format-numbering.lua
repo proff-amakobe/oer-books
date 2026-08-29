@@ -20,8 +20,7 @@ end
 
 function Div(element)
   if has_class(element, "web-only") then
-    element.content = {}
-    return element
+    return {}
   end
 end
 

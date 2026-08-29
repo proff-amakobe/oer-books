@@ -49,7 +49,7 @@ function Header(el)
     local number, chapter_title = title:match("^Chapter%s+(%d+):%s*(.+)$")
     if number then
       local display_number = tonumber(number) < 10 and ("0" .. number) or number
-      return pandoc.RawBlock("latex", "\\ACAChapter{" .. display_number .. "}{" .. latex_escape(chapter_title) .. "}")
+      return pandoc.RawBlock("latex", "\\ACAChapter{" .. display_number .. "}{" .. number .. "}{" .. latex_escape(chapter_title) .. "}")
     end
     local part_number, part_title = title:match("^Part%s+([IVX]+):%s*(.+)$")
     if part_title then
@@ -64,7 +64,10 @@ function Pandoc(doc)
   local i = 1
   while i <= #doc.blocks do
     local block = doc.blocks[i]
-    if block.t == "Header" and block.level >= 2 then
+    local marker = (block.t == "Para" or block.t == "Plain") and stringify(block):lower() or ""
+    if marker:match("^(python|bash|java|javascript|yaml|json)$") then
+      i = i + 1
+    elseif block.t == "Header" and block.level >= 2 then
       local title = stringify(block):lower()
       if title:match("learning objectives") or title:match("what you.?ll learn") then
         local content = {}
