@@ -68,17 +68,7 @@ Formally: Σ flow-in = Σ flow-out for every vertex except s and t.
 
 Let's look at a tiny network:
 
-```
-        [capacity: 10]
-    s ----------------> a
-    |                   |
-    |                   | [capacity: 10]
-    |[5]                |
-    |                   v
-    v                   t
-    b ----------------->
-        [capacity: 15]
-```
+![A source branches to vertices a and b with capacities 10 and 5; their outgoing edges to the sink have capacities 10 and 15.](../assets/figures/chapter09/simple-flow-network.svg){#fig-simple-flow-network width=68% fig-pos="H" fig-cap="Two edge-disjoint paths carry a maximum flow of 15 units."}
 
 **Question**: What's the maximum flow from s to t?
 
@@ -114,13 +104,7 @@ The backward edge isn't about water flowing backward in physical pipes. It's abo
 
 **Concrete example:**
 
-```
-Original: You're pushing 7 units through edge (u,v) with capacity 10
-
-Residual network shows:
-u --[3]-->  v    (can push 3 more forward)
-u  <--[7]-- v    (can "cancel" up to 7 units)
-```
+![For an edge carrying seven of ten units, the residual network contains forward capacity three and a dashed backward edge of capacity seven.](../assets/figures/chapter09/residual-edge.svg){#fig-residual-edge width=64% fig-pos="H" fig-cap="Residual edges represent both unused forward capacity and flow that may be canceled."}
 
 If you later find a better path that uses the backward edge from v to u, you're essentially redirecting some of that flow to a better route.
 
@@ -132,18 +116,7 @@ This idea—that we can undo bad routing decisions—is what makes flow algorith
 
 Imagine taking scissors and cutting your flow network into two pieces: one piece containing the source, one containing the sink. The **capacity of the cut** is the total capacity of edges you cut.
 
-```
-    s ---[10]---> a ---[10]---> t
-    |                            ^
-    |[5]                         |
-    v                            |[15]
-    b --------------------------->
-
-If I cut here: |  then I sever these edges
-              |
-    s    a    |     t
-         b    |
-```
+![A dashed boundary immediately after the source crosses capacity-10 and capacity-5 edges while highlighted paths carry total flow 15.](../assets/figures/chapter09/max-flow-min-cut.svg){#fig-max-flow-min-cut width=74% fig-pos="H" fig-cap="The source cut has capacity 15, equal to the displayed maximum flow."}
 
 In this example, cutting between {s,a,b} and {t} means we cut edges a→t and b→t, giving us a cut capacity of 10 + 15 = 25.
 
@@ -203,17 +176,7 @@ That's it! Find a path, push flow, repeat until no paths remain.
 
 Let's work through a complete example so you really see how this works:
 
-```
-Initial network (numbers show capacities):
-
-        s --[16]-> v1 --[12]-> t
-        |          |            ^
-     [13]|       [9]|         [20]|
-        |          v            |
-        v2 --[4]-> v3 --[7]-> v4
-        |                       ^
-     [14]|____________________[4]|
-```
+The trace uses the capacity network stated by the edge list in the implementation below. Each round records its chosen augmenting path, bottleneck, and residual update; this procedural state is retained as text rather than duplicated as an additional static diagram.
 
 **Start**: Flow everywhere is zero.
 
@@ -733,16 +696,7 @@ Here's the magic: we can solve matching using maximum flow!
 4. Add edge from every compatible pair (capacity 1)
 5. Add edge from every right vertex to t (capacity 1)
 
-```
-        Left side        Right side
-           L1 ------------ R1
-          /  \            /  \
-    s -- L2   --- X ----    R2 -- t
-          \  /            \  /
-           L3 ------------ R3
-
-All edges have capacity 1
-```
+![A source connects to three left vertices, compatibility edges connect the bipartition, and three highlighted unit-flow paths reach the sink through distinct right vertices.](../assets/figures/chapter09/bipartite-matching-flow.svg){#fig-bipartite-matching-flow width=82% fig-pos="H" fig-cap="Unit capacities convert bipartite matching into maximum flow while enforcing at most one match per vertex."}
 
 **Why does this work?**
 

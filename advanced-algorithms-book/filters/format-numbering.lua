@@ -36,7 +36,13 @@ function Header(element)
     sections = {0, 0, 0, 0, 0}
     sectioning_started = false
     local label = tostring(chapter)
-    if FORMAT:match("latex") then label = "Chapter " .. label .. ":" end
+    if FORMAT:match("latex") then
+      label = "Chapter " .. label .. ":"
+      local heading = prefix(element, label, "chapter-number")
+      local figure_counter = string.format(
+        "\\setcounter{figure}{0}\\renewcommand{\\thefigure}{%d.\\arabic{figure}}", chapter)
+      return {pandoc.RawBlock("latex", figure_counter), heading}
+    end
     return prefix(element, label, "chapter-number")
   end
 

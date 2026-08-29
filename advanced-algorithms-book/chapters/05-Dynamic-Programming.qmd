@@ -125,21 +125,7 @@ print(fibonacci_naive(100)) # Returns: ???    (would take millennia!)
 
 **What's going wrong?** Let's visualize the recursion tree for `fibonacci_naive(5)`:
 
-```
-                              fib(5)
-                           /           \
-                      fib(4)           fib(3)
-                     /      \          /      \
-                fib(3)    fib(2)   fib(2)   fib(1)
-               /     \    /    \    /    \      |
-           fib(2) fib(1) fib(1) fib(0) fib(1) fib(0)  1
-           /    \    |      |      |      |      |
-       fib(1) fib(0) 1      1      0      1      0
-          |      |
-          1      0
-
-Total function calls: 15 to compute fib(5)!
-```
+![Naive Fibonacci recursion repeats fib(3) and fib(2), whereas the memoized dependency chain computes each state once.](../assets/figures/chapter05/fibonacci-overlap.svg){#fig-fibonacci-overlap width=88% fig-pos="H" fig-cap="Memoization collapses repeated Fibonacci subproblems into one computation per state."}
 
 **The problem:** We compute the same values repeatedly:
 
@@ -235,20 +221,7 @@ print(fibonacci_memoized(500))  # ~      (instant!)
 
 **The memoized recursion tree for fib(5):**
 
-```
-                              fib(5) ← computed
-                           /           \
-                      fib(4) ← computed  fib(3) ← lookup! (already computed)
-                     /      \          
-                fib(3) ← computed    fib(2) ← lookup!
-               /     \    
-           fib(2) ← computed    fib(1) ← base case
-           /    \    
-       fib(1)  fib(0) ← base cases
-
-Total unique computations: 6 (not 15!)
-All subsequent calls are lookups: O(1)
-```
+As @fig-fibonacci-overlap shows, the memoized evaluation computes six unique states for `fib(5)`; subsequent requests for a stored state are constant-time lookups.
 
 **Analysis:**
 

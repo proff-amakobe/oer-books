@@ -191,26 +191,7 @@ Divide and conquer typically improves time complexity when:
 
 Understanding recursion trees is crucial for analyzing divide and conquer algorithms. Let's visualize our max-finding example:
 
-```
-                    find_max([3,7,2,9,1,5,8,4])  ← Original problem
-                           /              \
-                          /                \
-              find_max([3,7,2,9])    find_max([1,5,8,4])  ← Divide in half
-                   /        \             /        \
-                  /          \           /          \
-        find_max([3,7]) find_max([2,9]) find_max([1,5]) find_max([8,4])
-            /    \        /    \          /    \         /    \
-           3     7       2     9         1     5        8     4  ← Base cases
-           
-        Return 7    Return 9          Return 5       Return 8
-              \      /                      \          /
-               \    /                        \        /
-            Return 9                      Return 8
-                  \                          /
-                   \                        /
-                    \                      /
-                            Return 9  ← Final answer
-```
+![The input array splits recursively into single values. Local maxima combine upward until the root returns 9.](../assets/figures/chapter02/find-max-recursion.svg){#fig-find-max-recursion width=82% fig-pos="H" fig-cap="Find-max recursion exposes the divide and combine stages; the maximum value 9 propagates to the root."}
 
 **Key observations about the tree:**
 
@@ -469,20 +450,7 @@ Initial call: merge_sort([38, 27, 43, 3])
 
 **Complete recursion tree:**
 
-```
-                    [38, 27, 43, 3]
-                    /              \
-              [38, 27]            [43, 3]
-              /      \            /      \
-           [38]     [27]       [43]     [3]     ← Base cases
-             |        |          |        |
-           [38]     [27]       [43]     [3]     ← Return as-is
-              \      /            \      /
-             [27, 38]            [3, 43]         ← Merge pairs
-                  \                  /
-                   \                /
-                  [3, 27, 38, 43]                ← Final merge
-```
+![Merge sort splits the array into singleton leaves, merges each pair in order, and produces the sorted array 3, 27, 38, 43.](../assets/figures/chapter02/merge-sort-decomposition.svg){#fig-merge-sort-decomposition width=78% fig-pos="H" fig-cap="Merge sort alternates decomposition and ordered combination."}
 
 ### Correctness Proof for Merge Sort
 
@@ -554,20 +522,7 @@ Total work = cn × (log₂ n + 1) = O(n log n)
 
 **Visual representation:**
 
-```
-                            cn                    ← Level 0: n work
-                    /              \
-                cn/2              cn/2             ← Level 1: n work total
-              /      \          /      \
-           cn/4    cn/4      cn/4    cn/4         ← Level 2: n work total
-          /  \    /  \      /  \    /  \
-        ...  ...  ...  ...  ...  ...  ...  ...   ← ...
-        c    c    c    c    c    c    c    c     ← Level log n: n work total
-
-Total levels: log₂(n) + 1
-Work per level: cn
-Total work: cn log₂(n) = O(n log n)
-```
+![A balanced binary recursion tree has cn total work at every level, from one root problem through n constant-size leaves.](../assets/figures/chapter02/merge-sort-work-tree.svg){#fig-merge-sort-work width=84% fig-pos="H" fig-cap="Merge sort performs Θ(n) work per level across Θ(log n) levels."}
 
 **Formal proof using substitution method:**
 
@@ -1015,18 +970,7 @@ Solution: T(n) = O(n log n)
 
 **Recursion tree:**
 
-```
-                    n                    ← cn work
-                /        \
-              n/2        n/2             ← cn work
-             /  \        /  \
-          n/4  n/4    n/4  n/4           ← cn work
-          ...  ...    ...  ...
-          
-Height: log n
-Work per level: cn
-Total: cn log n = O(n log n)
-```
+![Balanced quicksort partitions form a logarithmic-height tree; repeatedly choosing an extreme pivot forms a linear chain.](../assets/figures/chapter02/quicksort-partition-comparison.svg){#fig-quicksort-partitions width=88% fig-pos="H" fig-cap="Partition balance determines whether quicksort has Θ(n log n) or Θ(n²) recursion."}
 
 #### Worst Case: O(n²)
 
@@ -1055,23 +999,7 @@ T(n) = T(n-1) + O(n)
 
 **Recursion tree:**
 
-```
-                    n                    ← cn work
-                   /
-                  n-1                    ← c(n-1) work
-                 /
-                n-2                      ← c(n-2) work
-               /
-              ...
-             /
-            1                            ← c work
-
-Height: n
-Total work: cn + c(n-1) + c(n-2) + ... + c
-          = c(n + (n-1) + (n-2) + ... + 1)
-          = c(n(n+1)/2)
-          = O(n²)
-```
+The unbalanced case is the right-hand tree in @fig-quicksort-partitions: its level costs sum to an arithmetic series, giving Θ(n²) work.
 
 **This is bad!** Same as bubble sort, selection sort, insertion sort.
 
@@ -3309,4 +3237,3 @@ def get_skyline(buildings: List[List[int]]) -> List[List[int]]:
 _"In recursion, you solve the big problem by solving smaller versions. In dynamic programming, you solve the small problems once and remember the answers." - Preparing for Chapter 3_
 
 ---
-
