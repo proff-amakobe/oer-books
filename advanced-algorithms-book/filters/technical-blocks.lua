@@ -94,6 +94,16 @@ function CodeBlock(el)
         el.text .. "\n\\end{Verbatim}\n\\end{ACATerminal}\\color{black}"
       return pandoc.RawBlock("latex", raw)
     end
+    -- Narrative examples, diagrams, and captured output are not source code.
+    -- Render them without syntax-token macros so a token style can never create
+    -- the dark-on-dark bars that previously hid mathematical expressions.
+    if kind == "program-output" or kind == "data-example" or kind == "text-diagram" or
+       kind == "inline-example" or kind == "technical-other" then
+      local raw = "\\begin{" .. env .. "}{" .. safe .. "}\n" ..
+        "\\begin{Verbatim}[fontsize=\\fontsize{8.5}{10}\\selectfont,formatcom=\\color{ACAPrintInk}]\n" ..
+        el.text .. "\n\\end{Verbatim}\n\\end{" .. env .. "}"
+      return pandoc.RawBlock("latex", raw)
+    end
     return {pandoc.RawBlock("latex", "\\begin{" .. env .. "}{" .. safe .. "}"),
       el, pandoc.RawBlock("latex", "\\end{" .. env .. "}")}
   end

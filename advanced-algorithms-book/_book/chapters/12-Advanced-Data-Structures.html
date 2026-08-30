@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-06de4c5d76b4db83effa651bdc7dd733.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-1f529bbf54edd2e16fcb2365157a6421.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-981565f5080857d62f3392ea134307e7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -129,6 +129,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 </script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles/technical-blocks.css">
 <meta property="og:title" content="12&nbsp; Advanced Data Structures - When Arrays and Trees Aren’t Enough – Advanced Computational Algorithms">
@@ -498,7 +527,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="12.1" class="anchored" data-anchor-id="introduction-beyond-the-basics"><span class="header-section-number">12.1</span> Introduction: Beyond the Basics</h2>
 <p>You know arrays, linked lists, hash tables, and binary search trees. These are the bread and butter of programming. But what happens when you need to:</p>
 <ul>
-<li><strong>Find the sum of elements from index 1000 to 5000 in an array that changes frequently</strong> (try doing that in O(log n)!)</li>
+<li><strong>Find the sum of elements from index 1000 to 5000 in an array that changes frequently</strong> (try doing that in <span class="math inline">\(O(log n)\)</span>!)</li>
 <li><strong>Support “undo” in your application without storing copies of everything</strong> (time travel, anyone?)</li>
 <li><strong>Represent a billion-element bit vector in just megabytes</strong> (not gigabytes!)</li>
 <li><strong>Process data faster than your CPU’s cache misses</strong> (algorithms that adapt to any cache size!)</li>
@@ -520,17 +549,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-problem" class="level3" data-number="12.2.1">
 <h3 data-number="12.2.1" class="anchored" data-anchor-id="the-problem"><span class="header-section-number">12.2.1</span> The Problem</h3>
 <p>You have an array of n elements and need to: 1. <strong>Query</strong>: Find the sum (or min, max, etc.) of elements from index L to R 2. <strong>Update</strong>: Change the value at a specific index</p>
-<p><strong>Naive solutions</strong>: - Query: O(n) by iterating through the range - Update: O(1) just set the value</p>
+<p><strong>Naive solutions</strong>: - Query: <span class="math inline">\(O(n)\)</span> by iterating through the range - Update: <span class="math inline">\(O(1)\)</span> just set the value</p>
 <p>OR</p>
 <ul>
-<li>Use prefix sums for O(1) queries, but O(n) updates</li>
+<li>Use prefix sums for <span class="math inline">\(O(1)\)</span> queries, but <span class="math inline">\(O(n)\)</span> updates</li>
 </ul>
-<p><strong>Can we do better?</strong> Yes! O(log n) for both operations!</p>
+<p><strong>Can we do better?</strong> Yes! <span class="math inline">\(O(log n)\)</span> for both operations!</p>
 </section>
 <section id="the-segment-tree-idea" class="level3" data-number="12.2.2">
 <h3 data-number="12.2.2" class="anchored" data-anchor-id="the-segment-tree-idea"><span class="header-section-number">12.2.2</span> The Segment Tree Idea</h3>
 <p>A <strong>segment tree</strong> is a binary tree where: - Each <strong>leaf</strong> represents a single element - Each <strong>internal node</strong> represents a range (segment) of elements - Each node stores the aggregate (sum, min, max, etc.) of its segment</p>
-<div id="fig-segment-tree-query" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H" data-fig-cap="A segment-tree query decomposes range [1,4] into three disjoint stored intervals.">
+<div id="fig-segment-tree-query" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-cap="A segment-tree query decomposes range [1,4] into three disjoint stored intervals." data-fig-pos="H">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-segment-tree-query-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../assets/figures/chapter12/segment-tree-query.svg" alt="The array 1, 3, 5, 7, 9, 11 maps to a binary sum tree. Highlighted disjoint nodes for intervals one, two, and three through four sum to 24." class="img-fluid figure-img" style="width:86.0%" data-fig-pos="H" data-fig-cap="A segment-tree query decomposes range [1,4] into three disjoint stored intervals.">
@@ -540,7 +569,11 @@ Figure&nbsp;12.1: The array 1, 3, 5, 7, 9, 11 maps to a binary sum tree. Highlig
 </figcaption>
 </figure>
 </div>
-<p><strong>Key insight</strong>: Any range [L, R] can be broken into O(log n) nodes in the tree!</p>
+<p><strong>Key insight:</strong> A query interval <span class="math inline">\([L,R]\)</span> has a canonical decomposition into <span class="math inline">\(O(\log n)\)</span> segment-tree nodes. For an associative combine operation <span class="math inline">\(\circ\)</span>, the range result is</p>
+<p><span class="math display">\[
+A_L\circ A_{L+1}\circ\cdots\circ A_R,
+\]</span></p>
+<p>computed from those node aggregates. The logarithmic bound assumes a balanced binary segment tree.</p>
 <p><strong>Example</strong>: Query sum from index 1 to 4: - Break into: [1:3] + [2:5] + [3-4:16] - Or even better: [1:3] + [2:5] + [3:7] + [4:9] - Total: 3 + 5 + 7 + 9 = 24</p>
 </section>
 <section id="building-a-segment-tree" class="level3" data-number="12.2.3">
@@ -734,8 +767,8 @@ Figure&nbsp;12.1: The array 1, 3, 5, 7, 9, 11 maps to a binary sum tree. Highlig
 <section id="lazy-propagation-range-updates" class="level3" data-number="12.2.5">
 <h3 data-number="12.2.5" class="anchored" data-anchor-id="lazy-propagation-range-updates"><span class="header-section-number">12.2.5</span> Lazy Propagation: Range Updates</h3>
 <p>What if we want to <strong>update an entire range</strong> [L, R] at once?</p>
-<p>Naive approach: Update each element individually → O(n log n)</p>
-<p><strong>Lazy propagation</strong>: Defer updates until necessary → O(log n)!</p>
+<p>Naive approach: Update each element individually → <span class="math inline">\(O(n log n)\)</span></p>
+<p><strong>Lazy propagation</strong>: Defer updates until necessary → <span class="math inline">\(O(log n)\)</span>!</p>
 <p><strong>Key idea</strong>: Mark nodes as “lazy” and propagate updates only when needed.</p>
 <div class="technical-block program-code">
 <div class="sourceCode" id="cb3" data-chapter="12"><pre class="sourceCode python program-code code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LazySegmentTree:</span>
@@ -967,7 +1000,7 @@ Figure&nbsp;12.1: The array 1, 3, 5, 7, 9, 11 maps to a binary sum tree. Highlig
 <section id="the-inspiration" class="level3" data-number="12.3.1">
 <h3 data-number="12.3.1" class="anchored" data-anchor-id="the-inspiration"><span class="header-section-number">12.3.1</span> The Inspiration</h3>
 <p>Segment trees are powerful but… they’re a bit heavy. 4n space, lots of pointer chasing, somewhat complex code.</p>
-<p><strong>Fenwick Trees</strong> (also called <strong>Binary Indexed Trees</strong> or <strong>BIT</strong>) solve the same problem with: - ✅ Much simpler code (~10 lines!) - ✅ Better cache performance - ✅ Only n space (vs 4n) - ✅ Same O(log n) operations</p>
+<p><strong>Fenwick Trees</strong> (also called <strong>Binary Indexed Trees</strong> or <strong>BIT</strong>) solve the same problem with: - ✅ Much simpler code (~10 lines!) - ✅ Better cache performance - ✅ Only n space (vs 4n) - ✅ Same <span class="math inline">\(O(log n)\)</span> operations</p>
 <p>The catch? Less flexible than segment trees (mainly for cumulative operations like sum).</p>
 </section>
 <section id="the-brilliant-idea" class="level3" data-number="12.3.2">
@@ -984,7 +1017,12 @@ BIT[3] = arr[3]
 BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 ...</code></pre>
 </div>
-<p><strong>Pattern</strong>: <code>BIT[i]</code> stores sum of <code>2^k</code> elements ending at i, where k = position of rightmost set bit in i.</p>
+<p><strong>Pattern:</strong> Let <span class="math inline">\(\operatorname{lowbit}(i)=i\mathbin{\&amp;}(-i)\)</span>. Then a Fenwick-tree entry stores</p>
+<p><span id="eq-fenwick-invariant"><span class="math display">\[
+\operatorname{BIT}[i]
+=\sum_{j=i-\operatorname{lowbit}(i)+1}^{i}A[j].
+\tag{12.1}\]</span></span></p>
+<p>Thus <code>BIT[i]</code> covers <span class="math inline">\(\operatorname{lowbit}(i)=2^k\)</span> elements ending at <span class="math inline">\(i\)</span>, where <span class="math inline">\(k\)</span> is the position of the least significant set bit.</p>
 <p><strong>Why is this brilliant?</strong></p>
 <p>To compute prefix sum up to index i: 1. Add BIT[i] 2. Remove rightmost set bit from i 3. Add BIT[new i] 4. Repeat until i = 0</p>
 <p><strong>Example</strong>: Sum up to index 7 (binary: 111) - Add BIT[111 = 7] (covers [7]) - Remove rightmost bit: 110 (6) - Add BIT[110 = 6] (covers [5-6]) - Remove rightmost bit: 100 (4) - Add BIT[100 = 4] (covers [1-4]) - Done! Sum = BIT[7] + BIT[6] + BIT[4]</p>
@@ -1416,8 +1454,8 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 <section id="the-problem-1" class="level3" data-number="12.4.1">
 <h3 data-number="12.4.1" class="anchored" data-anchor-id="the-problem-1"><span class="header-section-number">12.4.1</span> The Problem</h3>
 <p>Imagine you’re building a text editor with unlimited undo/redo. How do you store every version efficiently?</p>
-<p><strong>Naive approach</strong>: Copy entire data structure for each version → O(n) space per version!</p>
-<p><strong>Persistent data structures</strong>: Share common parts between versions → O(1) or O(log n) space per version!</p>
+<p><strong>Naive approach</strong>: Copy entire data structure for each version → <span class="math inline">\(O(n)\)</span> space per version!</p>
+<p><strong>Persistent data structures</strong>: Share common parts between versions → <span class="math inline">\(O(1)\)</span> or <span class="math inline">\(O(log n)\)</span> space per version!</p>
 <p><strong>Key idea</strong>: When you “modify” a persistent structure, you create a new version that shares most data with the old version.</p>
 </section>
 <section id="persistent-array" class="level3" data-number="12.4.2">
@@ -1846,8 +1884,8 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 <section id="the-problem-2" class="level3" data-number="12.5.1">
 <h3 data-number="12.5.1" class="anchored" data-anchor-id="the-problem-2"><span class="header-section-number">12.5.1</span> The Problem</h3>
 <p>You have a billion-element bit vector (125 MB). You need to support: - <code>access(i)</code>: Get bit at position i - <code>rank(i)</code>: Count 1s up to position i - <code>select(k)</code>: Find position of k-th 1</p>
-<p><strong>Naive</strong>: Store array → 125 MB, but rank/select are slow (O(n))</p>
-<p><strong>Succinct</strong>: Store in just n + o(n) bits (barely more than the data itself!) with O(1) operations!</p>
+<p><strong>Naive</strong>: Store array → 125 MB, but rank/select are slow (<span class="math inline">\(O(n)\)</span>)</p>
+<p><strong>Succinct</strong>: Store in just n + o(n) bits (barely more than the data itself!) with <span class="math inline">\(O(1)\)</span> operations!</p>
 </section>
 <section id="succinct-bit-vector" class="level3" data-number="12.5.2">
 <h3 data-number="12.5.2" class="anchored" data-anchor-id="succinct-bit-vector"><span class="header-section-number">12.5.2</span> Succinct Bit Vector</h3>
@@ -2023,7 +2061,7 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 <section id="wavelet-tree" class="level3" data-number="12.5.3">
 <h3 data-number="12.5.3" class="anchored" data-anchor-id="wavelet-tree"><span class="header-section-number">12.5.3</span> Wavelet Tree</h3>
 <p>A <strong>wavelet tree</strong> is a succinct structure for storing sequences that supports: - <code>access(i)</code>: Get element at position i - <code>rank(c, i)</code>: Count occurrences of c up to position i - <code>select(c, k)</code>: Find position of k-th occurrence of c</p>
-<p>All in O(log σ) time, where σ = alphabet size!</p>
+<p>All in <span class="math inline">\(O(log σ)\)</span> time, where σ = alphabet size!</p>
 <div class="technical-block program-code">
 <div class="sourceCode" id="cb14" data-chapter="12"><pre class="sourceCode python program-code code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WaveletTree:</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
@@ -2871,7 +2909,7 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 </section>
 <section id="summary-and-key-takeaways" class="level2" data-number="12.8">
 <h2 data-number="12.8" class="anchored" data-anchor-id="summary-and-key-takeaways"><span class="header-section-number">12.8</span> Summary and Key Takeaways</h2>
-<p><strong>Core Data Structures</strong>: 1. <strong>Segment Trees</strong>: O(log n) range queries with updates, very flexible 2. <strong>Fenwick Trees</strong>: Simpler, faster, less memory, but less flexible 3. <strong>Persistent Structures</strong>: Time-travel with O(log n) space per version 4. <strong>Succinct Structures</strong>: n + o(n) space with O(1) or O(log σ) operations 5. <strong>Cache-Oblivious</strong>: Automatically efficient for all cache sizes</p>
+<p><strong>Core Data Structures</strong>: 1. <strong>Segment Trees</strong>: <span class="math inline">\(O(log n)\)</span> range queries with updates, very flexible 2. <strong>Fenwick Trees</strong>: Simpler, faster, less memory, but less flexible 3. <strong>Persistent Structures</strong>: Time-travel with <span class="math inline">\(O(log n)\)</span> space per version 4. <strong>Succinct Structures</strong>: n + o(n) space with <span class="math inline">\(O(1)\)</span> or <span class="math inline">\(O(log σ)\)</span> operations 5. <strong>Cache-Oblivious</strong>: Automatically efficient for all cache sizes</p>
 <p><strong>When to Use What</strong>: - <strong>Simple range sums</strong>: Fenwick tree (simplest, fastest) - <strong>Complex range queries</strong> (min, max, GCD): Segment tree - <strong>Range updates</strong>: Lazy segment tree - <strong>Need history/undo</strong>: Persistent structures - <strong>Massive data, tight memory</strong>: Succinct structures - <strong>Unknown cache sizes</strong>: Cache-oblivious algorithms</p>
 <p><strong>Key Insights</strong>: - <strong>Bit manipulation</strong> enables elegant solutions (Fenwick tree) - <strong>Path copying</strong> makes persistence cheap - <strong>Divide-and-conquer</strong> adapts to cache automatically - <strong>Auxiliary structures</strong> trade space for query speed</p>
 <p><strong>Real-World Impact</strong>: - <strong>Databases</strong>: Range queries, time-travel queries - <strong>Genomics</strong>: Succinct indices for huge genomes - <strong>Version control</strong>: Git uses persistent structures - <strong>High-performance computing</strong>: Cache-oblivious algorithms</p>
@@ -2881,7 +2919,7 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 <section id="understanding" class="level3" data-number="12.9.1">
 <h3 data-number="12.9.1" class="anchored" data-anchor-id="understanding"><span class="header-section-number">12.9.1</span> Understanding</h3>
 <ol type="1">
-<li><p><strong>Segment Tree</strong>: Prove that a segment tree uses O(n) space (not O(4n) worst case) for most arrays.</p></li>
+<li><p><strong>Segment Tree</strong>: Prove that a segment tree uses <span class="math inline">\(O(n)\)</span> space (not <span class="math inline">\(O(4n)\)</span> worst case) for most arrays.</p></li>
 <li><p><strong>Fenwick Magic</strong>: Explain why <code>index &amp; (-index)</code> extracts the rightmost set bit.</p></li>
 <li><p><strong>Persistence</strong>: Calculate the space usage of a persistent array after k updates.</p></li>
 </ol>
@@ -2890,14 +2928,14 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 <h3 data-number="12.9.2" class="anchored" data-anchor-id="implementation-1"><span class="header-section-number">12.9.2</span> Implementation</h3>
 <ol start="4" type="1">
 <li><p><strong>2D Segment Tree</strong>: Implement a 2D segment tree for rectangle queries.</p></li>
-<li><p><strong>Persistent Stack</strong>: Implement a persistent stack with O(1) push/pop and access to all versions.</p></li>
+<li><p><strong>Persistent Stack</strong>: Implement a persistent stack with <span class="math inline">\(O(1)\)</span> push/pop and access to all versions.</p></li>
 <li><p><strong>Succinct Tree</strong>: Implement a succinct representation of a binary tree using 2n + o(n) bits.</p></li>
 </ol>
 </section>
 <section id="applications" class="level3" data-number="12.9.3">
 <h3 data-number="12.9.3" class="anchored" data-anchor-id="applications"><span class="header-section-number">12.9.3</span> Applications</h3>
 <ol start="7" type="1">
-<li><p><strong>Skyline Problem</strong>: Use segment tree to solve the skyline problem in O(n log n).</p></li>
+<li><p><strong>Skyline Problem</strong>: Use segment tree to solve the skyline problem in <span class="math inline">\(O(n log n)\)</span>.</p></li>
 <li><p><strong>Version Control</strong>: Build a simple version control system using persistent data structures.</p></li>
 <li><p><strong>Genome Assembly</strong>: Use succinct structures to index and query a large genome.</p></li>
 </ol>
@@ -2906,7 +2944,7 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 <h3 data-number="12.9.4" class="anchored" data-anchor-id="advanced"><span class="header-section-number">12.9.4</span> Advanced</h3>
 <ol start="10" type="1">
 <li><p><strong>Dynamic Connectivity</strong>: Implement dynamic connectivity queries using persistent Union-Find.</p></li>
-<li><p><strong>Fractional Cascading</strong>: Speed up segment tree queries to O(log n + k) where k = output size.</p></li>
+<li><p><strong>Fractional Cascading</strong>: Speed up segment tree queries to <span class="math inline">\(O(log n + k)\)</span> where k = output size.</p></li>
 <li><p><strong>Cache-Oblivious B-Tree</strong>: Implement a cache-oblivious search tree.</p></li>
 </ol>
 </section>

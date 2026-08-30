@@ -6,7 +6,7 @@
 Current public URL:
 <https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/>
 
-Print edition: 608 pages
+Print edition baseline: 608 pages; Phase 6C corrected edition: 614 pages
 Edition: Second Edition
 Year: 2026
 
@@ -134,16 +134,33 @@ EPUB: **PASS**
 
 See `editorial/SECOND-EDITION-FORMAT-PARITY.md`.
 
+## Mathematical Rendering Parity
+
+PDF: **PASS**
+
+HTML: **PASS**
+
+EPUB: **PASS**
+
+Whole-book equation audit: **PASS — 1,018/1,018 inventoried expressions**
+
+Hidden equation defects: **0/10 remaining**
+
+Missing math glyphs: **0/23 remaining**
+
+HTML supplies 684 semantic MathJax carriers, EPUB supplies 684 MathML nodes, and neither format exposes raw LaTeX. Responsive browser QA passes 27/27 focused equation checks. See `editorial/PHASE-6C-WHOLE-BOOK-MATH-AUDIT.md` and `editorial/EQUATION-FORMAT-PARITY.csv`.
+
 ### Print Regression
 
-Page count: **608**
+Page count before Phase 6C: **608**
+Page count after Phase 6C: **614 (+6, documented equation-semantic correction)**
 Trim: **612 × 792 pt**
-Technical blocks: **512/512**
+Technical blocks: **431/431 (81 net math blocks reclassified)**
 Figures: **14/14**
 Overflow: **0**
 Fonts not embedded: **0**
 
-PRINT LOCK PRESERVED: **YES**
+PRINT REGRESSION AFTER AUTHORIZED MATH CORRECTION: **PASS**
 
 ### Deployment
 
@@ -155,5 +172,5 @@ Live site: **STATUS REPORTED AT HANDOFF**
 ### Final Status
 
 WEB SECOND EDITION: **READY LOCALLY**
-PRINT EDITION: **UNCHANGED / LOCK PRESERVED**
+PRINT EDITION: **614 PAGES / PHASE 6C REGRESSION PASS**
 READY FOR PHASE 8: **PENDING DEPLOYMENT VERIFICATION**

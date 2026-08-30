@@ -11,13 +11,13 @@ Imagine you're organizing a massive library with 1 million books scattered rando
 
 This is the essence of **divide and conquer**—one of the most elegant and powerful paradigms in all of computer science. Instead of solving a large problem directly, we break it into smaller subproblems, solve those recursively, and then combine the solutions. It's the same strategy that successful armies, businesses, and problem-solvers have used throughout history: divide your challenge into manageable pieces, conquer each piece, and unite the results.
 
-In Chapter 1, we learned to analyze algorithms and implemented basic sorting methods that worked directly on the entire input. Those algorithms—bubble sort, selection sort, insertion sort—all had O(n²) time complexity in the worst case. Now we're going to blow past that limitation. By the end of this chapter, you'll understand and implement sorting algorithms that run in O(n log n) time, making them thousands of times faster on large datasets. The key? Divide and conquer.
+In Chapter 1, we learned to analyze algorithms and implemented basic sorting methods that worked directly on the entire input. Those algorithms—bubble sort, selection sort, insertion sort—all had $O(n^2)$ time complexity in the worst case. Now we're going to blow past that limitation. By the end of this chapter, you'll understand and implement sorting algorithms that run in $O(n log n)$ time, making them thousands of times faster on large datasets. The key? Divide and conquer.
 
 ### Why This Matters {.unnumbered}
 
 Divide and conquer isn't just about sorting faster. This paradigm powers some of the most important algorithms in computing:
 
-**🔍 Binary Search:** Finding elements in sorted arrays in O(log n) time instead of O(n)
+**🔍 Binary Search:** Finding elements in sorted arrays in $O(log n)$ time instead of $O(n)$
 
 **📊 Fast Fourier Transform (FFT):** Processing signals and audio in telecommunications, used billions of times per day
 
@@ -36,8 +36,8 @@ The beautiful thing about divide and conquer is that once you understand the pat
 By the end of this chapter, you'll master:
 
 1. **The Divide and Conquer Paradigm:** Understanding the three-step pattern and when to apply it
-2. **Merge Sort:** A guaranteed O(n log n) sorting algorithm with elegant simplicity
-3. **QuickSort:** The practical champion of sorting with average-case O(n log n) performance
+2. **Merge Sort:** A guaranteed $O(n log n)$ sorting algorithm with elegant simplicity
+3. **QuickSort:** The practical champion of sorting with average-case $O(n log n)$ performance
 4. **Recurrence Relations:** Mathematical tools for analyzing recursive algorithms
 5. **Master Theorem:** A powerful formula for solving common recurrences quickly
 6. **Advanced Applications:** From integer multiplication to matrix algorithms
@@ -87,7 +87,7 @@ Let's say you need to find the best chess player among 1,024 competitors.
 
 - Everyone plays everyone else
 - Total games: 1,024 × 1,023 / 2 = 523,776 games!
-- Time complexity: O(n²)
+- Time complexity: $O(n^2)$
 
 **Divide and Conquer Approach (Tournament bracket):**
 
@@ -96,7 +96,7 @@ Let's say you need to find the best chess player among 1,024 competitors.
 - **Round 3:** Divide winners into 128 pairs → 128 games
 - ...continue until final winner
 - **Total games:** 512 + 256 + 128 + ... + 2 + 1 = 1,023 games
-- Time complexity: O(n)... actually O(n) in this case, but O(log n) rounds!
+- Time complexity: $O(n)$... actually $O(n)$ in this case, but $O(log n)$ rounds!
 
 You just reduced the problem from over 500,000 games to about 1,000 games—a 500× speedup! This is the power of divide and conquer.
 
@@ -152,11 +152,11 @@ print(result)  # Output: 9
 
 **Analysis:**
 
-- **Divide:** Split array into two halves → O(1)
+- **Divide:** Split array into two halves → $O(1)$
 - **Conquer:** Recursively find max in each half → 2 × T(n/2)
-- **Combine:** Compare two numbers → O(1)
+- **Combine:** Compare two numbers → $O(1)$
 
-**Recurrence relation:** T(n) = 2T(n/2) + O(1) **Solution:** T(n) = O(n)
+**Recurrence relation:** T(n) = 2T(n/2) + $O(1)$ **Solution:** T(n) = $O(n)$
 
 Wait—we got the same time complexity as the iterative version! So why bother with divide and conquer?
 
@@ -172,14 +172,14 @@ The key insight: **Not every problem benefits from divide and conquer.** You nee
 
 Divide and conquer typically improves time complexity when:
 
-**✅ Subproblems are independent** (can be solved separately) **✅ Combining solutions is relatively cheap** (ideally O(n) or better) **✅ Problem size reduces significantly** (usually by half or more) **✅ Base cases are simple** (direct solutions exist for small inputs)
+**✅ Subproblems are independent** (can be solved separately) **✅ Combining solutions is relatively cheap** (ideally $O(n)$ or better) **✅ Problem size reduces significantly** (usually by half or more) **✅ Base cases are simple** (direct solutions exist for small inputs)
 
 **Examples where it helps:**
 
-- **Sorting** (merge sort, quicksort): O(n²) → O(n log n)
-- **Binary search**: O(n) → O(log n)
-- **Matrix multiplication** (Strassen's): O(n³) → O(n^2.807)
-- **Integer multiplication** (Karatsuba): O(n²) → O(n^1.585)
+- **Sorting** (merge sort, quicksort): $O(n^2)$ → $O(n log n)$
+- **Binary search**: $O(n)$ → $O(log n)$
+- **Matrix multiplication** (Strassen's): $O(n^3)$ → $O(n^2.807)$
+- **Integer multiplication** (Karatsuba): $O(n^2)$ → $O(n^1.585)$
 
 **Examples where it doesn't help much:**
 
@@ -196,8 +196,8 @@ Understanding recursion trees is crucial for analyzing divide and conquer algori
 **Key observations about the tree:**
 
 1. **Height of tree:** log₂(8) = 3 levels (plus base level)
-2. **Work per level:** We compare all n elements once per level → O(n) per level
-3. **Total work:** O(n) × log(n) levels = O(n log n)... wait, no!
+2. **Work per level:** We compare all n elements once per level → $O(n)$ per level
+3. **Total work:** $O(n)$ × log(n) levels = $O(n log n)$... wait, no!
 
 Actually, for this problem, the work decreases as we go down:
 
@@ -206,7 +206,7 @@ Actually, for this problem, the work decreases as we go down:
 - Level 2: 2 + 2 + 2 + 2 = 8 elements
 - Level 3: 8 base cases (1 element each)
 
-Each level processes n elements total, and there are log(n) levels, but the combine step is O(1), so total is O(n).
+Each level processes n elements total, and there are log(n) levels, but the combine step is $O(1)$, so total is $O(n)$.
 
 **Important lesson:** The combine step's complexity determines whether divide and conquer helps! We'll see this more clearly with merge sort.
 
@@ -236,7 +236,7 @@ When approaching a new problem with divide and conquer, ask yourself:
 
 - What operation merges subproblem solutions?
 - How expensive is this operation?
-- Example: Merging two sorted arrays takes O(n) time
+- Example: Merging two sorted arrays takes $O(n)$ time
 
 **5. Does the math work out?**
 
@@ -248,17 +248,17 @@ Let's apply this framework to sorting!
 
 ---
 
-## Merge Sort - Guaranteed O(n log n) Performance
+## Merge Sort - Guaranteed $O(n log n)$ Performance
 
 ### The Sorting Challenge Revisited
 
-In Chapter 1, we implemented three sorting algorithms: bubble sort, selection sort, and insertion sort. All three have O(n²) worst-case time complexity. For small arrays, that's fine. But what about sorting a million elements?
+In Chapter 1, we implemented three sorting algorithms: bubble sort, selection sort, and insertion sort. All three have $O(n^2)$ worst-case time complexity. For small arrays, that's fine. But what about sorting a million elements?
 
-**O(n²) algorithms:** 1,000,000² = 1,000,000,000,000 operations (1 trillion!) **O(n log n) algorithms:** 1,000,000 × log₂(1,000,000) ≈ 20,000,000 operations (20 million)
+**$O(n^2)$ algorithms:** 1,000,000² = 1,000,000,000,000 operations (1 trillion!) **$O(n log n)$ algorithms:** 1,000,000 × log₂(1,000,000) ≈ 20,000,000 operations (20 million)
 
 That's a **50,000× speedup**! This is why understanding efficient sorting matters.
 
-Merge sort achieves O(n log n) by using divide and conquer:
+Merge sort achieves $O(n log n)$ by using divide and conquer:
 
 1. **Divide:** Split the array into two halves
 2. **Conquer:** Recursively sort each half
@@ -359,8 +359,8 @@ result = [1, 2, 3, 5, 6, 7, 8, 9]
 
 - We examine each element exactly once
 - Total comparisons ≤ (n + m)
-- Time complexity: **O(n + m)** where n and m are the lengths of the input arrays
-- In the context of merge sort, this will be O(n) where n is the total number of elements
+- Time complexity: **$O(n + m)$** where n and m are the lengths of the input arrays
+- In the context of merge sort, this will be $O(n)$ where n is the total number of elements
 
 This linear-time merge is what makes merge sort efficient!
 
@@ -494,18 +494,18 @@ Let's prove that merge sort actually works using **mathematical induction**.
 
 Now let's rigorously analyze merge sort's performance.
 
-**Divide step:** Finding the midpoint takes O(1) time
+**Divide step:** Finding the midpoint takes $O(1)$ time
 
 **Conquer step:** We make two recursive calls on arrays of size n/2
 
-**Combine step:** Merging takes O(n) time (we process each element once)
+**Combine step:** Merging takes $O(n)$ time (we process each element once)
 
 **Recurrence relation:**
 
-```{.inline-example chapter=2}
-T(n) = 2T(n/2) + O(n)
-T(1) = O(1)
-```
+$$
+T(n)=2T\!\left(\frac n2\right)+O(n),
+\qquad T(1)=O(1).
+$$
 
 **Solving the recurrence (using the recursion tree method):**
 
@@ -522,7 +522,7 @@ Total work = cn × (log₂ n + 1) = O(n log n)
 
 **Visual representation:**
 
-![A balanced binary recursion tree has cn total work at every level, from one root problem through n constant-size leaves.](../assets/figures/chapter02/merge-sort-work-tree.svg){#fig-merge-sort-work width=84% fig-pos="H" fig-cap="Merge sort performs Θ(n) work per level across Θ(log n) levels."}
+![A balanced binary recursion tree has cn total work at every level, from one root problem through n constant-size leaves.](../assets/figures/chapter02/merge-sort-work-tree.svg){#fig-merge-sort-work width=84% fig-pos="H" fig-cap="Merge sort performs $\Theta(n)$ work per level across $\Theta(log n)$ levels."}
 
 **Formal proof using substitution method:**
 
@@ -544,11 +544,11 @@ T(n) = 2T(n/2) + cn
      ≤ cn log n + d  (if d ≥ 2d, which we can choose)
 ```
 
-Therefore T(n) = O(n log n) ✓
+Therefore T(n) = $O(n log n)$ ✓
 
-**Why O(n log n) is significantly better than O(n²):**
+**Why $O(n log n)$ is significantly better than $O(n^2)$:**
 
-|Input Size|O(n²) Operations|O(n log n) Operations|Speedup|
+|Input Size|$O(n^2)$ Operations|$O(n log n)$ Operations|Speedup|
 |---|---|---|---|
 |100|10,000|664|15×|
 |1,000|1,000,000|9,966|100×|
@@ -560,7 +560,7 @@ For a million elements, merge sort is **50,000 times faster** than bubble sort!
 
 ### Space Complexity Analysis
 
-Unlike our O(n²) sorting algorithms from Chapter 1 (which sorted in-place), merge sort requires additional memory:
+Unlike our $O(n^2)$ sorting algorithms from Chapter 1 (which sorted in-place), merge sort requires additional memory:
 
 **During merging:**
 
@@ -572,7 +572,7 @@ Unlike our O(n²) sorting algorithms from Chapter 1 (which sorted in-place), mer
 - Maximum depth is log n
 - Each level stores its own variables
 
-**Total space complexity:** O(n)
+**Total space complexity:** $O(n)$
 
 The space used at each recursive level is:
 
@@ -581,7 +581,7 @@ The space used at each recursive level is:
 - Level 2: n/4 + n/4 + n/4 + n/4 = n space total
 - ...
 
-However, the merges at different levels don't overlap in time, so we can reuse space. The dominant factor is O(n) for the merge operations plus O(log n) for the recursion stack, giving us **O(n) total space complexity**.
+However, the merges at different levels don't overlap in time, so we can reuse space. The dominant factor is $O(n)$ for the merge operations plus $O(log n)$ for the recursion stack, giving us **$O(n)$ total space complexity**.
 
 **Trade-off:** Merge sort trades space for time. We use extra memory to achieve faster sorting.
 
@@ -591,7 +591,7 @@ Let's summarize merge sort's characteristics:
 
 **✅ Advantages:**
 
-- **Guaranteed O(n log n)** in worst, average, and best cases (predictable performance)
+- **Guaranteed $O(n log n)$** in worst, average, and best cases (predictable performance)
 - **Stable:** Maintains relative order of equal elements
 - **Simple to understand and implement** once you grasp recursion
 - **Parallelizable:** The two recursive calls can run simultaneously
@@ -600,7 +600,7 @@ Let's summarize merge sort's characteristics:
 
 **❌ Disadvantages:**
 
-- **O(n) extra space required** (not in-place)
+- **$O(n)$ extra space required** (not in-place)
 - **Slower in practice than quicksort** on arrays due to memory allocation overhead
 - **Not adaptive:** Doesn't take advantage of existing order in the data
 - **Cache-unfriendly:** Memory access pattern isn't optimal for modern CPUs
@@ -631,7 +631,7 @@ def merge_sort_optimized(arr):
 **Why this helps:**
 
 - Insertion sort has lower overhead for small inputs
-- O(n²) vs O(n log n) doesn't matter when n ≤ 10
+- $O(n^2)$ vs $O(n log n)$ doesn't matter when n ≤ 10
 - Reduces recursion depth
 - Typical speedup: 10-15%
 
@@ -684,16 +684,16 @@ Most production implementations use the standard merge with space optimizations 
 
 ### Why Another Sorting Algorithm?
 
-You might be thinking: "We have merge sort with guaranteed O(n log n) performance. Why do we need another algorithm?"
+You might be thinking: "We have merge sort with guaranteed $O(n log n)$ performance. Why do we need another algorithm?"
 
 Great question! While merge sort is excellent in theory, **quicksort is often faster in practice** for several reasons:
 
-1. **In-place sorting:** Uses only O(log n) extra space for recursion (vs. merge sort's O(n))
+1. **In-place sorting:** Uses only $O(log n)$ extra space for recursion (vs. merge sort's $O(n)$)
 2. **Cache-friendly:** Better memory access patterns on modern CPUs
 3. **Fewer data movements:** Elements are often already close to their final positions
 4. **Simpler partitioning:** The partition operation is often faster than merging
 
-The catch? Quick sort's worst-case performance is O(n²). But with randomization, this worst case becomes extremely unlikely—so unlikely that quicksort is the go-to sorting algorithm in most standard libraries (C's `qsort`, Java's `Arrays.sort` for primitives, etc.).
+The catch? Quick sort's worst-case performance is $O(n^2)$. But with randomization, this worst case becomes extremely unlikely—so unlikely that quicksort is the go-to sorting algorithm in most standard libraries (C's `qsort`, Java's `Arrays.sort` for primitives, etc.).
 
 ### The QuickSort Idea
 
@@ -957,22 +957,21 @@ Final result: [0, 1, 2, 3, 7, 8, 10]
 
 QuickSort's performance varies dramatically based on pivot selection:
 
-#### Best Case: O(n log n)
+#### Best Case: $O(n log n)$
 
 **Occurs when:** Pivot always divides array perfectly in half
 
-```{.inline-example chapter=2}
-T(n) = 2T(n/2) + O(n)
+$$
+T(n)=2T\!\left(\frac n2\right)+O(n)=O(n\log n),
+$$
 
-This is the same recurrence as merge sort!
-Solution: T(n) = O(n log n)
-```
+the same balanced recurrence as merge sort.
 
 **Recursion tree:**
 
-![Balanced quicksort partitions form a logarithmic-height tree; repeatedly choosing an extreme pivot forms a linear chain.](../assets/figures/chapter02/quicksort-partition-comparison.svg){#fig-quicksort-partitions width=88% fig-pos="H" fig-cap="Partition balance determines whether quicksort has Θ(n log n) or Θ(n²) recursion."}
+![Balanced quicksort partitions form a logarithmic-height tree; repeatedly choosing an extreme pivot forms a linear chain.](../assets/figures/chapter02/quicksort-partition-comparison.svg){#fig-quicksort-partitions width=88% fig-pos="H" fig-cap="Partition balance determines whether quicksort has $\Theta(n log n)$ or $\Theta(n^2)$ recursion."}
 
-#### Worst Case: O(n²)
+#### Worst Case: $O(n^2)$
 
 **Occurs when:** Pivot is always the smallest or largest element
 
@@ -988,39 +987,41 @@ Pick 3 as pivot → partition into [1,2] and []
 
 **Recurrence:**
 
-```{.technical-other chapter=2}
-T(n) = T(n-1) + O(n)
-     = T(n-2) + O(n-1) + O(n)
-     = T(n-3) + O(n-2) + O(n-1) + O(n)
-     = ...
-     = O(1) + O(2) + ... + O(n)
-     = O(n²)
-```
+$$
+\begin{aligned}
+T(n)
+  &=T(n-1)+O(n) \\
+  &=T(n-2)+O(n-1)+O(n) \\
+  &\ \vdots \\
+  &=\sum_{i=1}^{n}O(i) \\
+  &=O(n^2).
+\end{aligned}
+$$
 
 **Recursion tree:**
 
-The unbalanced case is the right-hand tree in @fig-quicksort-partitions: its level costs sum to an arithmetic series, giving Θ(n²) work.
+The unbalanced case is the right-hand tree in @fig-quicksort-partitions: its level costs sum to an arithmetic series, giving $\Theta(n^2)$ work.
 
 **This is bad!** Same as bubble sort, selection sort, insertion sort.
 
-#### Average Case: O(n log n)
+#### Average Case: $O(n log n)$
 
-**More complex analysis:** Even with random pivots, average case is O(n log n)
+**More complex analysis:** Even with random pivots, average case is $O(n log n)$
 
 **Intuition:** On average, pivot will be somewhere in the middle 50% of values, giving reasonably balanced partitions.
 
 **Formal analysis (simplified):**
 
 - Probability of getting a "good" split (25%-75% or better): 50%
-- Expected number of levels until all partitions are "good": O(log n)
-- Work per level: O(n)
-- Total: O(n log n)
+- Expected number of levels until all partitions are "good": $O(log n)$
+- Work per level: $O(n)$
+- Total: $O(n log n)$
 
-**Key insight:** We don't need perfect splits to get O(n log n) performance, just "reasonably balanced" ones!
+**Key insight:** We don't need perfect splits to get $O(n log n)$ performance, just "reasonably balanced" ones!
 
 ### The Worst Case Problem: Randomization to the Rescue!
 
-The worst case O(n²) behavior is unacceptable for a production sorting algorithm. How do we avoid it?
+The worst case $O(n^2)$ behavior is unacceptable for a production sorting algorithm. How do we avoid it?
 
 **Solution: Randomized QuickSort**
 
@@ -1068,14 +1069,14 @@ def randomized_quicksort(arr, low=0, high=None):
 With random pivot selection:
 
 - **Probability of worst case:** (1/n!)^(log n) ≈ astronomically small
-- **Expected running time:** O(n log n) regardless of input order
+- **Expected running time:** $O(n log n)$ regardless of input order
 - **No bad inputs exist!** Every input has the same expected performance
 
 **Practical impact:**
 
-- Sorted array: O(n²) deterministic → O(n log n) randomized
-- Reverse sorted: O(n²) deterministic → O(n log n) randomized
-- Any adversarial input: O(n²) deterministic → O(n log n) randomized
+- Sorted array: $O(n^2)$ deterministic → $O(n log n)$ randomized
+- Reverse sorted: $O(n^2)$ deterministic → $O(n log n)$ randomized
+- Any adversarial input: $O(n^2)$ deterministic → $O(n log n)$ randomized
 
 This is a powerful idea: **randomization eliminates worst-case inputs!**
 
@@ -1156,14 +1157,14 @@ This is counterproductive—we're sorting to find a pivot to sort!
 
 ### QuickSort vs Merge Sort: The Showdown
 
-Let's compare our two O(n log n) algorithms:
+Let's compare our two $O(n log n)$ algorithms:
 
 |Criterion|Merge Sort|QuickSort|
 |---|---|---|
-|**Worst-case time**|O(n log n) ✓|O(n²) ✗ (but O(n log n) expected with randomization)|
-|**Best-case time**|O(n log n)|O(n log n) ✓|
-|**Average-case time**|O(n log n)|O(n log n) ✓|
-|**Space complexity**|O(n)|O(log n) ✓|
+|**Worst-case time**|$O(n log n)$ ✓|$O(n^2)$ ✗ (but $O(n log n)$ expected with randomization)|
+|**Best-case time**|$O(n log n)$|$O(n log n)$ ✓|
+|**Average-case time**|$O(n log n)$|$O(n log n)$ ✓|
+|**Space complexity**|$O(n)$|$O(log n)$ ✓|
 |**In-place**|No ✗|Yes ✓|
 |**Stable**|Yes ✓|No ✗|
 |**Practical speed**|Good|Excellent ✓|
@@ -1173,10 +1174,10 @@ Let's compare our two O(n log n) algorithms:
 
 **When to use Merge Sort:**
 
-- Need guaranteed O(n log n) time
+- Need guaranteed $O(n log n)$ time
 - Stability is required
 - External sorting (data doesn't fit in memory)
-- Linked lists (can be done in O(1) space)
+- Linked lists (can be done in $O(1)$ space)
 - Need predictable performance
 
 **When to use QuickSort:**
@@ -1285,7 +1286,7 @@ def quicksort_3way(arr, low, high):
 
 - Elements equal to pivot are already in place (don't need to recurse on them)
 - For arrays with many duplicates: massive speedup
-- Example: array of only 10 distinct values → nearly O(n) performance!
+- Example: array of only 10 distinct values → nearly $O(n)$ performance!
 
 **Optimization 3: Tail recursion elimination**
 
@@ -1336,57 +1337,45 @@ A **recurrence relation** expresses the running time of a recursive algorithm in
 
 **General form:**
 
-```{.algorithm chapter=2}
-T(n) = aT(n/b) + f(n)
+$$
+T(n)=aT\!\left(\frac{n}{b}\right)+f(n).
+$$ {#eq-divide-conquer-general}
 
-where:
-  a = number of recursive subproblems
-  b = factor by which problem size shrinks
-  f(n) = work done outside recursive calls (divide + combine)
-```
+Here $a$ is the number of recursive subproblems, $b>1$ is the factor by which the problem size shrinks, and $f(n)$ is the nonrecursive divide-and-combine work. The model assumes equally sized subproblems; recurrences with unequal subproblem sizes require another method.
 
 **Examples we've seen:**
 
 **Merge Sort:**
 
-```{.technical-other chapter=2}
-T(n) = 2T(n/2) + O(n)
+$$
+T(n)=2T\!\left(\frac n2\right)+O(n).
+$$
 
-Explanation:
-  - 2 recursive calls (a = 2)
-  - Each on problem of size n/2 (b = 2)  
-  - O(n) work to merge (f(n) = n)
-```
+There are two recursive calls on inputs of size $n/2$, followed by linear merge work.
 
 **QuickSort (best case):**
 
-```{.inline-example chapter=2}
-T(n) = 2T(n/2) + O(n)
+$$
+T(n)=2T\!\left(\frac n2\right)+O(n),
+$$
 
-Same as merge sort!
-```
+the same balanced recurrence as merge sort.
 
 **Finding Maximum (divide & conquer):**
 
-```{.technical-other chapter=2}
-T(n) = 2T(n/2) + O(1)
+$$
+T(n)=2T\!\left(\frac n2\right)+O(1),
+$$
 
-Explanation:
-  - 2 recursive calls (a = 2)
-  - Each on size n/2 (b = 2)
-  - O(1) to compare two values (f(n) = 1)
-```
+with two half-size calls and constant comparison work.
 
 **Binary Search:**
 
-```{.technical-other chapter=2}
-T(n) = T(n/2) + O(1)
+$$
+T(n)=T\!\left(\frac n2\right)+O(1),
+$$
 
-Explanation:
-  - 1 recursive call (a = 1)
-  - On problem size n/2 (b = 2)
-  - O(1) to compare and choose side (f(n) = 1)
-```
+with one half-size call and constant selection work.
 
 ### Solving Recurrences: Multiple Methods
 
@@ -1428,7 +1417,7 @@ Total work: cn × log n = O(n log n)
 
 **Example:** T(n) = 2T(n/2) + n
 
-**Guess:** T(n) = O(n log n), so T(n) ≤ cn log n
+**Guess:** T(n) = $O(n log n)$, so T(n) ≤ cn log n
 
 **Proof by induction:**
 
@@ -1454,7 +1443,7 @@ Choose c large enough that cn ≥ n + d for all n ≥ n₀
 This works! ✓
 ```
 
-Therefore T(n) = O(n log n) ✓
+Therefore T(n) = $O(n log n)$ ✓
 
 This method works but requires good intuition about what to guess!
 
@@ -1464,31 +1453,39 @@ The Master Theorem provides a cookbook for solving many common recurrences insta
 
 ### The Master Theorem
 
-**Theorem:** Let a ≥ 1 and b > 1 be constants, let f(n) be a function, and let T(n) be defined on non-negative integers by the recurrence:
+**Theorem:** Let $a\ge1$ and $b>1$ be constants, let $f(n)$ be an eventually nonnegative function, and let $T(n)$ satisfy
 
-```{.inline-example chapter=2}
-T(n) = aT(n/b) + f(n)
-```
+$$
+T(n)=aT\!\left(\frac n b\right)+f(n).
+$$ {#eq-master-theorem}
 
 Then T(n) has the following asymptotic bounds:
 
-**Case 1:** If f(n) = O(n^(log_b(a) - ε)) for some constant ε > 0, then:
+**Case 1:** If $f(n)=O\!\left(n^{\log_b a-\epsilon}\right)$ for some constant $\epsilon>0$, then
 
-```{.inline-example chapter=2}
-T(n) = Θ(n^(log_b(a)))
-```
+$$
+T(n)=\Theta\!\left(n^{\log_b a}\right).
+$$
 
-**Case 2:** If f(n) = Θ(n^(log_b(a))), then:
+**Case 2:** If $f(n)=\Theta\!\left(n^{\log_b a}\right)$, then
 
-```{.inline-example chapter=2}
-T(n) = Θ(n^(log_b(a)) log n)
-```
+$$
+T(n)=\Theta\!\left(n^{\log_b a}\log n\right).
+$$
 
-**Case 3:** If f(n) = Ω(n^(log_b(a) + ε)) for some constant ε > 0, AND if af(n/b) ≤ cf(n) for some constant c < 1 and sufficiently large n, then:
+**Case 3:** If $f(n)=\Omega\!\left(n^{\log_b a+\epsilon}\right)$ for some constant $\epsilon>0$, and if the regularity condition
 
-```{.inline-example chapter=2}
-T(n) = Θ(f(n))
-```
+$$
+a f\!\left(\frac n b\right)\le c f(n)
+$$
+
+holds for some constant $c<1$ and all sufficiently large $n$, then
+
+$$
+T(n)=\Theta\!\left(f(n)\right).
+$$
+
+The theorem compares the recursive work $n^{\log_b a}$ with the nonrecursive work $f(n)$. It does not cover every recurrence: unequal subproblem sizes, nonstandard additive terms, or failure of the regularity condition can require substitution, a recursion tree, or the Akra--Bazzi method.
 
 **Whoa! That's a lot of notation. Let's break it down...**
 
@@ -1505,9 +1502,9 @@ This represents how fast the number of subproblems grows relative to how fast th
 
 **Intuition:**
 
-- **Case 1:** Recursion dominates → Answer is Θ(n^(log_b(a)))
-- **Case 2:** Recursion and f(n) are balanced → Answer is Θ(n^(log_b(a)) log n)
-- **Case 3:** f(n) dominates → Answer is Θ(f(n))
+- **Case 1:** Recursion dominates → Answer is $\Theta(n^(log_b(a)))$
+- **Case 2:** Recursion and f(n) are balanced → Answer is $\Theta(n^(log_b(a)) log n)$
+- **Case 3:** f(n) dominates → Answer is $\Theta(f(n))$
 
 **Think of it like a tug-of-war:**
 
@@ -1531,34 +1528,31 @@ Let's apply the Master Theorem to algorithms we know:
 
 **Calculate critical exponent:**
 
-```{.inline-example chapter=2}
-log_b(a) = log₂(2) = 1
-```
+$$
+\log_b a=\log_2 2=1.
+$$
 
 **Compare f(n) with n^(log_b(a)):**
 
-```{.algorithm chapter=2}
-f(n) = n
-n^(log_b(a)) = n¹ = n
-
-f(n) = Θ(n^(log_b(a)))  ← They're equal!
-```
+$$
+f(n)=n=n^{\log_b a},
+\qquad f(n)=\Theta\!\left(n^{\log_b a}\right).
+$$
 
 **This is Case 2!**
 
 **Solution:**
 
-```{.inline-example chapter=2}
-T(n) = Θ(n^(log_b(a)) log n)
-     = Θ(n¹ log n)
-     = Θ(n log n) ✓
-```
+$$
+T(n)=\Theta\!\left(n^{\log_b a}\log n\right)
+=\Theta(n\log n).
+$$
 
 Matches what we found before!
 
 #### Example 2: Binary Search
 
-**Recurrence:** T(n) = T(n/2) + O(1)
+**Recurrence:** T(n) = T(n/2) + $O(1)$
 
 **Identify parameters:**
 
@@ -1568,32 +1562,30 @@ Matches what we found before!
 
 **Calculate critical exponent:**
 
-```{.inline-example chapter=2}
-log_b(a) = log₂(1) = 0
-```
+$$
+\log_b a=\log_2 1=0.
+$$
 
 **Compare:**
 
-```{.algorithm chapter=2}
-f(n) = 1 = Θ(1)
-n^(log_b(a)) = n⁰ = 1
-
-f(n) = Θ(n^(log_b(a)))  ← Equal again!
-```
+$$
+f(n)=1=n^{\log_b a}=n^0,
+\qquad f(n)=\Theta\!\left(n^{\log_b a}\right).
+$$
 
 **This is Case 2!**
 
 **Solution:**
 
-```{.inline-example chapter=2}
-T(n) = Θ(n⁰ log n) = Θ(log n) ✓
-```
+$$
+T(n)=\Theta(n^0\log n)=\Theta(\log n).
+$$
 
-Perfect! Binary search is O(log n).
+Perfect! Binary search is $O(log n)$.
 
 #### Example 3: Finding Maximum (Divide & Conquer)
 
-**Recurrence:** T(n) = 2T(n/2) + O(1)
+**Recurrence:** T(n) = 2T(n/2) + $O(1)$
 
 **Identify parameters:**
 
@@ -1603,9 +1595,9 @@ Perfect! Binary search is O(log n).
 
 **Calculate critical exponent:**
 
-```{.inline-example chapter=2}
-log_b(a) = log₂(2) = 1
-```
+$$
+\log_b a=\log_2 2=1.
+$$
 
 **Compare:**
 
@@ -1620,17 +1612,15 @@ f(n) = O(n^(1-ε)) for ε = 1  ← f(n) is polynomially smaller!
 
 **Solution:**
 
-```{.inline-example chapter=2}
-T(n) = Θ(n^(log_b(a)))
-     = Θ(n¹)
-     = Θ(n) ✓
-```
+$$
+T(n)=\Theta\!\left(n^{\log_b a}\right)=\Theta(n).
+$$
 
 Makes sense! We still need to look at every element.
 
 #### Example 4: Strassen's Matrix Multiplication (Preview)
 
-**Recurrence:** T(n) = 7T(n/2) + O(n²)
+**Recurrence:** T(n) = 7T(n/2) + $O(n^2)$
 
 **Identify parameters:**
 
@@ -1640,9 +1630,9 @@ Makes sense! We still need to look at every element.
 
 **Calculate critical exponent:**
 
-```{.inline-example chapter=2}
-log_b(a) = log₂(7) ≈ 2.807
-```
+$$
+\log_b a=\log_2 7\approx2.807.
+$$
 
 **Compare:**
 
@@ -1657,12 +1647,11 @@ f(n) = O(n^(2.807 - ε)) for ε ≈ 0.807  ← f(n) is smaller!
 
 **Solution:**
 
-```{.inline-example chapter=2}
-T(n) = Θ(n^(log₂(7)))
-     = Θ(n^2.807) ✓
-```
+$$
+T(n)=\Theta\!\left(n^{\log_2 7}\right)\approx\Theta(n^{2.807}).
+$$
 
-Better than naive O(n³) matrix multiplication!
+Better than naive $O(n^3)$ matrix multiplication!
 
 #### Example 5: A Contrived Case 3 Example
 
@@ -1676,9 +1665,9 @@ Better than naive O(n³) matrix multiplication!
 
 **Calculate critical exponent:**
 
-```{.inline-example chapter=2}
-log_b(a) = log₂(2) = 1
-```
+$$
+\log_b a=\log_2 2=1.
+$$
 
 **Compare:**
 
@@ -1691,22 +1680,21 @@ f(n) = Ω(n^(1+ε)) for ε = 1  ← f(n) is polynomially larger!
 
 **Check regularity condition:** af(n/b) ≤ cf(n)
 
-```{.technical-other chapter=2}
-2·(n/2)² ≤ c·n²
-2·n²/4 ≤ c·n²
-n²/2 ≤ c·n²
+$$
+2\left(\frac n2\right)^2
+=\frac{n^2}{2}
+\le c n^2.
+$$
 
-Choose c = 1/2, this works! ✓
-```
+Choosing $c=1/2<1$ verifies the regularity condition.
 
 **This is Case 3!**
 
 **Solution:**
 
-```{.inline-example chapter=2}
-T(n) = Θ(f(n))
-     = Θ(n²) ✓
-```
+$$
+T(n)=\Theta(f(n))=\Theta(n^2).
+$$
 
 The quadratic work outside recursion dominates!
 
@@ -1769,21 +1757,21 @@ This doesn't work for constant c! ❌
 
 Here's a quick reference for applying the Master Theorem:
 
-**Given:** T(n) = aT(n/b) + f(n)
+**Given:** $T(n)=aT(n/b)+f(n)$.
 
 **Step 1:** Calculate critical exponent
 
-```{.inline-example chapter=2}
-E = log_b(a)
-```
+$$
+E=\log_b a.
+$$
 
-**Step 2:** Compare f(n) with n^E
+**Step 2:** Compare $f(n)$ with $n^E$.
 
 |Comparison|Case|Solution|
 |---|---|---|
-|f(n) = O(n^(E-ε)), ε > 0|Case 1|T(n) = Θ(n^E)|
-|f(n) = Θ(n^E)|Case 2|T(n) = Θ(n^E log n)|
-|f(n) = Ω(n^(E+ε)), ε > 0<br>AND regularity holds|Case 3|T(n) = Θ(f(n))|
+|f(n) = $O(n^(E-ε))$, ε > 0|Case 1|T(n) = $\Theta(n^E)$|
+|f(n) = $\Theta(n^E)$|Case 2|T(n) = $\Theta(n^E log n)$|
+|f(n) = $\Omega(n^(E+ε))$, ε > 0<br>AND regularity holds|Case 3|T(n) = $\Theta(f(n))$|
 
 **Quick identification tricks:**
 
@@ -1822,35 +1810,35 @@ E = log_b(a)
 1. **T(n) = 4T(n/2) + n**
     
     - a=4, b=2, f(n)=n, log₂(4)=2
-    - f(n) = O(n^(2-ε)), Case 1
-    - **Answer: Θ(n²)**
+    - f(n) = $O(n^(2-ε))$, Case 1
+    - **Answer: $\Theta(n^2)$**
 2. **T(n) = 4T(n/2) + n²**
     
     - a=4, b=2, f(n)=n², log₂(4)=2
-    - f(n) = Θ(n²), Case 2
-    - **Answer: Θ(n² log n)**
+    - f(n) = $\Theta(n^2)$, Case 2
+    - **Answer: $\Theta(n^2 log n)$**
 3. **T(n) = 4T(n/2) + n³**
     
     - a=4, b=2, f(n)=n³, log₂(4)=2
-    - f(n) = Ω(n^(2+ε)), Case 3
+    - f(n) = $\Omega(n^(2+ε))$, Case 3
     - Check: 4(n/2)³ = n³/2 ≤ c·n³ ✓
-    - **Answer: Θ(n³)**
+    - **Answer: $\Theta(n^3)$**
 4. **T(n) = T(n/2) + n**
     
     - a=1, b=2, f(n)=n, log₂(1)=0
-    - f(n) = Ω(n^(0+ε)), Case 3
+    - f(n) = $\Omega(n^(0+ε))$, Case 3
     - Check: 1·(n/2) ≤ c·n ✓
-    - **Answer: Θ(n)**
+    - **Answer: $\Theta(n)$**
 5. **T(n) = 16T(n/4) + n**
     
     - a=16, b=4, f(n)=n, log₄(16)=2
-    - f(n) = O(n^(2-ε)), Case 1
-    - **Answer: Θ(n²)**
+    - f(n) = $O(n^(2-ε))$, Case 1
+    - **Answer: $\Theta(n^2)$**
 6. **T(n) = 9T(n/3) + n²**
     
     - a=9, b=3, f(n)=n², log₃(9)=2
-    - f(n) = Θ(n²), Case 2
-    - **Answer: Θ(n² log n)**
+    - f(n) = $\Theta(n^2)$, Case 2
+    - **Answer: $\Theta(n^2 log n)$**
 
 </details>
 
@@ -1862,21 +1850,22 @@ For recurrences that don't fit the Master Theorem, we have additional techniques
 
 Handles unequal subproblem sizes:
 
-```{.inline-example chapter=2}
-T(n) = T(n/3) + T(2n/3) + n
+$$
+T(n)=T\!\left(\frac n3\right)+T\!\left(\frac{2n}{3}\right)+n
+=\Theta(n\log n),
+$$
 
-Solution: Still Θ(n log n) using Akra-Bazzi
-```
+as the Akra--Bazzi method shows.
 
 #### Generating Functions
 
 For more complex recurrences:
 
-```{.inline-example chapter=2}
-T(n) = T(n-1) + T(n-2) + n
+$$
+T(n)=T(n-1)+T(n-2)+n,
+$$
 
-This is like Fibonacci with extra term!
-```
+a Fibonacci-like recurrence with an additional linear term.
 
 #### Recursion Tree for Irregular Patterns
 
@@ -1905,43 +1894,36 @@ T(n) = O(n²) operations
 
 **Divide and conquer approach:**
 
-Split each n-digit number into two halves:
+Split each $n$-digit number into two halves:
 
-```{.inline-example chapter=2}
-x = x₁ · 10^(n/2) + x₀
-y = y₁ · 10^(n/2) + y₀
+$$
+x=x_1 10^{n/2}+x_0,
+\qquad
+y=y_1 10^{n/2}+y_0.
+$$
 
-Example: 1234 = 12 · 10² + 34
-```
+For example, $1234=12\cdot10^2+34$.
 
 **Naive recursive multiplication:**
 
-```{.technical-other chapter=2}
-xy = (x₁ · 10^(n/2) + x₀)(y₁ · 10^(n/2) + y₀)
-   = x₁y₁ · 10^n + (x₁y₀ + x₀y₁) · 10^(n/2) + x₀y₀
+$$
+xy=x_1y_1 10^n+(x_1y_0+x_0y_1)10^{n/2}+x_0y_0.
+$$
 
-Requires 4 multiplications:
-- x₁y₁
-- x₁y₀  
-- x₀y₁
-- x₀y₀
-
-Recurrence: T(n) = 4T(n/2) + O(n)
-Solution: Θ(n²) - no improvement! ❌
-```
+Computing $x_1y_1$, $x_1y_0$, $x_0y_1$, and $x_0y_0$ requires four recursive multiplications, giving $T(n)=4T(n/2)+O(n)=\Theta(n^2)$.
 
 **Karatsuba's insight (1960):** Compute the middle term differently!
 
-```{.technical-other chapter=2}
-(x₁y₀ + x₀y₁) = (x₁ + x₀)(y₁ + y₀) - x₁y₁ - x₀y₀
+$$
+\begin{aligned}
+z_0&=x_0y_0,\\
+z_2&=x_1y_1,\\
+z_1&=(x_1+x_0)(y_1+y_0)-z_2-z_0,\\
+xy&=z_2 10^n+z_1 10^{n/2}+z_0.
+\end{aligned}
+$$
 
-Now we only need 3 multiplications:
-- z₀ = x₀y₀
-- z₂ = x₁y₁
-- z₁ = (x₁ + x₀)(y₁ + y₀) - z₂ - z₀
-
-Result: z₂ · 10^n + z₁ · 10^(n/2) + z₀
-```
+The identity $x_1y_0+x_0y_1=(x_1+x_0)(y_1+y_0)-x_1y_1-x_0y_0$ reduces the recursive multiplications from four to three.
 
 **Implementation:**
 
@@ -1983,17 +1965,13 @@ def karatsuba(x, y):
 
 **Analysis:**
 
-```{.technical-other chapter=2}
-Recurrence: T(n) = 3T(n/2) + O(n)
+The recurrence and its Master-Theorem solution are
 
-Using Master Theorem:
-a = 3, b = 2, f(n) = n
-log₂(3) ≈ 1.585
-
-f(n) = O(n^(1.585 - ε)), Case 1
-
-Solution: T(n) = Θ(n^log₂(3)) ≈ Θ(n^1.585) ✓
-```
+$$
+T(n)=3T\!\left(\frac n2\right)+O(n)
+=\Theta\!\left(n^{\log_2 3}\right)
+\approx\Theta(n^{1.585}).
+$$
 
 **Impact:**
 
@@ -2023,7 +2001,7 @@ def closest_pair_naive(points):
     return min_dist
 ```
 
-**Divide and conquer approach: O(n log n)**
+**Divide and conquer approach: $O(n log n)$**
 
 ```{.python .program-code chapter=2}
 import math
@@ -2132,15 +2110,13 @@ def _strip_closest(strip, d):
 - Both halves have no points closer than d
 - At most 8 points can fit in this region (pigeon-hole principle)
 
-**Analysis:**
+**Analysis:** Sorting and scanning the strip takes $O(n)$, so
 
-```{.technical-other chapter=2}
-Recurrence: T(n) = 2T(n/2) + O(n)
-            (sorting strip takes O(n))
+$$
+T(n)=2T\!\left(\frac n2\right)+O(n)=\Theta(n\log n)
+$$
 
-Master Theorem Case 2:
-T(n) = Θ(n log n) ✓
-```
+by Case 2 of the Master Theorem.
 
 ### Application 3: Matrix Multiplication (Strassen's Algorithm)
 
@@ -2166,43 +2142,45 @@ def naive_matrix_multiply(A, B):
 
 Split each matrix into 4 quadrants:
 
-```{.data-example chapter=2}
-[A B] × [E F] = [AE+BG  AF+BH]
-[C D]   [G H]   [CE+DG  CF+DH]
+$$
+\begin{bmatrix}A&B\\C&D\end{bmatrix}
+\begin{bmatrix}E&F\\G&H\end{bmatrix}
+=
+\begin{bmatrix}AE+BG&AF+BH\\CE+DG&CF+DH\end{bmatrix}.
+$$
 
-Requires 8 multiplications!
-T(n) = 8T(n/2) + O(n²)
-     = Θ(n³) - no improvement! ❌
-```
+This direct block method uses eight recursive multiplications, so $T(n)=8T(n/2)+O(n^2)=\Theta(n^3)$.
 
-**Strassen's algorithm (1969):** Use only 7 multiplications!
+**Strassen's algorithm (1969):** Use only seven multiplications:
 
-```{.algorithm chapter=2}
-Define 7 products:
-M₁ = (A + D)(E + H)
-M₂ = (C + D)E
-M₃ = A(F - H)
-M₄ = D(G - E)
-M₅ = (A + B)H
-M₆ = (C - A)(E + F)
-M₇ = (B - D)(G + H)
+$$
+\begin{aligned}
+M_1&=(A+D)(E+H), & M_2&=(C+D)E,\\
+M_3&=A(F-H), & M_4&=D(G-E),\\
+M_5&=(A+B)H, & M_6&=(C-A)(E+F),\\
+M_7&=(B-D)(G+H).
+\end{aligned}
+$$
 
-Result:
-[M₁ + M₄ - M₅ + M₇    M₃ + M₅]
-[M₂ + M₄              M₁ + M₃ - M₂ + M₆]
+The output blocks are
 
-Recurrence: T(n) = 7T(n/2) + O(n²)
-Solution: T(n) = Θ(n^log₂(7)) ≈ Θ(n^2.807) ✓
-```
+$$
+\begin{bmatrix}
+M_1+M_4-M_5+M_7 & M_3+M_5\\
+M_2+M_4 & M_1+M_3-M_2+M_6
+\end{bmatrix}.
+$$
 
-**Better than O(n³)!**
+Thus $T(n)=7T(n/2)+O(n^2)=\Theta(n^{\log_2 7})\approx\Theta(n^{2.807})$.
+
+**Better than $O(n^3)$!**
 
 **Modern developments:**
 
-- Coppersmith-Winograd (1990): O(n^2.376)
-- Le Gall (2014): O(n^2.3728639)
-- Williams (2024): O(n^2.371552)
-- Theoretical limit: O(n²+ε)? Still unknown!
+- Coppersmith-Winograd (1990): $O(n^2.376)$
+- Le Gall (2014): $O(n^2.3728639)$
+- Williams (2024): $O(n^2.371552)$
+- Theoretical limit: $O(n^2+ε)$? Still unknown!
 
 ### Application 4: Fast Fourier Transform (FFT)
 
@@ -2216,7 +2194,7 @@ Solution: T(n) = Θ(n^log₂(7)) ≈ Θ(n^2.807) ✓
 - Solving polynomial multiplication
 - Communication systems
 
-**Naive DFT:** O(n²) **FFT (divide and conquer):** O(n log n)
+**Naive DFT:** $O(n^2)$ **FFT (divide and conquer):** $O(n log n)$
 
 This **revolutionized digital signal processing** in the 1960s!
 
@@ -2262,10 +2240,9 @@ def fft(x):
 
 **Recurrence:**
 
-```{.inline-example chapter=2}
-T(n) = 2T(n/2) + O(n)
-T(n) = Θ(n log n) ✓
-```
+$$
+T(n)=2T\!\left(\frac n2\right)+O(n)=\Theta(n\log n).
+$$
 
 **Impact:** Made real-time audio/video processing possible!
 
@@ -2650,7 +2627,7 @@ Based on extensive testing, here are practical insights:
 
 **Use Merge Sort when:**
 
-- Guaranteed O(n log n) required
+- Guaranteed $O(n log n)$ required
 - Stability is needed
 - Sorting linked lists
 - External sorting (disk-based)
@@ -2837,7 +2814,7 @@ What if data doesn't fit in RAM? External sorting handles disk-based data.
 
 **Complexity:**
 
-- I/O operations: O((n/B) log_{M/B}(n/M))
+- I/O operations: $O((n/B) log_{M/B}(n/M))$
     - B = block size
     - M = memory size
     - Dominates computation time!
@@ -2865,16 +2842,16 @@ Congratulations! You've mastered divide and conquer—one of the most powerful a
 
 **📊 Merge Sort:**
 
-- Guaranteed O(n log n) performance
+- Guaranteed $O(n log n)$ performance
 - Stable sorting
-- Requires O(n) extra space
+- Requires $O(n)$ extra space
 - Great for external sorting and linked lists
 - Foundation for understanding divide and conquer
 
 **⚡ QuickSort:**
 
-- O(n log n) expected time with randomization
-- O(log n) space (in-place)
+- $O(n log n)$ expected time with randomization
+- $O(log n)$ space (in-place)
 - Fastest practical sorting algorithm
 - Three-way partitioning handles duplicates excellently
 - Used in most standard libraries
@@ -2887,21 +2864,21 @@ Congratulations! You've mastered divide and conquer—one of the most powerful a
 
 **🚀 Advanced Applications:**
 
-- Karatsuba multiplication: O(n^1.585) integer multiplication
-- Strassen's algorithm: O(n^2.807) matrix multiplication
-- FFT: O(n log n) signal processing
-- Closest pair: O(n log n) geometric algorithms
+- Karatsuba multiplication: $O(n^1.585)$ integer multiplication
+- Strassen's algorithm: $O(n^2.807)$ matrix multiplication
+- FFT: $O(n log n)$ signal processing
+- Closest pair: $O(n log n)$ geometric algorithms
 
 ### Performance Comparison Chart
 
 |Algorithm|Best Case|Average Case|Worst Case|Space|Stable|
 |---|---|---|---|---|---|
-|**Bubble Sort**|O(n)|O(n²)|O(n²)|O(1)|Yes|
-|**Selection Sort**|O(n²)|O(n²)|O(n²)|O(1)|No|
-|**Insertion Sort**|O(n)|O(n²)|O(n²)|O(1)|Yes|
-|**Merge Sort**|O(n log n)|O(n log n)|O(n log n)|O(n)|Yes|
-|**QuickSort**|O(n log n)|O(n log n)|O(n²)*|O(log n)|No|
-|**3-Way QuickSort**|O(n)|O(n log n)|O(n²)*|O(log n)|No|
+|**Bubble Sort**|$O(n)$|$O(n^2)$|$O(n^2)$|$O(1)$|Yes|
+|**Selection Sort**|$O(n^2)$|$O(n^2)$|$O(n^2)$|$O(1)$|No|
+|**Insertion Sort**|$O(n)$|$O(n^2)$|$O(n^2)$|$O(1)$|Yes|
+|**Merge Sort**|$O(n log n)$|$O(n log n)$|$O(n log n)$|$O(n)$|Yes|
+|**QuickSort**|$O(n log n)$|$O(n log n)$|$O(n^2)$*|$O(log n)$|No|
+|**3-Way QuickSort**|$O(n)$|$O(n log n)$|$O(n^2)$*|$O(log n)$|No|
 
 *With randomization, worst case becomes extremely unlikely
 
@@ -2948,7 +2925,7 @@ Else:
 
 **Lesson 1: Recursion is Powerful** Breaking problems into smaller copies of themselves often leads to elegant solutions. Once you see the recursive pattern, implementation becomes straightforward.
 
-**Lesson 2: The Combine Step Matters** The efficiency of merging or combining solutions determines whether divide and conquer helps. O(1) combine → amazing speedup. O(n²) combine → no benefit.
+**Lesson 2: The Combine Step Matters** The efficiency of merging or combining solutions determines whether divide and conquer helps. $O(1)$ combine → amazing speedup. $O(n^2)$ combine → no benefit.
 
 **Lesson 3: Base Cases Are Critical**
 
@@ -3021,9 +2998,9 @@ Design a divide and conquer algorithm for the following problem:
 
 **Part A:** What is the probability that QuickSort with random pivot selection chooses a "good" pivot (one that results in partitions of size at least n/4 and at most 3n/4)?
 
-**Part B:** Using this probability, argue why the expected number of "levels" of good splits is O(log n).
+**Part B:** Using this probability, argue why the expected number of "levels" of good splits is $O(log n)$.
 
-**Part C:** Explain why this implies O(n log n) expected time.
+**Part C:** Explain why this implies $O(n log n)$ expected time.
 
 ---
 
@@ -3087,7 +3064,7 @@ Write comprehensive tests for each function.
 
 **Problem 2.7: K-th Smallest Element (30 points)**
 
-Implement QuickSelect to find the k-th smallest element in O(n) average time:
+Implement QuickSelect to find the k-th smallest element in $O(n)$ average time:
 
 ```{.python .program-code chapter=2}
 def quickselect(arr: List[int], k: int) -> int:
@@ -3106,7 +3083,7 @@ def quickselect(arr: List[int], k: int) -> int:
     pass
 ```
 
-**Requirements:** a) Implement with randomized pivot selection b) Prove the average-case O(n) time complexity c) Compare empirically with sorting the array first d) Test on arrays of size 10³, 10⁴, 10⁵, 10⁶
+**Requirements:** a) Implement with randomized pivot selection b) Prove the average-case $O(n)$ time complexity c) Compare empirically with sorting the array first d) Test on arrays of size 10³, 10⁴, 10⁵, 10⁶
 
 ---
 
@@ -3140,7 +3117,7 @@ Implement both approaches and compare:
 
 **Problem 2.9: Median of Two Sorted Arrays (35 points)**
 
-Find the median of two sorted arrays in O(log(min(m,n))) time:
+Find the median of two sorted arrays in $O(log(min(m,n)))$ time:
 
 ```{.python .program-code chapter=2}
 def find_median_sorted_arrays(arr1: List[int], arr2: List[int]) -> float:

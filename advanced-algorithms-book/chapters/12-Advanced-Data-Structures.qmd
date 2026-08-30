@@ -10,7 +10,7 @@ Advanced data structures become valuable when ordinary arrays, lists, and hash t
 
 You know arrays, linked lists, hash tables, and binary search trees. These are the bread and butter of programming. But what happens when you need to:
 
-- **Find the sum of elements from index 1000 to 5000 in an array that changes frequently** (try doing that in O(log n)!)
+- **Find the sum of elements from index 1000 to 5000 in an array that changes frequently** (try doing that in $O(log n)$!)
 - **Support "undo" in your application without storing copies of everything** (time travel, anyone?)
 - **Represent a billion-element bit vector in just megabytes** (not gigabytes!)
 - **Process data faster than your CPU's cache misses** (algorithms that adapt to any cache size!)
@@ -44,14 +44,14 @@ You have an array of n elements and need to:
 2. **Update**: Change the value at a specific index
 
 **Naive solutions**:
-- Query: O(n) by iterating through the range
-- Update: O(1) just set the value
+- Query: $O(n)$ by iterating through the range
+- Update: $O(1)$ just set the value
 
 OR
 
-- Use prefix sums for O(1) queries, but O(n) updates
+- Use prefix sums for $O(1)$ queries, but $O(n)$ updates
 
-**Can we do better?** Yes! O(log n) for both operations!
+**Can we do better?** Yes! $O(log n)$ for both operations!
 
 ### The Segment Tree Idea
 
@@ -62,7 +62,13 @@ A **segment tree** is a binary tree where:
 
 ![The array 1, 3, 5, 7, 9, 11 maps to a binary sum tree. Highlighted disjoint nodes for intervals one, two, and three through four sum to 24.](../assets/figures/chapter12/segment-tree-query.svg){#fig-segment-tree-query width=86% fig-pos="H" fig-cap="A segment-tree query decomposes range [1,4] into three disjoint stored intervals."}
 
-**Key insight**: Any range [L, R] can be broken into O(log n) nodes in the tree!
+**Key insight:** A query interval $[L,R]$ has a canonical decomposition into $O(\log n)$ segment-tree nodes. For an associative combine operation $\circ$, the range result is
+
+$$
+A_L\circ A_{L+1}\circ\cdots\circ A_R,
+$$
+
+computed from those node aggregates. The logarithmic bound assumes a balanced binary segment tree.
 
 **Example**: Query sum from index 1 to 4:
 - Break into: [1:3] + [2:5] + [3-4:16]
@@ -262,9 +268,9 @@ if __name__ == "__main__":
 
 What if we want to **update an entire range** [L, R] at once?
 
-Naive approach: Update each element individually → O(n log n)
+Naive approach: Update each element individually → $O(n log n)$
 
-**Lazy propagation**: Defer updates until necessary → O(log n)!
+**Lazy propagation**: Defer updates until necessary → $O(log n)$!
 
 **Key idea**: Mark nodes as "lazy" and propagate updates only when needed.
 
@@ -507,7 +513,7 @@ Segment trees are powerful but... they're a bit heavy. 4n space, lots of pointer
 - ✅ Much simpler code (~10 lines!)
 - ✅ Better cache performance
 - ✅ Only n space (vs 4n)
-- ✅ Same O(log n) operations
+- ✅ Same $O(log n)$ operations
 
 The catch? Less flexible than segment trees (mainly for cumulative operations like sum).
 
@@ -528,7 +534,14 @@ BIT[4] = arr[1] + arr[2] + arr[3] + arr[4]
 ...
 ```
 
-**Pattern**: `BIT[i]` stores sum of `2^k` elements ending at i, where k = position of rightmost set bit in i.
+**Pattern:** Let $\operatorname{lowbit}(i)=i\mathbin{\&}(-i)$. Then a Fenwick-tree entry stores
+
+$$
+\operatorname{BIT}[i]
+=\sum_{j=i-\operatorname{lowbit}(i)+1}^{i}A[j].
+$$ {#eq-fenwick-invariant}
+
+Thus `BIT[i]` covers $\operatorname{lowbit}(i)=2^k$ elements ending at $i$, where $k$ is the position of the least significant set bit.
 
 **Why is this brilliant?**
 
@@ -975,9 +988,9 @@ if __name__ == "__main__":
 
 Imagine you're building a text editor with unlimited undo/redo. How do you store every version efficiently?
 
-**Naive approach**: Copy entire data structure for each version → O(n) space per version!
+**Naive approach**: Copy entire data structure for each version → $O(n)$ space per version!
 
-**Persistent data structures**: Share common parts between versions → O(1) or O(log n) space per version!
+**Persistent data structures**: Share common parts between versions → $O(1)$ or $O(log n)$ space per version!
 
 **Key idea**: When you "modify" a persistent structure, you create a new version that shares most data with the old version.
 
@@ -1410,9 +1423,9 @@ You have a billion-element bit vector (125 MB). You need to support:
 - `rank(i)`: Count 1s up to position i
 - `select(k)`: Find position of k-th 1
 
-**Naive**: Store array → 125 MB, but rank/select are slow (O(n))
+**Naive**: Store array → 125 MB, but rank/select are slow ($O(n)$)
 
-**Succinct**: Store in just n + o(n) bits (barely more than the data itself!) with O(1) operations!
+**Succinct**: Store in just n + o(n) bits (barely more than the data itself!) with $O(1)$ operations!
 
 ### Succinct Bit Vector
 
@@ -1592,7 +1605,7 @@ A **wavelet tree** is a succinct structure for storing sequences that supports:
 - `rank(c, i)`: Count occurrences of c up to position i
 - `select(c, k)`: Find position of k-th occurrence of c
 
-All in O(log σ) time, where σ = alphabet size!
+All in $O(log σ)$ time, where σ = alphabet size!
 
 ```{.python .program-code chapter=12}
 class WaveletTree:
@@ -2442,10 +2455,10 @@ if __name__ == "__main__":
 ## Summary and Key Takeaways
 
 **Core Data Structures**:
-1. **Segment Trees**: O(log n) range queries with updates, very flexible
+1. **Segment Trees**: $O(log n)$ range queries with updates, very flexible
 2. **Fenwick Trees**: Simpler, faster, less memory, but less flexible
-3. **Persistent Structures**: Time-travel with O(log n) space per version
-4. **Succinct Structures**: n + o(n) space with O(1) or O(log σ) operations
+3. **Persistent Structures**: Time-travel with $O(log n)$ space per version
+4. **Succinct Structures**: n + o(n) space with $O(1)$ or $O(log σ)$ operations
 5. **Cache-Oblivious**: Automatically efficient for all cache sizes
 
 **When to Use What**:
@@ -2472,7 +2485,7 @@ if __name__ == "__main__":
 
 ### Understanding
 
-1. **Segment Tree**: Prove that a segment tree uses O(n) space (not O(4n) worst case) for most arrays.
+1. **Segment Tree**: Prove that a segment tree uses $O(n)$ space (not $O(4n)$ worst case) for most arrays.
 
 2. **Fenwick Magic**: Explain why `index & (-index)` extracts the rightmost set bit.
 
@@ -2482,13 +2495,13 @@ if __name__ == "__main__":
 
 4. **2D Segment Tree**: Implement a 2D segment tree for rectangle queries.
 
-5. **Persistent Stack**: Implement a persistent stack with O(1) push/pop and access to all versions.
+5. **Persistent Stack**: Implement a persistent stack with $O(1)$ push/pop and access to all versions.
 
 6. **Succinct Tree**: Implement a succinct representation of a binary tree using 2n + o(n) bits.
 
 ### Applications
 
-7. **Skyline Problem**: Use segment tree to solve the skyline problem in O(n log n).
+7. **Skyline Problem**: Use segment tree to solve the skyline problem in $O(n log n)$.
 
 8. **Version Control**: Build a simple version control system using persistent data structures.
 
@@ -2498,7 +2511,7 @@ if __name__ == "__main__":
 
 10. **Dynamic Connectivity**: Implement dynamic connectivity queries using persistent Union-Find.
 
-11. **Fractional Cascading**: Speed up segment tree queries to O(log n + k) where k = output size.
+11. **Fractional Cascading**: Speed up segment tree queries to $O(log n + k)$ where k = output size.
 
 12. **Cache-Oblivious B-Tree**: Implement a cache-oblivious search tree.
 

@@ -226,10 +226,10 @@ If you choose paths badly, the algorithm can be horribly slow. In fact, with irr
 
 Using BFS to choose augmenting paths yields a polynomial-time guarantee.
 
-**Time complexity**: O(VE²)
+**Time complexity**: $O(VE^2)$
 
 This might seem like a small tweak, but it's huge. By always taking the shortest path, you guarantee that:
-1. Each edge appears on at most O(VE) augmenting paths
+1. Each edge appears on at most $O(VE)$ augmenting paths
 2. The algorithm terminates in a reasonable number of steps
 3. You don't get stuck in weird infinite loops
 
@@ -428,7 +428,7 @@ Here's the key insight about Edmonds-Karp:
 
 **The shortest path distance from s to any vertex can only increase over time.**
 
-When you saturate an edge on a shortest path, the next shortest path must be longer. Since paths can be at most V edges long, and you have E edges to saturate, you get the O(VE) bound on the number of augmenting paths.
+When you saturate an edge on a shortest path, the next shortest path must be longer. Since paths can be at most V edges long, and you have E edges to saturate, you get the $O(VE)$ bound on the number of augmenting paths.
 
 It's one of those proofs where the intuition is beautiful but the formal details are technical. The takeaway: **using BFS isn't just convenient, it's provably efficient**.
 
@@ -444,7 +444,7 @@ It's like the difference between:
 - **Ford-Fulkerson**: Planning your entire road trip before leaving
 - **Push-Relabel**: At each city, just head in the general direction of your destination
 
-Surprisingly, the local approach can be faster! The best push-relabel variants run in O(V³), better than Edmonds-Karp's O(VE²) on dense graphs.
+Surprisingly, the local approach can be faster! The best push-relabel variants run in $O(V^3)$, better than Edmonds-Karp's $O(VE^2)$ on dense graphs.
 
 ### The Key Concepts
 
@@ -658,10 +658,10 @@ if __name__ == "__main__":
 - ✅ Simple to understand and implement
 - ✅ Works well on sparse graphs
 - ✅ Easy to modify for variants
-- ❌ O(VE²) can be slow on dense graphs
+- ❌ $O(VE^2)$ can be slow on dense graphs
 
 **Push-Relabel**:
-- ✅ Faster on dense graphs (O(V³) or better with optimizations)
+- ✅ Faster on dense graphs ($O(V^3)$ or better with optimizations)
 - ✅ More amenable to parallelization
 - ❌ More complex to implement correctly
 - ❌ Harder to modify for special cases
@@ -862,9 +862,12 @@ Each edge (u,v) now has:
 - Cost per unit a(u,v)
 
 Goal: send d units from s to t minimizing:
-```{.inline-example chapter=9}
-total cost = Σ a(u,v) × f(u,v)
-```
+
+$$
+\min \sum_{(u,v)\in E} a(u,v)\,f(u,v),
+$$ {#eq-min-cost-flow-objective}
+
+where $a(u,v)$ is the per-unit cost and $f(u,v)$ is the flow on edge $(u,v)$. Feasible flows must also satisfy the stated capacity constraints and flow-conservation equations.
 
 ### Successive Shortest Paths Algorithm
 
@@ -1748,8 +1751,8 @@ We've covered a LOT in this chapter! Let's recap the big ideas:
 
 **Algorithms**:
 1. **Ford-Fulkerson**: Find augmenting paths, push flow, repeat
-2. **Edmonds-Karp**: Use BFS for paths → O(VE²) time
-3. **Push-Relabel**: Local "push excess downhill" approach → O(V³) time
+2. **Edmonds-Karp**: Use BFS for paths → $O(VE^2)$ time
+3. **Push-Relabel**: Local "push excess downhill" approach → $O(V^3)$ time
 4. **Min-Cost Flow**: Find cheapest way to send flow
 
 **Applications**:
@@ -1818,7 +1821,7 @@ Often, the answer is yes, and suddenly you have 60 years of algorithmic research
 
 11. **Integer Flows**: Prove that if all capacities are integers, Edmonds-Karp produces integer flows.
 
-12. **Complexity Lower Bound**: Show that any max-flow algorithm must examine all edges at least once, giving an Ω(E) lower bound.
+12. **Complexity Lower Bound**: Show that any max-flow algorithm must examine all edges at least once, giving an $\Omega(E)$ lower bound.
 
 ### Research Extensions
 

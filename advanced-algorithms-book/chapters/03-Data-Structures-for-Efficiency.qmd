@@ -18,17 +18,17 @@ Consider this simple problem: finding a number in a collection.
 
 **With an Array (unsorted):**
 
-- Time to find: O(n) - must check every element
+- Time to find: $O(n)$ - must check every element
 - 1 billion elements = 1 billion checks, worst case
 
 **With a Hash Table:**
 
-- Time to find: O(1) average - direct lookup
+- Time to find: $O(1)$ average - direct lookup
 - 1 billion elements = ~1 check
 
 **With a Balanced Tree:**
 
-- Time to find: O(log n) - binary search property
+- Time to find: $O(log n)$ - binary search property
 - 1 billion elements = ~30 checks
 
 Same problem, same data, but **50 million times faster** with the right structure!
@@ -230,9 +230,9 @@ class MaxHeap:
             self._sift_down(i)
 ```
 
-### The Magic of O(n) Heap Construction
+### The Magic of $O(n)$ Heap Construction
 
-Why is `build_heap` O(n) and not O(n log n)?
+Why is `build_heap` $O(n)$ and not $O(n log n)$?
 
 **Key Insight**: Most nodes are near the bottom!
 
@@ -245,14 +245,19 @@ Why is `build_heap` O(n) and not O(n log n)?
 
 **Total work:**
 
-```{.technical-other chapter=3}
-W = Σ(i=0 to h) 2^i * (h-i)
-  = 2^h * Σ(i=0 to h) (h-i) / 2^(h-i)
-  = 2^h * Σ(j=0 to h) j / 2^j
-  ≤ 2^h * 2
-  = 2n
-  = O(n)
-```
+$$
+\begin{aligned}
+W
+  &=\sum_{i=0}^{h}2^i(h-i) \\
+  &=2^h\sum_{i=0}^{h}\frac{h-i}{2^{h-i}} \\
+  &=2^h\sum_{j=0}^{h}\frac{j}{2^j} \\
+  &\le 2^h\cdot2 \\
+  &=2n \\
+  &=O(n).
+\end{aligned}
+$$ {#eq-build-heap-work}
+
+Here $h$ is the heap height and $W$ is the total sift-down work. The final bound uses $\sum_{j\ge0}j/2^j=2$ and $2^h\le n$ up to a constant factor, which explains why bottom-up heap construction is linear even though one individual sift can take $O(\log n)$ time.
 
 ### Advanced Heap Operations
 
@@ -419,7 +424,7 @@ class MedianFinder:
 
 ### The Balance Problem
 
-Binary Search Trees (BSTs) give us O(log n) operations... **if balanced**. But what if they're not?
+Binary Search Trees (BSTs) give us $O(log n)$ operations... **if balanced**. But what if they're not?
 
 **Worst case - degenerate tree (linked list):**
 
@@ -828,17 +833,19 @@ class RedBlackTree:
 
 ---
 
-## Hash Tables - O(1) Average Case Magic
+## Hash Tables - $O(1)$ Average Case Magic
 
 ### The Dream of Constant Time
 
-Hash tables achieve something seemingly impossible: O(1) average-case lookup, insert, and delete for arbitrary keys.
+Hash tables achieve something seemingly impossible: $O(1)$ average-case lookup, insert, and delete for arbitrary keys.
 
-**The Magic Formula:**
+**The address formula:**
 
-```{.inline-example chapter=3}
-address = hash(key) % table_size
-```
+$$
+\operatorname{address}(k)=h(k)\bmod m,
+$$
+
+where $h$ is the hash function and $m$ is the table size.
 
 ### Hash Function Design
 
@@ -846,7 +853,7 @@ A good hash function has three properties:
 
 1. **Deterministic**: Same input → same output
 2. **Uniform**: Distributes keys evenly
-3. **Fast**: O(1) computation
+3. **Fast**: $O(1)$ computation
 
 ```{.python .program-code chapter=3}
 class HashTable:
@@ -1084,7 +1091,7 @@ class OpenAddressHashTable:
 
 ### Advanced Hashing Techniques
 
-#### Cuckoo Hashing - Worst-Case O(1) Lookup
+#### Cuckoo Hashing - Worst-Case $O(1)$ Lookup
 
 ```{.python .program-code chapter=3}
 class CuckooHashTable:
@@ -1239,9 +1246,9 @@ Sometimes worst-case analysis is too pessimistic. **Amortized analysis** conside
 
 **Example:** Dynamic array doubling
 
-- Most insertions: O(1)
-- Occasional resize: O(n)
-- Amortized: O(1) per operation!
+- Most insertions: $O(1)$
+- Occasional resize: $O(n)$
+- Amortized: $O(1)$ per operation!
 
 ### Three Methods of Amortized Analysis
 
@@ -2047,7 +2054,7 @@ class LRUCacheCustom:
 
 **3.2 Trade-off Analysis** Compare and contrast: a) AVL trees vs Red-Black trees vs Skip Lists b) Separate chaining vs Open addressing vs Cuckoo hashing c) Binary heap vs Fibonacci heap vs Binomial heap d) Array vs Linked List vs Dynamic Array
 
-**3.3 Amortized Proofs** Prove using potential method: a) Union-Find with path compression is O(log* n) b) Splay tree operations are O(log n) amortized c) Dynamic table with α-expansion has O(1) amortized insert
+**3.3 Amortized Proofs** Prove using potential method: a) Union-Find with path compression is $O(log* n)$ b) Splay tree operations are $O(log n)$ amortized c) Dynamic table with α-expansion has $O(1)$ amortized insert
 
 ### Implementation Problems
 
@@ -2111,7 +2118,7 @@ class ExtendibleHashing:
 
 ### Key Takeaways
 
-1. **The Right Structure Matters**: O(n) vs O(log n) vs O(1) can mean the difference between seconds and hours.
+1. **The Right Structure Matters**: $O(n)$ vs $O(log n)$ vs $O(1)$ can mean the difference between seconds and hours.
     
 2. **Trade-offs Everywhere**:
     

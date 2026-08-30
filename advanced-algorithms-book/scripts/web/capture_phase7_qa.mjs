@@ -135,6 +135,29 @@ async function inspect(relative, width) {
   cdp.close(); return result;
 }
 
+async function inspectMath(relative, width) {
+  const cdp = await openPage(relative, width, 900);
+  const result = await evaluate(cdp, `(() => {
+    const displays = [...document.querySelectorAll("mjx-container[display='true'], .math.display")];
+    const allMath = [...document.querySelectorAll("mjx-container, .math")];
+    const rawLatex = [...document.querySelectorAll("main p, main li, main td")]
+      .filter(element => /\\\\(?:Theta|Omega|frac|sum|begin\\{)|\\$\\$/.test(element.innerText)).length;
+    const clipped = displays.filter(element => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element.closest(".math.display, div[id^='eq-']") || element);
+      return rect.right > document.documentElement.clientWidth + 2 && !["auto", "scroll"].includes(style.overflowX);
+    }).length;
+    return {
+      page: location.pathname.split("/").slice(-2).join("/"), requestedWidth: ${width},
+      mathCount: allMath.length, displayCount: displays.length, rawLatex, clipped,
+      overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+    };
+  })()`);
+  result.consoleErrors = cdp.events.filter(event => event.method === "Runtime.exceptionThrown").length;
+  result.failedRequests = cdp.events.filter(event => event.method === "Network.loadingFailed" && !event.params.canceled).length;
+  cdp.close(); return result;
+}
+
 try {
   await poll(`http://127.0.0.1:${PORT}/json/version`);
   const shots = [];
@@ -159,16 +182,33 @@ try {
   for (const width of [375, 430, 768, 1024, 1440]) {
     for (const page of representatives) matrix.push(await inspect(page, width));
   }
+  const mathMatrix = [];
+  const mathPages = [
+    "chapters/01-introduction.html", "chapters/02-Divide-and-Conquer.html",
+    "chapters/05-Dynamic-Programming.html", "chapters/06-Randomized-Algorithms.html",
+    "chapters/07-Computational-Complexity.html", "chapters/08-Approximation-Algorithms.html",
+    "chapters/09-Advanced-Graph-Algorithms.html", "chapters/11-Numerical-Algorithms.html",
+    "chapters/12-Advanced-Data-Structures.html",
+  ];
+  for (const width of [375, 768, 1440]) {
+    for (const page of mathPages) mathMatrix.push(await inspectMath(page, width));
+  }
+  await writeFile(path.join(OUT, "math-responsive-qa.json"), JSON.stringify({
+    checks: mathMatrix,
+    status: mathMatrix.every(item => item.mathCount > 0 && !item.rawLatex && !item.clipped && !item.overflow && !item.consoleErrors && !item.failedRequests) ? "PASS" : "FAIL"
+  }, null, 2) + "\n");
   const report = {
     screenshots: shots,
     responsiveMatrix: matrix,
     overflowCount: matrix.filter(item => item.overflow).length,
     consoleErrorCount: matrix.reduce((sum, item) => sum + item.consoleErrors, 0),
     failedRequestCount: matrix.reduce((sum, item) => sum + item.failedRequests, 0),
-    status: matrix.every(item => !item.overflow && !item.consoleErrors && !item.failedRequests && !item.missingImages && item.copyLabels && Object.values(item.landmarks).every(Boolean)) ? "PASS" : "FAIL",
+    mathMatrix,
+    status: matrix.every(item => !item.overflow && !item.consoleErrors && !item.failedRequests && !item.missingImages && item.copyLabels && Object.values(item.landmarks).every(Boolean)) &&
+      mathMatrix.every(item => item.mathCount > 0 && !item.rawLatex && !item.clipped && !item.overflow && !item.consoleErrors && !item.failedRequests) ? "PASS" : "FAIL",
   };
   await writeFile(path.join(OUT, "responsive-qa.json"), JSON.stringify(report, null, 2) + "\n");
-  console.log(JSON.stringify({ status: report.status, overflowCount: report.overflowCount, consoleErrorCount: report.consoleErrorCount, failedRequestCount: report.failedRequestCount, screenshots: shots.length, matrixChecks: matrix.length }));
+  console.log(JSON.stringify({ status: report.status, overflowCount: report.overflowCount, consoleErrorCount: report.consoleErrorCount, failedRequestCount: report.failedRequestCount, screenshots: shots.length, matrixChecks: matrix.length, mathChecks: mathMatrix.length }));
   if (report.status !== "PASS") process.exitCode = 1;
 } finally {
   chrome.kill("SIGTERM");

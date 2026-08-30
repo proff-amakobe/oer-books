@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-06de4c5d76b4db83effa651bdc7dd733.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-1f529bbf54edd2e16fcb2365157a6421.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-981565f5080857d62f3392ea134307e7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -149,6 +149,35 @@ div.csl-indent {
 }
 </script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles/technical-blocks.css">
 <meta property="og:title" content="13&nbsp; Research and Industry Applications - Where Algorithms Meet Reality – Advanced Computational Algorithms">
@@ -528,7 +557,7 @@ div.csl-indent {
 <h2 data-number="13.2" class="anchored" data-anchor-id="current-directions-in-algorithm-research"><span class="header-section-number">13.2</span> Current Directions in Algorithm Research</h2>
 <section id="beyond-worst-case-analysis-algorithms-for-the-real-world" class="level3" data-number="13.2.1">
 <h3 data-number="13.2.1" class="anchored" data-anchor-id="beyond-worst-case-analysis-algorithms-for-the-real-world"><span class="header-section-number">13.2.1</span> Beyond Worst-Case Analysis: Algorithms for the Real World</h3>
-<p>For decades, algorithm analysis focused obsessively on <strong>worst-case complexity</strong>. If quicksort has O(n²) worst case, we worried about it constantly, even though it almost never happens in practice.</p>
+<p>For decades, algorithm analysis focused obsessively on <strong>worst-case complexity</strong>. If quicksort has <span class="math inline">\(O(n^2)\)</span> worst case, we worried about it constantly, even though it almost never happens in practice.</p>
 <p>But around 2000, researchers started asking: <strong>“What if we analyzed algorithms the way they actually perform?”</strong></p>
 <p>This led to several revolutionary frameworks:</p>
 <section id="smoothed-analysis" class="level4" data-number="13.2.1.1">
@@ -610,9 +639,9 @@ div.csl-indent {
 </section>
 <section id="fine-grained-complexity" class="level4" data-number="13.2.1.3">
 <h4 data-number="13.2.1.3" class="anchored" data-anchor-id="fine-grained-complexity"><span class="header-section-number">13.2.1.3</span> <strong>Fine-Grained Complexity</strong></h4>
-<p>Around 2015, researchers realized: many problems seem to require specific running times (like O(n²) for edit distance), and we can’t do better even though we can’t prove it.</p>
+<p>Around 2015, researchers realized: many problems seem to require specific running times (like <span class="math inline">\(O(n^2)\)</span> for edit distance), and we can’t do better even though we can’t prove it.</p>
 <p><strong>The Strong Exponential Time Hypothesis (SETH)</strong>: A conjecture that k-SAT requires 2^n time for some k.</p>
-<p>If SETH is true, it implies lower bounds for hundreds of problems: - Edit distance requires Ω(n²) - Longest common subsequence requires Ω(n²) - Frequent itemset mining requires exponential time</p>
+<p>If SETH is true, it implies lower bounds for hundreds of problems: - Edit distance requires <span class="math inline">\(\Omega(n^2)\)</span> - Longest common subsequence requires <span class="math inline">\(\Omega(n^2)\)</span> - Frequent itemset mining requires exponential time</p>
 <p><strong>Impact</strong>: Conditional lower bounds explain why improving one problem beyond a conjectured threshold would also require breakthroughs for a broader class of problems. They are conditional results, not unconditional proofs of impossibility.</p>
 <p><strong>Research direction</strong>: Fine-grained reductions map which problems share conjectured time barriers. An improvement for one problem can therefore imply improvements for others connected by those reductions.</p>
 </section>
@@ -630,7 +659,7 @@ div.csl-indent {
 </section>
 <section id="grovers-algorithm-quantum-search" class="level4" data-number="13.2.2.2">
 <h4 data-number="13.2.2.2" class="anchored" data-anchor-id="grovers-algorithm-quantum-search"><span class="header-section-number">13.2.2.2</span> <strong>Grover’s Algorithm: Quantum Search</strong></h4>
-<p>Grover’s algorithm gives a quadratic quantum query improvement for unstructured search, from linear to O(√N) oracle queries <span class="citation" data-cites="grover1996search">(<a href="../references.html#ref-grover1996search" role="doc-biblioref">Grover 1996</a>)</span>.</p>
+<p>Grover’s algorithm gives a quadratic quantum query improvement for unstructured search, from linear to <span class="math inline">\(O(\sqrt N)\)</span> oracle queries <span class="citation" data-cites="grover1996search">(<a href="../references.html#ref-grover1996search" role="doc-biblioref">Grover 1996</a>)</span>.</p>
 <p><strong>Why this matters</strong>: This is a <em>provable</em> quadratic speedup for a fundamental problem.</p>
 <p><strong>Implications</strong>: - Brute-force search: If classical takes 2^128 operations, quantum takes 2^64 (still hard, but concerning) - Symmetric cryptography: Need to double key sizes (AES-128 → AES-256) - NP-complete problems: Get √ speedup (not enough to solve them efficiently, but still significant)</p>
 <p><strong>The intuition</strong>: Classical search checks possibilities one by one. Quantum search uses “amplitude amplification” to boost the probability of the correct answer, checking many possibilities simultaneously through superposition.</p>
@@ -645,7 +674,7 @@ div.csl-indent {
 <section id="the-limitations" class="level4" data-number="13.2.2.4">
 <h4 data-number="13.2.2.4" class="anchored" data-anchor-id="the-limitations"><span class="header-section-number">13.2.2.4</span> <strong>The Limitations</strong></h4>
 <p>Important reality check: Quantum computers aren’t magic.</p>
-<p><strong>What quantum computers DON’T speed up</strong>: - Sorting: Still Ω(n log n) (maybe √n speedup on some measures) - Graph problems: Most remain hard - Matrix multiplication: No proven speedup - Database operations: No fundamental speedup beyond Grover</p>
+<p><strong>What quantum computers DON’T speed up</strong>: - Sorting: Still <span class="math inline">\(\Omega(n log n)\)</span> (maybe √n speedup on some measures) - Graph problems: Most remain hard - Matrix multiplication: No proven speedup - Database operations: No fundamental speedup beyond Grover</p>
 <p><strong>The engineering challenge</strong>: Noise and decoherence corrupt quantum states. Useful resource estimates must model gate errors, circuit depth, connectivity, measurement, and correction overhead.</p>
 <p><strong>Error correction</strong>: A logical qubit is encoded across many physical components, with overhead determined by the code, hardware error model, and target reliability. Fixed ratios and arrival dates quickly become misleading; resource estimates must state their assumptions.</p>
 </section>
@@ -658,13 +687,13 @@ div.csl-indent {
 <p>Traditional algorithms: Designed by humans, work for all inputs, worst-case guarantees.</p>
 <p>Machine learning: Learn from data, work great on typical inputs, no guarantees.</p>
 <p><strong>Learning-augmented algorithms</strong>: Use ML predictions + classical algorithms as backup.</p>
-<p><strong>The framework</strong> <span class="citation" data-cites="lykouris2018caching">(<a href="../references.html#ref-lykouris2018caching" role="doc-biblioref">Lykouris and Vassilvitskii 2018</a>)</span>: - ML provides “hints” or predictions - Algorithm uses hints when they’re good - Falls back to classical algorithm when predictions are wrong - Guarantee: Never worse than O(α) × classical, often much better</p>
+<p><strong>The framework</strong> <span class="citation" data-cites="lykouris2018caching">(<a href="../references.html#ref-lykouris2018caching" role="doc-biblioref">Lykouris and Vassilvitskii 2018</a>)</span>: - ML provides “hints” or predictions - Algorithm uses hints when they’re good - Falls back to classical algorithm when predictions are wrong - Guarantee: Never worse than <span class="math inline">\(O(α)\)</span> × classical, often much better</p>
 </section>
 <section id="learned-index-structures" class="level4" data-number="13.2.3.2">
 <h4 data-number="13.2.3.2" class="anchored" data-anchor-id="learned-index-structures"><span class="header-section-number">13.2.3.2</span> <strong>Learned Index Structures</strong></h4>
 <p>Learned index structures model the position of a key in an ordered collection and use a conventional correction step when the prediction is imperfect <span class="citation" data-cites="kraska2018learned">(<a href="../references.html#ref-kraska2018learned" role="doc-biblioref">Kraska et al. 2018</a>)</span>.</p>
-<p><strong>Traditional B-tree index</strong>: O(log n) lookup, works for any data distribution.</p>
-<p><strong>Learned index</strong>: Train neural network to predict position of key in sorted array. When predictions are accurate, lookup is O(1)!</p>
+<p><strong>Traditional B-tree index</strong>: <span class="math inline">\(O(log n)\)</span> lookup, works for any data distribution.</p>
+<p><strong>Learned index</strong>: Train neural network to predict position of key in sorted array. When predictions are accurate, lookup is <span class="math inline">\(O(1)\)</span>!</p>
 <p><strong>The trick</strong>: Use B-tree as safety net. Structure is:</p>
 <div class="technical-block inline-example technical-compact">
 <pre class="inline-example" data-chapter="13"><code>Prediction: NN(key) → approximate position
@@ -724,16 +753,17 @@ you can't tell if any specific person is in the dataset.</code></pre>
 </section>
 <section id="the-algorithms" class="level4" data-number="13.2.4.4">
 <h4 data-number="13.2.4.4" class="anchored" data-anchor-id="the-algorithms"><span class="header-section-number">13.2.4.4</span> <strong>The Algorithms</strong></h4>
-<p><strong>Laplace mechanism</strong>: For numeric queries (counts, sums)</p>
-<div class="technical-block algorithm technical-compact">
-<pre class="algorithm" data-chapter="13"><code>Add noise from Laplace(Δf/ε) distribution
-where Δf = sensitivity (max change from one person)</code></pre>
-</div>
-<p><strong>Exponential mechanism</strong>: For choosing from a set of options</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>Probability of choosing option o ∝ exp(ε × quality(o) / 2Δ)
-Better options more likely, but randomized for privacy</code></pre>
-</div>
+<p><strong>Laplace mechanism</strong>: For a numeric query <span class="math inline">\(f\)</span>, release</p>
+<p><span class="math display">\[
+\mathcal M(D)=f(D)+Z,
+\qquad Z\sim\operatorname{Laplace}\!\left(0,\frac{\Delta f}{\epsilon}\right),
+\]</span></p>
+<p>where <span class="math inline">\(\Delta f\)</span> is the query sensitivity under the stated adjacency relation and <span class="math inline">\(\epsilon&gt;0\)</span> is the privacy parameter.</p>
+<p><strong>Exponential mechanism</strong>: For choosing from a set of options <span class="math display">\[
+\Pr[\mathcal M(D)=o]\propto
+\exp\!\left(\frac{\epsilon\,q(D,o)}{2\Delta q}\right),
+\]</span></p>
+<p>where <span class="math inline">\(q(D,o)\)</span> is the option’s quality score and <span class="math inline">\(\Delta q\)</span> is its sensitivity.</p>
 <p><strong>Sparse vector technique</strong>: For answering many queries efficiently.</p>
 </section>
 <section id="the-cost-of-privacy" class="level4" data-number="13.2.4.5">
@@ -791,69 +821,71 @@ Better options more likely, but randomized for privacy</code></pre>
 <p>But how do neural networks actually learn?</p>
 <section id="backpropagation-the-learning-algorithm" class="level4" data-number="13.3.1.1">
 <h4 data-number="13.3.1.1" class="anchored" data-anchor-id="backpropagation-the-learning-algorithm"><span class="header-section-number">13.3.1.1</span> <strong>Backpropagation: The Learning Algorithm</strong></h4>
-<p><strong>The setup</strong>: A neural network is a function f(x; θ) where θ are parameters (weights). We want to minimize loss L(f(x; θ), y).</p>
-<p><strong>The challenge</strong>: Networks have millions of parameters. How do we compute ∂L/∂θ for each one?</p>
-<p><strong>Naive approach</strong>: Finite differences</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>∂L/∂θᵢ ≈ (L(θ + εeᵢ) - L(θ)) / ε</code></pre>
-</div>
-<p>For n parameters, this requires n forward passes. For a million parameters, that’s impossibly slow!</p>
+<p><strong>The setup</strong>: A neural network is a function <span class="math inline">\(f(x;\theta)\)</span> where <span class="math inline">\(\theta\)</span> contains its parameters. We want to minimize the loss <span class="math inline">\(L(f(x;\theta),y)\)</span>.</p>
+<p><strong>The challenge</strong>: Networks have millions of parameters. How do we compute <span class="math inline">\(\partial L/\partial\theta_i\)</span> for each one?</p>
+<p><strong>Naive approach</strong>: Finite differences <span class="math display">\[
+\frac{\partial L}{\partial\theta_i}
+\approx
+\frac{L(\theta+\epsilon e_i)-L(\theta)}{\epsilon}.
+\]</span> For n parameters, this requires n forward passes. For a million parameters, that’s impossibly slow!</p>
 <p><strong>Backpropagation</strong> (Rumelhart et al., 1986): Use the chain rule to compute all gradients in <em>one</em> backward pass.</p>
 <p><strong>How it works</strong>:</p>
 <ol type="1">
-<li><strong>Forward pass</strong>: Compute network output</li>
+<li><p><strong>Forward pass</strong>: Compute network output <span class="math display">\[
+\begin{aligned}
+h_1&amp;=\sigma(W_1x+b_1),\\
+h_2&amp;=\sigma(W_2h_1+b_2),\\
+&amp;\ \vdots\\
+\widehat y&amp;=\sigma(W_nh_{n-1}+b_n),\\
+L&amp;=(\widehat y-y)^2.
+\end{aligned}
+\]</span></p></li>
+<li><p><strong>Backward pass</strong>: Compute gradients layer by layer <span class="math display">\[
+\begin{aligned}
+\frac{\partial L}{\partial\widehat y}&amp;=2(\widehat y-y),\\
+\frac{\partial L}{\partial W_n}
+  &amp;=\frac{\partial L}{\partial\widehat y}
+\frac{\partial\widehat y}{\partial W_n},\\
+\frac{\partial L}{\partial h_{n-1}}
+  &amp;=\frac{\partial L}{\partial\widehat y}
+\frac{\partial\widehat y}{\partial h_{n-1}}.
+\end{aligned}
+\]</span></p></li>
 </ol>
-<div class="technical-block program-output" data-technical-label="Output">
-<span class="technical-label visually-distinct-label" aria-hidden="true">Output</span>
-<pre class="program-output" data-chapter="13"><code>Layer 1: h₁ = σ(W₁x + b₁)
-Layer 2: h₂ = σ(W₂h₁ + b₂)
-...
-Output: ŷ = σ(Wₙhₙ₋₁ + bₙ)
-Loss: L = (ŷ - y)²</code></pre>
-</div>
-<ol start="2" type="1">
-<li><strong>Backward pass</strong>: Compute gradients layer by layer</li>
-</ol>
-<div class="technical-block technical-other technical-compact">
-<pre class="technical-other" data-chapter="13"><code>∂L/∂ŷ = 2(ŷ - y)
-∂L/∂Wₙ = ∂L/∂ŷ × ∂ŷ/∂Wₙ = ∂L/∂ŷ × hₙ₋₁
-∂L/∂hₙ₋₁ = ∂L/∂ŷ × ∂ŷ/∂hₙ₋₁ = ∂L/∂ŷ × Wₙ
-(continue backwards through layers)</code></pre>
-</div>
 <p><strong>The magic</strong>: Each gradient computation reuses calculations from the layer above. Total cost: one forward pass + one backward pass, regardless of number of parameters!</p>
-<p><strong>Time complexity</strong>: O(E) where E = number of edges in network (typically E ≈ n for n parameters).</p>
+<p><strong>Time complexity</strong>: <span class="math inline">\(O(E)\)</span> where E = number of edges in network (typically E ≈ n for n parameters).</p>
 <p><strong>Why this matters</strong>: Without backpropagation, training deep networks would be impossible. It’s the algorithm that makes deep learning feasible.</p>
 </section>
 <section id="stochastic-gradient-descent-the-optimization-workhorse" class="level4" data-number="13.3.1.2">
 <h4 data-number="13.3.1.2" class="anchored" data-anchor-id="stochastic-gradient-descent-the-optimization-workhorse"><span class="header-section-number">13.3.1.2</span> <strong>Stochastic Gradient Descent: The Optimization Workhorse</strong></h4>
 <p>Once we have gradients, how do we optimize?</p>
-<p><strong>Gradient descent</strong>: θ ← θ - η∇L(θ)</p>
+<p><strong>Gradient descent</strong> uses <span class="math inline">\(\theta\leftarrow\theta-\eta\nabla L(\theta)\)</span>, where <span class="math inline">\(\eta&gt;0\)</span> is the learning rate.</p>
 <p><strong>Problem</strong>: Computing L(θ) requires entire dataset. For millions of examples, one update takes forever!</p>
-<p><strong>Stochastic Gradient Descent (SGD)</strong>: Use one random example at a time</p>
-<div class="technical-block algorithm technical-compact">
-<pre class="algorithm" data-chapter="13"><code>Pick random example (x, y)
-Compute gradient ∇L(f(x; θ), y)
-Update: θ ← θ - η∇L</code></pre>
-</div>
+<p><strong>Stochastic Gradient Descent (SGD)</strong>: Use one random example at a time For a sampled example <span class="math inline">\((x,y)\)</span>, SGD computes <span class="math inline">\(\nabla_\theta L(f(x;\theta),y)\)</span> and applies</p>
+<p><span class="math display">\[
+\theta\leftarrow\theta-\eta\nabla_\theta L.
+\]</span></p>
 <p><strong>Mini-batch SGD</strong>: Use small batches (typically 32-256 examples) - Balances speed vs.&nbsp;gradient accuracy - Enables parallel computation on GPUs - Reduces gradient noise</p>
 <p><strong>Why SGD works</strong>: Individual gradients are noisy, but on average point toward optimum. The noise even helps escape bad local minima!</p>
 </section>
 <section id="modern-optimizers" class="level4" data-number="13.3.1.3">
 <h4 data-number="13.3.1.3" class="anchored" data-anchor-id="modern-optimizers"><span class="header-section-number">13.3.1.3</span> <strong>Modern Optimizers</strong></h4>
-<p><strong>Momentum</strong> (1964): Accelerate in consistent directions</p>
-<div class="technical-block algorithm technical-compact">
-<pre class="algorithm" data-chapter="13"><code>v ← βv + ∇L    (velocity accumulates gradients)
-θ ← θ - ηv     (update includes momentum)</code></pre>
-</div>
-<p>Effect: Smoother optimization, faster convergence, dampens oscillations.</p>
-<p><strong>Adam</strong> (Kingma &amp; Ba, 2014): Adaptive learning rates per parameter</p>
-<div class="technical-block algorithm technical-compact">
-<pre class="algorithm" data-chapter="13"><code>m ← β₁m + (1-β₁)∇L           (first moment: mean)
-v ← β₂v + (1-β₂)(∇L)²        (second moment: variance)
-m̂ = m/(1-β₁ᵗ), v̂ = v/(1-β₂ᵗ)  (bias correction)
-θ ← θ - η m̂/√(v̂ + ε)          (update)</code></pre>
-</div>
-<p>Effect: Parameters with large gradients get smaller updates (more conservative). Parameters with small gradients get larger updates (more aggressive).</p>
+<p><strong>Momentum</strong> (1964): Accelerate in consistent directions <span class="math display">\[
+v\leftarrow\beta v+\nabla L,
+\qquad
+\theta\leftarrow\theta-\eta v.
+\]</span> Effect: Smoother optimization, faster convergence, dampens oscillations.</p>
+<p><strong>Adam</strong> (Kingma &amp; Ba, 2014): Adaptive learning rates per parameter <span class="math display">\[
+\begin{aligned}
+m_t&amp;\leftarrow\beta_1m_{t-1}+(1-\beta_1)g_t,\\
+v_t&amp;\leftarrow\beta_2v_{t-1}+(1-\beta_2)g_t^2,\\
+\widehat m_t&amp;=\frac{m_t}{1-\beta_1^t},
+&amp;\widehat v_t&amp;=\frac{v_t}{1-\beta_2^t},\\
+\theta_t&amp;\leftarrow\theta_{t-1}-\eta
+\frac{\widehat m_t}{\sqrt{\widehat v_t}+\epsilon}.
+\end{aligned}
+\]</span></p>
+<p>Here <span class="math inline">\(g_t=\nabla_\theta L_t\)</span>; squares, roots, and division are applied componentwise. Effect: Parameters with large gradients get smaller updates (more conservative). Parameters with small gradients get larger updates (more aggressive).</p>
 <p><strong>Why Adam is popular</strong>: Works well with minimal hyperparameter tuning. Default choice for many applications.</p>
 <p><strong>Current research</strong>: Better optimizers (AdamW, LAMB), understanding why SGD generalizes better than sophisticated methods, adversarial examples.</p>
 </section>
@@ -869,44 +901,34 @@ m̂ = m/(1-β₁ᵗ), v̂ = v/(1-β₂ᵗ)  (bias correction)
 <p><strong>How attention works</strong>:</p>
 <p>For each position i, compute how much to “attend” to each other position j:</p>
 <ol type="1">
-<li><strong>Query, Key, Value</strong>: For each word, compute three vectors</li>
+<li><strong>Query, Key, Value</strong>: For each word, compute three vectors <span class="math display">\[
+Q_i=W_Qx_i,\qquad K_i=W_Kx_i,\qquad V_i=W_Vx_i.
+\]</span></li>
 </ol>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>Qᵢ = Wᵠxᵢ  (what I'm looking for)
-Kᵢ = Wₖxᵢ  (what I contain)
-Vᵢ = Wᵥxᵢ  (what I'll contribute)</code></pre>
-</div>
+<p><span class="math inline">\(Q_i\)</span> represents what position <span class="math inline">\(i\)</span> seeks, <span class="math inline">\(K_i\)</span> what it contains, and <span class="math inline">\(V_i\)</span> what it contributes.</p>
 <ol start="2" type="1">
-<li><strong>Attention scores</strong>: How relevant is position j to position i?</li>
+<li><p><strong>Attention scores</strong>: How relevant is position j to position i? <span class="math display">\[
+s_{ij}=\frac{Q_i\cdot K_j}{\sqrt d}.
+\]</span></p></li>
+<li><p><strong>Softmax</strong>: Convert scores to probabilities <span class="math display">\[
+\alpha_{ij}=\frac{\exp(s_{ij})}{\sum_k\exp(s_{ik})}.
+\]</span></p></li>
+<li><p><strong>Weighted sum</strong>: Output is weighted combination of values <span id="eq-scaled-dot-product-attention"><span class="math display">\[
+\operatorname{output}_i=\sum_j\alpha_{ij}V_j.
+\tag{13.1}\]</span></span></p></li>
 </ol>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>scoreᵢⱼ = Qᵢ · Kⱼ / √d  (dot product, scaled)</code></pre>
-</div>
-<ol start="3" type="1">
-<li><strong>Softmax</strong>: Convert scores to probabilities</li>
-</ol>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>αᵢⱼ = exp(scoreᵢⱼ) / Σₖ exp(scoreᵢₖ)</code></pre>
-</div>
-<ol start="4" type="1">
-<li><strong>Weighted sum</strong>: Output is weighted combination of values</li>
-</ol>
-<div class="technical-block program-output technical-compact" data-technical-label="Output">
-<span class="technical-label visually-distinct-label" aria-hidden="true">Output</span>
-<pre class="program-output" data-chapter="13"><code>outputᵢ = Σⱼ αᵢⱼVⱼ</code></pre>
-</div>
+<p>The weights <span class="math inline">\(\alpha_{ij}\)</span> are nonnegative and sum to one over <span class="math inline">\(j\)</span>. The <span class="math inline">\(1/\sqrt d\)</span> scale controls dot-product magnitude; the mechanism still has quadratic pairwise cost in the sequence length.</p>
 <p><strong>Intuition</strong>: “The animal” has high attention to “it” and “tired”, learning that “it” refers to the animal, not the street.</p>
-<p><strong>Time complexity</strong>: O(n²d) where n = sequence length, d = dimension - Quadratic in sequence length (problem for long sequences!) - But parallelizes perfectly (unlike RNNs)</p>
+<p><strong>Time complexity</strong>: <span class="math inline">\(O(n^2d)\)</span> where n = sequence length, d = dimension - Quadratic in sequence length (problem for long sequences!) - But parallelizes perfectly (unlike RNNs)</p>
 </section>
 <section id="multi-head-attention" class="level4" data-number="13.3.2.2">
 <h4 data-number="13.3.2.2" class="anchored" data-anchor-id="multi-head-attention"><span class="header-section-number">13.3.2.2</span> <strong>Multi-Head Attention</strong></h4>
 <p>Run attention multiple times in parallel with different learned projections:</p>
-<div class="technical-block technical-other technical-compact">
-<pre class="technical-other" data-chapter="13"><code>head₁ = Attention(Q₁, K₁, V₁)
-head₂ = Attention(Q₂, K₂, V₂)
-...
-output = Concat(head₁, head₂, ...) × Wₒ</code></pre>
-</div>
+<p><span class="math display">\[
+\operatorname{head}_i=\operatorname{Attention}(Q_i,K_i,V_i),
+\qquad
+\operatorname{output}=\operatorname{Concat}(\operatorname{head}_1,\ldots,\operatorname{head}_h)W_O.
+\]</span></p>
 <p><strong>Why</strong>: Different heads learn different relationships. One might focus on syntax, another on semantics, another on coreference.</p>
 <p>The number and width of heads are architectural hyperparameters; more heads do not automatically imply a better model.</p>
 </section>
@@ -949,8 +971,8 @@ Predict "mat"</code></pre>
 <h4 data-number="13.3.2.5" class="anchored" data-anchor-id="efficient-transformers"><span class="header-section-number">13.3.2.5</span> <strong>Efficient Transformers</strong></h4>
 <p><strong>The n² problem</strong>: Standard attention is quadratic in sequence length.</p>
 <p><strong>Solutions</strong>:</p>
-<p><strong>Sparse attention</strong> (Child et al., 2019): Only attend to subset of positions - Local attention: nearby tokens - Global attention: special tokens - Reduces to O(n√n) or O(n log n)</p>
-<p><strong>Linformer</strong> (Wang et al., 2020): Project keys/values to lower dimension - Reduces to O(nd) where d &lt;&lt; n</p>
+<p><strong>Sparse attention</strong> (Child et al., 2019): Only attend to subset of positions - Local attention: nearby tokens - Global attention: special tokens - Reduces to <span class="math inline">\(O(n\sqrt n)\)</span> or <span class="math inline">\(O(n log n)\)</span></p>
+<p><strong>Linformer</strong> (Wang et al., 2020): Project keys/values to lower dimension - Reduces to <span class="math inline">\(O(nd)\)</span> where d &lt;&lt; n</p>
 <p><strong>Flash Attention</strong> (Dao et al., 2022): Optimize memory access patterns - Same complexity, but 2-4x faster wall-clock time - Key innovation: algorithmic improvements for GPUs</p>
 <p>Efficient-attention methods trade exactness, memory traffic, sparsity structure, and implementation complexity in different ways. Context length is therefore a model-and-system parameter, not a stable field-wide threshold.</p>
 </section>
@@ -963,14 +985,12 @@ Predict "mat"</code></pre>
 <h4 data-number="13.3.3.1" class="anchored" data-anchor-id="the-rl-framework"><span class="header-section-number">13.3.3.1</span> <strong>The RL Framework</strong></h4>
 <p><strong>Setup</strong>: - Agent in environment - At each timestep: observe state s, take action a, receive reward r - Goal: maximize cumulative reward</p>
 <p><strong>The challenge</strong>: Actions have delayed consequences. Sacrificing a piece in chess might lead to winning 20 moves later.</p>
-<p><strong>Value function</strong>: V(s) = expected cumulative reward starting from state s</p>
-<p><strong>Q-function</strong>: Q(s,a) = expected cumulative reward from state s after action a</p>
-<p><strong>The Bellman equation</strong>:</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>Q(s,a) = r + γ × max_a' Q(s',a')
-where s' = next state after action a
-      γ = discount factor (typically 0.99)</code></pre>
-</div>
+<p><strong>Value function</strong>: <span class="math inline">\(V(s)\)</span> is the expected cumulative reward starting from state <span class="math inline">\(s\)</span>.</p>
+<p><strong>Q-function</strong>: <span class="math inline">\(Q(s,a)\)</span> is the expected cumulative reward after taking action <span class="math inline">\(a\)</span> in state <span class="math inline">\(s\)</span>.</p>
+<p><strong>The Bellman equation</strong>: <span id="eq-bellman-optimality"><span class="math display">\[
+Q(s,a)=r+\gamma\max_{a'}Q(s',a').
+\tag{13.2}\]</span></span></p>
+<p>Here <span class="math inline">\(s'\)</span> is the next state and <span class="math inline">\(0\le\gamma&lt;1\)</span> is the discount factor. The equation assumes the Markov state captures the information needed to model the next-state distribution.</p>
 <p><strong>Intuitive meaning</strong>: Value of state = immediate reward + discounted future value.</p>
 </section>
 <section id="q-learning-the-classic-algorithm" class="level4" data-number="13.3.3.2">
@@ -992,15 +1012,13 @@ Loop:
 <section id="deep-q-networks-dqn" class="level4" data-number="13.3.3.3">
 <h4 data-number="13.3.3.3" class="anchored" data-anchor-id="deep-q-networks-dqn"><span class="header-section-number">13.3.3.3</span> <strong>Deep Q-Networks (DQN)</strong></h4>
 <p><strong>The scaling problem</strong>: Q-learning stores Q(s,a) in table. For Atari games: 10^9 states × 18 actions = 18 billion entries!</p>
-<p><strong>Solution</strong> (Mnih et al., 2015): Approximate Q with neural network</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>Q(s,a; θ) ≈ Q*(s,a)</code></pre>
-</div>
-<p><strong>Training</strong>: Use TD (temporal difference) error as loss</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>Loss = [r + γ max_a' Q(s',a'; θ⁻) - Q(s,a; θ)]²
-where θ⁻ = target network parameters (updated periodically)</code></pre>
-</div>
+<p><strong>Solution</strong> (Mnih et al., 2015): Approximate Q with neural network <span class="math display">\[
+Q(s,a;\theta)\approx Q^*(s,a).
+\]</span></p>
+<p><strong>Training</strong>: Use TD (temporal difference) error as loss <span class="math display">\[
+L(\theta)=\left[r+\gamma\max_{a'}Q(s',a';\theta^-)-Q(s,a;\theta)\right]^2,
+\]</span></p>
+<p>where <span class="math inline">\(\theta^-\)</span> denotes periodically updated target-network parameters.</p>
 <p><strong>Key innovations</strong>:</p>
 <p><strong>Experience replay</strong>: Store past experiences (s,a,r,s’) in buffer, sample randomly for training - Breaks correlation between consecutive samples - Improves data efficiency</p>
 <p><strong>Target network</strong>: Use old parameters θ⁻ for computing targets - Stabilizes learning (target isn’t constantly moving) - Update periodically (every 10k steps)</p>
@@ -1009,31 +1027,26 @@ where θ⁻ = target network parameters (updated periodically)</code></pre>
 <section id="policy-gradient-methods" class="level4" data-number="13.3.3.4">
 <h4 data-number="13.3.3.4" class="anchored" data-anchor-id="policy-gradient-methods"><span class="header-section-number">13.3.3.4</span> <strong>Policy Gradient Methods</strong></h4>
 <p><strong>Alternative approach</strong>: Learn policy π(a|s) directly (probability of action a in state s).</p>
-<p><strong>REINFORCE</strong> (Williams, 1992): Increase probability of actions that led to high reward</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>∇J(θ) = E[∇ log π(a|s; θ) × R]
-where R = cumulative reward</code></pre>
-</div>
+<p><strong>REINFORCE</strong> (Williams, 1992): Increase probability of actions that led to high reward <span class="math display">\[
+\nabla J(\theta)
+=\mathbb E\!\left[R\,\nabla_\theta\log\pi(a\mid s;\theta)\right],
+\]</span></p>
+<p>where <span class="math inline">\(R\)</span> is cumulative return. The estimator can have high variance, motivating baselines and actor–critic methods.</p>
 <p><strong>Intuition</strong>: If an action led to good outcome, make it more likely. If bad outcome, make it less likely.</p>
-<p><strong>Actor-Critic</strong>: Combine value function (critic) with policy (actor)</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>Actor: π(a|s; θ)
-Critic: V(s; w)
-Update actor using critic's value estimate as baseline</code></pre>
-</div>
+<p><strong>Actor-Critic</strong>: Combine value function (critic) with policy (actor) The actor is <span class="math inline">\(\pi(a\mid s;\theta)\)</span> and the critic is <span class="math inline">\(V(s;w)\)</span>; the critic’s value estimate serves as a baseline for the actor update.</p>
 <p><strong>Advantage</strong>: Reduces variance, learns faster.</p>
 </section>
 <section id="proximal-policy-optimization-ppo" class="level4" data-number="13.3.3.5">
 <h4 data-number="13.3.3.5" class="anchored" data-anchor-id="proximal-policy-optimization-ppo"><span class="header-section-number">13.3.3.5</span> <strong>Proximal Policy Optimization (PPO)</strong></h4>
 <p><strong>PPO</strong> (Schulman et al., 2017): Current state-of-the-art policy gradient method.</p>
 <p><strong>The problem</strong>: Policy gradients are unstable. One bad update can destroy learned policy.</p>
-<p><strong>PPO’s solution</strong>: Constrain policy updates</p>
-<div class="technical-block technical-other technical-compact">
-<pre class="technical-other" data-chapter="13"><code>Maximize: min(ratio × A, clip(ratio, 1-ε, 1+ε) × A)
-where ratio = π_new(a|s) / π_old(a|s)
-      A = advantage estimate
-      ε = clipping parameter (typically 0.2)</code></pre>
-</div>
+<p><strong>PPO’s solution</strong>: Constrain policy updates <span id="eq-ppo-clipped-objective"><span class="math display">\[
+\max_\theta\;\mathbb E\!\left[
+\min\!\left(r_t(\theta)A_t,
+\operatorname{clip}(r_t(\theta),1-\epsilon,1+\epsilon)A_t\right)
+\right],
+\tag{13.3}\]</span></span></p>
+<p>where <span class="math inline">\(r_t(\theta)=\pi_\theta(a_t\mid s_t)/\pi_{\mathrm{old}}(a_t\mid s_t)\)</span>, <span class="math inline">\(A_t\)</span> is an advantage estimate, and <span class="math inline">\(\epsilon\)</span> is the clipping parameter. Clipping limits a single policy update; it does not by itself guarantee global convergence.</p>
 <p><strong>Effect</strong>: Limits how much policy can change per update. More stable, more reliable.</p>
 <p><strong>Applications</strong>: - OpenAI Five (Dota 2) - AlphaStar (StarCraft II) - ChatGPT (RLHF: Reinforcement Learning from Human Feedback)</p>
 </section>
@@ -1149,7 +1162,7 @@ Reduce: Sum all contributions for each (i,j)</code></pre>
 <section id="count-min-sketch" class="level4" data-number="13.4.2.1">
 <h4 data-number="13.4.2.1" class="anchored" data-anchor-id="count-min-sketch"><span class="header-section-number">13.4.2.1</span> <strong>Count-Min Sketch</strong></h4>
 <p><strong>Problem</strong>: Count frequency of millions of distinct items, but you only have memory for thousands of counters.</p>
-<p><strong>Naive approach</strong>: Hash table → O(n) space where n = number of distinct items. If n = billions, you’re out of memory.</p>
+<p><strong>Naive approach</strong>: Hash table → <span class="math inline">\(O(n)\)</span> space where n = number of distinct items. If n = billions, you’re out of memory.</p>
 <p><strong>Count-Min Sketch</strong> <span class="citation" data-cites="cormode2005countmin">(<a href="../references.html#ref-cormode2005countmin" role="doc-biblioref">Cormode and Muthukrishnan 2005</a>)</span>:</p>
 <div class="technical-block algorithm numbered-algorithm" data-technical-label="Algorithm 13.1">
 <span class="technical-label visually-distinct-label" aria-hidden="true">Algorithm 13.1</span>
@@ -1163,14 +1176,14 @@ Update(item):
 Query(item):
     return min(count[i][hᵢ(item)] for i = 1 to d)</code></pre>
 </div>
-<p><strong>Why it works</strong>: - True count ≤ returned count (never underestimate) - With high probability: returned count ≤ true count + ε × total_items - Space: O((1/ε) × log(1/δ)) where δ = failure probability</p>
+<p><strong>Why it works</strong>: - True count ≤ returned count (never underestimate) - With high probability: returned count ≤ true count + ε × total_items - Space: <span class="math inline">\(O((1/ε) × log(1/δ))\)</span> where δ = failure probability</p>
 <p><strong>Applications</strong>: - Network traffic analysis - Top-k frequent items - Heavy hitters detection</p>
 <p>Its one-sided error is useful when overestimation is acceptable and the width and depth are selected from explicit error and failure-probability targets.</p>
 </section>
 <section id="hyperloglog" class="level4" data-number="13.4.2.2">
 <h4 data-number="13.4.2.2" class="anchored" data-anchor-id="hyperloglog"><span class="header-section-number">13.4.2.2</span> <strong>HyperLogLog</strong></h4>
 <p><strong>Problem</strong>: Count number of distinct items in stream.</p>
-<p><strong>Naive approach</strong>: Hash set → O(n) space.</p>
+<p><strong>Naive approach</strong>: Hash set → <span class="math inline">\(O(n)\)</span> space.</p>
 <p><strong>HyperLogLog</strong> <span class="citation" data-cites="flajolet2007hyperloglog">(<a href="../references.html#ref-flajolet2007hyperloglog" role="doc-biblioref">Flajolet et al. 2007</a>)</span>:</p>
 <div class="technical-block technical-other">
 <pre class="technical-other" data-chapter="13"><code>Per-register space: O(log log n) bits for cardinality n
@@ -1273,25 +1286,17 @@ Computation proceeds in supersteps:
 <section id="rsa-and-its-security-assumption" class="level4" data-number="13.5.1.2">
 <h4 data-number="13.5.1.2" class="anchored" data-anchor-id="rsa-and-its-security-assumption"><span class="header-section-number">13.5.1.2</span> <strong>RSA and Its Security Assumption</strong></h4>
 <p><strong>RSA</strong> is based on modular exponentiation and a trapdoor construction related to the difficulty of factoring a product of large primes <span class="citation" data-cites="rivest1978rsa">(<a href="../references.html#ref-rivest1978rsa" role="doc-biblioref">Rivest, Shamir, and Adleman 1978</a>)</span>.</p>
-<p><strong>Key generation</strong>:</p>
-<div class="technical-block technical-other">
-<pre class="technical-other" data-chapter="13"><code>1. Choose two large primes p, q (typically 1024 bits each)
-2. Compute N = p × q (the modulus)
-3. Compute φ(N) = (p-1)(q-1) (Euler's totient)
-4. Choose public exponent e (commonly 65537)
-5. Compute private exponent d where e × d ≡ 1 (mod φ(N))
-
-Public key: (N, e)
-Private key: (N, d)</code></pre>
-</div>
-<p><strong>Encryption</strong>: message^e mod N = ciphertext</p>
-<p><strong>Decryption</strong>: ciphertext^d mod N = message</p>
-<p><strong>Why it works (mathematically)</strong>:</p>
-<div class="technical-block inline-example technical-compact">
-<pre class="inline-example" data-chapter="13"><code>(message^e)^d ≡ message^(ed) (mod N)
-Since ed ≡ 1 (mod φ(N)), by Euler's theorem:
-message^(ed) ≡ message (mod N)</code></pre>
-</div>
+<p><strong>Key generation</strong> chooses large primes <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span>, forms <span class="math inline">\(N=pq\)</span> and <span class="math inline">\(\varphi(N)=(p-1)(q-1)\)</span>, selects a public exponent <span class="math inline">\(e\)</span>, and computes <span class="math inline">\(d\)</span> such that</p>
+<p><span class="math display">\[
+ed\equiv1\pmod{\varphi(N)}.
+\]</span></p>
+<p>The public key is <span class="math inline">\((N,e)\)</span> and the private key is <span class="math inline">\((N,d)\)</span>.</p>
+<p><strong>Encryption</strong>: <span class="math inline">\(c\equiv m^e\pmod N\)</span>.</p>
+<p><strong>Decryption</strong>: <span class="math inline">\(m\equiv c^d\pmod N\)</span>.</p>
+<p><strong>Why it works (mathematically)</strong>: <span class="math display">\[
+(m^e)^d\equiv m^{ed}\equiv m\pmod N,
+\]</span></p>
+<p>under the number-theoretic conditions used by RSA. The congruence <span class="math inline">\(ed\equiv1\pmod{\varphi(N)}\)</span> explains the basic exponent relation; complete correctness also handles messages not coprime to <span class="math inline">\(N\)</span>.</p>
 <p><strong>Security basis</strong>: Recovering the factors of a properly generated modulus is believed to be computationally infeasible for suitable parameters with known classical methods. Secure practice also requires standardized padding, protected key generation, and resistance to implementation attacks; textbook RSA alone is not a deployable encryption scheme.</p>
 </section>
 <section id="the-quantum-threat-to-rsa" class="level4" data-number="13.5.1.3">
@@ -1604,78 +1609,78 @@ After n rounds:
 <h3 data-number="13.8.3" class="anchored" data-anchor-id="analysis-template"><span class="header-section-number">13.8.3</span> Analysis Template</h3>
 <div class="technical-block configuration" data-technical-label="Markdown">
 <span class="technical-label visually-distinct-label" aria-hidden="true">Markdown</span>
-<div class="sourceCode" id="cb42" data-chapter="13"><pre class="sourceCode markdown configuration code-with-copy"><code class="sourceCode markdown"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Paper Analysis: [Title]</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## 1. Citation</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Full citation in standard format</span><span class="co">]</span></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## 2. One-Sentence Summary</span></span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">What is the single most important contribution?</span><span class="co">]</span></span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. Problem Statement</span></span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What problem does this paper address?**</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Why is this problem important?**</span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What makes this problem challenging?**</span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4. Prior Work</span></span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What did previous approaches do?**</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What were their limitations?**</span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What gap does this paper fill?**</span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## 5. Key Innovation</span></span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What is the main new idea?**</span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What makes this approach better?**</span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## 6. Algorithm Description</span></span>
-<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**High-level overview**</span>
-<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Detailed pseudocode**</span>
-<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Key subroutines**</span>
-<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Data structures used**</span>
-<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## 7. Theoretical Analysis</span></span>
-<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Time complexity**: <span class="co">[</span><span class="ot">with derivation</span><span class="co">]</span></span>
-<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Space complexity**: <span class="co">[</span><span class="ot">with derivation</span><span class="co">]</span></span>
-<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Correctness proof**: <span class="co">[</span><span class="ot">sketch</span><span class="co">]</span></span>
-<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Optimality**: <span class="co">[</span><span class="ot">lower bounds, if provided</span><span class="co">]</span></span>
-<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## 8. Experimental Evaluation</span></span>
-<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Datasets used**</span>
-<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Baselines compared against**</span>
-<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Key results** <span class="co">[</span><span class="ot">with numbers</span><span class="co">]</span></span>
-<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Where it works well / poorly**</span>
-<span id="cb42-40"><a href="#cb42-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-41"><a href="#cb42-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## 9. Implementation</span></span>
-<span id="cb42-42"><a href="#cb42-42" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Your implementation with code</span><span class="co">]</span></span>
-<span id="cb42-43"><a href="#cb42-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-44"><a href="#cb42-44" aria-hidden="true" tabindex="-1"></a><span class="fu">## 10. Reproduction</span></span>
-<span id="cb42-45"><a href="#cb42-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Were you able to reproduce results?**</span>
-<span id="cb42-46"><a href="#cb42-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Any discrepancies?**</span>
-<span id="cb42-47"><a href="#cb42-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Insights from implementation**</span>
-<span id="cb42-48"><a href="#cb42-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-49"><a href="#cb42-49" aria-hidden="true" tabindex="-1"></a><span class="fu">## 11. Critical Analysis</span></span>
-<span id="cb42-50"><a href="#cb42-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### Strengths</span></span>
-<span id="cb42-51"><a href="#cb42-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">What does this paper do well?</span><span class="co">]</span></span>
-<span id="cb42-52"><a href="#cb42-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-53"><a href="#cb42-53" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limitations</span></span>
-<span id="cb42-54"><a href="#cb42-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">What are the weaknesses?</span><span class="co">]</span></span>
-<span id="cb42-55"><a href="#cb42-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-56"><a href="#cb42-56" aria-hidden="true" tabindex="-1"></a><span class="fu">### Assumptions</span></span>
-<span id="cb42-57"><a href="#cb42-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">What assumptions are made? Are they realistic?</span><span class="co">]</span></span>
-<span id="cb42-58"><a href="#cb42-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-59"><a href="#cb42-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## 12. Extensions</span></span>
-<span id="cb42-60"><a href="#cb42-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Possible improvements**</span>
-<span id="cb42-61"><a href="#cb42-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Related problems this could solve**</span>
-<span id="cb42-62"><a href="#cb42-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Open questions**</span>
-<span id="cb42-63"><a href="#cb42-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-64"><a href="#cb42-64" aria-hidden="true" tabindex="-1"></a><span class="fu">## 13. Broader Impact</span></span>
-<span id="cb42-65"><a href="#cb42-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Applications**</span>
-<span id="cb42-66"><a href="#cb42-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ethical considerations**</span>
-<span id="cb42-67"><a href="#cb42-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Future research directions**</span>
-<span id="cb42-68"><a href="#cb42-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-69"><a href="#cb42-69" aria-hidden="true" tabindex="-1"></a><span class="fu">## 14. Your Assessment</span></span>
-<span id="cb42-70"><a href="#cb42-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Would you recommend this paper? Why?**</span>
-<span id="cb42-71"><a href="#cb42-71" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What did you learn?**</span>
-<span id="cb42-72"><a href="#cb42-72" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**How might you build on this work?**</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21" data-chapter="13"><pre class="sourceCode markdown configuration code-with-copy"><code class="sourceCode markdown"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Paper Analysis: [Title]</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## 1. Citation</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Full citation in standard format</span><span class="co">]</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## 2. One-Sentence Summary</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">What is the single most important contribution?</span><span class="co">]</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. Problem Statement</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What problem does this paper address?**</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Why is this problem important?**</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What makes this problem challenging?**</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4. Prior Work</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What did previous approaches do?**</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What were their limitations?**</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What gap does this paper fill?**</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## 5. Key Innovation</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What is the main new idea?**</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What makes this approach better?**</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## 6. Algorithm Description</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**High-level overview**</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Detailed pseudocode**</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Key subroutines**</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Data structures used**</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## 7. Theoretical Analysis</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Time complexity**: <span class="co">[</span><span class="ot">with derivation</span><span class="co">]</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Space complexity**: <span class="co">[</span><span class="ot">with derivation</span><span class="co">]</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Correctness proof**: <span class="co">[</span><span class="ot">sketch</span><span class="co">]</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Optimality**: <span class="co">[</span><span class="ot">lower bounds, if provided</span><span class="co">]</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## 8. Experimental Evaluation</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Datasets used**</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Baselines compared against**</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Key results** <span class="co">[</span><span class="ot">with numbers</span><span class="co">]</span></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Where it works well / poorly**</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## 9. Implementation</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Your implementation with code</span><span class="co">]</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a><span class="fu">## 10. Reproduction</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Were you able to reproduce results?**</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Any discrepancies?**</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Insights from implementation**</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a><span class="fu">## 11. Critical Analysis</span></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### Strengths</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">What does this paper do well?</span><span class="co">]</span></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limitations</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">What are the weaknesses?</span><span class="co">]</span></span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="fu">### Assumptions</span></span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">What assumptions are made? Are they realistic?</span><span class="co">]</span></span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## 12. Extensions</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Possible improvements**</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Related problems this could solve**</span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Open questions**</span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a><span class="fu">## 13. Broader Impact</span></span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Applications**</span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ethical considerations**</span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Future research directions**</span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a><span class="fu">## 14. Your Assessment</span></span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Would you recommend this paper? Why?**</span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What did you learn?**</span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**How might you build on this work?**</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>

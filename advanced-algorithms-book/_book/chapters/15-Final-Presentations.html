@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-06de4c5d76b4db83effa651bdc7dd733.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-1f529bbf54edd2e16fcb2365157a6421.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-981565f5080857d62f3392ea134307e7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -129,6 +129,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 </script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles/technical-blocks.css">
 <meta property="og:title" content="15&nbsp; Research, Reproducibility, and Project Synthesis – Advanced Computational Algorithms">
@@ -522,7 +551,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>Option C: State the impact</strong> &gt; “The algorithm I’m presenting today makes DNA sequence alignment 100x faster than previous approaches. This could accelerate genetic research, personalize medicine, and help us understand diseases.”</p>
 <p><strong>Minute 2: The Challenge</strong></p>
 <p>Explain what makes the problem hard: - Why can’t we use naive approaches? - What’s the computational bottleneck? - What constraints do we face?</p>
-<p><strong>Example</strong>: &gt; “Naively comparing audio features requires O(n²) comparisons for n songs. For 1 million songs, that’s 1 trillion comparisons! We need something smarter.”</p>
+<p><strong>Example</strong>: &gt; “Naively comparing audio features requires <span class="math inline">\(O(n^2)\)</span> comparisons for n songs. For 1 million songs, that’s 1 trillion comparisons! We need something smarter.”</p>
 <p><strong>Minutes 3-4: The Solution</strong></p>
 <p>This is the heart of your demo. Show:</p>
 <p><strong>1. Your algorithm/approach</strong> (30 seconds of explanation) &gt; “Locality-sensitive hashing uses random projections to group similar items into the same buckets…”</p>

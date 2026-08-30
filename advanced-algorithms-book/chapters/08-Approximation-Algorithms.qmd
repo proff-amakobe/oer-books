@@ -133,7 +133,7 @@ print(f"Number of stands: {len(stands)}")
 
 **Definition:** Factor grows logarithmically with input size.
 
-**Example:** O(log n)-approximation for Set Cover
+**Example:** $O(log n)$-approximation for Set Cover
 - Your solution ≤ (ln n) × optimal
 - Factor grows, but slowly
 - Still practical for large inputs
@@ -145,7 +145,7 @@ print(f"Number of stands: {len(stands)}")
 **Example:** (1 + ε)-approximation for Knapsack
 - Choose any ε > 0
 - Get solution within (1 + ε) factor
-- Runtime like O(n^(1/ε)) - polynomial for fixed ε
+- Runtime like $O(n^(1/ε))$ - polynomial for fixed ε
 
 ### When Approximation is Impossible
 
@@ -220,7 +220,7 @@ def vertex_cover_naive(graph):
     return min_cover
 ```
 
-**Time:** O(2^n × m) - Impossibly slow for n > 20!
+**Time:** $O(2^n × m)$ - Impossibly slow for n > 20!
 
 ### The Greedy 2-Approximation
 
@@ -285,13 +285,11 @@ print(f"Size: {len(cover)}")
 3. **Our approximation ratio:**
    - Our size / OPT ≤ 2|M| / |M| = 2 ✓
 
-**Visual Proof:**
-```{.technical-other chapter=8}
-Selected edges (M):  A---B     C---D     E---F
-Our cover:           A,B       C,D       E,F    (6 vertices)
-Optimal must pick:   A or B    C or D    E or F (≥3 vertices)
-Ratio:               6/3 = 2
-```
+**Visual proof:** For three disjoint matching edges, the construction selects both endpoints, giving six vertices. Any cover must select at least one endpoint of each edge, so $\mathrm{OPT}\ge3$ and
+
+$$
+\frac{|C|}{\mathrm{OPT}}\le\frac{6}{3}=2.
+$$
 
 ### An Improved Algorithm: Maximum Matching
 
@@ -678,7 +676,7 @@ print(f"Number of sets: {len(cover)}")
 3. **Total iterations needed**
    - About OPT × ln(n) iterations
    - Each iteration adds one set
-   - Total: O(OPT × ln(n)) sets
+   - Total: $O(OPT × ln(n))$ sets
 
 ### The Weighted Version
 
@@ -1062,9 +1060,14 @@ def set_cover_lp(universe, sets, weights=None):
 
 The **integrality gap** measures how much we lose by relaxing:
 
-```{.technical-other chapter=8}
-Integrality Gap = (Worst integer solution) / (Best fractional solution)
-```
+For a minimization problem, the instance-level gap is
+
+$$
+\operatorname{gap}(I)=\frac{\operatorname{OPT}_{\mathrm{integer}}(I)}
+{\operatorname{OPT}_{\mathrm{fractional}}(I)}.
+$$ {#eq-integrality-gap}
+
+The relaxation must be feasible and have a positive fractional optimum for this ratio to be defined; the problem-class gap is the supremum over valid instances.
 
 **Examples:**
 - Vertex Cover: Gap = 2

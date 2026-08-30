@@ -172,7 +172,7 @@ Imagine you're organizing a deck of 52 cards by number. Regular QuickSort works 
 
 We get the most unbalanced splits possible! This is like trying to balance a see-saw with all the kids on one side.
 
-**Time complexity:** O(n²) - absolutely terrible for large datasets!
+**Time complexity:** $O(n^2)$ - absolutely terrible for large datasets!
 
 ### Enter Randomized QuickSort: The Magic of Random Pivots
 
@@ -196,8 +196,8 @@ Let's understand this with an analogy:
 **The Mathematical Magic:**
 - Probability of picking a "good" pivot (between 25th and 75th percentile): 50%
 - With good pivots, we get balanced splits
-- Expected number of times we split: O(log n)
-- Total expected work: O(n log n) - MUCH better!
+- Expected number of times we split: $O(log n)$
+- Total expected work: $O(n log n)$ - MUCH better!
 
 #### Step-by-Step Example
 
@@ -514,9 +514,9 @@ def amplify_accuracy(monte_carlo_func, input_data, desired_accuracy=0.99):
 ### The Naive Approach
 
 **Method 1: Sort then Select**
-- Sort the entire array: O(n log n)
-- Return element at position k: O(1)
-- Total: O(n log n)
+- Sort the entire array: $O(n log n)$
+- Return element at position k: $O(1)$
+- Total: $O(n log n)$
 
 **Problem:** We're doing too much work! We sort everything when we only need one element.
 
@@ -551,9 +551,9 @@ Imagine finding the 30th tallest person in a group of 100:
 
 - Each partition cuts the problem roughly in half (on average)
 - We only recurse on one side (unlike QuickSort which does both)
-- Expected comparisons: n + n/2 + n/4 + ... = 2n = O(n)
+- Expected comparisons: n + n/2 + n/4 + ... = 2n = $O(n)$
 
-That's linear time! Much better than O(n log n) for sorting.
+That's linear time! Much better than $O(n log n)$ for sorting.
 
 #### The Implementation
 
@@ -601,7 +601,7 @@ def quickselect(arr, k):
 1. **Finding Medians in Data Analysis**
    - Dataset: Customer purchase amounts
    - Need: Find median purchase (not affected by billionaire outliers)
-   - QuickSelect: O(n) vs Sorting: O(n log n)
+   - QuickSelect: $O(n)$ vs Sorting: $O(n log n)$
 
 2. **Percentile Calculations**
    - Finding 95th percentile response time in web servers
@@ -636,7 +636,7 @@ This is like two different people having the same locker combination. What do we
 **Deterministic Problem:**
 If an attacker knows your hash function, they can deliberately cause collisions:
 - Send 1000 items that all hash to the same bucket
-- Your O(1) lookup becomes O(n) - disaster!
+- Your $O(1)$ lookup becomes $O(n)$ - disaster!
 
 ### Universal Hashing: Randomization to the Rescue
 
@@ -650,10 +650,13 @@ If an attacker knows your hash function, they can deliberately cause collisions:
 
 #### What Makes a Hash Family "Universal"?
 
-A family of hash functions is universal if:
-- For any two different keys x and y
-- Probability that h(x) = h(y) ≤ 1/m
-- Where m is the table size
+A family of hash functions is universal if, for distinct keys $x$ and $y$,
+
+$$
+\Pr_{h}[h(x)=h(y)]\le\frac1m,
+$$
+
+where $m$ is the table size and the probability is over the random choice of $h$.
 
 **In Simple Terms:** The chance of any two items colliding is as small as if we assigned them random locations!
 
@@ -661,13 +664,11 @@ A family of hash functions is universal if:
 
 One elegant universal hash family:
 
-```{.inline-example chapter=6}
-h(x) = ((ax + b) mod p) mod m
-```
+$$
+h_{a,b}(x)=\bigl((ax+b)\bmod p\bigr)\bmod m.
+$$ {#eq-universal-hash-family}
 
-Where:
-- p is a prime number larger than your universe
-- a is randomly chosen from {1, 2, ..., p-1}
+Here $p$ is a prime larger than the key universe, $a$ is chosen uniformly from $\{1,2,\ldots,p-1\}$, and $b$ is chosen uniformly from $\{0,1,\ldots,p-1\}$.
 - b is randomly chosen from {0, 1, ..., p-1}
 - m is your table size
 
@@ -1270,7 +1271,7 @@ Expected comparisons = 1×(1/4) + 2×(1/4) + 3×(1/4) + 4×(1/4) = 2.5
 
 "Expected" performance is nice, but what if we get unlucky? We want stronger guarantees!
 
-**High Probability Statement:** "The algorithm finishes in O(n log n) time with probability ≥ 1 - 1/n²"
+**High Probability Statement:** "The algorithm finishes in $O(n log n)$ time with probability ≥ 1 - 1/n²"
 
 **What this means:**
 - For n = 1000: Fails less than once in a million runs

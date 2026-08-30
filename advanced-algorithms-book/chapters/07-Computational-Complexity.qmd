@@ -77,23 +77,23 @@ Imagine you're planning a birthday party and need to complete various tasks:
 - 30 guests = 30 invitations to write
 - 60 guests = 60 invitations
 - Time doubles when guests double
-- This is **linear time**: O(n)
+- This is **linear time**: $O(n)$
 
 **Task 2: Everyone Shaking Hands**
 - 30 guests = 435 handshakes (each pair shakes once)
 - 60 guests = 1,770 handshakes
 - Time quadruples when guests double
-- This is **quadratic time**: O(n²)
+- This is **quadratic time**: $O(n^2)$
 
 **Task 3: Seating Arrangements**
 - 10 guests = 3,628,800 possible arrangements
 - 11 guests = 39,916,800 possible arrangements
 - Adding ONE guest multiplies possibilities by 11!
-- This is **factorial time**: O(n!)
+- This is **factorial time**: $O(n!)$
 
 The difference is staggering:
 
-| Guests | Linear (O(n)) | Quadratic (O(n²)) | Factorial (O(n!)) |
+| Guests | Linear ($O(n)$) | Quadratic ($O(n^2)$) | Factorial ($O(n!)$) |
 |--------|---------------|-------------------|-------------------|
 | 10     | 10 steps      | 100 steps         | 3,628,800 steps   |
 | 20     | 20 steps      | 400 steps         | 2.4 × 10¹⁸ steps  |
@@ -109,12 +109,12 @@ If each "step" takes 1 microsecond:
 The fundamental distinction in complexity theory is between:
 
 **Polynomial Time** (considered "efficient"):
-- O(n), O(n²), O(n³), even O(n¹⁰⁰)
+- $O(n)$, $O(n^2)$, $O(n^3)$, even $O(n¹⁰⁰)$
 - Doubles input → time increases by fixed factor
 - Practical for large inputs with enough resources
 
 **Exponential Time** (considered "inefficient"):
-- O(2ⁿ), O(n!), O(nⁿ)
+- $O(2^n)$, $O(n!)$, $O(n^n)$
 - Each additional input multiplies time
 - Quickly becomes impossible even for moderate inputs
 
@@ -148,22 +148,22 @@ This is why exponential algorithms are impractical—they grow too fast!
 
 1. **Sorting a List**
    - Algorithm: MergeSort
-   - Time: O(n log n)
+   - Time: $O(n log n)$
    - Definitely in P!
 
 2. **Finding Shortest Path (with positive weights)**
    - Algorithm: Dijkstra's
-   - Time: O(E log V)
+   - Time: $O(E log V)$
    - In P!
 
 3. **Testing if a Number is Prime**
    - Algorithm: AKS primality test
-   - Time: O(log⁶ n)
+   - Time: $O(log⁶ n)$
    - In P! (This was only proven in 2002!)
 
 4. **Maximum Flow in a Network**
    - Algorithm: Edmonds-Karp
-   - Time: O(VE²)
+   - Time: $O(VE^2)$
    - In P!
 
 ### Class NP: Problems We Can Verify Efficiently
@@ -374,11 +374,11 @@ Solution: Laptop + Jewelry = 3.5 kg, $3000 ✓
 **The Problem:** SAT where each clause has exactly 3 literals.
 
 **Example:**
-```{.inline-example chapter=7}
-(x₁ OR x₂ OR x₃) AND 
-(NOT x₁ OR x₃ OR x₄) AND
-(x₂ OR NOT x₃ OR NOT x₄)
-```
+$$
+(x_1\lor x_2\lor x_3)
+\land(\neg x_1\lor x_3\lor x_4)
+\land(x_2\lor\neg x_3\lor\neg x_4).
+$$
 
 **Why It's Important:**
 - Easier to work with than general SAT
@@ -475,8 +475,8 @@ Connect clause gadgets to variable gadgets based on literals.
 
 #### Step 5: Prove Polynomial Time
 
-- Creating gadgets: O(clauses + variables)
-- Connecting gadgets: O(clauses × 3)
+- Creating gadgets: $O(clauses + variables)$
+- Connecting gadgets: $O(clauses × 3)$
 - Total: Polynomial! ✓
 
 Therefore, Vertex Cover is NP-complete!
@@ -908,9 +908,9 @@ def reduce_3sat_to_clique(formula):
 **7.7 Complexity Analysis**
 For each algorithm, determine if it implies P = NP:
 
-a) O(n^100) algorithm for 3-SAT
-b) O(2^√n) algorithm for TSP
-c) O(n^log n) algorithm for Clique
+a) $O(n^100)$ algorithm for 3-SAT
+b) $O(2^{\sqrt n})$ algorithm for TSP
+c) $O(n^log n)$ algorithm for Clique
 d) Quantum polynomial algorithm for Factoring
 
 **7.8 Special Cases**

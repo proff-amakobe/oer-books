@@ -19,7 +19,7 @@ The FFT is so fundamental that when it was rediscovered in 1965 (it was actually
 - **Scientific computing**: Climate modeling, quantum physics
 - **Finance**: High-frequency trading, risk analysis
 
-But the FFT is just the beginning. In this chapter, we'll explore the algorithms that power our digital world: how to multiply matrices fast enough to train neural networks, how to multiply polynomials in O(n log n) time instead of O(n²), and how to make sure floating-point errors don't destroy your calculations.
+But the FFT is just the beginning. In this chapter, we'll explore the algorithms that power our digital world: how to multiply matrices fast enough to train neural networks, how to multiply polynomials in $O(n log n)$ time instead of $O(n^2)$, and how to make sure floating-point errors don't destroy your calculations.
 
 **What makes these algorithms special?**
 
@@ -59,23 +59,20 @@ Once you're in the frequency domain, you can:
 
 ### The Mathematical Foundation
 
-For a signal with N samples x₀, x₁, ..., x_{N-1}, the **Discrete Fourier Transform (DFT)** is:
+For a signal with $N$ samples $x_0,x_1,\ldots,x_{N-1}$, the **Discrete Fourier Transform (DFT)** is
 
-```{.technical-other chapter=11}
-X_k = Σ(n=0 to N-1) x_n * e^(-2πikn/N)
+$$
+X_k=\sum_{n=0}^{N-1}x_n e^{-2\pi i kn/N},
+\qquad k=0,1,\ldots,N-1.
+$$ {#eq-discrete-fourier-transform}
 
-where:
-- X_k = amplitude of frequency k
-- x_n = sample n in time domain
-- e^(-2πikn/N) = complex rotation (Euler's formula)
-- k ranges from 0 to N-1
-```
+Here $X_k$ is the complex amplitude of frequency bin $k$, $x_n$ is time-domain sample $n$, and $e^{-2\pi i kn/N}$ is a unit-magnitude complex rotation. The definition assumes uniformly spaced samples; interpreting bins as physical frequencies also requires the sampling rate.
 
 In plain English: to find the amplitude at frequency k, we multiply each time sample by a complex exponential at that frequency and sum everything up.
 
-**The complex exponential** e^(iθ) = cos(θ) + i*sin(θ) might look scary, but it's just a rotation in the complex plane. Think of it as asking "how much of frequency k is present in the signal?"
+The complex exponential $e^{i\theta}=\cos\theta+i\sin\theta$ is a rotation in the complex plane. Think of the DFT as asking how much of frequency $k$ is present in the signal.
 
-### The Naive DFT: O(N²)
+### The Naive DFT: $O(N^2)$
 
 The straightforward implementation computes each X_k independently:
 
@@ -134,11 +131,13 @@ Where:
 
 Keep dividing until you reach size 1 (base case: DFT of one element is itself).
 
-**Time complexity analysis**:
-```{.algorithm chapter=11}
-T(N) = 2T(N/2) + O(N)  (two recursive calls + combining)
-     = O(N log N)       (by Master Theorem)
-```
+**Time complexity analysis:** The two half-size transforms and linear combine step give
+
+$$
+T(N)=2T\!\left(\frac N2\right)+O(N)=O(N\log N)
+$$
+
+by the Master Theorem.
 
 **The speedup**: For N = 1,000,000:
 - Naive: 1,000,000² = 1,000,000,000,000 operations
@@ -229,7 +228,7 @@ def fft_trace_example():
 
 ### Iterative FFT (Cooley-Tukey)
 
-The recursive slicing version is elegant but performs O(N log N) total allocation over the run; its peak auxiliary space is O(N). The iterative version also uses O(N) auxiliary space and usually has lower allocation overhead:
+The recursive slicing version is elegant but performs $O(N log N)$ total allocation over the run; its peak auxiliary space is $O(N)$. The iterative version also uses $O(N)$ auxiliary space and usually has lower allocation overhead:
 
 ```{.python .program-code chapter=11}
 def fft_iterative(x):
@@ -547,10 +546,12 @@ if __name__ == "__main__":
 ### The Problem
 
 You have two polynomials:
-```{.inline-example chapter=11}
-A(x) = a₀ + a₁x + a₂x² + ... + aₙxⁿ
-B(x) = b₀ + b₁x + b₂x² + ... + bₘxᵐ
-```
+
+$$
+A(x)=\sum_{i=0}^{n}a_i x^i,
+\qquad
+B(x)=\sum_{j=0}^{m}b_j x^j.
+$$
 
 **Goal**: Compute C(x) = A(x) × B(x)
 
@@ -573,15 +574,13 @@ def multiply_polynomials_naive(A, B):
     return result
 ```
 
-**Example**:
-```{.technical-other chapter=11}
-A(x) = 1 + 2x + 3x²  →  [1, 2, 3]
-B(x) = 4 + 5x + 6x²  →  [4, 5, 6]
+**Example:** If $A(x)=1+2x+3x^2$ and $B(x)=4+5x+6x^2$, then
 
-C(x) = A(x) × B(x)
-     = 4 + 13x + 28x² + 27x³ + 18x⁴
-     = [4, 13, 28, 27, 18]
-```
+$$
+C(x)=A(x)B(x)=4+13x+28x^2+27x^3+18x^4.
+$$
+
+The corresponding coefficient vector is $[4,13,28,27,18]$.
 
 ### The FFT Trick
 
@@ -593,13 +592,16 @@ Here's the key insight: **polynomial multiplication in coefficient form is convo
 
 Think of polynomials as signals. The coefficients are like time-domain samples. When we multiply polynomials, we're convolving their coefficients. By the convolution theorem:
 
-```{.inline-example chapter=11}
-FFT(A × B) = FFT(A) * FFT(B)  (pointwise multiplication)
-```
+$$
+\operatorname{FFT}(A*B)
+=\operatorname{FFT}(A)\odot\operatorname{FFT}(B),
+$$ {#eq-convolution-theorem}
+
+where $*$ denotes coefficient convolution and $\odot$ denotes pointwise multiplication. Zero-padding is required to avoid circular wraparound when computing an ordinary polynomial product.
 
 **Time complexity**:
-- Naive: O(n²)
-- FFT method: O(n log n)
+- Naive: $O(n^2)$
+- FFT method: $O(n log n)$
 
 For large polynomials, this is HUGE!
 
@@ -704,7 +706,7 @@ if __name__ == "__main__":
 
 ### Application: Big Integer Multiplication
 
-You can use FFT to multiply huge integers in O(n log n) time!
+You can use FFT to multiply huge integers in $O(n log n)$ time!
 
 ```{.python .program-code chapter=11}
 def multiply_large_integers(a, b, base=10):
@@ -804,40 +806,46 @@ def matmul_naive(A, B):
     return C
 ```
 
-For square matrices (n×n), this is **O(n³)**.
+For square matrices (n×n), this is **$O(n^3)$**.
 
 **Can we do better?**
 
 Yes! But it's complicated...
 
-### Strassen's Algorithm: O(n^2.807)
+### Strassen's Algorithm: $O(n^2.807)$
 
 Volker Strassen (1969) discovered that you can multiply 2×2 matrices with only 7 multiplications instead of 8:
 
 **Normal method** (8 multiplications):
-```{.algorithm chapter=11}
-[a b]   [e f]   [ae+bg  af+bh]
-[c d] × [g h] = [ce+dg  cf+dh]
-```
 
-**Strassen's method** (7 multiplications):
-```{.technical-other chapter=11}
-M₁ = (a + d)(e + h)
-M₂ = (c + d)e
-M₃ = a(f - h)
-M₄ = d(g - e)
-M₅ = (a + b)h
-M₆ = (c - a)(e + f)
-M₇ = (b - d)(g + h)
+$$
+\begin{bmatrix}a&b\\c&d\end{bmatrix}
+\begin{bmatrix}e&f\\g&h\end{bmatrix}
+=
+\begin{bmatrix}ae+bg&af+bh\\ce+dg&cf+dh\end{bmatrix}.
+$$
 
-Then:
-C₁₁ = M₁ + M₄ - M₅ + M₇
-C₁₂ = M₃ + M₅
-C₂₁ = M₂ + M₄
-C₂₂ = M₁ - M₂ + M₃ + M₆
-```
+**Strassen's method** (7 multiplications) defines
 
-By recursively applying this, you get O(n^log₂(7)) ≈ O(n^2.807).
+$$
+\begin{aligned}
+M_1&=(a+d)(e+h), & M_2&=(c+d)e,\\
+M_3&=a(f-h), & M_4&=d(g-e),\\
+M_5&=(a+b)h, & M_6&=(c-a)(e+f),\\
+M_7&=(b-d)(g+h),
+\end{aligned}
+$$
+
+and combines them as
+
+$$
+\begin{aligned}
+C_{11}&=M_1+M_4-M_5+M_7, & C_{12}&=M_3+M_5,\\
+C_{21}&=M_2+M_4, & C_{22}&=M_1-M_2+M_3+M_6.
+\end{aligned}
+$$
+
+By recursively applying this construction, the running time is $O(n^{\log_2 7})\approx O(n^{2.807})$.
 
 ```{.python .program-code chapter=11}
 def strassen_matmul(A, B):
@@ -2419,8 +2427,8 @@ if __name__ == '__main__':
 ## Summary and Key Takeaways
 
 **Core Algorithms**:
-1. **FFT**: O(n log n) frequency analysis, revolutionized signal processing
-2. **Polynomial multiplication**: Use FFT for O(n log n) multiplication
+1. **FFT**: $O(n log n)$ frequency analysis, revolutionized signal processing
+2. **Polynomial multiplication**: Use FFT for $O(n log n)$ multiplication
 3. **Matrix operations**: Cache-aware blocking makes huge difference
 4. **Numerical stability**: Always consider floating-point errors
 
@@ -2446,7 +2454,7 @@ if __name__ == '__main__':
 
 ### Conceptual Understanding
 
-1. **FFT Complexity**: Prove that FFT has O(n log n) complexity using the Master Theorem.
+1. **FFT Complexity**: Prove that FFT has $O(n log n)$ complexity using the Master Theorem.
 
 2. **Nyquist Frequency**: Explain why you can't measure frequencies above sample_rate/2.
 
@@ -2498,4 +2506,4 @@ if __name__ == '__main__':
 
 You've now mastered the algorithms that power the digital world! From the music you listen to, to the images you see, to the data your phone transmits—FFT and matrix algorithms are working behind the scenes.
 
-Next up: Advanced data structures that can query ranges in O(log n) time and support persistent versions of themselves!
+Next up: Advanced data structures that can query ranges in $O(log n)$ time and support persistent versions of themselves!

@@ -146,7 +146,8 @@ def audit() -> dict:
 
     return {
         "html_pages": len(files), "chapter_urls": f"{sum(path.exists() for path in chapter_paths)}/15",
-        "chapter_numbering": numbering, "canonical_technical_blocks": 512,
+        "chapter_numbering": numbering, "technical_blocks_before_math_audit": 512,
+        "math_blocks_reclassified_net": 512 - technical,
         "technical_blocks_html": technical, "figures_svg": figures,
         "residue": dict(residue), "internal_links_checked": checked,
         "broken_internal": broken, "external_links_discovered": len(external),

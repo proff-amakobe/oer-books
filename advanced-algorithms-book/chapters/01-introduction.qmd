@@ -485,17 +485,17 @@ Before implementing, let's analyze how efficient our algorithm is:
 
 **Time Complexity:**
 
-- We process each element exactly once: O(n)
-- Each hash table operation (lookup, insert, update) takes O(1) on average
-- Total: O(n) ✓
+- We process each element exactly once: $O(n)$
+- Each hash table operation (lookup, insert, update) takes $O(1)$ on average
+- Total: $O(n)$ ✓
 
 **Space Complexity:**
 
-- Hash table stores at most n elements: O(n)
-- Result list stores at most n elements: O(n)
-- Total: O(n) ✓
+- Hash table stores at most n elements: $O(n)$
+- Result list stores at most n elements: $O(n)$
+- Total: $O(n)$ ✓
 
-This is quite efficient! We can't do better than O(n) time because we must examine every element at least once.
+This is quite efficient! We can't do better than $O(n)$ time because we must examine every element at least once.
 
 ### Step 7: Implement
 
@@ -600,8 +600,8 @@ def find_median_exact(numbers):
 **Analysis:**
 
 - **Correctness:** 100% accurate
-- **Time Complexity:** O(n log n) due to sorting
-- **Space Complexity:** O(n) for the sorted copy
+- **Time Complexity:** $O(n log n)$ due to sorting
+- **Space Complexity:** $O(n)$ for the sorted copy
 
 #### Approach 2: The "Fast" Way (QuickSelect)
 
@@ -639,8 +639,8 @@ def quickselect(arr, k):
 **Analysis:**
 
 - **Correctness:** 100% accurate
-- **Time Complexity:** O(n) average case, O(n²) worst case
-- **Space Complexity:** O(1) if implemented iteratively
+- **Time Complexity:** $O(n)$ average case, $O(n^2)$ worst case
+- **Space Complexity:** $O(1)$ if implemented iteratively
 
 #### Approach 3: The "Approximate" Way
 
@@ -658,8 +658,8 @@ def find_median_approximate(numbers, sample_size=100):
 **Analysis:**
 
 - **Correctness:** Approximately correct (error depends on data distribution)
-- **Time Complexity:** O(s log s) where s is sample size (constant for fixed sample size)
-- **Space Complexity:** O(s)
+- **Time Complexity:** $O(s log s)$ where s is sample size (constant for fixed sample size)
+- **Space Complexity:** $O(s)$
 
 ### Real-World Performance Comparison
 
@@ -814,9 +814,9 @@ Let's see how they perform for different input sizes:
 
 For small inputs, Algorithm B wins decisively. But as the input size grows, Algorithm A eventually overtakes Algorithm B and becomes dramatically faster. The "crossover point" is around n = 100.
 
-**The Big-O Insight:** For sufficiently large inputs, Algorithm A (which is O(n)) will always be faster than Algorithm B (which is O(n²)), regardless of the constant factors.
+**The Big-O Insight:** For sufficiently large inputs, Algorithm A (which is $O(n)$) will always be faster than Algorithm B (which is $O(n^2)$), regardless of the constant factors.
 
-This is why we say that O(n) is "better" than O(n²)—not because it's always faster, but because it scales better as problems get larger.
+This is why we say that $O(n)$ is "better" than $O(n^2)$—not because it's always faster, but because it scales better as problems get larger.
 
 ### Formal Definitions: Making It Precise
 
@@ -824,78 +824,82 @@ Now let's make these intuitions mathematically rigorous. Don't worry if the nota
 
 #### Big-O Notation (Upper Bound)
 
-**Definition:** We say f(n) = O(g(n)) if there exist positive constants c and n₀ such that:
+**Definition:** We say $f(n)=O(g(n))$ if there exist positive constants $c$ and $n_0$ such that
 
-```{.inline-example chapter=1}
-0 ≤ f(n) ≤ c·g(n) for all n ≥ n₀
-```
+$$
+0 \le f(n) \le c\,g(n)
+\qquad \text{for all } n \ge n_0.
+$$ {#eq-bigo-definition}
 
-**In plain English:** f(n) grows no faster than g(n), up to constant factors and for sufficiently large n.
+Here, $f(n)$ is the quantity being bounded, $g(n)$ is the comparison function, $c$ is a fixed scaling constant, and $n_0$ is the threshold beyond which the bound holds. Both functions are assumed nonnegative for sufficiently large $n$.
 
-**Visual Intuition:** Imagine you're drawing f(n) and c·g(n) on a graph. After some point n₀, the line c·g(n) stays above f(n) forever.
+**In plain English:** $f(n)$ grows no faster than $g(n)$, up to a constant factor and for sufficiently large $n$. This is an asymptotic upper bound, not necessarily an exact growth rate.
 
-**Example:** Let's prove that 3n² + 5n + 2 = O(n²).
+**Visual Intuition:** Imagine drawing $f(n)$ and $c\,g(n)$ on a graph. After $n_0$, the curve $c\,g(n)$ stays above $f(n)$.
 
-We need to find constants c and n₀ such that:
+**Example:** Let's prove that $3n^2+5n+2=O(n^2)$.
 
-```{.inline-example chapter=1}
-3n² + 5n + 2 ≤ c·n² for all n ≥ n₀
-```
+We need constants $c$ and $n_0$ such that
 
-For large n, the terms 5n and 2 become negligible compared to 3n². Let's be more precise:
+$$
+3n^2+5n+2 \le c\,n^2
+\qquad \text{for all } n \ge n_0.
+$$
 
-For n ≥ 1:
+For large $n$, the terms $5n$ and $2$ become negligible compared with $3n^2$. More precisely, for $n\ge1$:
 
-- 5n ≤ 5n² (since n ≤ n² when n ≥ 1)
-- 2 ≤ 2n² (since 1 ≤ n² when n ≥ 1)
+- $5n\le5n^2$, since $n\le n^2$.
+- $2\le2n^2$, since $1\le n^2$.
 
 Therefore:
 
-```{.inline-example chapter=1}
-3n² + 5n + 2 ≤ 3n² + 5n² + 2n² = 10n²
-```
+$$
+3n^2+5n+2 \le 3n^2+5n^2+2n^2=10n^2.
+$$
 
-So we can choose c = 10 and n₀ = 1, proving that 3n² + 5n + 2 = O(n²). ✓
+Thus $c=10$ and $n_0=1$ prove that $3n^2+5n+2=O(n^2)$.
 
 #### Big-Ω Notation (Lower Bound)
 
-**Definition:** We say f(n) = Ω(g(n)) if there exist positive constants c and n₀ such that:
+**Definition:** We say $f(n)=\Omega(g(n))$ if there exist positive constants $c$ and $n_0$ such that
 
-```{.inline-example chapter=1}
-0 ≤ c·g(n) ≤ f(n) for all n ≥ n₀
-```
+$$
+0 \le c\,g(n) \le f(n)
+\qquad \text{for all } n \ge n_0.
+$$ {#eq-bigomega-definition}
 
-**In plain English:** f(n) grows at least as fast as g(n), up to constant factors.
+The variables have the same meanings and eventual-nonnegativity assumption as in @eq-bigo-definition. **In plain English:** $f(n)$ grows at least as fast as $g(n)$, up to a constant factor.
 
-**Example:** Let's prove that 3n² + 5n + 2 = Ω(n²).
+**Example:** Let's prove that $3n^2+5n+2=\Omega(n^2)$.
 
 We need:
 
-```{.inline-example chapter=1}
-c·n² ≤ 3n² + 5n + 2 for all n ≥ n₀
-```
+$$
+c\,n^2 \le 3n^2+5n+2
+\qquad \text{for all } n \ge n_0.
+$$
 
-This is easier! For any n ≥ 1:
+For every $n\ge1$,
 
-```{.inline-example chapter=1}
-3n² ≤ 3n² + 5n + 2
-```
+$$
+3n^2 \le 3n^2+5n+2.
+$$
 
-So we can choose c = 3 and n₀ = 1. ✓
+Thus we may choose $c=3$ and $n_0=1$.
 
 #### Big-Θ Notation (Tight Bound)
 
-**Definition:** We say f(n) = Θ(g(n)) if f(n) = O(g(n)) AND f(n) = Ω(g(n)).
+**Definition:** We say $f(n)=\Theta(g(n))$ when $f(n)=O(g(n))$ and $f(n)=\Omega(g(n))$.
 
-**In plain English:** f(n) and g(n) grow at exactly the same rate, up to constant factors.
+**In plain English:** $f(n)$ and $g(n)$ have the same asymptotic growth rate up to constant factors. This does not mean that the functions are numerically equal.
 
-**Example:** Since we proved both 3n² + 5n + 2 = O(n²) and 3n² + 5n + 2 = Ω(n²), we can conclude:
+**Example:** Since we proved both an upper and a lower bound,
 
-```{.inline-example chapter=1}
-3n² + 5n + 2 = Θ(n²)
-```
+$$
+3n^2+5n+2=\Theta(n^2).
+$$
 
-This means that for large n, this function behaves essentially like n².
+For sufficiently large $n$, this polynomial therefore grows quadratically.
 
 ### Common Misconceptions (And How to Avoid Them)
 
@@ -903,11 +907,11 @@ Understanding asymptotic notation correctly is crucial, but there are several co
 
 #### Misconception 1: "Big-O means exact growth rate"
 
-❌ **Wrong thinking:** "Since bubble sort is O(n²), it can't also be O(n³)."
+❌ **Wrong thinking:** "Since bubble sort is $O(n^2)$, it can't also be $O(n^3)$."
 
-✅ **Correct thinking:** "Big-O gives an upper bound. If an algorithm is O(n²), it's also O(n³), O(n⁴), etc."
+✅ **Correct thinking:** "Big-O gives an upper bound. If an algorithm is $O(n^2)$, it's also $O(n^3)$, $O(n⁴)$, etc."
 
-**Why this matters:** Big-O tells us the worst an algorithm can be, not exactly how it behaves. Saying "this algorithm is O(n²)" means "it won't be worse than quadratic," not "it's exactly quadratic."
+**Why this matters:** Big-O tells us the worst an algorithm can be, not exactly how it behaves. Saying "this algorithm is $O(n^2)$" means "it won't be worse than quadratic," not "it's exactly quadratic."
 
 **Example:**
 
@@ -921,15 +925,15 @@ def linear_search(arr, target):
 
 This algorithm is:
 
-- O(n) ✓ (correct upper bound)
-- O(n²) ✓ (loose but valid upper bound)
-- O(n³) ✓ (very loose but still valid upper bound)
+- $O(n)$ ✓ (correct upper bound)
+- $O(n^2)$ ✓ (loose but valid upper bound)
+- $O(n^3)$ ✓ (very loose but still valid upper bound)
 
-However, we prefer the tightest bound, so we say it's O(n).
+However, we prefer the tightest bound, so we say it's $O(n)$.
 
 #### Misconception 2: "Constants and lower-order terms never matter"
 
-❌ **Wrong thinking:** "Algorithm A takes 1000n² time, Algorithm B takes n² time. Since both are O(n²), they're equally good."
+❌ **Wrong thinking:** "Algorithm A takes 1000n² time, Algorithm B takes n² time. Since both are $O(n^2)$, they're equally good."
 
 ✅ **Correct thinking:** "Both have the same asymptotic growth rate, but the constant factor of 1000 makes Algorithm A much slower in practice."
 
@@ -949,23 +953,23 @@ However, we prefer the tightest bound, so we say it's O(n).
 
 - Very large input sizes where asymptotic behavior dominates
 - Theoretical analysis comparing different algorithmic approaches
-- When choosing between different complexity classes (O(n) vs O(n²))
+- When choosing between different complexity classes ($O(n)$ vs $O(n^2)$)
 
-#### Misconception 3: "Best case = O(), Worst case = Ω()"
+#### Misconception 3: "Best case = $O()$, Worst case = $\Omega()$"
 
-❌ **Wrong thinking:** "QuickSort's best case is O(n log n) and worst case is Ω(n²)."
+❌ **Wrong thinking:** "QuickSort's best case is $O(n log n)$ and worst case is $\Omega(n^2)$."
 
-✅ **Correct thinking:** "QuickSort's best case is Θ(n log n) and worst case is Θ(n²). Each case has its own Big-O, Big-Ω, and Big-Θ."
+✅ **Correct thinking:** "QuickSort's best case is $\Theta(n log n)$ and worst case is $\Theta(n^2)$. Each case has its own Big-O, Big-Ω, and Big-Θ."
 
 **Correct analysis of QuickSort:**
 
-- **Best case:** Θ(n log n) - this means O(n log n) AND Ω(n log n)
-- **Average case:** Θ(n log n)
-- **Worst case:** Θ(n²) - this means O(n²) AND Ω(n²)
+- **Best case:** $\Theta(n log n)$ - this means $O(n log n)$ AND $\Omega(n log n)$
+- **Average case:** $\Theta(n log n)$
+- **Worst case:** $\Theta(n^2)$ - this means $O(n^2)$ AND $\Omega(n^2)$
 
 #### Misconception 4: "Asymptotic analysis applies to small inputs"
 
-❌ **Wrong thinking:** "This O(n²) algorithm is slow even on 5 elements."
+❌ **Wrong thinking:** "This $O(n^2)$ algorithm is slow even on 5 elements."
 
 ✅ **Correct thinking:** "Asymptotic analysis predicts behavior for large n. Small inputs may behave very differently."
 
@@ -986,14 +990,19 @@ Many production sorting algorithms use this hybrid approach!
 
 Understanding the relative growth rates of common functions is essential for algorithm analysis. Here's the hierarchy from slowest to fastest growing:
 
-```{.algorithm chapter=1}
-O(1) < O(log log n) < O(log n) < O(n^(1/3)) < O(√n) < O(n)
-< O(n log n) < O(n²) < O(n³) < O(2ⁿ) < O(n!) < O(nⁿ)
-```
+$$
+\begin{aligned}
+O(1)&\subset O(\log\log n)\subset O(\log n)\subset O(n^{1/3})\subset O(\sqrt n),\\
+&\subset O(n)\subset O(n\log n)\subset O(n^2)\subset O(n^3),\\
+&\subset O(2^n)\subset O(n!)\subset O(n^n).
+\end{aligned}
+$$
+
+The inclusions compare asymptotic upper-bound classes; they describe eventual growth and do not rank running times for every finite input.
 
 Let's explore each with intuitive explanations and real-world examples:
 
-#### O(1) - Constant Time
+#### $O(1)$ - Constant Time
 
 **Intuition:** Takes the same time regardless of input size. **Examples:**
 
@@ -1003,7 +1012,7 @@ Let's explore each with intuitive explanations and real-world examples:
 
 **Real-world analogy:** Looking up a word in a dictionary if you know the exact page number.
 
-#### O(log n) - Logarithmic Time
+#### $O(log n)$ - Logarithmic Time
 
 **Intuition:** Time increases slowly as input size increases exponentially. **Examples:**
 
@@ -1021,7 +1030,7 @@ Let's explore each with intuitive explanations and real-world examples:
 
 You can search through a billion items with just 30 comparisons!
 
-#### O(n) - Linear Time
+#### $O(n)$ - Linear Time
 
 **Intuition:** Time grows proportionally with input size. **Examples:**
 
@@ -1031,7 +1040,7 @@ You can search through a billion items with just 30 comparisons!
 
 **Real-world analogy:** Reading every page of a book to find all instances of a word.
 
-#### O(n log n) - Linearithmic Time
+#### $O(n log n)$ - Linearithmic Time
 
 **Intuition:** Slightly worse than linear, but much better than quadratic. **Examples:**
 
@@ -1043,7 +1052,7 @@ You can search through a billion items with just 30 comparisons!
 
 **Why it's the "sweet spot":** This is often the best we can do for comparison-based sorting and many other fundamental problems.
 
-#### O(n²) - Quadratic Time
+#### $O(n^2)$ - Quadratic Time
 
 **Intuition:** Time grows with the square of input size. **Examples:**
 
@@ -1059,7 +1068,7 @@ You can search through a billion items with just 30 comparisons!
 - 10,000 elements: ~100 million operations
 - 100,000 elements: ~10 billion operations
 
-#### O(2ⁿ) - Exponential Time
+#### $O(2^n)$ - Exponential Time
 
 **Intuition:** Time doubles with each additional input element. **Examples:**
 
@@ -1077,7 +1086,7 @@ You can search through a billion items with just 30 comparisons!
 
 Adding just 10 more elements increases the time by a factor of 1,000!
 
-#### O(n!) - Factorial Time
+#### $O(n!)$ - Factorial Time
 
 **Intuition:** Even worse than exponential—considers all possible permutations. **Examples:**
 
@@ -1112,7 +1121,7 @@ def print_pairs(arr):
 - Outer loop: n iterations
 - Inner loop: n iterations for each outer iteration
 - Total: n × n = n² iterations
-- **Time Complexity:** O(n²)
+- **Time Complexity:** $O(n^2)$
 
 #### Example 2: Variable Inner Loop
 
@@ -1132,7 +1141,7 @@ def print_triangular_pairs(arr):
 - ...
 - When i = n-1: inner loop runs n-1 times
 - Total: 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 = (n² - n)/2
-- **Time Complexity:** O(n²) (the n² term dominates)
+- **Time Complexity:** $O(n^2)$ (the n² term dominates)
 
 #### Example 3: Logarithmic Loop
 
@@ -1157,7 +1166,7 @@ def binary_search_iterative(arr, target):
 - Each iteration eliminates half the remaining elements
 - If we start with n elements: n → n/2 → n/4 → n/8 → ... → 1
 - Number of iterations until we reach 1: log₂(n)
-- **Time Complexity:** O(log n)
+- **Time Complexity:** $O(log n)$
 
 #### Example 4: Divide and Conquer
 
@@ -1192,9 +1201,9 @@ def merge(left, right):
 
 **Analysis using recurrence relations:**
 
-- T(n) = 2T(n/2) + O(n)
+- T(n) = 2T(n/2) + $O(n)$
 - This is a classic divide-and-conquer recurrence
-- By the Master Theorem (which we'll study in detail later): T(n) = O(n log n)
+- By the Master Theorem (which we'll study in detail later): T(n) = $O(n log n)$
 
 ### Making Asymptotic Analysis Practical
 
@@ -1260,9 +1269,9 @@ Some algorithms have expensive operations occasionally but cheap operations most
 
 **Example:** Dynamic arrays (like Python lists)
 
-- Most `append()` operations: O(1)
-- Occasional resize operation: O(n)
-- Amortized cost per append: O(1)
+- Most `append()` operations: $O(1)$
+- Occasional resize operation: $O(n)$
+- Amortized cost per append: $O(1)$
 
 #### Best, Average, and Worst Case
 
@@ -1270,9 +1279,9 @@ Many algorithms have different performance characteristics depending on the inpu
 
 **QuickSort Example:**
 
-- **Best case:** O(n log n) - pivot always splits array evenly
-- **Average case:** O(n log n) - pivot splits reasonably well most of the time
-- **Worst case:** O(n²) - pivot is always the smallest or largest element
+- **Best case:** $O(n log n)$ - pivot always splits array evenly
+- **Average case:** $O(n log n)$ - pivot splits reasonably well most of the time
+- **Worst case:** $O(n^2)$ - pivot is always the smallest or largest element
 
 **Which matters most?**
 
@@ -2474,15 +2483,15 @@ Next week, we'll dive into **Divide and Conquer**, one of the most powerful algo
 
 ⚡ **Advanced Sorting:**
 
-- Merge Sort: Guaranteed O(n log n) performance
-- QuickSort: Average-case O(n log n) with randomization
+- Merge Sort: Guaranteed $O(n log n)$ performance
+- QuickSort: Average-case $O(n log n)$ with randomization
 - Hybrid approaches that adapt to input characteristics
 
 🧮 **Mathematical Tools:**
 
 - Master Theorem for analyzing recurrence relations
 - Solving complex recursive algorithms
-- Understanding why O(n log n) is optimal for comparison-based sorting
+- Understanding why $O(n log n)$ is optimal for comparison-based sorting
 
 🎯 **Real-World Applications:**
 
@@ -2540,20 +2549,20 @@ Design an algorithm to find the second largest element in an array. Then impleme
 
 **Problem 1.2: Asymptotic Proof Practice (20 points)**
 
-**Part A:** Prove using formal definitions that 5n³ + 3n² + 2n + 1 = O(n³)
+**Part A:** Prove using formal definitions that 5n³ + 3n² + 2n + 1 = $O(n^3)$
 
 - Find appropriate constants c and n₀
 - Show your work step by step
 - Justify each inequality
 
-**Part B:** Prove using formal definitions that 5n³ + 3n² + 2n + 1 = Ω(n³)
+**Part B:** Prove using formal definitions that 5n³ + 3n² + 2n + 1 = $\Omega(n^3)$
 
 - Find appropriate constants c and n₀
 - Show your work step by step
 
 **Part C:** What can you conclude about Θ notation for this function? Justify your answer.
 
-**Part D:** Prove or disprove: 2n² + 100n = O(n²)
+**Part D:** Prove or disprove: 2n² + 100n = $O(n^2)$
 
 ---
 

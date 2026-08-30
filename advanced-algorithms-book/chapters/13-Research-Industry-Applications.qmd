@@ -20,7 +20,7 @@ Let's see where algorithms are taking us!
 
 ### Beyond Worst-Case Analysis: Algorithms for the Real World
 
-For decades, algorithm analysis focused obsessively on **worst-case complexity**. If quicksort has O(n²) worst case, we worried about it constantly, even though it almost never happens in practice.
+For decades, algorithm analysis focused obsessively on **worst-case complexity**. If quicksort has $O(n^2)$ worst case, we worried about it constantly, even though it almost never happens in practice.
 
 But around 2000, researchers started asking: **"What if we analyzed algorithms the way they actually perform?"**
 
@@ -113,13 +113,13 @@ An algorithm is **instance-optimal** if it's the best possible for *every* input
 
 #### **Fine-Grained Complexity**
 
-Around 2015, researchers realized: many problems seem to require specific running times (like O(n²) for edit distance), and we can't do better even though we can't prove it.
+Around 2015, researchers realized: many problems seem to require specific running times (like $O(n^2)$ for edit distance), and we can't do better even though we can't prove it.
 
 **The Strong Exponential Time Hypothesis (SETH)**: A conjecture that k-SAT requires 2^n time for some k.
 
 If SETH is true, it implies lower bounds for hundreds of problems:
-- Edit distance requires Ω(n²)
-- Longest common subsequence requires Ω(n²)
+- Edit distance requires $\Omega(n^2)$
+- Longest common subsequence requires $\Omega(n^2)$
 - Frequent itemset mining requires exponential time
 
 **Impact**: Conditional lower bounds explain why improving one problem beyond a conjectured threshold would also require breakthroughs for a broader class of problems. They are conditional results, not unconditional proofs of impossibility.
@@ -147,7 +147,7 @@ No reliable date can be assigned to a cryptographically relevant quantum compute
 
 #### **Grover's Algorithm: Quantum Search**
 
-Grover's algorithm gives a quadratic quantum query improvement for unstructured search, from linear to O(√N) oracle queries [@grover1996search].
+Grover's algorithm gives a quadratic quantum query improvement for unstructured search, from linear to $O(\sqrt N)$ oracle queries [@grover1996search].
 
 **Why this matters**: This is a *provable* quadratic speedup for a fundamental problem.
 
@@ -173,7 +173,7 @@ Quantum simulation is a central motivation for quantum computing because the sta
 Important reality check: Quantum computers aren't magic.
 
 **What quantum computers DON'T speed up**:
-- Sorting: Still Ω(n log n) (maybe √n speedup on some measures)
+- Sorting: Still $\Omega(n log n)$ (maybe √n speedup on some measures)
 - Graph problems: Most remain hard
 - Matrix multiplication: No proven speedup
 - Database operations: No fundamental speedup beyond Grover
@@ -198,15 +198,15 @@ Machine learning: Learn from data, work great on typical inputs, no guarantees.
 - ML provides "hints" or predictions
 - Algorithm uses hints when they're good
 - Falls back to classical algorithm when predictions are wrong
-- Guarantee: Never worse than O(α) × classical, often much better
+- Guarantee: Never worse than $O(α)$ × classical, often much better
 
 #### **Learned Index Structures**
 
 Learned index structures model the position of a key in an ordered collection and use a conventional correction step when the prediction is imperfect [@kraska2018learned].
 
-**Traditional B-tree index**: O(log n) lookup, works for any data distribution.
+**Traditional B-tree index**: $O(log n)$ lookup, works for any data distribution.
 
-**Learned index**: Train neural network to predict position of key in sorted array. When predictions are accurate, lookup is O(1)!
+**Learned index**: Train neural network to predict position of key in sorted array. When predictions are accurate, lookup is $O(1)$!
 
 **The trick**: Use B-tree as safety net. Structure is:
 ```{.inline-example chapter=13}
@@ -296,17 +296,22 @@ Differential privacy has moved from theory into official statistics and telemetr
 
 #### **The Algorithms**
 
-**Laplace mechanism**: For numeric queries (counts, sums)
-```{.algorithm chapter=13}
-Add noise from Laplace(Δf/ε) distribution
-where Δf = sensitivity (max change from one person)
-```
+**Laplace mechanism**: For a numeric query $f$, release
+
+$$
+\mathcal M(D)=f(D)+Z,
+\qquad Z\sim\operatorname{Laplace}\!\left(0,\frac{\Delta f}{\epsilon}\right),
+$$
+
+where $\Delta f$ is the query sensitivity under the stated adjacency relation and $\epsilon>0$ is the privacy parameter.
 
 **Exponential mechanism**: For choosing from a set of options
-```{.inline-example chapter=13}
-Probability of choosing option o ∝ exp(ε × quality(o) / 2Δ)
-Better options more likely, but randomized for privacy
-```
+$$
+\Pr[\mathcal M(D)=o]\propto
+\exp\!\left(\frac{\epsilon\,q(D,o)}{2\Delta q}\right),
+$$
+
+where $q(D,o)$ is the option's quality score and $\Delta q$ is its sensitivity.
 
 **Sparse vector technique**: For answering many queries efficiently.
 
@@ -409,14 +414,16 @@ But how do neural networks actually learn?
 
 #### **Backpropagation: The Learning Algorithm**
 
-**The setup**: A neural network is a function f(x; θ) where θ are parameters (weights). We want to minimize loss L(f(x; θ), y).
+**The setup**: A neural network is a function $f(x;\theta)$ where $\theta$ contains its parameters. We want to minimize the loss $L(f(x;\theta),y)$.
 
-**The challenge**: Networks have millions of parameters. How do we compute ∂L/∂θ for each one?
+**The challenge**: Networks have millions of parameters. How do we compute $\partial L/\partial\theta_i$ for each one?
 
 **Naive approach**: Finite differences
-```{.inline-example chapter=13}
-∂L/∂θᵢ ≈ (L(θ + εeᵢ) - L(θ)) / ε
-```
+$$
+\frac{\partial L}{\partial\theta_i}
+\approx
+\frac{L(\theta+\epsilon e_i)-L(\theta)}{\epsilon}.
+$$
 For n parameters, this requires n forward passes. For a million parameters, that's impossibly slow!
 
 **Backpropagation** (Rumelhart et al., 1986): Use the chain rule to compute all gradients in *one* backward pass.
@@ -424,25 +431,32 @@ For n parameters, this requires n forward passes. For a million parameters, that
 **How it works**:
 
 1. **Forward pass**: Compute network output
-```{.program-output chapter=13}
-Layer 1: h₁ = σ(W₁x + b₁)
-Layer 2: h₂ = σ(W₂h₁ + b₂)
-...
-Output: ŷ = σ(Wₙhₙ₋₁ + bₙ)
-Loss: L = (ŷ - y)²
-```
+$$
+\begin{aligned}
+h_1&=\sigma(W_1x+b_1),\\
+h_2&=\sigma(W_2h_1+b_2),\\
+&\ \vdots\\
+\widehat y&=\sigma(W_nh_{n-1}+b_n),\\
+L&=(\widehat y-y)^2.
+\end{aligned}
+$$
 
 2. **Backward pass**: Compute gradients layer by layer
-```{.technical-other chapter=13}
-∂L/∂ŷ = 2(ŷ - y)
-∂L/∂Wₙ = ∂L/∂ŷ × ∂ŷ/∂Wₙ = ∂L/∂ŷ × hₙ₋₁
-∂L/∂hₙ₋₁ = ∂L/∂ŷ × ∂ŷ/∂hₙ₋₁ = ∂L/∂ŷ × Wₙ
-(continue backwards through layers)
-```
+$$
+\begin{aligned}
+\frac{\partial L}{\partial\widehat y}&=2(\widehat y-y),\\
+\frac{\partial L}{\partial W_n}
+  &=\frac{\partial L}{\partial\widehat y}
+    \frac{\partial\widehat y}{\partial W_n},\\
+\frac{\partial L}{\partial h_{n-1}}
+  &=\frac{\partial L}{\partial\widehat y}
+    \frac{\partial\widehat y}{\partial h_{n-1}}.
+\end{aligned}
+$$
 
 **The magic**: Each gradient computation reuses calculations from the layer above. Total cost: one forward pass + one backward pass, regardless of number of parameters!
 
-**Time complexity**: O(E) where E = number of edges in network (typically E ≈ n for n parameters).
+**Time complexity**: $O(E)$ where E = number of edges in network (typically E ≈ n for n parameters).
 
 **Why this matters**: Without backpropagation, training deep networks would be impossible. It's the algorithm that makes deep learning feasible.
 
@@ -450,16 +464,16 @@ Loss: L = (ŷ - y)²
 
 Once we have gradients, how do we optimize?
 
-**Gradient descent**: θ ← θ - η∇L(θ)
+**Gradient descent** uses $\theta\leftarrow\theta-\eta\nabla L(\theta)$, where $\eta>0$ is the learning rate.
 
 **Problem**: Computing L(θ) requires entire dataset. For millions of examples, one update takes forever!
 
 **Stochastic Gradient Descent (SGD)**: Use one random example at a time
-```{.algorithm chapter=13}
-Pick random example (x, y)
-Compute gradient ∇L(f(x; θ), y)
-Update: θ ← θ - η∇L
-```
+For a sampled example $(x,y)$, SGD computes $\nabla_\theta L(f(x;\theta),y)$ and applies
+
+$$
+\theta\leftarrow\theta-\eta\nabla_\theta L.
+$$
 
 **Mini-batch SGD**: Use small batches (typically 32-256 examples)
 - Balances speed vs. gradient accuracy
@@ -471,19 +485,26 @@ Update: θ ← θ - η∇L
 #### **Modern Optimizers**
 
 **Momentum** (1964): Accelerate in consistent directions
-```{.algorithm chapter=13}
-v ← βv + ∇L    (velocity accumulates gradients)
-θ ← θ - ηv     (update includes momentum)
-```
+$$
+v\leftarrow\beta v+\nabla L,
+\qquad
+\theta\leftarrow\theta-\eta v.
+$$
 Effect: Smoother optimization, faster convergence, dampens oscillations.
 
 **Adam** (Kingma & Ba, 2014): Adaptive learning rates per parameter
-```{.algorithm chapter=13}
-m ← β₁m + (1-β₁)∇L           (first moment: mean)
-v ← β₂v + (1-β₂)(∇L)²        (second moment: variance)
-m̂ = m/(1-β₁ᵗ), v̂ = v/(1-β₂ᵗ)  (bias correction)
-θ ← θ - η m̂/√(v̂ + ε)          (update)
-```
+$$
+\begin{aligned}
+m_t&\leftarrow\beta_1m_{t-1}+(1-\beta_1)g_t,\\
+v_t&\leftarrow\beta_2v_{t-1}+(1-\beta_2)g_t^2,\\
+\widehat m_t&=\frac{m_t}{1-\beta_1^t},
+&\widehat v_t&=\frac{v_t}{1-\beta_2^t},\\
+\theta_t&\leftarrow\theta_{t-1}-\eta
+\frac{\widehat m_t}{\sqrt{\widehat v_t}+\epsilon}.
+\end{aligned}
+$$
+
+Here $g_t=\nabla_\theta L_t$; squares, roots, and division are applied componentwise.
 Effect: Parameters with large gradients get smaller updates (more conservative). Parameters with small gradients get larger updates (more aggressive).
 
 **Why Adam is popular**: Works well with minimal hyperparameter tuning. Default choice for many applications.
@@ -507,42 +528,44 @@ The Transformer introduced a sequence architecture based primarily on attention 
 For each position i, compute how much to "attend" to each other position j:
 
 1. **Query, Key, Value**: For each word, compute three vectors
-```{.inline-example chapter=13}
-Qᵢ = Wᵠxᵢ  (what I'm looking for)
-Kᵢ = Wₖxᵢ  (what I contain)
-Vᵢ = Wᵥxᵢ  (what I'll contribute)
-```
+$$
+Q_i=W_Qx_i,\qquad K_i=W_Kx_i,\qquad V_i=W_Vx_i.
+$$
+
+$Q_i$ represents what position $i$ seeks, $K_i$ what it contains, and $V_i$ what it contributes.
 
 2. **Attention scores**: How relevant is position j to position i?
-```{.inline-example chapter=13}
-scoreᵢⱼ = Qᵢ · Kⱼ / √d  (dot product, scaled)
-```
+$$
+s_{ij}=\frac{Q_i\cdot K_j}{\sqrt d}.
+$$
 
 3. **Softmax**: Convert scores to probabilities
-```{.inline-example chapter=13}
-αᵢⱼ = exp(scoreᵢⱼ) / Σₖ exp(scoreᵢₖ)
-```
+$$
+\alpha_{ij}=\frac{\exp(s_{ij})}{\sum_k\exp(s_{ik})}.
+$$
 
 4. **Weighted sum**: Output is weighted combination of values
-```{.program-output chapter=13}
-outputᵢ = Σⱼ αᵢⱼVⱼ
-```
+$$
+\operatorname{output}_i=\sum_j\alpha_{ij}V_j.
+$$ {#eq-scaled-dot-product-attention}
+
+The weights $\alpha_{ij}$ are nonnegative and sum to one over $j$. The $1/\sqrt d$ scale controls dot-product magnitude; the mechanism still has quadratic pairwise cost in the sequence length.
 
 **Intuition**: "The animal" has high attention to "it" and "tired", learning that "it" refers to the animal, not the street.
 
-**Time complexity**: O(n²d) where n = sequence length, d = dimension
+**Time complexity**: $O(n^2d)$ where n = sequence length, d = dimension
 - Quadratic in sequence length (problem for long sequences!)
 - But parallelizes perfectly (unlike RNNs)
 
 #### **Multi-Head Attention**
 
 Run attention multiple times in parallel with different learned projections:
-```{.technical-other chapter=13}
-head₁ = Attention(Q₁, K₁, V₁)
-head₂ = Attention(Q₂, K₂, V₂)
-...
-output = Concat(head₁, head₂, ...) × Wₒ
-```
+
+$$
+\operatorname{head}_i=\operatorname{Attention}(Q_i,K_i,V_i),
+\qquad
+\operatorname{output}=\operatorname{Concat}(\operatorname{head}_1,\ldots,\operatorname{head}_h)W_O.
+$$
 
 **Why**: Different heads learn different relationships. One might focus on syntax, another on semantics, another on coreference.
 
@@ -602,10 +625,10 @@ Scaling results are empirical relationships within a stated experimental regime,
 **Sparse attention** (Child et al., 2019): Only attend to subset of positions
 - Local attention: nearby tokens
 - Global attention: special tokens
-- Reduces to O(n√n) or O(n log n)
+- Reduces to $O(n\sqrt n)$ or $O(n log n)$
 
 **Linformer** (Wang et al., 2020): Project keys/values to lower dimension
-- Reduces to O(nd) where d << n
+- Reduces to $O(nd)$ where d << n
 
 **Flash Attention** (Dao et al., 2022): Optimize memory access patterns
 - Same complexity, but 2-4x faster wall-clock time
@@ -628,16 +651,16 @@ How does RL work?
 
 **The challenge**: Actions have delayed consequences. Sacrificing a piece in chess might lead to winning 20 moves later.
 
-**Value function**: V(s) = expected cumulative reward starting from state s
+**Value function**: $V(s)$ is the expected cumulative reward starting from state $s$.
 
-**Q-function**: Q(s,a) = expected cumulative reward from state s after action a
+**Q-function**: $Q(s,a)$ is the expected cumulative reward after taking action $a$ in state $s$.
 
 **The Bellman equation**:
-```{.inline-example chapter=13}
-Q(s,a) = r + γ × max_a' Q(s',a')
-where s' = next state after action a
-      γ = discount factor (typically 0.99)
-```
+$$
+Q(s,a)=r+\gamma\max_{a'}Q(s',a').
+$$ {#eq-bellman-optimality}
+
+Here $s'$ is the next state and $0\le\gamma<1$ is the discount factor. The equation assumes the Markov state captures the information needed to model the next-state distribution.
 
 **Intuitive meaning**: Value of state = immediate reward + discounted future value.
 
@@ -666,15 +689,16 @@ Loop:
 **The scaling problem**: Q-learning stores Q(s,a) in table. For Atari games: 10^9 states × 18 actions = 18 billion entries!
 
 **Solution** (Mnih et al., 2015): Approximate Q with neural network
-```{.inline-example chapter=13}
-Q(s,a; θ) ≈ Q*(s,a)
-```
+$$
+Q(s,a;\theta)\approx Q^*(s,a).
+$$
 
 **Training**: Use TD (temporal difference) error as loss
-```{.inline-example chapter=13}
-Loss = [r + γ max_a' Q(s',a'; θ⁻) - Q(s,a; θ)]²
-where θ⁻ = target network parameters (updated periodically)
-```
+$$
+L(\theta)=\left[r+\gamma\max_{a'}Q(s',a';\theta^-)-Q(s,a;\theta)\right]^2,
+$$
+
+where $\theta^-$ denotes periodically updated target-network parameters.
 
 **Key innovations**:
 
@@ -693,19 +717,17 @@ where θ⁻ = target network parameters (updated periodically)
 **Alternative approach**: Learn policy π(a|s) directly (probability of action a in state s).
 
 **REINFORCE** (Williams, 1992): Increase probability of actions that led to high reward
-```{.inline-example chapter=13}
-∇J(θ) = E[∇ log π(a|s; θ) × R]
-where R = cumulative reward
-```
+$$
+\nabla J(\theta)
+=\mathbb E\!\left[R\,\nabla_\theta\log\pi(a\mid s;\theta)\right],
+$$
+
+where $R$ is cumulative return. The estimator can have high variance, motivating baselines and actor--critic methods.
 
 **Intuition**: If an action led to good outcome, make it more likely. If bad outcome, make it less likely.
 
 **Actor-Critic**: Combine value function (critic) with policy (actor)
-```{.inline-example chapter=13}
-Actor: π(a|s; θ)
-Critic: V(s; w)
-Update actor using critic's value estimate as baseline
-```
+The actor is $\pi(a\mid s;\theta)$ and the critic is $V(s;w)$; the critic's value estimate serves as a baseline for the actor update.
 
 **Advantage**: Reduces variance, learns faster.
 
@@ -716,12 +738,14 @@ Update actor using critic's value estimate as baseline
 **The problem**: Policy gradients are unstable. One bad update can destroy learned policy.
 
 **PPO's solution**: Constrain policy updates
-```{.technical-other chapter=13}
-Maximize: min(ratio × A, clip(ratio, 1-ε, 1+ε) × A)
-where ratio = π_new(a|s) / π_old(a|s)
-      A = advantage estimate
-      ε = clipping parameter (typically 0.2)
-```
+$$
+\max_\theta\;\mathbb E\!\left[
+\min\!\left(r_t(\theta)A_t,
+\operatorname{clip}(r_t(\theta),1-\epsilon,1+\epsilon)A_t\right)
+\right],
+$$ {#eq-ppo-clipped-objective}
+
+where $r_t(\theta)=\pi_\theta(a_t\mid s_t)/\pi_{\mathrm{old}}(a_t\mid s_t)$, $A_t$ is an advantage estimate, and $\epsilon$ is the clipping parameter. Clipping limits a single policy update; it does not by itself guarantee global convergence.
 
 **Effect**: Limits how much policy can change per update. More stable, more reliable.
 
@@ -887,7 +911,7 @@ Reduce: Sum all contributions for each (i,j)
 
 **Problem**: Count frequency of millions of distinct items, but you only have memory for thousands of counters.
 
-**Naive approach**: Hash table → O(n) space where n = number of distinct items. If n = billions, you're out of memory.
+**Naive approach**: Hash table → $O(n)$ space where n = number of distinct items. If n = billions, you're out of memory.
 
 **Count-Min Sketch** [@cormode2005countmin]:
 ```{.algorithm chapter=13}
@@ -905,7 +929,7 @@ Query(item):
 **Why it works**:
 - True count ≤ returned count (never underestimate)
 - With high probability: returned count ≤ true count + ε × total_items
-- Space: O((1/ε) × log(1/δ)) where δ = failure probability
+- Space: $O((1/ε) × log(1/δ))$ where δ = failure probability
 
 **Applications**:
 - Network traffic analysis
@@ -918,7 +942,7 @@ Its one-sided error is useful when overestimation is acceptable and the width an
 
 **Problem**: Count number of distinct items in stream.
 
-**Naive approach**: Hash set → O(n) space.
+**Naive approach**: Hash set → $O(n)$ space.
 
 **HyperLogLog** [@flajolet2007hyperloglog]:
 ```{.technical-other chapter=13}
@@ -1061,28 +1085,24 @@ Diffie and Hellman established the public-key model and key-agreement direction 
 
 **RSA** is based on modular exponentiation and a trapdoor construction related to the difficulty of factoring a product of large primes [@rivest1978rsa].
 
-**Key generation**:
-```{.technical-other chapter=13}
-1. Choose two large primes p, q (typically 1024 bits each)
-2. Compute N = p × q (the modulus)
-3. Compute φ(N) = (p-1)(q-1) (Euler's totient)
-4. Choose public exponent e (commonly 65537)
-5. Compute private exponent d where e × d ≡ 1 (mod φ(N))
+**Key generation** chooses large primes $p$ and $q$, forms $N=pq$ and $\varphi(N)=(p-1)(q-1)$, selects a public exponent $e$, and computes $d$ such that
 
-Public key: (N, e)
-Private key: (N, d)
-```
+$$
+ed\equiv1\pmod{\varphi(N)}.
+$$
 
-**Encryption**: message^e mod N = ciphertext
+The public key is $(N,e)$ and the private key is $(N,d)$.
 
-**Decryption**: ciphertext^d mod N = message
+**Encryption**: $c\equiv m^e\pmod N$.
+
+**Decryption**: $m\equiv c^d\pmod N$.
 
 **Why it works (mathematically)**:
-```{.inline-example chapter=13}
-(message^e)^d ≡ message^(ed) (mod N)
-Since ed ≡ 1 (mod φ(N)), by Euler's theorem:
-message^(ed) ≡ message (mod N)
-```
+$$
+(m^e)^d\equiv m^{ed}\equiv m\pmod N,
+$$
+
+under the number-theoretic conditions used by RSA. The congruence $ed\equiv1\pmod{\varphi(N)}$ explains the basic exponent relation; complete correctness also handles messages not coprime to $N$.
 
 **Security basis**: Recovering the factors of a properly generated modulus is believed to be computationally infeasible for suitable parameters with known classical methods. Secure practice also requires standardized padding, protected key generation, and resistance to implementation attacks; textbook RSA alone is not a deployable encryption scheme.
 
