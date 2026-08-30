@@ -164,13 +164,15 @@ PRINT REGRESSION AFTER AUTHORIZED MATH CORRECTION: **PASS**
 
 ### Deployment
 
-Commit: **CREATED WITH THE MANDATED MESSAGE; HASH REPORTED AT HANDOFF**
-Push: **STATUS REPORTED AT HANDOFF**
-GitHub Pages: **STATUS REPORTED AT HANDOFF**
-Live site: **STATUS REPORTED AT HANDOFF**
+Commit: **`38b827f` — `Fix whole-book mathematical rendering in Advanced Algorithms`**
+Push: **PASS — `origin/main`**
+GitHub Pages: **PASS — Actions run `33285203326`**
+Live site: **PASS — cache-bypassed PDF, EPUB, and representative HTML artifacts verified after deployment**
+
+The live PDF is 614 US Letter pages and has zero unembedded fonts. The complete live EPUB contains 684 MathML nodes, declares `en-US`, and exposes zero raw LaTeX. Representative live HTML checks likewise expose zero raw LaTeX.
 
 ### Final Status
 
-WEB SECOND EDITION: **READY LOCALLY**
+WEB SECOND EDITION: **DEPLOYED AND VERIFIED**
 PRINT EDITION: **614 PAGES / PHASE 6C REGRESSION PASS**
-READY FOR PHASE 8: **PENDING DEPLOYMENT VERIFICATION**
+READY FOR PHASE 8: **YES**

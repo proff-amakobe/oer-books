@@ -155,6 +155,8 @@ Internal links: **17,719 checked / 0 broken**
 
 WHOLE-BOOK MATH RENDERING: **PASS**
 
-PHASE 7 MAY CLOSE: **YES, after deployment verification**
+PHASE 7 MAY CLOSE: **YES — deployment verified in GitHub Actions run `33285203326`**
 
-READY FOR NEXT PUBLICATION PHASE: **YES, after deployment verification**
+READY FOR NEXT PUBLICATION PHASE: **YES**
+
+The deployed commit is `38b827f`. Cache-bypassed live artifacts were downloaded after publication and independently checked: the PDF is 614 US Letter pages with zero unembedded fonts, the EPUB contains 684 MathML nodes with `en-US` metadata and zero exposed raw LaTeX, and representative live HTML chapters contain semantic math carriers with zero exposed raw LaTeX.
