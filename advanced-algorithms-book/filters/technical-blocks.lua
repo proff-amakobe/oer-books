@@ -46,6 +46,18 @@ function Header(el)
 end
 
 function CodeBlock(el)
+  -- Quarto's self-contained book PDF merge can serialize the landing page's
+  -- HTML-only front matter as a literal code block.  It is valid page metadata,
+  -- not publication content, so discard only this exact generated signature.
+  -- The HTML render consumes the metadata normally and never enters this path.
+  if FORMAT:match("latex") and el.text:match("^%-%-%-") and
+     el.text:match("number%-sections:%s*false") and
+     el.text:match("page%-layout:%s*full") and
+     el.text:match("body%-classes:%s*aca%-home") and
+     el.text:match("format:%s*\n%s*html:%s*\n%s*toc:%s*false") then
+    return {}
+  end
+
   local kind = semantic_class(el)
   local attributed_chapter = tonumber(el.attributes["chapter"] or "")
   if attributed_chapter and attributed_chapter ~= chapter then
