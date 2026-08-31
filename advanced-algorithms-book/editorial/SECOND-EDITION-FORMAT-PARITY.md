@@ -17,7 +17,7 @@
 | Instructional figures | 14/14 | 14/14 responsive SVG | 14/14 SVG | MATCH |
 | Technical blocks | 431/431 after 81 net math reclassifications | 431 semantic HTML wrappers | 431 semantic blocks present | MATCH; native math replaces misclassified blocks |
 | Mathematical expressions | 1,018/1,018 | 684 semantic MathJax carriers; 0 raw LaTeX | 684 MathML nodes; 0 raw LaTeX | PASS |
-| ISBN state | TBD in publication-lock context | Omitted from visible web metadata and citation | Unassigned; no fabricated ISBN | MATCH; format-specific presentation |
+| ISBN state | Print ISBN `TBD`, explicitly marked proof-only and unassigned | Omitted from visible web metadata, citation, OpenGraph, and JSON-LD | UUID internal identifier; no ISBN emitted | MATCH; correct format-specific presentation |
 | Public PDF | 614-page digital PDF after Phase 6C | `Advanced-Computational-Algorithms.pdf` | Not applicable | MATCH |
 | Public EPUB | Not applicable | `Advanced-Computational-Algorithms.epub` | Generated EPUB 3 artifact | MATCH |
 
