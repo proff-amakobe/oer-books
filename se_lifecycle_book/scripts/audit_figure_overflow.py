@@ -15,15 +15,10 @@ from pathlib import Path
 import pymupdf as fitz
 
 
-PAGE_W = 8.5 * 72
-PAGE_H = 11 * 72
+TRIM_W = 8.5 * 72
+TRIM_H = 11 * 72
+BLEED = 0.125 * 72
 # Geometry from print/preamble.tex plus 0.075 inch internal figure clearance.
-SAFE_TOP = (0.70 + 0.075) * 72
-SAFE_BOTTOM = PAGE_H - (0.81 + 0.075) * 72
-SAFE_EVEN_LEFT = (0.73 + 0.075) * 72
-SAFE_EVEN_RIGHT = PAGE_W - (1.00 + 0.10 + 0.075) * 72
-SAFE_ODD_LEFT = (1.00 + 0.10 + 0.075) * 72
-SAFE_ODD_RIGHT = PAGE_W - (0.73 + 0.075) * 72
 CAPTION_RE = re.compile(r"^Figure\s+\d+(?:\.\d+)+:", re.I)
 CHAPTER_RE = re.compile(r"^Chapter\s+(\d+)", re.I)
 
@@ -44,6 +39,17 @@ def main() -> int:
     parser.add_argument("--report", type=Path, default=Path("editorial/figure-overflow-audit.md"))
     args = parser.parse_args()
     doc = fitz.open(args.pdf)
+    first_rect = doc[0].rect
+    has_bleed = abs(first_rect.width - 8.625 * 72) < 0.1
+    page_w = first_rect.width
+    top_bleed = BLEED if has_bleed else 0
+    even_outside_bleed = BLEED if has_bleed else 0
+    safe_top = top_bleed + (0.70 + 0.075) * 72
+    safe_bottom = top_bleed + TRIM_H - (0.81 + 0.075) * 72
+    safe_even_left = even_outside_bleed + (0.73 + 0.075) * 72
+    safe_even_right = page_w - (1.00 + 0.10 + 0.075) * 72
+    safe_odd_left = (1.00 + 0.10 + 0.075) * 72
+    safe_odd_right = TRIM_W - (0.73 + 0.075) * 72
     physical = []
     instructional = []
     chapter = "Front matter"
@@ -60,7 +66,7 @@ def main() -> int:
         headings = [b[4].strip() for b in blocks if b[4].strip() and len(b[4].strip()) < 90]
         if headings:
             section = headings[0].splitlines()[0]
-        is_opener = "CHAPTER" in text[:500] and page_no > 1
+        is_opener = ("CHAPTER" in text[:500] and page_no > 1) or page_no == 3
         drawings = page.get_drawings()
         for drawing in drawings:
             rect = fitz.Rect(drawing["rect"])
@@ -71,9 +77,9 @@ def main() -> int:
         captions = [fitz.Rect(b[:4]) for b in blocks if CAPTION_RE.match(b[4].strip())]
         if not captions:
             continue
-        left = SAFE_ODD_LEFT if page_no % 2 else SAFE_EVEN_LEFT
-        right = SAFE_ODD_RIGHT if page_no % 2 else SAFE_EVEN_RIGHT
-        safe = fitz.Rect(left, SAFE_TOP, right, SAFE_BOTTOM)
+        left = safe_odd_left if page_no % 2 else safe_even_left
+        right = safe_odd_right if page_no % 2 else safe_even_right
+        safe = fitz.Rect(left, safe_top, right, safe_bottom)
         for cap in captions:
             # Quarto places captions directly below figures. Group nearby
             # substantive paths vertically and select the group nearest the
@@ -130,7 +136,7 @@ def main() -> int:
         "",
         "## Method",
         "",
-        "PyMuPDF drawing paths are checked against the 8.5 x 11 inch media box. Figure-adjacent vectors are also checked against the mirrored print text area with 0.075 inch internal clearance. The audit is intended to run after every print build.",
+        "PyMuPDF drawing paths are checked against the 8.625 x 11.25 inch bleed MediaBox. Figure-adjacent vectors are checked against the original 8.5 x 11 inch mirrored trim-relative text area with 0.075 inch internal clearance. Chapter-opener background vectors are approved bleed artwork and are excluded from content-overflow findings.",
         "",
     ])
     args.report.parent.mkdir(parents=True, exist_ok=True)

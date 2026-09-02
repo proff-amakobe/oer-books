@@ -29,6 +29,24 @@
 | Tables | PASS - empty List of Tables omitted |
 | PDF | `output/volume2/Software-Delivery-Operations-and-Evolution.pdf` |
 
+## Volume II Ingram Bleed Correction
+
+Original Ingram response: **BOOKBLOCK: INSUFFICIENT BLEED**
+
+Root cause: the title-page field and seven chapter-opener vector backgrounds terminated at the 8.5 x 11 inch MediaBox/trim edge. The source PDF had no physical bleed canvas, TrimBox, or BleedBox.
+
+Correction: the locked 409 pages are imposed without scaling onto mirrored 621 x 810 pt production pages. Chapter-opener vector colors continue through the 0.125 inch top and outside bleed; ordinary text, figures, code, headers, footers, and page numbers retain their original trim-relative positions.
+
+| Check | Result |
+|---|---|
+| Source page count | 409 |
+| Ingram production/template count | 410 |
+| Final bleed geometry | 621 x 810 pt |
+| Odd/even mirroring | PASS |
+| Full-bleed backgrounds | PASS |
+| Fonts | PASS - all embedded |
+| Cover/spine | UNCHANGED - official 410-page template and 0.839 in spine retained |
+
 ## Complete Edition
 
 | Check | Result |
