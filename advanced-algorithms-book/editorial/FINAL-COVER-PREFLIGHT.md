@@ -1,36 +1,48 @@
 # Final Cover Preflight
 
-## Digital front cover
+## Production result
 
-| Check | Result |
+| Field | Verified result |
 |---|---|
-| Concept | The Geometry of Computation |
-| Filename | `assets/cover/advanced-computational-algorithms-second-edition.png` |
-| Dimensions | 1024 × 1536 px |
-| Mode | RGB PNG |
-| Hierarchy | PASS — title dominates; subtitle, edition, author, publisher, and OER identity are legible |
-| Visual system | PASS — one continuous recursion/graph/DP/optimization/state/flow system |
-| Avoid list | PASS — no robots, AI heads, binary rain, laptops, code screenshots, circuit clichés, gears, stock photos, or clip art |
-| Thumbnail review | PASS |
-| Web/EPUB integration | PASS |
+| Title | Advanced Computational Algorithms |
+| Subtitle | Concepts, Complexity, and Applied Projects |
+| Author | Moody Amakobe |
+| Edition/year | Second Edition / 2026 |
+| Publisher | Global Data Science Institute |
+| ISBN | 979-8-1827-2111-0 — valid and locked |
+| Official template | `print/templates/9798182721110-Perfect.pdf`; 1 page; SHA256 `952d742a86b13ccfbc58dd9eeb3c9d70d9792dfa96faf2809a8c0a208af50f37` |
+| Template dimensions | 1512 × 864 pt / 21 × 12 in |
+| Trim | 8.5 × 11 in |
+| Interior | Standard Color; locked at 614 pages |
+| Paper / binding / finish | 50 lb White / paperback perfect bound / matte |
+| Official spine | 1.239 in / 31.47 mm; not recalculated |
+| Safe areas | PASS — 13/13 critical objects; minimum 14.0 pt / 0.194 in clearance |
+| Bleed | PASS — continuous CMYK background covers the complete blue artwork/bleed region; no slivers or gaps |
+| Template residue | PASS — no instructions or production marks appear in the final submission PDF |
+| Barcode | PASS — official supplied barcode preserved; visible digits 9798182721110; 754 × 596 px at 1.257 × 0.993 in; 600 effective PPI |
+| Fonts | PASS — Arial and Arial Bold subsets embedded; no missing or Type 3 fonts |
+| Color | CMYK vectors and CMYK barcode raster; official template output intent retained |
+| Raster assets | 1 — official barcode only; minimum effective resolution 600 PPI |
+| PDF standard | PDF 1.3; identified as PDF/X-1:2001 by `pdfinfo` |
+| Final page | 1 page; exactly 1512 × 864 pt |
+| Output | `print/covers/Advanced-Computational-Algorithms-Second-Edition-Ingram-Cover.pdf` |
 
-The digital cover was generated with the built-in image-generation workflow and then visually inspected. It is independently composed for portrait digital display and is not a print-wrap master.
+The cover remains vector-native except for the official barcode. The official template itself remains byte-for-byte unchanged. Visual inspection covered the full wrap, front, back, spine, overlay, safe proof, 100% panel views, 50%, 25%, thumbnail, and grayscale. Title, subtitle, edition, author, publisher, license, ISBN, body copy, spine direction, and panel orientation were checked on rendered output.
 
-## Ingram production wrap
+## Consistency table
 
-| Field | Status |
-|---|---|
-| ISBN | 979-8-1827-2111-0 — VALID / LOCKED |
-| Official template filename | PENDING |
-| Template page count | PENDING (interior currently locked at 614) |
-| Template overall dimensions | PENDING |
-| Official spine width | PENDING |
-| Bleed | PENDING |
-| Safe-area compliance | PENDING |
-| Barcode | PENDING — none invented or reused |
-| Fonts | PENDING |
-| Color space | PENDING |
-| Raster resolution | PENDING |
-| Output filename | `print/covers/Advanced-Computational-Algorithms-Second-Edition-Ingram-Cover.pdf` (reserved; not generated) |
+| Field | Interior | Metadata | Template | Cover | Status |
+|---|---|---|---|---|---|
+| Title | Advanced Computational Algorithms | Match | — | Match | PASS |
+| Subtitle | Concepts, Complexity, and Applied Projects | Match | — | Match | PASS |
+| Author | Moody Amakobe | Match | — | Match | PASS |
+| Edition | Second Edition | Match | — | Match | PASS |
+| Year | 2026 | Match | — | No conflicting year | PASS |
+| ISBN | 979-8-1827-2111-0 | Match | 979-8-1827-2111-0 | Match | PASS |
+| Page count | 614 | 614 | 614-page template | Not printed as content | PASS |
+| Trim | 8.5 × 11 in | Match | 8.5 × 11 in | Match | PASS |
+| Publisher | Global Data Science Institute | Match | — | Match | PASS |
 
-Final print-wrap status: **PENDING**. The project is ready to request the official template using print ISBN `979-8-1827-2111-0`, 614 pages, 8.5 × 11 in, Perfect Bound Paperback, and Color interior after paper and cover finish are selected. Production geometry must come exclusively from that template. No spine formula, estimated geometry, template overlay, or fabricated barcode has been used.
+First Edition, 2025, and the former ISBN have zero visible occurrences in the production cover. The locked interior remains 614 pages at 612 × 792 pt with its previously locked SHA256 unchanged.
+
+**FINAL INGRAM COVER: READY**

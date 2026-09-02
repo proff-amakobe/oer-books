@@ -60,10 +60,10 @@
 | Trim | 8.5 × 11 in |
 | Binding | Perfect Bound Paperback |
 | Interior | Color |
-| Official template | PENDING |
-| Template page count | PENDING |
-| Spine | PENDING |
-| Cover | PENDING |
+| Official template | LOCKED — `9798182721110-Perfect.pdf` |
+| Template page count | 614-page manufacturing specification |
+| Spine | LOCKED — 1.239 in / 31.47 mm |
+| Cover | LOCKED — final PDF/X-1:2001 wrap |
 
 ### Cover
 
@@ -71,10 +71,10 @@
 |---|---|
 | Concept | The Geometry of Computation |
 | Front | PASS — digital/web/EPUB composition |
-| Back | PENDING — copy prepared; wrap geometry unavailable |
-| Spine | PENDING |
-| Safe area | PENDING |
-| Barcode | PENDING |
+| Back | PASS — description, approved bio, OER/license, publisher, and barcode |
+| Spine | PASS — title, author, and publisher mark inside official safe area |
+| Safe area | PASS — 13/13 critical objects; minimum clearance 0.194 in |
+| Barcode | PASS — official Ingram barcode, ISBN 9798182721110 |
 
 ### Release
 
@@ -94,15 +94,12 @@
 | EPUB | LOCKED |
 | PRINT ISBN | LOCKED |
 | EBOOK ISBN | PENDING |
-| COVER | PENDING — digital front complete; production wrap pending |
-| INGRAM | READY FOR OFFICIAL TEMPLATE after paper/finish selection |
-| FINAL RELEASE | BLOCKED |
+| COVER | LOCKED — digital front and production wrap complete |
+| INGRAM | COVER READY — official template, 50 lb White, matte, perfect-bound geometry locked |
+| FINAL RELEASE | BLOCKED only by commercial settings, ebook-ISBN decision, and author publication approval |
 
 ### Remaining Blockers
 
 - Decide whether to assign a separate ebook ISBN; otherwise retain the UUID identifier.
-- Select Ingram paper and cover finish.
-- Generate and supply the official IngramSpark template using print ISBN `979-8-1827-2111-0` and the locked 614-page specification.
-- Build and preflight the wrap against that template, including safe areas and official barcode handling.
 - Obtain author decisions on prices, returns, wholesale discount, and territorial rights.
 - Create the release tag and GitHub release only after those blockers and publication approval are cleared.

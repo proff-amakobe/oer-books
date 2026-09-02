@@ -16,7 +16,7 @@
 | TRIM | 8.5 × 11 in (612 × 792 pt) |
 | BINDING | Paperback Perfect Bound |
 | INTERIOR TYPE | Color |
-| COVER STATUS | Digital cover complete; Ingram wrap pending official template, paper, and finish |
+| COVER STATUS | Digital cover and official-template Ingram wrap complete; 50 lb White / matte / perfect bound |
 | PUBLIC HTML URL | https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/ |
 | PDF DOWNLOAD URL | https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/Advanced-Computational-Algorithms.pdf |
 | EPUB DOWNLOAD URL | https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/Advanced-Computational-Algorithms.epub |
