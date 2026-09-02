@@ -65,14 +65,19 @@
   \ifcase\value{chapter}\or INTRODUCTION\or REQUIREMENTS\or SYSTEM MODELING\or ARCHITECTURE\or EXPERIENCE DESIGN\or AGILE DELIVERY\or VERSION CONTROL\or QUALITY\or CI/CD\or DATA \& APIs\or CLOUD\or SECURITY\or EVOLUTION\or PROFESSIONAL PRACTICE\or INTEGRATION\fi}
 \newcommand{\SEDescription}{%
   \ifcase\value{chapter}\or The complete lifecycle, from engineering principles and SDLC models to version control and collaboration.\or Discovering, documenting, validating, and managing what software systems must accomplish.\or Using UML and complementary models to understand, communicate, and design software systems.\or Structuring software through architectural styles, SOLID principles, and proven design patterns.\or Designing usable, accessible interfaces through human-centered research and iterative prototyping.\or Organizing adaptive teams, iterative delivery, estimation, and project work.\or Building reliable collaborative workflows with Git, pull requests, and code review.\or Designing layered testing strategies and engineering quality into every stage of delivery.\or Automating integration, delivery, deployment, and operational feedback.\or Designing durable data models and dependable application programming interfaces.\or Packaging, deploying, scaling, and operating software on modern cloud platforms.\or Integrating secure design, implementation, verification, and operational practice.\or Maintaining, refactoring, documenting, and evolving long-lived software systems.\or Practicing software engineering responsibly, collaboratively, legally, and ethically.\or Bringing the lifecycle together in a complete, polished, professional software project.\fi}
+\newlength{\SEPanelInset}
+\newlength{\SENegPanelInset}
+\setlength{\SEPanelInset}{0pt}
+\setlength{\SENegPanelInset}{0pt}
 
 \titleformat{\chapter}[display]
   {\normalfont\color{white}}
   {\begin{tikzpicture}[remember picture,overlay]
-     \fill[SENavy] (current page.north west) rectangle ([yshift=-5.62in]current page.north east);
-     \fill[SEDeepBlue] ([xshift=.53\paperwidth]current page.north) rectangle ([yshift=-5.62in]current page.north east);
-     \fill[SEPeriwinkle] ([yshift=-5.62in]current page.north west) rectangle ([yshift=-5.68in]current page.north east);
+     \fill[SENavy] ([xshift=\SEPanelInset,yshift=\SENegPanelInset]current page.north west) rectangle ([xshift=\SENegPanelInset,yshift=-5.62in]current page.north east);
+     \fill[SEDeepBlue] ([xshift=.53\paperwidth,yshift=\SENegPanelInset]current page.north) rectangle ([xshift=\SENegPanelInset,yshift=-5.62in]current page.north east);
+     \fill[SEPeriwinkle] ([xshift=\SEPanelInset,yshift=-5.62in]current page.north west) rectangle ([xshift=\SENegPanelInset,yshift=-5.68in]current page.north east);
      \draw[SEPeriwinkle,opacity=.16,line width=.6pt] ([xshift=-2.0in,yshift=-.5in]current page.north east) grid[xstep=.42in,ystep=.42in] ([xshift=-.12in,yshift=-3.8in]current page.north east);
+     \fill[white] ([xshift=\SENegPanelInset]current page.north east) rectangle ([yshift=-5.68in]current page.north east);
      \node[rotate=90,anchor=south west,text=SEPeriwinkle,font=\sffamily\bfseries\small] at ([xshift=.33in,yshift=-2.15in]current page.north west) {CHAPTER \ifnum\value{chapter}<10 0\fi\thechapter};
    \end{tikzpicture}%
    \sffamily\bfseries\color{SEPeriwinkle}\Large CHAPTER\\[-.1em]

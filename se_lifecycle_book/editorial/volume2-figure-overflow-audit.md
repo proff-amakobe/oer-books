@@ -17,4 +17,4 @@ Pages: 409
 
 ## Method
 
-PyMuPDF drawing paths are checked against the 8.625 x 11.25 inch bleed MediaBox. Figure-adjacent vectors are checked against the original 8.5 x 11 inch mirrored trim-relative text area with 0.075 inch internal clearance. Chapter-opener background vectors are approved bleed artwork and are excluded from content-overflow findings.
+PyMuPDF drawing paths are checked against the 8.5 x 11 inch media box. Figure-adjacent vectors are also checked against the mirrored print text area with 0.075 inch internal clearance. The audit is intended to run after every print build.

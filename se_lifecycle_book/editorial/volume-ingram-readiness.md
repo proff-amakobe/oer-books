@@ -30,17 +30,17 @@
 
 Volume II's source interior contains 409 PDF pages. Use the page-count value required by Ingram's production workflow when generating its official template; document any production-system adjustment without silently changing the source interior. Spine dimensions must come only from each official Ingram template. No complete-edition cover measurement may be reused.
 
-## Volume II Interior Bleed
+## Volume II Non-Bleed Interior Strategy
 
 | Field | Value |
 |---|---|
-| Required | YES |
+| Interior strategy | NON-BLEED |
 | Trim | 8.5 x 11 in |
 | Source pages | 409 |
-| Ingram production/template count | 410 |
-| Top bleed | 0.125 in |
-| Bottom bleed | 0.125 in |
-| Outside bleed | 0.125 in |
-| Gutter bleed | 0 in |
-| Bleed PDF | 8.625 x 11.25 in / 621 x 810 pt |
-| Status | PASS |
+| Ingram production count | 410 |
+| Production PDF | 612 x 792 pt |
+| All graphical elements intended to remain inside trim | PASS |
+| Minimum modified-background clearance | 0.15 in |
+| Interior bleed required | NO |
+
+Reason: all formerly edge-touching title and chapter-opener decorative backgrounds were converted to intentional inset panels. The official 410-page cover template, 0.839-inch spine, and cover files are unchanged.

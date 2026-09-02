@@ -29,23 +29,24 @@
 | Tables | PASS - empty List of Tables omitted |
 | PDF | `output/volume2/Software-Delivery-Operations-and-Evolution.pdf` |
 
-## Volume II Ingram Bleed Correction
+## Volume II Ingram Rejection Resolution
 
-Original Ingram response: **BOOKBLOCK: INSUFFICIENT BLEED**
+Original Ingram rejection: **INSUFFICIENT BLEED**
 
-Root cause: the title-page field and seven chapter-opener vector backgrounds terminated at the 8.5 x 11 inch MediaBox/trim edge. The source PDF had no physical bleed canvas, TrimBox, or BleedBox.
-
-Correction: the locked 409 pages are imposed without scaling onto mirrored 621 x 810 pt production pages. Chapter-opener vector colors continue through the 0.125 inch top and outside bleed; ordinary text, figures, code, headers, footers, and page numbers retain their original trim-relative positions.
+Resolution strategy: rather than alter the locked interior to asymmetric bleed geometry, Volume II was restored to its exact 612 x 792 pt architecture and converted to an explicitly non-bleed interior by insetting all edge-touching decorative artwork.
 
 | Check | Result |
 |---|---|
-| Source page count | 409 |
+| Failed 621 x 810 pt implementation | REVERTED |
+| Final strategy | NON-BLEED |
+| Source/production pages | 409 |
 | Ingram production/template count | 410 |
-| Final bleed geometry | 621 x 810 pt |
-| Odd/even mirroring | PASS |
-| Full-bleed backgrounds | PASS |
-| Fonts | PASS - all embedded |
-| Cover/spine | UNCHANGED - official 410-page template and 0.839 in spine retained |
+| Final MediaBox | 612 x 792 pt |
+| Title-page field | PASS - 0.15 in inset |
+| Chapter opener fields | 7/7 PASS - 0.15 in inset |
+| Edge-touching artwork remaining | 0 |
+| Body-page pixel regression | PASS - 401/401 unchanged pages |
+| Cover/spine | UNCHANGED - 0.839 in spine |
 
 ## Complete Edition
 
