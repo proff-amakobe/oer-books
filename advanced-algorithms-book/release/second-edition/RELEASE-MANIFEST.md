@@ -9,7 +9,7 @@ Release tag: `advanced-algorithms-second-edition-v1.0` reserved but not created
 | Artifact | Purpose | Version | Pages | Bytes | SHA256 | Publication status |
 |---|---|---|---:|---:|---|---|
 | `print/Advanced-Computational-Algorithms-Second-Edition-Print.pdf` | Locked print interior proof | Second Edition / 2026 | 614 | 2,268,222 | `ff98055e8e1d45b2d8f4f980c15da6f9058989aad52bdcfcb4e9f96ae17bf892` | LOCKED; Print ISBN 979-8-1827-2111-0 |
-| `print/Advanced-Computational-Algorithms-Second-Edition-Ingram-Cover.pdf` | Final Ingram paperback wrap | Second Edition / 2026 | 1 | 500,078 | `bf8d401451647385ce225358b9c7c31197319336cf7ad4dee99032e57b25823d` | LOCKED; official 1.239 in spine; safe-area PASS |
+| `print/Advanced-Computational-Algorithms-Second-Edition-Ingram-Cover.pdf` | Final Ingram paperback wrap | Second Edition / 2026 | 1 | 103,898 | `22e29f66333f615f25098f3b4ef885a1bf5d36c419d7ff3277b3f3996ea6baf1` | LOCKED; cross-viewer validated; official 1.239 in spine; safe-area PASS |
 | `digital/Advanced-Computational-Algorithms-Second-Edition-Public.pdf` | Public downloadable PDF | Second Edition / 2026 | 614 | 2,268,222 | `ff98055e8e1d45b2d8f4f980c15da6f9058989aad52bdcfcb4e9f96ae17bf892` | LOCKED; identifies paperback ISBN explicitly |
 | `digital/Advanced-Computational-Algorithms-Second-Edition.epub` | EPUB 3 edition | Second Edition / 2026 | — | 2,321,876 | `5161b6afb06d6bb21748c751ae4e79b291529ed1a4d721e7e1e8e608688d85dc` | LOCKED; UUID identifier; no print ISBN leakage |
 | `digital/advanced-computational-algorithms-second-edition.png` | Coordinated web/EPUB front cover | Second Edition / 2026 | — | 1,690,055 | `f7bf88d8035ab3f07fee4d2850a60ee3a24c3da9c68969a17f9f245c1625d463` | COMPLETE for digital use |

@@ -21,13 +21,13 @@
 | Template residue | PASS — no instructions or production marks appear in the final submission PDF |
 | Barcode | PASS — official supplied barcode preserved; visible digits 9798182721110; 754 × 596 px at 1.257 × 0.993 in; 600 effective PPI |
 | Fonts | PASS — Arial and Arial Bold subsets embedded; no missing or Type 3 fonts |
-| Color | CMYK vectors and CMYK barcode raster; official template output intent retained |
+| Color | DeviceCMYK vectors and CMYK barcode raster; no unmanaged RGB production artwork |
 | Raster assets | 1 — official barcode only; minimum effective resolution 600 PPI |
-| PDF standard | PDF 1.3; identified as PDF/X-1:2001 by `pdfinfo` |
+| PDF standard | Valid PDF 1.4; clean native object structure; intentionally not labeled PDF/X after cross-viewer compatibility testing |
 | Final page | 1 page; exactly 1512 × 864 pt |
 | Output | `print/covers/Advanced-Computational-Algorithms-Second-Edition-Ingram-Cover.pdf` |
 
-The cover remains vector-native except for the official barcode. The official template itself remains byte-for-byte unchanged. Visual inspection covered the full wrap, front, back, spine, overlay, safe proof, 100% panel views, 50%, 25%, thumbnail, and grayscale. Title, subtitle, edition, author, publisher, license, ISBN, body copy, spine direction, and panel orientation were checked on rendered output.
+The cover remains vector-native except for the official barcode. The official template itself remains byte-for-byte unchanged. Visual inspection covered the full wrap, front, back, spine, overlay, safe proof, 100% panel views, 50%, 25%, thumbnail, and grayscale. Title, subtitle, edition, author, publisher, license, ISBN, body copy, spine direction, and panel orientation were checked on rendered output. The production PDF was also opened through Poppler, pypdf strict mode, and macOS CoreGraphics.
 
 ## Consistency table
 

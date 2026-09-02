@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -16,8 +16,6 @@ if DEPS.exists():
     sys.path.insert(0, str(DEPS))
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageOps
-from pypdf import PdfReader, PdfWriter
-from pypdf.generic import NameObject
 from reportlab.lib.colors import CMYKColor
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.styles import ParagraphStyle
@@ -89,7 +87,11 @@ def draw_paragraph(c, text, x, top, width, style, log, name, panel):
 def draw_artwork(path: Path, barcode_path: Path) -> list[dict]:
     register_fonts()
     log: list[dict] = []
-    c = Canvas(str(path), pagesize=(PAGE_W, PAGE_H), pageCompression=1, initialFontName="Arial")
+    c = Canvas(str(path), pagesize=(PAGE_W, PAGE_H), pageCompression=1,
+               initialFontName="Arial", pdfVersion=(1, 3))
+    c.setTitle("Advanced Computational Algorithms - Second Edition - Ingram Cover")
+    c.setAuthor("Moody Amakobe")
+    c.setSubject("Print cover; ISBN 979-8-1827-2111-0")
     c.setFillColor(WHITE); c.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
     c.setFillColor(NAVY); c.rect(COVER_LEFT, COVER_BOTTOM, COVER_RIGHT-COVER_LEFT, COVER_TOP-COVER_BOTTOM, fill=1, stroke=0)
 
@@ -172,21 +174,15 @@ def draw_artwork(path: Path, barcode_path: Path) -> list[dict]:
 
 
 def merge_with_template(artwork: Path, output: Path) -> None:
-    """Make artwork final while inheriting only the template's PDF/X prepress profile."""
-    reader = PdfReader(str(TEMPLATE), strict=True)
-    art = PdfReader(str(artwork), strict=True)
-    writer = PdfWriter(clone_from=art)
-    # Copy the official template's output intent and XMP packet, but not its visible
-    # guides/instructions or its unembedded Helvetica resource.
-    for key in ("/OutputIntents", "/Metadata"):
-        if key in reader.trailer["/Root"]:
-            writer._root_object[NameObject(key)] = reader.trailer["/Root"][key].clone(writer)
-    writer.pdf_header = b"%PDF-1.3"
-    writer.add_metadata({"/Title": "Advanced Computational Algorithms — Second Edition — Ingram Cover",
-                         "/Author": "Moody Amakobe", "/Subject": "Print cover; ISBN 979-8-1827-2111-0",
-                         "/GTS_PDFXVersion": "PDF/X-1:2001"})
+    """Publish the clean artwork PDF; template geometry has already governed layout.
+
+    Copying the template's XMP/output-intent object graph into an independently
+    generated PDF produces a file that Poppler accepts but macOS CoreGraphics and
+    some Acrobat configurations reject as damaged. The artwork itself is already
+    PDF 1.3, CMYK, one page, exact-size, and fully font-embedded.
+    """
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("wb") as f: writer.write(f)
+    shutil.copyfile(artwork, output)
 
 
 def render_pdf(pdf: Path, prefix: Path, dpi=150) -> Path:

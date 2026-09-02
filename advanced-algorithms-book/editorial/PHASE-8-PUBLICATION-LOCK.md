@@ -63,7 +63,7 @@
 | Official template | LOCKED — `9798182721110-Perfect.pdf` |
 | Template page count | 614-page manufacturing specification |
 | Spine | LOCKED — 1.239 in / 31.47 mm |
-| Cover | LOCKED — final PDF/X-1:2001 wrap |
+| Cover | LOCKED — final CMYK PDF 1.4 wrap; cross-viewer validated |
 
 ### Cover
 
