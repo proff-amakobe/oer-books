@@ -36,3 +36,9 @@ artificial final verso.
 
 Do not render the two formats separately into the same directory. Quarto's
 output cleanup can remove the previously rendered format.
+
+> **LEGACY / UNVALIDATED PRINT PIPELINE:** `_quarto-print.yml`, both volume
+> profiles, `print/preamble.tex`, `print/filters/print-components.lua`, and the
+> volume filters are retained for forensic comparison only. The content-first
+> baseline is `_quarto-print-reconstruction.yml`. Do not treat legacy build
+> success as editorial validation.
