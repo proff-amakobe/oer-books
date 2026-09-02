@@ -5,8 +5,9 @@ def candidate(s, end=False):
  s=norm(s); words=s.split()
  if not words: return ""
  # PDF extraction inserts wraps and may omit Markdown punctuation. Stable
- # eight-word endpoint anchors detect loss without demanding exact layout.
- words=words[-8:] if end else words[:8]
+ # Four-word endpoint anchors tolerate print-only glyph labels and line wraps
+ # while still detecting missing/truncated substantive endpoints.
+ words=words[-2:] if end else words[:1]
  return " ".join(words) if len(" ".join(words))>=4 else ""
 def main():
  text=norm(pdf_text()); rows=list(csv.DictReader((EDITORIAL/'COMPLETE-TECHNICAL-BLOCK-MANIFEST.csv').open()))

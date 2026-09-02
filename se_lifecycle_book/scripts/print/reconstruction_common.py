@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Source and PDF parity helpers for the neutral complete-edition build."""
 from __future__ import annotations
-import csv, hashlib, re, subprocess, sys
+import csv, hashlib, re, subprocess, sys, os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -10,7 +10,7 @@ CHAPTERS = [ROOT / "chapters" / f"{n:02d}-{slug}.qmd" for n, slug in enumerate([
  "introduction","requirements-engineering","systems-modeling","software-architecture","ui-ux",
  "agile-methodologies","version-control","testing-quality","cicd","data-management","cloud-services",
  "security","maintenance-evolution","ethics-professionalism","final-project-integration"], 1)]
-PDF = ROOT / "output/reconstruction/The-Complete-Software-Engineering-Lifecycle-NEUTRAL-REVIEW.pdf"
+PDF = Path(os.environ.get("SE_PRINT_PDF", ROOT / "output/reconstruction/The-Complete-Software-Engineering-Lifecycle-NEUTRAL-REVIEW.pdf"))
 EDITORIAL = ROOT / "editorial"
 
 def sha(data: bytes) -> str: return hashlib.sha256(data).hexdigest()

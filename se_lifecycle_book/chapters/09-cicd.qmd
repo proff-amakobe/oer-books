@@ -263,9 +263,9 @@ CI server detects change
     ▼
 Pipeline executes automatically
     │
-    ├── Success → Green checkmark ✓
+    ├── Success → Green checkmark Yes
     │
-    └── Failure → Red X, team notified ✗
+    └── Failure → Red X, team notified No
 ```
 
 **6. Keep the Build Fast**
@@ -328,9 +328,9 @@ Build status is visible to all:
 │  CI DASHBOARD                                                           │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  main branch:     ✓ Build #1234 passed (3m ago)                        │
-│  develop branch:  ✓ Build #567 passed (15m ago)                        │
-│  feature/auth:    ✗ Build #89 failed - Test failure (1h ago)           │
+│  main branch:     Yes Build #1234 passed (3m ago)                        │
+│  develop branch:  Yes Build #567 passed (15m ago)                        │
+│  feature/auth:    No Build #89 failed - Test failure (1h ago)           │
 │  feature/api:     ◐ Build #90 in progress...                           │
 │                                                                         │
 │  Recent Activity:                                                       │
@@ -393,41 +393,41 @@ When the build breaks:
 **Ignoring Broken Builds:**
 
 ```         
-❌ "The build's been red for a week, but we're too busy to fix it."
+Avoid: "The build's been red for a week, but we're too busy to fix it."
 
-✓ Fix broken builds immediately. A red build is an emergency.
+Yes Fix broken builds immediately. A red build is an emergency.
 ```
 
 **Infrequent Integration:**
 
 ```         
-❌ Committing once a week with massive changes
+Avoid: Committing once a week with massive changes
 
-✓ Commit multiple times daily with small changes
+Yes Commit multiple times daily with small changes
 ```
 
 **Skipping Tests:**
 
 ```         
-❌ "I'll add tests later" or "Tests are too slow, skip them"
+Avoid: "I'll add tests later" or "Tests are too slow, skip them"
 
-✓ Tests are non-negotiable. Optimize slow tests.
+Yes Tests are non-negotiable. Optimize slow tests.
 ```
 
 **Not Running Pipeline Locally:**
 
 ```         
-❌ "It works on my machine" → Push → CI fails
+Avoid: "It works on my machine" → Push → CI fails
 
-✓ Run the same checks locally before pushing
+Yes Run the same checks locally before pushing
 ```
 
 **Long-Lived Feature Branches:**
 
 ```         
-❌ Feature branch that diverges for months
+Avoid: Feature branch that diverges for months
 
-✓ Short-lived branches, merged within days
+Yes Short-lived branches, merged within days
 ```
 
 ------------------------------------------------------------------------
@@ -1633,16 +1633,16 @@ jobs:
 Repository Settings → Environments → production
 
 Protection Rules:
-☑ Required reviewers
+[x] Required reviewers
   • @team-leads
   
-☑ Wait timer
+[x] Wait timer
   • 30 minutes after staging deploy
   
-☑ Restrict branches
+[x] Restrict branches
   • Only main branch can deploy
 
-☑ Custom deployment branch policy
+[x] Custom deployment branch policy
   • Selected branches: main, release/*
 ```
 
@@ -2296,7 +2296,7 @@ migrate:
 ``` javascript
 // migrations/20241209_add_user_role.js
 
-// ✓ Safe: Adding a column with default
+// Yes Safe: Adding a column with default
 exports.up = async (knex) => {
   await knex.schema.alterTable('users', (table) => {
     table.string('role').defaultTo('user');
@@ -2311,7 +2311,7 @@ exports.down = async (knex) => {
 ```
 
 ``` javascript
-// ✗ Dangerous: Renaming column (breaks running code)
+// No Dangerous: Renaming column (breaks running code)
 // Instead, do it in phases:
 
 // Phase 1: Add new column
@@ -2407,7 +2407,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "🔄 Rollback completed for ${{ github.event.inputs.environment }}",
+              "text": "In Progress Rollback completed for ${{ github.event.inputs.environment }}",
               "blocks": [
                 {
                   "type": "section",
@@ -2772,46 +2772,46 @@ CI/CD BEST PRACTICES CHECKLIST
 ═══════════════════════════════════════════════════════════════
 
 CONTINUOUS INTEGRATION
-☐ Single source repository
-☐ Automated builds on every commit
-☐ Fast feedback (< 15 minutes)
-☐ Self-testing builds
-☐ Fix broken builds immediately
-☐ Keep the build green
+[ ] Single source repository
+[ ] Automated builds on every commit
+[ ] Fast feedback (< 15 minutes)
+[ ] Self-testing builds
+[ ] Fix broken builds immediately
+[ ] Keep the build green
 
 TESTING
-☐ Unit tests with high coverage
-☐ Integration tests for critical paths
-☐ E2E tests for user journeys
-☐ Tests run in CI
-☐ No flaky tests
+[ ] Unit tests with high coverage
+[ ] Integration tests for critical paths
+[ ] E2E tests for user journeys
+[ ] Tests run in CI
+[ ] No flaky tests
 
 DEPLOYMENT
-☐ Automated deployments
-☐ Multiple environments (dev, staging, prod)
-☐ Production-like staging
-☐ Deployment approval for production
-☐ Rollback procedure documented and tested
+[ ] Automated deployments
+[ ] Multiple environments (dev, staging, prod)
+[ ] Production-like staging
+[ ] Deployment approval for production
+[ ] Rollback procedure documented and tested
 
 SECURITY
-☐ Secrets in secret manager (not in code)
-☐ Dependency scanning
-☐ Security scanning in CI
-☐ Least privilege for CI credentials
-☐ Audit logging
+[ ] Secrets in secret manager (not in code)
+[ ] Dependency scanning
+[ ] Security scanning in CI
+[ ] Least privilege for CI credentials
+[ ] Audit logging
 
 MONITORING
-☐ Health check endpoints
-☐ Key metrics monitored
-☐ Alerts configured
-☐ Post-deployment verification
-☐ Logging and tracing
+[ ] Health check endpoints
+[ ] Key metrics monitored
+[ ] Alerts configured
+[ ] Post-deployment verification
+[ ] Logging and tracing
 
 DOCUMENTATION
-☐ Pipeline documented
-☐ Runbook for common issues
-☐ Rollback procedure documented
-☐ Environment configuration documented
+[ ] Pipeline documented
+[ ] Runbook for common issues
+[ ] Rollback procedure documented
+[ ] Environment configuration documented
 ```
 
 ------------------------------------------------------------------------

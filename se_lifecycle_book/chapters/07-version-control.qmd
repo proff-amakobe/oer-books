@@ -170,7 +170,7 @@ git merge --abort
 
 ![Git history before and after rebasing a feature branch](../assets/images/git_rebase_diagram.svg){#fig-git-rebase width=92%}
 
-The commits on feature are recreated (●' indicates new commits with same changes but different hashes).
+The commits on feature are recreated (a primed node indicates a new commit with the same changes but a different hash).
 
 **Rebase Commands:**
 
@@ -894,44 +894,44 @@ CODE REVIEW CHECKLIST
 ═══════════════════════════════════════════════════════════════
 
 UNDERSTANDING
-☐ I understand what this PR is supposed to do
-☐ The PR description explains the changes clearly
-☐ Related issues are linked
+[ ] I understand what this PR is supposed to do
+[ ] The PR description explains the changes clearly
+[ ] Related issues are linked
 
 FUNCTIONALITY
-☐ Code achieves the stated goal
-☐ Edge cases are handled
-☐ Error handling is appropriate
-☐ No obvious bugs
+[ ] Code achieves the stated goal
+[ ] Edge cases are handled
+[ ] Error handling is appropriate
+[ ] No obvious bugs
 
 DESIGN
-☐ Approach is reasonable
-☐ Consistent with existing patterns
-☐ No unnecessary complexity
-☐ Changes are in appropriate locations
+[ ] Approach is reasonable
+[ ] Consistent with existing patterns
+[ ] No unnecessary complexity
+[ ] Changes are in appropriate locations
 
 CODE QUALITY
-☐ Code is readable
-☐ Names are clear and meaningful
-☐ No dead/commented code
-☐ No debugging code (console.log, etc.)
-☐ Follows project style guide
+[ ] Code is readable
+[ ] Names are clear and meaningful
+[ ] No dead/commented code
+[ ] No debugging code (console.log, etc.)
+[ ] Follows project style guide
 
 TESTING
-☐ Tests exist for new functionality
-☐ Tests cover important cases
-☐ Tests are readable
-☐ All tests pass
+[ ] Tests exist for new functionality
+[ ] Tests cover important cases
+[ ] Tests are readable
+[ ] All tests pass
 
 SECURITY
-☐ No obvious security issues
-☐ Inputs are validated
-☐ Sensitive data is handled properly
+[ ] No obvious security issues
+[ ] Inputs are validated
+[ ] Sensitive data is handled properly
 
 DOCUMENTATION
-☐ Complex code is commented
-☐ API documentation updated
-☐ README updated if needed
+[ ] Complex code is commented
+[ ] API documentation updated
+[ ] README updated if needed
 ```
 
 ### Giving Feedback
@@ -939,9 +939,9 @@ DOCUMENTATION
 **Be Specific:**
 
 ```         
-❌ "This code is confusing."
+Avoid: "This code is confusing."
 
-✓ "I found the logic in processOrder() hard to follow. Consider 
+Yes "I found the logic in processOrder() hard to follow. Consider
    extracting the discount calculation into a separate function 
    like calculateDiscount(order)."
 ```
@@ -949,18 +949,18 @@ DOCUMENTATION
 **Explain Why:**
 
 ```         
-❌ "Use const instead of let here."
+Avoid: "Use const instead of let here."
 
-✓ "Use const instead of let here since items isn't reassigned. 
+Yes "Use const instead of let here since items isn't reassigned.
    Using const signals intent and prevents accidental reassignment."
 ```
 
 **Ask Questions:**
 
 ```         
-❌ "This is wrong."
+Avoid: "This is wrong."
 
-✓ "I'm not sure I understand the logic here. What happens if 
+Yes "I'm not sure I understand the logic here. What happens if
    the user has no orders? Wouldn't orders.length be 0, making 
    the average calculation divide by zero?"
 ```
@@ -968,9 +968,9 @@ DOCUMENTATION
 **Offer Suggestions:**
 
 ```         
-❌ "This could be better."
+Avoid: "This could be better."
 
-✓ "Consider using array.find() instead of the for loop:
+Yes "Consider using array.find() instead of the for loop:
    
    const user = users.find(u => u.id === targetId);
    
@@ -1034,17 +1034,17 @@ Reviewer: "This function is doing too much. Consider splitting it."
 
 Response Options:
 
-✓ "Good point! I've split it into validateInput() and 
+Yes "Good point! I've split it into validateInput() and
    processRequest(). Much cleaner now."
 
-✓ "I considered splitting it, but keeping it together lets us 
+Yes "I considered splitting it, but keeping it together lets us
    do X more efficiently. Here's my reasoning... What do you think?"
 
-✓ "Could you clarify what you mean? Are you suggesting splitting 
+Yes "Could you clarify what you mean? Are you suggesting splitting
    by responsibility or by... something else?"
 
-❌ "It's fine how it is."
-❌ "I don't have time to refactor this."
+Avoid: "It's fine how it is."
+Avoid: "I don't have time to refactor this."
 ```
 
 ### Review Etiquette
@@ -1708,28 +1708,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 │  Branch protection rule: main                                           │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ☑ Require a pull request before merging                               │
-│    ☑ Require approvals: 1                                              │
-│    ☑ Dismiss stale PR approvals when new commits are pushed            │
-│    ☑ Require review from code owners                                   │
+│  [x] Require a pull request before merging                               │
+│    [x] Require approvals: 1                                              │
+│    [x] Dismiss stale PR approvals when new commits are pushed            │
+│    [x] Require review from code owners                                   │
 │                                                                         │
-│  ☑ Require status checks to pass before merging                        │
-│    ☑ Require branches to be up to date before merging                  │
+│  [x] Require status checks to pass before merging                        │
+│    [x] Require branches to be up to date before merging                  │
 │    Status checks:                                                       │
-│      ☑ ci/test                                                         │
-│      ☑ ci/lint                                                         │
+│      [x] ci/test                                                         │
+│      [x] ci/lint                                                         │
 │                                                                         │
-│  ☑ Require conversation resolution before merging                      │
+│  [x] Require conversation resolution before merging                      │
 │                                                                         │
-│  ☐ Require signed commits                                              │
+│  [ ] Require signed commits                                              │
 │                                                                         │
-│  ☑ Do not allow bypassing the above settings                           │
+│  [x] Do not allow bypassing the above settings                           │
 │                                                                         │
-│  ☐ Restrict who can push to matching branches                          │
+│  [ ] Restrict who can push to matching branches                          │
 │                                                                         │
-│  ☑ Allow force pushes: Nobody                                          │
+│  [x] Allow force pushes: Nobody                                          │
 │                                                                         │
-│  ☑ Allow deletions: ☐                                                  │
+│  [x] Allow deletions: [ ]                                                  │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
