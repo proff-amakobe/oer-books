@@ -10,16 +10,16 @@
 | YEAR | 2026 |
 | LANGUAGE | en-US |
 | LICENSE | Creative Commons Attribution 4.0 International (CC BY 4.0) |
-| PRINT ISBN | TBD |
+| PRINT ISBN | 979-8-1827-2111-0 |
 | EBOOK ISBN | TBD |
 | PRINT PAGE COUNT | 614 |
 | TRIM | 8.5 × 11 in (612 × 792 pt) |
 | BINDING | Paperback Perfect Bound |
 | INTERIOR TYPE | Color |
-| COVER STATUS | Digital cover complete; Ingram wrap pending official template, ISBN, paper, and finish |
+| COVER STATUS | Digital cover complete; Ingram wrap pending official template, paper, and finish |
 | PUBLIC HTML URL | https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/ |
 | PDF DOWNLOAD URL | https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/Advanced-Computational-Algorithms.pdf |
 | EPUB DOWNLOAD URL | https://proff-amakobe.github.io/oer-books/advanced-algorithms-book/Advanced-Computational-Algorithms.epub |
 | SOURCE REPOSITORY | https://github.com/proff-amakobe/oer-books/tree/main/advanced-algorithms-book |
 
-The fixed publication date is `2026-01-01`. Build timestamps are not publication dates. Public HTML and EPUB omit unassigned ISBN values; the PDF proof identifies the print ISBN as `TBD` and unassigned.
+The fixed publication date is `2026-01-01`. Build timestamps are not publication dates. The print ISBN is locked to the paperback. HTML may identify that paperback explicitly; EPUB retains its generated UUID and does not use the print ISBN. The ebook ISBN remains unassigned.

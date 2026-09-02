@@ -14,4 +14,4 @@ The 2026 Second Edition establishes a publication-ready 614-page interior and a 
 - a refreshed Second Edition digital cover based on “The Geometry of Computation”; and
 - final print residue removal, embedded-font preflight, overflow checks, and full-book visual review.
 
-The print interior, HTML, and EPUB are locked. The ISBN, official Ingram template, production wrap, pricing, distribution settings, release tag, and GitHub release remain pending author or distributor inputs.
+The print interior, print ISBN, HTML, and EPUB are locked. The ebook ISBN remains unassigned. The official Ingram template, production wrap, pricing, distribution settings, release tag, and GitHub release remain pending author or distributor inputs.

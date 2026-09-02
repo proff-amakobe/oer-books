@@ -20,7 +20,7 @@ The digital cover was generated with the built-in image-generation workflow and 
 
 | Field | Status |
 |---|---|
-| ISBN | PENDING |
+| ISBN | 979-8-1827-2111-0 — VALID / LOCKED |
 | Official template filename | PENDING |
 | Template page count | PENDING (interior currently locked at 614) |
 | Template overall dimensions | PENDING |
@@ -33,4 +33,4 @@ The digital cover was generated with the built-in image-generation workflow and 
 | Raster resolution | PENDING |
 | Output filename | `print/covers/Advanced-Computational-Algorithms-Second-Edition-Ingram-Cover.pdf` (reserved; not generated) |
 
-Final print-wrap status: **PENDING**. Production geometry must come exclusively from the official IngramSpark template after the print ISBN, paper, and cover finish are selected. No spine formula, estimated geometry, template overlay, or fabricated barcode has been used.
+Final print-wrap status: **PENDING**. The project is ready to request the official template using print ISBN `979-8-1827-2111-0`, 614 pages, 8.5 × 11 in, Perfect Bound Paperback, and Color interior after paper and cover finish are selected. Production geometry must come exclusively from that template. No spine formula, estimated geometry, template overlay, or fabricated barcode has been used.

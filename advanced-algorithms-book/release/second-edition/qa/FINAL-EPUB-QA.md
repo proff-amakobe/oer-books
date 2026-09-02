@@ -13,7 +13,8 @@ Artifact: `Advanced-Computational-Algorithms.epub`
 | Publisher | PASS — Global Data Science Institute |
 | Language | PASS — en-US |
 | Edition/year | PASS — Second Edition / 2026 in content; fixed OPF date 2026-01-01 |
-| Identifier | PASS — generated UUID; no unassigned or reused ISBN |
+| Identifier | PASS — generated UUID; no ebook ISBN assigned |
+| Paperback ISBN isolation | PASS — `979-8-1827-2111-0` does not occur anywhere in the EPUB package |
 | MathML | PASS — semantic MathML present; 684 audited MathML nodes and 0 raw LaTeX leaks |
 | Figures | PASS — 14/14 instructional SVG figures plus the digital cover |
 | Technical content | PASS — 431 semantic blocks retained across formats |

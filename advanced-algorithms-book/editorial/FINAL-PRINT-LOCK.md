@@ -3,10 +3,10 @@
 | Check | Result |
 |---|---|
 | PDF filename | `Advanced-Computational-Algorithms.pdf` |
-| SHA256 | `0fc581c402624e33092e240e2d7a99499e1aa8b6c60afa34af863ccda103d929` |
+| SHA256 | `ff98055e8e1d45b2d8f4f980c15da6f9058989aad52bdcfcb4e9f96ae17bf892` |
 | Page count | 614 |
 | Trim | 612 × 792 pt (8.5 × 11 in) |
-| File size | 2,268,122 bytes |
+| File size | 2,268,222 bytes |
 | Encryption | None |
 | Fonts | PASS — 0 unembedded records; figure-origin Type 3 records are embedded |
 | Figures | PASS — 14/14 |
@@ -24,8 +24,9 @@
 | Source residue | PASS — 0 raw YAML, Markdown fences, Pandoc attributes, Quarto directives, web-only UI, or format-specific metadata leaks |
 | Visual review | PASS — all 614 pages reviewed across 25 retained contact sheets; full-page checks completed for both low-density review pages |
 | Publication metadata | PASS — title, subtitle, author, publisher, Second Edition, 2026, en-US, and CC BY 4.0 |
-| ISBN status | PENDING — print and ebook ISBNs remain independently unassigned |
+| Print ISBN | PASS — 979-8-1827-2111-0; ISBN-13 check digit valid; LOCKED |
+| Ebook ISBN | TBD — not assigned to the print PDF or EPUB package |
 
-The final PDF was compared with the pre-Phase-8 locked baseline at page-raster level. Only physical pages 10 and 11 changed: Edition Notice and Copyright. The other 612 pages were identical at the comparison resolution. Both changed pages were rendered separately and visually approved.
+The ISBN-locked PDF was compared with the pre-ISBN 614-page lock at page-raster level. Only physical page 11 changed: Copyright. The other 613 pages were identical at the comparison resolution. Page 11 was rendered separately and visually approved; the ISBN occurs once, with correct punctuation and digits, and does not wrap.
 
 **FINAL PRINT INTERIOR: LOCKED**

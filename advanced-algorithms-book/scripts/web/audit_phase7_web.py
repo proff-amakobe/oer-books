@@ -105,6 +105,9 @@ def audit() -> dict:
             book = next(item for item in objects if item.get("@type") == "Book")
             assert book.get("bookEdition") == "Second Edition" and str(book.get("datePublished")) == "2026"
             assert not any(key.lower() == "isbn" for key in book)
+            paperback = book.get("workExample", {})
+            assert paperback.get("bookFormat") == "https://schema.org/Paperback"
+            assert paperback.get("isbn") == "979-8-1827-2111-0"
         except Exception as exc: errors.append(f"JSON-LD: {path.name}: {exc}")
 
     checked = broken = 0

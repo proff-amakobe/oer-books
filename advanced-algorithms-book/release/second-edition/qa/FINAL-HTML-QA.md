@@ -7,7 +7,7 @@
 | Search | PASS — representative queries return results |
 | Downloads | PASS — PDF and EPUB links generated |
 | Canonical URLs | PASS — stable public base URL retained |
-| Book JSON-LD | PASS — title, author, publisher, edition, year, language, license; no fabricated ISBN |
+| Book JSON-LD | PASS — paperback `workExample` explicitly carries print ISBN `979-8-1827-2111-0`; the parent work and ebook are not assigned that identifier |
 | OpenGraph/Twitter | PASS — refreshed 1024 × 1536 cover and canonical descriptions |
 | Publisher/license/language | PASS — Global Data Science Institute / CC BY 4.0 / en-US |
 | Internal links | PASS — 17,718 checked; 0 broken |

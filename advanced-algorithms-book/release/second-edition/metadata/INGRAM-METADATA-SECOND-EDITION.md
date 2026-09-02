@@ -9,7 +9,7 @@
 | Author | Moody Amakobe |
 | Publisher | Global Data Science Institute |
 | Edition | Second Edition |
-| Print ISBN | TBD — assignment required before submission |
+| Print ISBN | 979-8-1827-2111-0 |
 | Publication date | 2026-01-01 |
 | Language | en-US |
 | Page count | 614 |

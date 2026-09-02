@@ -16,7 +16,7 @@
 
 | Format | Value | Validation |
 |---|---|---|
-| Print | TBD | PENDING |
+| Print | 979-8-1827-2111-0 | PASS — VALID / LOCKED |
 | Ebook | TBD | PENDING |
 
 ### Interior
@@ -55,6 +55,11 @@
 | Field | Status |
 |---|---|
 | Metadata sheet | READY |
+| Print ISBN | 979-8-1827-2111-0 |
+| Page count | 614 |
+| Trim | 8.5 × 11 in |
+| Binding | Perfect Bound Paperback |
+| Interior | Color |
 | Official template | PENDING |
 | Template page count | PENDING |
 | Spine | PENDING |
@@ -87,17 +92,17 @@
 | INTERIOR | LOCKED |
 | WEB | LOCKED |
 | EPUB | LOCKED |
-| ISBN | PENDING |
+| PRINT ISBN | LOCKED |
+| EBOOK ISBN | PENDING |
 | COVER | PENDING — digital front complete; production wrap pending |
-| INGRAM | BLOCKED |
+| INGRAM | READY FOR OFFICIAL TEMPLATE after paper/finish selection |
 | FINAL RELEASE | BLOCKED |
 
 ### Remaining Blockers
 
-- Assign and validate a new Second Edition print ISBN.
 - Decide whether to assign a separate ebook ISBN; otherwise retain the UUID identifier.
 - Select Ingram paper and cover finish.
-- Generate and supply the official IngramSpark template using the final ISBN and locked 614-page specification.
+- Generate and supply the official IngramSpark template using print ISBN `979-8-1827-2111-0` and the locked 614-page specification.
 - Build and preflight the wrap against that template, including safe areas and official barcode handling.
 - Obtain author decisions on prices, returns, wholesale discount, and territorial rights.
 - Create the release tag and GitHub release only after those blockers and publication approval are cleared.
