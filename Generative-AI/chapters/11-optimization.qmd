@@ -1,0 +1,134 @@
+# Advanced Techniques and Optimization {#sec-ch11}
+
+## Introduction
+
+Chapter 2 introduced model routing as a design problem: match query complexity to model capability. Chapter 4 covered cost optimization at the integration layer: caching, batching, provider comparison. Both were genuinely useful, and both stopped short of a harder question that only shows up once a system is actually running at real scale: what do you do when routing and caching alone aren't enough, when you need the underlying models themselves to run faster, cheaper, and more reliably under real load, not just be chosen intelligently?
+
+This chapter goes one level deeper into that question: combining multiple models for better results than any one alone, shrinking models without gutting their quality, and the performance engineering that separates a system that works in a demo from one that holds up under thousands of simultaneous users. None of this is required reading for every project, if your assistant handles modest traffic, Chapters 2 and 4's routing and caching may be all you ever need, but understanding what's available at this next level of scale is part of being able to recognize when you'd actually need it.
+
+## Learning Outcomes
+
+By the end of this chapter, you will be able to:
+
+- Explain how ensemble methods can improve reliability and quality beyond a single model
+- Describe quantization, pruning, and knowledge distillation as approaches to model compression
+- Identify the performance engineering techniques (batching, parallelism, KV-caching) that matter at real production scale
+- Design a systematic, experiment-driven approach to continuous optimization
+- Recognize when this chapter's techniques are worth the added complexity, and when they aren't
+
+## Key Terminologies and Concepts
+
+| **Term** | **Definition** | **Example/Context** |
+|---|---|---|
+| **Ensemble Method** | Combining outputs from multiple models to improve reliability or quality | Using a second model to verify a first model's factual claims |
+| **Mixture of Experts (MoE)** | An architecture where different specialized sub-models handle different types of input, with a gating mechanism deciding which to activate | Only the relevant "expert" runs for a given query, saving compute |
+| **Quantization** | Reducing a model's numerical precision to decrease memory use and increase speed | Converting a model from 32-bit to 8-bit or 4-bit precision |
+| **Pruning** | Removing less-important parameters from a trained model to make it smaller and faster | Removing attention heads that contribute little to output quality |
+| **Knowledge Distillation** | Training a smaller "student" model to replicate a larger "teacher" model's behavior | A fast, cheap model trained to mimic a slower, more capable one |
+| **Batching** | Grouping multiple requests together for more efficient processing | Continuous batching, which starts processing new requests without waiting for a full batch |
+| **KV-Caching** | Reusing previously computed attention calculations rather than recomputing them for each new token | A core technique behind fast, responsive token-by-token generation |
+| **Speculative Decoding** | Using a smaller, faster model to draft likely next tokens that a larger model then verifies | Speeding up generation without sacrificing the larger model's quality |
+| **A/B Testing** | Comparing two system variants by exposing each to a portion of real traffic and measuring outcomes | Testing a new caching strategy against the current one with real users |
+
+---
+
+## Beyond Single-Model Routing: Ensemble Methods {#sec-11-1}
+
+Combining multiple models can improve reliability, accuracy, and robustness beyond what any single model achieves alone, at the cost of real added complexity and latency, a trade-off worth weighing deliberately rather than reaching for by default.
+
+**Voting ensembles** generate responses from multiple models and select among them: majority voting for tasks with clear discrete outputs, weighted voting when some models are known to be stronger on certain query types, or confidence-based selection when a model can meaningfully signal its own uncertainty. **Response fusion** goes further, actually combining complementary strengths from different models' outputs, or using one model specifically to verify another's factual claims, a genuinely useful pattern for reducing hallucination risk in high-stakes applications.
+
+**Mixture of Experts (MoE)** takes a more structural approach: rather than running every model on every query and choosing among the outputs afterward, a gating mechanism decides upfront which specialized "expert" sub-model should handle a given input, so only the relevant expert actually runs. This is efficient by design, and it's worth noting that some of the most capable models available today use MoE-style architecture internally, which means you may already be benefiting from this idea without having to implement it yourself.
+
+## Model Compression: Making Models Smaller and Faster {#sec-11-2}
+
+Three related techniques shrink a model's footprint without necessarily requiring you to accept proportionally worse quality.
+
+**Quantization**, reducing a model's numerical precision (32-bit down to 8-bit or even 4-bit), decreases memory use and increases speed, generally with real but often modest quality loss. Post-training quantization is simple to apply to an existing model; quantization-aware training, incorporating the precision reduction during training itself, preserves quality better at the cost of a more involved training pipeline.
+
+**Pruning** removes parameters that contribute little to a model's output, whole attention heads or layers (structured pruning) or individual weights (unstructured pruning), producing a smaller, faster model that, done carefully, loses surprisingly little capability.
+
+**Knowledge distillation** trains a smaller "student" model to replicate a larger "teacher" model's behavior, producing something that runs faster and cheaper at inference time while inheriting much of the teacher's quality. This is directly relevant to a design decision your Chapter 7 Customization Decision Memo may have touched on: a well-executed distillation can sometimes deliver most of a large model's value at a fraction of its ongoing inference cost, a trade-off worth naming explicitly if cost matters as much to your project as capability does.
+
+## Performance Engineering {#sec-11-3}
+
+At genuine production scale, the engineering underneath inference itself starts to matter. **Batching** groups multiple requests for more efficient processing, continuous batching in particular, starting to process new requests without waiting for an artificially full batch, balances efficiency against the latency any individual user actually experiences. **KV-caching** avoids recomputing attention calculations for tokens the model has already processed, a core reason modern generation can produce tokens as fast as it does. **Speculative decoding** uses a small, fast model to draft several likely next tokens at once, which a larger, more capable model then verifies in a single pass rather than generating token-by-token from scratch, a clever way to get large-model quality with some of small-model speed.
+
+None of these techniques are things you'd typically implement yourself when using a commercial API, they're mostly handled by the provider, but understanding that they exist, and roughly why they matter, helps you interpret a provider's latency claims and make sense of real performance differences between offerings that otherwise look similar on paper.
+
+## Continuous Optimization {#sec-11-4}
+
+Optimization, done well, is never a one-time pass. **A/B testing** compares two real variants of your system against genuine traffic rather than your own intuition about which is better, the same experimental discipline covered from an evaluation angle in Chapter 10, applied here specifically to optimization decisions like a new caching strategy or an adjusted routing threshold.
+
+A useful, minimal way to think about a routing decision that's been tuned this way, extending the design from Chapter 2 with the complexity and cost considerations this chapter has added:
+
+```{#tech-11-001 .technical-block .pseudocode}
+# Conceptual sketch — a routing decision informed by this chapter's considerations
+def select_model(complexity, urgency, budget_remaining):
+    if urgency == "high" and complexity < 5:
+        return "fast_model"
+    if complexity > 8 and budget_remaining > threshold:
+        return "premium_model"
+    return "balanced_model"
+```
+
+The point worth taking from this snippet isn't the four lines of logic, it's that every threshold in it (`5`, `8`, `threshold`) is exactly the kind of value A/B testing and production monitoring, not intuition, should determine over time.
+
+---
+
+## Connecting to Your Project: An Optimization Plan
+
+Most student projects, honestly, won't need ensembles, quantization, or speculative decoding, those matter at a scale few individual projects actually reach. What every project does need is a clear-eyed budget and a plan for the moment usage grows.
+
+**State your expected scale.** Roughly how many queries per day or month would your assistant realistically handle? Be honest rather than aspirational, this number should drive every other answer in this section.
+
+**Set a cost and latency budget.** Given your Chapter 2 model choices and Chapter 4 integration design, what would you actually expect to pay per query, and what latency would your users tolerate?
+
+**Identify your first bottleneck.** If usage grew tenfold overnight, what part of your design (from Chapters 2, 4, or 6) would break or become unaffordable first? You don't need to solve it now, naming it accurately is the actual exercise.
+
+**Decide, explicitly, whether this chapter's advanced techniques apply to you at all.** A clear "not at my current scale, but here's the threshold where I'd revisit this" is a completely legitimate, and often correct, answer.
+
+## Case Study: Serving Search at Scale
+
+Search engines and large-scale recommendation systems were solving the "serve enormous, unpredictable load with strict latency budgets" problem years before generative AI existed, and the techniques this chapter covers, caching, batching, request prioritization, predictive scaling, are direct descendants of that older engineering discipline, adapted to the specific shape of LLM inference. A production LLM-serving system today routinely combines continuous batching, KV-caching, and quantized model variants simultaneously, exactly the kind of multi-technique stack this chapter has walked through piece by piece, deployed together because no single technique alone gets a system to the latency and cost targets real products actually need.
+
+The lesson for your own design thinking: these techniques compound. A system using only one of them, caching alone, or quantization alone, captures a fraction of the benefit of a system that layers several together deliberately, which is exactly why production teams treat performance engineering as an ongoing practice rather than a single optimization pass.
+
+## Discussion Questions
+
+1. At what point does the added complexity of ensembles or model compression stop being worth the engineering cost, for a project at your scale?
+2. If a distilled or quantized model produces subtly different outputs than its full-precision original, how should that be evaluated, using the same methods from Chapter 10, or something adapted specifically for this comparison?
+3. How should organizations balance the environmental cost of running larger, less-optimized models (a theme from Chapter 1) against the real engineering cost of optimizing them?
+
+## Further Reading
+
+- Any current vLLM or TGI (Text Generation Inference) documentation on continuous batching and KV-caching, these projects are the practical, widely used implementations of @sec-11-3's concepts.
+- Hinton, G., et al. (2015). "Distilling the Knowledge in a Neural Network" — The foundational paper behind the knowledge distillation technique in @sec-11-2.
+
+---
+
+## Chapter Wrap-Up
+
+### Key Takeaways
+
+- Ensembles and Mixture-of-Experts architectures trade added complexity for improved reliability or efficiency, worth it at genuine scale, often not below it.
+- Quantization, pruning, and distillation each shrink a model differently, with different quality trade-offs worth matching to your actual constraints.
+- Performance engineering (batching, KV-caching, speculative decoding) mostly lives inside a provider's infrastructure, but understanding it helps you evaluate providers and interpret their claims.
+- Optimization is a continuous, experiment-driven practice (A/B testing, production monitoring from Chapter 10), not a one-time pass before launch.
+- Most projects at modest scale need Chapters 2 and 4's routing and caching, and nothing more from this chapter, knowing where that line sits is itself the skill.
+
+### Practice
+
+- Estimate your project's realistic query volume, then estimate roughly what a tenfold increase would do to your Chapter 4 cost plan.
+- Name one optimization technique from this chapter that would clearly be overkill for your project right now, and explain why.
+
+### Project Milestone: Optimization Plan
+
+In this chapter, add an **Optimization Plan** to your project portfolio:
+
+1. **Expected scale**: Your realistic query volume estimate.
+2. **Cost and latency budget**: What you'd expect to pay and how fast a response needs to be.
+3. **First bottleneck**: What would break first under significantly higher load, and why.
+4. **Applicability call**: Whether this chapter's advanced techniques apply to your project now, later, or not at all, with reasoning.
+
+*End of Chapter 11. Chapter 12 turns from performance to a different kind of engineering discipline entirely: the technical work of AI safety and alignment.*

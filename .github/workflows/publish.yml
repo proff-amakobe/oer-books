@@ -28,6 +28,11 @@ jobs:
           sudo apt-get install -y librsvg2-bin
 
 
+      - name: Install new Generative AI review dependencies
+        run: |
+          tlmgr install tex-gyre fvextra newunicodechar needspace
+          python -m pip install -r Generative-AI/scripts/qa/requirements.txt
+
       - name: Render books
         run: |
           set -e
@@ -59,6 +64,12 @@ jobs:
 
           
 
+          # ---- Generative AI: independent fifteen-chapter book ----
+          cd Generative-AI
+          python3 scripts/build.py
+          python3 scripts/qa/verify_book.py
+          cd ..
+
           # ---- Prepare public directory ----
           rm -rf public && mkdir -p public
 
@@ -81,6 +92,10 @@ jobs:
           # Copy Deep Learning Book
           mkdir -p public/deep-learning
           cp -r deep-learning/_book/* public/deep-learning/
+
+          # Copy Generative AI, including PDF and EPUB downloads
+          mkdir -p public/Generative-AI
+          cp -r Generative-AI/output/html/* public/Generative-AI/
 
           echo "----- Deployed tree -----"
           ls -R public
