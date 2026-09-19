@@ -3,3 +3,46 @@ main { min-width: 0; overflow-wrap: anywhere; }
 pre, pre code { white-space: pre-wrap !important; overflow-wrap: anywhere; }
 .table { display: block; max-width: 100%; overflow-x: auto; }
 img, svg { max-width: 100%; height: auto; }
+
+/* Publication landing page only; chapter typography stays unchanged. */
+.book-landing { --book-accent: #175b60; --book-panel: #f0f5f4; --book-border: #ccd9d7; --book-muted: #47585b; }
+body.quarto-dark .book-landing { --book-accent: #91d7d4; --book-panel: #263536; --book-border: #506667; --book-muted: #c4d3d3; }
+.book-landing .book-hero { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(180px, 1fr); gap: 2.5rem; align-items: center; padding: 1.5rem 0 2rem; }
+.book-landing h1 { font-size: clamp(2.5rem, 4vw, 4rem); line-height: 1.06; margin: .45rem 0 1rem; letter-spacing: -.035em; }
+.book-landing .book-subtitle { display: block; font-size: 1.35rem; line-height: 1.4; font-weight: 500; }
+.book-landing .book-author { font-size: 1.15rem; font-weight: 600; }
+.book-landing .book-eyebrow { color: var(--book-accent); font-size: .85rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.book-landing .book-cover { max-width: 300px; justify-self: center; }
+.book-landing .book-cover img { width: 100%; height: auto; box-shadow: 0 12px 30px #0003; border: 1px solid var(--book-border); }
+.book-landing .book-cover p, .book-landing .book-cover figure { margin: 0; }
+.book-landing .book-cover figcaption { display: none; }
+.book-landing .book-actions p { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.5rem 0 1rem; }
+.book-landing .book-button { display: inline-flex; align-items: center; min-height: 44px; padding: .7rem 1rem; border: 1px solid var(--book-accent); border-radius: 4px; color: var(--book-accent); font-weight: 600; text-decoration: none; line-height: 1.3; }
+.book-landing .book-button-primary { background: #175b60; color: white; border-color: #175b60; }
+body.quarto-dark .book-landing .book-button-primary { background: #91d7d4; color: #142829; border-color: #91d7d4; }
+.book-landing a:hover { text-decoration: underline; }
+.book-landing a:focus-visible { outline: 3px solid var(--book-accent); outline-offset: 4px; }
+.book-landing .book-facts { border-block: 1px solid var(--book-border); padding: 1rem 0; margin: 0 0 3rem; }
+.book-landing .book-facts p { display: flex; flex-wrap: wrap; gap: .8rem 1.5rem; margin: 0; font-size: .9rem; }
+.book-landing h2 { margin-top: 2.5rem; padding-bottom: .6rem; border-color: var(--book-border); }
+.book-landing h3 { font-size: 1.15rem; line-height: 1.4; margin-top: .6rem; }
+.book-landing .book-parts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1.5rem 0 2.5rem; }
+.book-landing .book-part { border: 1px solid var(--book-border); border-radius: 6px; padding: 1.4rem; }
+.book-landing .book-part:last-child { grid-column: 1 / -1; }
+.book-landing .book-part li { margin-bottom: .55rem; }
+.book-landing .book-part ul { padding-left: 1.2rem; }
+.book-landing .book-project, .book-landing .book-oer { background: var(--book-panel); border-radius: 6px; padding: 1.5rem 1.8rem; margin: 2.5rem 0; }
+.book-landing .book-project h2, .book-landing .book-oer h2 { margin-top: 0; }
+.book-landing .book-project li { margin-bottom: .7rem; }
+.book-landing .book-reader-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+.book-landing .book-reader-grid h2 { margin-top: 0; }
+.book-landing .book-credit { color: var(--book-muted); font-size: .95rem; }
+@media (max-width: 800px) {
+ .book-landing .book-hero { grid-template-columns: 1fr; gap: 1.5rem; }
+ .book-landing .book-cover { max-width: 240px; }
+ .book-landing .book-parts, .book-landing .book-reader-grid { grid-template-columns: 1fr; }
+ .book-landing .book-project, .book-landing .book-oer { padding: 1.25rem; }
+}
+
+.book-landing .book-part li, .book-landing .book-part a { white-space: normal; overflow: visible; text-overflow: clip; }
+.book-landing a:not(.book-button-primary) { color: var(--book-accent); }
