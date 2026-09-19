@@ -28,7 +28,8 @@ def pdf_symbols(t):
     for a,b in {'👍':'[thumbs up]','👎':'[thumbs down]','→':'->','↑':'[up]','↓':'[down]','├':'|','└':'+','─':'-'}.items():t=t.replace(a,b)
     return t
 
-baseline=json.loads((ED/'source-baseline.json').read_text())
+baseline={Path(k).name:v for k,v in json.loads((ED/'phase-0-review-baseline.json').read_text()).items()}
+authorized=json.loads((ED/'phase-1-content-changes.json').read_text())
 chapters=sorted((ROOT/'chapters').glob('[0-9][0-9]-*.qmd'))
 check(len(chapters)==15,'Expected exactly 15 source chapters')
 epub_path=ROOT/'output/epub/Generative-AI.epub'
@@ -52,9 +53,9 @@ with zipfile.ZipFile(epub_path) as z:
             check(target in names,f'EPUB missing target {name}: {href}')
             if u.fragment and target in epubs:
                 check(epubs[target].find(id=unquote(u.fragment)) is not None,f'EPUB broken fragment {name}: {href}')
-reader=PdfReader(ROOT/'output/pdf/Generative-AI-REVIEW.pdf')
+reader=PdfReader(ROOT/'output/pdf/Generative-AI-PHASE-1-REVIEW.pdf')
 check(all(abs(float(p.mediabox.width)-612)<.1 and abs(float(p.mediabox.height)-792)<.1 for p in reader.pages),'PDF not 612 x 792 pt on every page')
-doc=pymupdf.open(ROOT/'output/pdf/Generative-AI-REVIEW.pdf')
+doc=pymupdf.open(ROOT/'output/pdf/Generative-AI-PHASE-1-REVIEW.pdf')
 pdftext='\n'.join(p.get_text(clip=pymupdf.Rect(0,0,612,735),sort=False) for p in doc);pdfnorm=norm(pdftext);pdfwords=words(pdftext)
 stats['pdf_pages']=len(reader.pages)
 for forbidden in ['Read Online','Download PDF','Download EPUB','View Source on GitHub','What the book covers','Five Parts, fifteen chapters']:
@@ -66,7 +67,20 @@ for path in chapters:
     check(html_path.exists(),f'HTML chapter missing {ch}')
     page=soup(html_path.read_text());main=page.select_one('main');check(main is not None,f'No HTML main {ch}')
     for tag in main.select('.anchorjs-link, .code-copy-button'):tag.decompose()
-    expected=soup(subprocess.check_output([PANDOC,'-f','markdown','-t','html',str(path)],text=True))
+    expected=soup(subprocess.check_output([PANDOC,'-f','markdown','-t','html','--citeproc','--bibliography',str(ROOT/'references.bib'),'-M','nocite=@*',str(path)],text=True))
+    for refsdiv in expected.select('#refs'): refsdiv.decompose()
+    # Quarto disambiguates author names across the complete book; standalone
+    # Pandoc disambiguates only this chapter. Verify citation keys and links,
+    # then use the book's labels when comparing otherwise exact prose.
+    for citation in expected.select('span.citation'):
+        cited=citation.get('data-cites','')
+        if cited.startswith('sec-'):
+            citation.replace_with('@'+cited)
+            continue
+        actual=main.find('span',attrs={'data-cites':cited})
+        check(actual is not None,f'HTML citation keys missing {ch}: {cited}')
+        if actual is not None:citation.replace_with(actual.get_text(' ',strip=True))
+
     epub=next((s for s in epubs.values() if s.find(id=f'sec-ch{ch:02}')),None)
     check(epub is not None,f'EPUB chapter missing {ch}');epub=epub or soup('')
     h1=main.find('h1');number=h1.select_one('.chapter-number') if h1 else None
@@ -88,11 +102,17 @@ for path in chapters:
     check(len(source_heads)==len(expected.find_all(re.compile('^h[1-6]$'))),f'Unexpected Markdown heading interpretation {ch}')
     parsed_heads=[heading_words(h.get_text(' ',strip=True)) for h in expected.find_all(re.compile('^h[1-6]$'))]
     for _,title,_ in original_heads:
-        check(heading_words(title) in parsed_heads, f'Substantive source heading lost {ch}: {title}')
+        check(heading_words(next((r['new'] for r in authorized['headings'] if r['chapter']==ch and r['old']==title),title)) in parsed_heads, f'Substantive source heading lost {ch}: {title}')
     # Payload fidelity against originals: one documented conversion from verbatim to native math.
     _,oldblocks,_=parse(baseline[path.name]);_,newblocks,_=parse(source)
-    oldpayload=[b['text'] for b in oldblocks if not b['text'].startswith('15% of 240')]
-    check(oldpayload==[b['text'] for b in newblocks],f'Source technical payload changed {ch}')
+    check(len(oldblocks)==len(newblocks),f'Source technical block count changed {ch}')
+    for old,new in zip(oldblocks,newblocks):
+        ident=re.search(r'#([\w-]+)',new['lang'])[1]
+        allowance=next((r for r in authorized['technical_payloads'] if r['id']==ident),None)
+        valid=old['text']==new['text']
+        if allowance:
+            valid=(hashlib.sha256(old['text'].encode()).hexdigest()==allowance['old_sha256'] and hashlib.sha256(new['text'].encode()).hexdigest()==allowance['new_sha256'])
+        check(valid,f'Unreviewed source technical payload change {ident}')
     for pre in expected.find_all('pre'):
         payload=pre.get_text();ident=pre.get('id') or (pre.parent.get('id') if pre.parent else None);n=norm(payload)
         for fmt,rendered in [('HTML',main),('EPUB',epub)]:
@@ -134,10 +154,10 @@ for path in chapters:
     check(not re.search(r'```|(?:^|\s)#{1,6} [A-Z]|\{#sec-|(?m:^:::) |\\begin\{wrapfigure\}|(?m:^title:)',epub_clean.get_text('\n')),f'EPUB source leakage {ch}')
     stats['chapters_checked']+=1
 # Bibliography and native math must not silently disappear in combined formats.
-for key in ['vaswani2017attention','lewis2020rag']:
+for key in re.findall(r'@\w+\{([^,]+)',(ROOT/'references.bib').read_text()):
     check(soup((WEB/'references.html').read_text()).find(id='ref-'+key) is not None,'HTML bibliography entry missing '+key)
     check(any(s.find(id='ref-'+key) for s in epubs.values()),'EPUB bibliography entry missing '+key)
-for title in ['Attention Is All You Need','Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks']:
+for title in re.findall(r'title = \{\{(.+)\}\}',(ROOT/'references.bib').read_text()):
     check(words(title) in pdfwords,'PDF bibliography entry missing '+title)
 mathpage=soup((WEB/'chapters/03-prompt-engineering.html').read_text())
 check(len(mathpage.select('.math.display'))==2,'Expected two native HTML display expressions')
@@ -158,7 +178,7 @@ for p,s in pages.items():
         if u.fragment and target in pages and not pages[target].find(id=unquote(u.fragment)):
             stats['broken_local_links']+=1;errors.append(f'HTML missing fragment {p.name}: {href}')
 check(len(pages[WEB/'index.html'].find_all('h1'))==1,'Landing page title duplicated')
-for name in ['search.json','sitemap.xml','robots.txt','downloads/Generative-AI-REVIEW.pdf','downloads/Generative-AI.epub']:
+for name in ['search.json','sitemap.xml','robots.txt','downloads/Generative-AI-PHASE-1-REVIEW.pdf','downloads/Generative-AI.epub']:
     check((WEB/name).exists(),'Missing web resource '+name)
 search=(WEB/'search.json').read_text()
 for p in chapters:check(p.with_suffix('.html').name in search,'Chapter absent from search '+p.name)
@@ -176,7 +196,7 @@ for i,p in enumerate(doc):
                 check('\ufffd' not in span['text'],f'PDF replacement glyph on page {i+1}')
 for key in ['missing_headings','missing_technical_blocks','missing_tables','missing_figures','raw_source_leakage','broken_local_links','missing_rendered_assets','secrets_detected']:
     stats.setdefault(key,0)
-result={'status':'PASS' if not errors else 'FAIL','counts':dict(stats),'errors':errors,'preexisting_missing_artwork':20,'figure_proposals_without_supplied_art':30,'limits':['No claim of technical correctness or verified current legal/model information.','EPUB ZIP/navigation/content validation is not a formal EPUBCheck certification.','Missing artwork is visibly disclosed, not reconstructed.']}
+result={'status':'PASS' if not errors else 'FAIL','counts':dict(stats),'errors':errors,'preexisting_missing_artwork':20,'figure_proposals_without_supplied_art':30,'limits':['Build completeness is distinct from scholarly review; see the Phase 1 report and adjudicated records.','EPUB ZIP/navigation/content validation is not a formal EPUBCheck certification.','Missing artwork is visibly disclosed, not reconstructed.']}
 (ED/'qa-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'status':result['status'],'counts':result['counts'],'error_count':len(errors),'first_errors':errors[:30]},ensure_ascii=False,indent=2))
 sys.exit(bool(errors))

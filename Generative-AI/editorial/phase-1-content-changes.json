@@ -1,0 +1,72 @@
+{
+  "headings": [
+    {
+      "chapter": 2,
+      "old": "Real-World Example: Your Research Assistant",
+      "new": "Illustrative Scenario: Your Research Assistant"
+    },
+    {
+      "chapter": 2,
+      "old": "Meta Llama Family: The Open-Source Specialists",
+      "new": "Meta Llama Family: The Open-Weight Specialists"
+    }
+  ],
+  "technical_payloads": [
+    {
+      "id": "tech-02-008",
+      "old_sha256": "974787704c8d3b5d8f2e2f571beae00ff54d1adebfec3cb657b546b308ad284c",
+      "new_sha256": "03b814a69b00d03cbea68dab63494d65ca101283fb9552a45b6f1ba6d1f00b1b",
+      "old": "# Conceptual sketch of a routing decision — not a full implementation\ndef choose_model(complexity_score, cache_hit):\n    if cache_hit:\n        return \"cache\"          # free, instant, but only ever a repeat query\n    if complexity_score <= 3:\n        return \"fast_cheap_model\"\n    if complexity_score <= 7:\n        return \"balanced_model\"\n    return \"most_capable_model\"",
+      "new": "# Conceptual sketch of a routing decision — not a full implementation\ndef choose_model(complexity_score, cache_hit):\n    if cache_hit:\n        return \"cache\"          # eligible cached result; lookup and validation still have costs\n    if complexity_score <= 3:\n        return \"fast_cheap_model\"\n    if complexity_score <= 7:\n        return \"balanced_model\"\n    return \"most_capable_model\""
+    },
+    {
+      "id": "tech-03-044",
+      "old_sha256": "b19134ee991784cb7445d6d7474f4e191027398b92982de00e33f7bac976be92",
+      "new_sha256": "bf583d43c49796e2e5813d69c9f33d8a06f5bfddc56e5e1e9be8fa2f82cc2f39",
+      "old": "# Pseudocode for basic detection\nsuspicious_phrases = [\n    \"ignore previous\",\n    \"ignore all previous\",\n    \"forget everything\",\n    \"new instructions\",\n    \"system override\",\n    \"disregard prior\",\n    # ... extensive list\n]\n\ndef check_for_injection(user_input):\n    lower_input = user_input.lower()\n    for phrase in suspicious_phrases:\n        if phrase in lower_input:\n            return \"POTENTIAL_INJECTION\"\n    return \"CLEAN\"",
+      "new": "# Pseudocode for basic detection\nsuspicious_phrases = [\n    \"ignore previous\",\n    \"ignore all previous\",\n    \"forget everything\",\n    \"new instructions\",\n    \"system override\",\n    \"disregard prior\",\n    # ... extensive list\n]\n\ndef check_for_injection(user_input):\n    lower_input = user_input.lower()\n    for phrase in suspicious_phrases:\n        if phrase in lower_input:\n            return \"POTENTIAL_INJECTION\"\n    return \"NO_PATTERN_MATCH\"  # not a safety verdict"
+    },
+    {
+      "id": "tech-03-059",
+      "old_sha256": "8489d99395ebf6a5c8f0a7f4bfbcf66cd0e8e629cf1c18f4a501bdbee7fdbbd4",
+      "new_sha256": "0a21dd1b8b0b647ddfb2ba8cdd52bce04fa0909cb875718d9aed559d99df8031",
+      "old": "start_time = time.time()\nresponse = generate_with_prompt(user_query, template)\nlatency = time.time() - start_time",
+      "new": "start_time = time.perf_counter()\nresponse = generate_with_prompt(user_query, template)\nlatency = time.perf_counter() - start_time"
+    },
+    {
+      "id": "tech-03-060",
+      "old_sha256": "279b580b3b2fe55e5d8a2f909c28e338c1bdb4a52796addbdef001e60fc2b5de",
+      "new_sha256": "706fd817c7916e6428cf16b8629796f35e9d056f3b6bfce72aef5289a8af6b04",
+      "old": "Prompt: \"Explain quantum computing for high school students\"\n\nResponse A (Score: 3/5): \"Quantum computing leverages quantum \nmechanical phenomena such as superposition and entanglement to \nperform computations using qubits instead of classical bits...\"\n\nResponse B (Score: 5/5): \"Imagine if your computer could try \nall possible solutions to a problem at the same time, instead \nof one by one. That's the basic idea behind quantum computing...\"\n\nAssessment: Response B better matches the \"high school student\" \naudience specification.",
+      "new": "Prompt: \"Explain quantum computing for high school students\"\n\nResponse A (Score: 3/5): \"Quantum computing leverages quantum \nmechanical phenomena such as superposition and entanglement to \nperform computations using qubits instead of classical bits...\"\n\nResponse B (Flawed draft score: 5/5): \"Imagine if your computer could try\nall possible solutions to a problem at the same time, instead \nof one by one. That's the basic idea behind quantum computing...\"\n\nAssessment: The draft rubric rewards an accessible style while\nignoring factual precision. Do not accept this perfect score: the\nclaim about trying every solution at once is misleading. Require\na domain-qualified accuracy review alongside audience fit."
+    },
+    {
+      "id": "tech-03-061",
+      "old_sha256": "9339925d0b0b8897f9a90451631278325b8fa38d915fbd49cddc90e70b06128a",
+      "new_sha256": "821e7108f3df347376137c6a1a09d97bbd4ad2aab4d1c7a53730b6e4a75d7d1e",
+      "old": "def assess_accuracy(response):\n    \"\"\"\n    1. Extract factual claims\n    2. Verify each claim\n    3. Check for hallucinated sources\n    4. Assess hedging appropriateness\n    \"\"\"\n    claims = extract_claims(response)\n    verified = verify_claims(claims)\n    hallucinations = detect_fabrications(response)\n    \n    accuracy_score = (verified / len(claims)) - (hallucinations * 0.2)\n    return accuracy_score",
+      "new": "def assess_accuracy(response):\n    \"\"\"\n    1. Extract factual claims\n    2. Verify each claim\n    3. Check for hallucinated sources\n    4. Assess hedging appropriateness\n    \"\"\"\n    claims = extract_claims(response)\n    verified = verify_claims(claims)\n    hallucinations = detect_fabrications(response)\n    \n    if not claims:\n        return None  # no factual claims to score\n    # Report distinct measures rather than an unvalidated weighted score.\n    return {\"verified_fraction\": verified / len(claims),\n            \"fabrication_count\": hallucinations}"
+    },
+    {
+      "id": "tech-03-064",
+      "old_sha256": "889f2ef3f09ae1c5bef2362ed7251da1161854c150eee243887149dc3ac0343a",
+      "new_sha256": "30865e80112a26ee192de67899c39d549f996be52547ae286774535364cbd58a",
+      "old": "def assign_variant(query_id):\n    # Deterministic randomization\n    # Same query always gets same variant (for consistency)\n    hash_value = hash(query_id)\n    return \"A\" if hash_value % 2 == 0 else \"B\"",
+      "new": "import hashlib\n\ndef assign_variant(unit_id, experiment_id=\"prompt-v1\"):\n    # Stable assignment across Python processes; not a security mechanism.\n    payload = f\"{experiment_id}:{unit_id}\".encode(\"utf-8\")\n    bucket = hashlib.sha256(payload).digest()[0] % 2\n    return \"A\" if bucket == 0 else \"B\""
+    },
+    {
+      "id": "tech-03-066",
+      "old_sha256": "275ddb3904b77369b2f322c8477a783e8a2b5af298e2e72db3cac236669e7053",
+      "new_sha256": "410103d7624ec8c360b65544b3d422e6605e17774fc81bafde32f71d298c9580",
+      "old": "from scipy import stats\n\n# Compare success rates\nvariant_a_successes = [1, 1, 0, 1, 1, ...]  # 1=success, 0=failure\nvariant_b_successes = [1, 1, 1, 1, 0, ...]\n\n# Chi-square test for categorical outcomes\nchi2, p_value = stats.chi2_contingency([[sum(variant_a_successes), \n                                          sum(variant_b_successes)],\n                                         [len(variant_a_successes), \n                                          len(variant_b_successes)]])\n\nif p_value < 0.05:\n    print(\"Statistically significant difference!\")\nelse:\n    print(\"No significant difference detected\")",
+      "new": "# Conceptual analysis: replace observations with independently sampled data.\nfrom scipy import stats\n\nsuccess_a, total_a = 60, 100  # illustrative counts\nsuccess_b, total_b = 75, 100\nobserved = [[success_a, total_a - success_a],\n            [success_b, total_b - success_b]]\nresult = stats.chi2_contingency(observed)\np_value = result.pvalue\n# Check independence and expected counts before interpreting the test.\n# Use an appropriate exact or resampling method when counts are sparse.\nprint(p_value)"
+    },
+    {
+      "id": "tech-04-002",
+      "old_sha256": "ac80221c0e806528f98a7e835116b029ef1a7ce5445483fd3be45c8f046dbef9",
+      "new_sha256": "9c03cf3a79524360ab30bb309c5c4e3eb6a811d6bb98ba8299fbcfdab6d9ff62",
+      "old": "# Conceptual sketch of backoff timing — not a full retry implementation\ndef backoff_delay(attempt, base_delay=1, max_delay=60):\n    delay = min(base_delay * (2 ** attempt), max_delay)\n    jitter = random_between(0, delay * 0.1)\n    return delay + jitter",
+      "new": "# Conceptual sketch of backoff timing — not a full retry implementation\ndef backoff_delay(attempt, base_delay=1, max_delay=60):\n    delay = min(base_delay * (2 ** attempt), max_delay)\n    jitter = random_between(0, delay * 0.1)\n    return min(max_delay, delay + jitter)"
+    }
+  ]
+}

@@ -42,7 +42,7 @@ This is also a field where the incentive structure around publication looks diff
 
 ## Finding Current Sources {#sec-8-2}
 
-**arXiv** is where the overwhelming majority of current AI research appears first, often months before, or instead of, formal conference publication. Learning to search it directly, rather than relying on general web search to surface AI papers, is a genuinely high-leverage skill.
+**arXiv** is a widely used source of AI preprints, often months before, or instead of, formal conference publication. Learning to search it directly, rather than relying on general web search to surface AI papers, is a genuinely high-leverage skill. [@arxivhelp]
 
 **Conference proceedings**, NeurIPS, ICML, ACL, and similar venues, represent peer-reviewed work and are a reasonable signal of rigor, though the gap between "published at a top venue" and "true" is real, particularly for results that haven't yet been widely reproduced.
 
@@ -52,17 +52,21 @@ This is also a field where the incentive structure around publication looks diff
 
 ## Reading a Paper Efficiently {#sec-8-3}
 
+Peer review is scrutiny, not a correctness certificate; distinguish main-track papers, workshops, abstracts, and non-reviewed material. Check the version and proceedings record. For an empirical claim, inspect data provenance, split construction, contamination controls, baseline tuning, compute budgets, uncertainty, and released artifacts. Citation chaining can amplify a shared error, so seek independent tests and negative results rather than counting citations as votes. [@helm; @arxivhelp]
+
 You do not need to read every paper linearly from abstract to conclusion, and doing so is a poor use of time when you're trying to ground a specific design decision rather than master an entire subfield.
 
 **Start with the abstract and the results.** What claim is the paper making, and what evidence, specifically, supports it? If the abstract's claim doesn't bear on your actual question, stop there; you've correctly ruled the paper out in thirty seconds instead of thirty minutes.
 
 **Look at the method section only closely enough to answer one question**: is the comparison fair? A paper claiming a new technique outperforms an existing one is only informative if the baseline it's compared against was implemented and tuned seriously, not straw-manned. This is where a surprising number of overhyped claims fall apart on close reading.
 
-**Check for an ablation study** if the paper claims a specific component matters. A paper that adds three new ideas at once and reports one combined result hasn't actually shown you which idea did the work; a paper with an ablation study has.
+**Check for an ablation study** if the paper claims a specific component matters. A paper that adds three new ideas at once and reports one combined result hasn't actually shown you which idea did the work; an ablation can provide evidence, but component interactions, retuning choices, and unequal compute can still confound the interpretation.
 
 **Read the limitations section, if there is one, as carefully as the results.** Honest limitations sections are one of the best available signals of a paper you can trust, and their absence is itself informative.
 
 ## Synthesis, Not Summary {#sec-8-4}
+
+**Illustrative comparison.** Papers A–E below are fictional placeholders demonstrating writing structure, not evidence that semantic chunking outperforms fixed-size chunking.
 
 The single most common failure in a student literature review is a list of paper summaries stapled together, source A says this, source B says that, with no argument connecting them. A real synthesis does something different: it organizes sources around a question or theme, and uses them to build a case.
 
@@ -75,6 +79,8 @@ Compare these two approaches to the same five sources on, say, chunking strategy
 The synthesis version takes a position, uses each source for a specific piece of evidence, and connects back to an actual decision. That's what your Chapter 8 proposal needs, and it's a skill worth practicing deliberately rather than assuming it will happen automatically once you've read enough papers.
 
 ## Calibrating Trust: Established, Contested, or Hype {#sec-8-5}
+
+A reproducible study records the model/version, data and licenses, prompts, preprocessing, dependencies, seeds, hardware, decoding settings, and scoring code. Report repeated-run variation and effect sizes; document failed and null experiments to reduce selective reporting. A benchmark can be contaminated through pre-training, synthetic training data, repeated development-set tuning, or leaked evaluation prompts. An unavailable proprietary training set limits what contamination checks can establish. [@gpt3; @helm]
 
 Not every claim in this literature deserves equal confidence, and learning to sort claims into rough categories is as important as finding the sources in the first place.
 
@@ -98,6 +104,8 @@ This chapter's milestone is larger than previous ones: it brings your design dec
 
 ## Case Study: How a Wrong Benchmark Claim Spreads
 
+**Illustrative scenario.** This composite describes a possible failure pattern, not a documented allegation against an unnamed company.
+
 In the arms race of AI progress, benchmark scores are announced constantly, and press coverage often repeats a headline number ("state of the art on X benchmark") with far less scrutiny than the number deserves. A recurring pattern in this field: a new model claims a benchmark result, the claim circulates widely in the days after launch, and only weeks later, if at all, does independent evaluation reveal the result depended on test-set contamination (the benchmark's answers were present, even partially, in the model's training data), a narrower evaluation setup than the headline implied, or a comparison against an unfairly weak baseline.
 
 This isn't a story about any one company or model, it's a structural feature of how this field currently publicizes results, and it's exactly the pattern @sec-8-5 asks you to watch for. The practical lesson for your own work: a striking number in a single announcement is a hypothesis worth checking, not a fact worth citing, until independent sources have had time to weigh in, which is one more reason your Chapter 8 review should lean on sources that have had that time, not just this month's headline.
@@ -110,8 +118,8 @@ This isn't a story about any one company or model, it's a structural feature of 
 
 ## Further Reading
 
-- Liang, P., et al. (2022). "Holistic Evaluation of Language Models (HELM)" — A model for how a rigorous, multi-dimensional benchmark effort is actually structured, worth reading as much for its methodology as its results.
-- Any recent systematic review or survey paper in your own project's domain, found through the citation-chaining technique in @sec-8-2, is more valuable to you specifically than any fixed list this chapter could offer.
+- *Holistic Evaluation of Language Models* (2022). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@helm]
+- *Retrieval-Augmented Generation for Large Language Models: A Survey* (2023). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@ragsurvey]
 
 ---
 

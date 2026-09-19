@@ -2,6 +2,8 @@
 
 ## Introduction
 
+**Illustrative scenario.** The opening healthcare story is fictional. This chapter distinguishes normative responsibilities from measured system properties; legal duties require the jurisdiction-specific analysis in Chapter 14.
+
 A healthcare AI system saves clinicians real time, until a systematic bias in its recommendations is discovered, quietly affecting thousands of patients across months of routine use before anyone catches it. Nothing about the system's engineering was sloppy; it performed exactly as it was optimized to perform. The technical success and the ethical failure happened in the same system, at the same time, which is precisely the point: good engineering and responsible AI are not the same achievement, and a project can score highly on one while quietly failing the other.
 
 This chapter is where Chapter 1's opening ethical questions, who creates the training data, who benefits, who's responsible when something goes wrong, become concrete, practical design work rather than open discussion prompts. Chapter 12 covered the technical machinery of alignment, how a model is trained to behave safely in the first place. This chapter asks the applied question that sits on top of that machinery: given a model that's been aligned as well as current techniques allow, what does it actually take to deploy it responsibly, and who's accountable when that deployment falls short?
@@ -44,6 +46,8 @@ Responsibility for managing these risks isn't concentrated in one role. **Indivi
 
 ## Bias Detection and Mitigation {#sec-13-2}
 
+Demographic parity compares positive-decision rates; equalized odds conditions on outcomes; individual fairness requires a defensible task-specific similarity notion. These criteria can conflict, and no metric alone establishes ethical acceptability or legal compliance. The code's 0.05 threshold is illustrative, not a legal safe harbor; validate binary labels, nonempty groups, sample sizes, and uncertainty before interpreting it. [@equalopportunity; @fairnessawareness]
+
 Bias enters an AI system from several distinct sources, and mitigating it well requires knowing which source you're actually dealing with. **Training data bias** reflects historical discrimination baked into the data itself, underrepresentation of certain groups, or labeling bias from annotators carrying their own unconscious assumptions. **Algorithmic bias** can emerge even from unbiased data, through architectures, feature choices, or optimization objectives that inadvertently disadvantage certain groups, sometimes compounding through feedback loops that amplify a small initial bias over time. **Deployment bias** shows up after the model is built: different access patterns, uneven quality of service across contexts, or a mismatch between who the system was trained on and who actually uses it.
 
 Detecting bias systematically means testing for it deliberately rather than hoping it doesn't exist. **Demographic parity testing** checks whether a system's positive outcomes are distributed similarly across groups; conceptually, this means comparing outcome rates by group and flagging a meaningful gap:
@@ -56,11 +60,13 @@ def check_demographic_parity(outcomes_by_group, threshold=0.05):
     return gap < threshold
 ```
 
-Beyond parity, **equalized odds testing** checks whether accuracy itself is consistent across groups, accounting for different base rates, and **individual fairness testing** checks whether genuinely similar individuals receive similar treatment regardless of protected characteristics.
+Beyond parity, **equalized odds testing** compares true-positive and false-positive rates across protected groups, conditional on the actual label; equal aggregate accuracy is not sufficient [@equalopportunity], and **individual fairness testing** checks whether genuinely similar individuals receive similar treatment regardless of protected characteristics.
 
 Mitigation can happen at three different stages, and the right stage depends on where the bias actually enters: **pre-processing** approaches rebalance or augment training data before a model ever sees it; **in-processing** approaches build fairness constraints directly into training, sometimes through adversarial debiasing techniques; **post-processing** approaches adjust a trained model's outputs, threshold adjustment or calibration, without retraining it at all. None of these is universally correct, the right choice depends on where in the pipeline you actually have the leverage to intervene.
 
 ## Privacy Protection and Data Security {#sec-13-3}
+
+Differential privacy bounds how output distributions change between neighboring datasets. The guarantee requires a defined adjacency relation, sensitivity bound, privacy parameters, and composition accounting; arbitrary noise is not enough. Federated learning keeps raw training data decentralized but updates can leak information: privacy requires additional protections such as secure aggregation or a correctly analyzed differential-privacy mechanism. [@dp; @federated]
 
 **Privacy by design** means building protection in from the start rather than bolting it on afterward. **Data minimization**, collecting only what a task genuinely requires, and **purpose limitation**, using data only for its stated purpose, are both process disciplines as much as technical ones, decisions made in how a system is designed, not just how it's coded.
 
@@ -86,9 +92,11 @@ Automated moderation should never be the entire system. **Human-in-the-loop revi
 
 ## Explainability and Transparency {#sec-13-5}
 
+LIME fits a local surrogate around an input; SHAP assigns contributions relative to a specified value function and background distribution. Their outputs depend on modeling choices and are not automatically causal explanations or faithful accounts of an LLM's full generation process. Counterfactual recommendations also require feasibility and causal assumptions. [@lime; @shap; @attentionexplanation]
+
 As AI decisions carry real consequences, the ability to explain and justify them becomes a matter of trust and accountability, not a nice-to-have feature. **Global explainability** documents how a system works overall, its architecture, training process, known limitations, and bias testing results. **Local explainability** addresses one specific decision: why this particular output, for this particular input. **Counterfactual explainability** goes a step further, explaining not just why a decision was made but what would need to change for a different outcome, "the loan was declined because of X; increasing X by this amount would change the outcome", genuinely actionable information for the person affected, not just a technical justification.
 
-Established techniques support these levels of explanation. Model-agnostic approaches like **LIME** and **SHAP** identify which specific input features most influenced a given output, working across different model types and providing both local (single-decision) and global (overall pattern) explanations. For transformer-based models specifically, **attention visualization**, examining which parts of an input a model weighted heavily, the same attention mechanism from Chapter 2, offers a rough, imperfect window into what the model focused on, worth the same caution as the chain-of-thought caveat from Chapter 12: what a model attended to and why it produced a given output are related but not identical questions.
+Use LIME and SHAP for explicitly scoped feature-attribution questions, with their reference distributions and approximation choices documented. Attention plots show computed weights, not proof that a particular token caused the final answer. Validate explanations for the intended audience and decision rather than equating an attractive visualization with causal understanding. [@lime; @shap; @attentionexplanation]
 
 ---
 
@@ -106,7 +114,7 @@ Apply this chapter's frameworks directly to your own assistant, specifically, no
 
 ## Case Study: How Microsoft Developed Responsible AI Practices
 
-Microsoft's Responsible AI program, developed over several years and multiple public revisions, illustrates a pattern worth learning from directly: responsible AI practice isn't a document you write once, it's infrastructure, review boards, impact assessments required before certain kinds of AI deployment, published principles that are revised as the company's own understanding and the technology itself evolve, and, notably, publicly documented cases where the company chose not to deploy a capability it had already built, because an internal review concluded the risk wasn't adequately addressed yet.
+Microsoft's June 2022 publication introduced its revised Responsible AI Standard and described restrictions on sensitive face-analysis capabilities, including retirement of general-purpose emotion inference. This is evidence of published governance commitments and particular product decisions, not an independent audit proving that every Microsoft deployment followed them or avoided harm. [@microsoftresponsible]
 
 That last detail is the most instructive part for your own project work: a responsible AI practice that never says no to anything isn't actually functioning as a check on anything, it's a formality. The genuine test of your own Ethics & Fairness Review in this chapter isn't whether you can produce a document defending your current design, it's whether working through the exercise honestly might lead you to change something about it.
 
@@ -118,8 +126,8 @@ That last detail is the most instructive part for your own project work: a respo
 
 ## Further Reading
 
-- Jobin, A., et al. (2019). "The Global Landscape of AI Ethics Guidelines" — A systematic review of AI ethics frameworks worldwide, useful for seeing how much, and how little, consensus actually exists.
-- Weidinger, L., et al. (2022). "Taxonomy of Risks Posed by Language Models" — A detailed, structured taxonomy that expands considerably on @sec-13-1's risk categories.
+- *Artificial Intelligence: the global landscape of ethics guidelines* (2019). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@ethicsguidelines]
+- *Ethical and social risks of harm from Language Models* (2021). A verified 2021 risk paper replaces the unverified 2022 taxonomy entry; these are distinct works. [@risks]
 
 ---
 
@@ -129,7 +137,7 @@ That last detail is the most instructive part for your own project work: a respo
 
 - AI risk operates at three distinct scales, individual, societal, and systemic, and responsible design needs to consider all three, not just the most immediately visible one.
 - Bias enters through training data, algorithms, and deployment context separately; mitigation needs to target the actual source, not just the symptom.
-- Differential privacy and federated learning offer formal, technical privacy guarantees beyond simple policy commitments.
+- Differential privacy offers a quantified guarantee under stated assumptions; federated learning alone does not guarantee privacy.
 - Content moderation gets more complex with every modality, and automated moderation should never fully replace human review for edge cases.
 - Explainability needs vary by audience and stakes; matching the right level (global, local, counterfactual) to the actual need matters more than defaulting to maximal transparency everywhere.
 - A responsible AI practice that never changes a design decision isn't actually functioning as a check.

@@ -1,9 +1,16 @@
-# Citation audit
+# Citation audit — Phase 1 adjudication
 
-`citation-needed.csv` is a deliberately broad claim-review queue with 510 candidate lines, including teaching items that may not need their own citation after human review. It is not an adjudicated list of 510 unsupported assertions. Source locations refer to `source-baseline.json`. Existing Further Reading lists remain intact; their metadata and connection to individual claims need review.
+All **510 original candidates** were adjudicated as of **2026-09-18**. `citation-needed-phase-0.csv` retains the exact incoming queue; `citation-needed.csv` preserves original claims/locations and adds decisions, evidence, correction, and rationale. Teaching objectives, discussion prompts, and ordinary author framing do not each need a citation. A citation to a paper supports its scoped result, not every assertion in an adjacent paragraph.
 
-Priorities: transformer architecture and layer claims; scaling and emergent capabilities; RLHF, Constitutional AI and missing DPO coverage; RAG efficacy; LoRA/QLoRA data/hardware claims; agent architecture and deployment performance; multimodal reliability; evaluation validity and judge bias; fairness and privacy guarantees; ethics frameworks; jurisdiction-specific AI law; production/frontier claims. Numerical vignettes need explicit illustrative status or evidence.
+- ILLUSTRATIVE: 182
+- COMMON_KNOWLEDGE: 154
+- CITATION_HELPFUL: 55
+- REMOVE_OR_GENERALIZE: 64
+- CITATION_REQUIRED: 55
+- NEEDS_VERIFICATION: 0
 
-The new bibliography is a small verified starting set, not a replacement for chapter reading lists. Verify metadata against original paper records and include URLs; do not fabricate DOI values. The centralized References page explains this limited scope. Full sentence-level citation integration is deferred to technical review.
+The bibliography grew from **2 to 97 verified entries**. There are **260 added inline citation references**, counted as source-key occurrences outside Further Reading, plus **50 Further Reading citations**. Multiple sources in a citation group count separately. This is not a claim that 510 citations were added.
 
-Bibliographic metadata for Vaswani et al. (2017) and Lewis et al. (2020) verified 2026-09-18 against https://arxiv.org/abs/1706.03762 and https://arxiv.org/abs/2005.11401. Entries deliberately use the arXiv records and no DOI. Additional retrieved paper records are not automatically incorporated without checking full metadata.
+All 50 original Further Reading items are recorded in `further-reading-audit.csv`: {'VERIFIED': 19, 'CORRECTED': 18, 'REPLACED': 13}. Ambiguous model-card titles, generic search suggestions, and an unverified taxonomy entry were replaced by identified sources. Preprints are labeled as preprints; company reports are attributed; the Marcus reading is identified as an essay. No publication venue, DOI, page range, or date was invented. Living documentation uses an access date without an invented publication year.
+
+`phase-1-sources.json` records verified metadata and primary URLs. The two original citation keys remain valid. Further Reading and inline claim citations are distinct. See the Phase 1 report for limitations and reproduction instructions.

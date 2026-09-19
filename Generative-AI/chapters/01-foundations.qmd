@@ -56,7 +56,7 @@ By the end of this chapter, you will be able to:
 |---|---|---|
 |**Generative AI**|AI systems that create new content (text, images, code) rather than just classifying or predicting existing data|ChatGPT writing an essay, Midjourney creating an image|
 |**Large Language Model (LLM)**|A neural network trained on vast amounts of text data to understand and generate human-like language|GPT-4, Claude, Llama|
-|**Token**|The smallest unit of text a model processes, often a word or part of a word|"Hello" = 1 token, "unhappiness" = 2 tokens|
+|**Token**|The smallest unit of text a model processes, often a word or part of a word|Token counts depend on the tokenizer, capitalization, and surrounding text|
 |**Embedding**|A numerical representation of text that captures semantic meaning in high-dimensional space|Converting "dog" into a vector like [0.2, -0.1, 0.8, ...]|
 |**Transformer**|A neural network architecture that uses attention mechanisms to process sequential data in parallel|The "T" in GPT (Generative Pre-trained Transformer)|
 |**Attention Mechanism**|A technique that lets a model weigh how relevant each part of the input is when producing each part of the output|Focusing on "Paris" when answering "What is the capital of France?"|
@@ -64,7 +64,7 @@ By the end of this chapter, you will be able to:
 |**Fine-tuning**|Adapting a pre-trained model to a specific task or domain using a smaller, targeted dataset|Training a medical assistant model on de-identified clinical notes|
 |**Inference**|The process of using an already-trained model to generate new outputs|Asking a chatbot a question and receiving an answer|
 |**Prompt**|The input text given to a generative model to elicit a specific response|"Write a professional email about..."|
-|**Temperature**|A parameter controlling randomness in a model's output (0 = deterministic, 1+ = more creative/random)|Low temperature for factual answers, higher for brainstorming|
+|**Temperature**|A parameter controlling randomness in a model's output (lower settings concentrate sampling probability; supported values vary)|Temperature changes sampling variability; it does not verify facts|
 |**Context Window**|The maximum amount of text (measured in tokens) a model can consider at once, including both prompt and response|A 128,000-token window can hold a lengthy document plus a long conversation|
 |**Hallucination**|A confident, fluent output that is factually wrong or unsupported by any real source|A model citing a legal case that does not exist|
 
@@ -76,7 +76,7 @@ Imagine having a conversation with a computer that doesn't just understand what 
 
 Generative Artificial Intelligence (GenAI) is a subset of AI focused on creating new, original content, text, images, music, video, or code, rather than merely analyzing or classifying existing data. Think of it as the difference between a critic who can tell you whether a painting is a Picasso or a Monet, and an artist who can create an entirely new painting in either style.
 
-Unlike traditional AI systems built on discriminative models (spam detection, sentiment analysis), generative AI uses probabilistic models to synthesize novel outputs that extend the patterns found in its training data into territory it has never literally seen before.
+Generative models sample outputs from learned distributions. Those outputs can combine familiar patterns in new ways, but can also reproduce training material; novelty is not guaranteed. [@gpt3; @extraction]
 
 ### Key Distinctions: The Analyst vs. The Creator
 
@@ -84,7 +84,7 @@ Unlike traditional AI systems built on discriminative models (spam detection, se
 
 *Proposed Figure 1.1: Discriminative AI vs. Generative AI — Fundamental Approaches to Artificial Intelligence*
 
-**Discriminative AI** is the traditional approach most people picture when they hear "artificial intelligence." These systems classify and predict: a spam filter examines an email and decides "spam" or "not spam"; a sentiment analyzer reads a review and returns "positive," "negative," or "neutral"; a diagnostic system matches symptoms to a known list of conditions. The defining trait of discriminative AI is that it works entirely within the boundaries of its training categories. It can sort something novel into an existing bucket, but it cannot invent a new bucket or explain its reasoning in fresh language.
+**Discriminative models** learn a conditional prediction or decision rule, such as a class given an input. Generative models learn distributions used to produce samples, possibly conditioned on a prompt. A generative language model can also classify text, and a larger system can combine both approaches; the distinction is not an absolute division between systems that can and cannot explain a result. [@gpt3]
 
 **Generative AI**, by contrast, produces something that did not exist a moment before. Ask a model to "write a poem about artificial intelligence in the style of Shakespeare," and it doesn't search a database for a matching poem, it generates an original one, word by word, that captures Shakespearean rhythm and diction while addressing a subject Shakespeare never wrote about.
 
@@ -95,7 +95,9 @@ Consider the practical distinction:
 
 ### Why It's Revolutionary
 
-Generative AI's revolutionary quality lies in its ability to recombine learned concepts into genuinely novel outputs. When an image model generates a "cyberpunk cat wearing a space helmet," it isn't copying any single training image. It has learned the underlying concepts of "cyberpunk aesthetics," "cats," "space helmets," and "composition," then combines them into something new.
+Generation does not guarantee originality. Training examples can be memorized and sometimes reproduced; the existence of generation also does not rule out retrieval in the surrounding application. [@extraction]
+
+Generative AI's revolutionary quality lies in its ability to recombine learned concepts into genuinely novel outputs. When an image model generates a "cyberpunk cat wearing a space helmet," it may combine learned visual patterns, although novelty and non-memorization are not guaranteed. It has learned the underlying concepts of "cyberpunk aesthetics," "cats," "space helmets," and "composition," then combines them into something new.
 
 The same principle governs text generation:
 
@@ -105,6 +107,8 @@ The same principle governs text generation:
 The model isn't retrieving this from storage; it's constructing it from patterns learned across millions of examples of descriptive writing and code.
 
 ### The Fundamental Mechanism
+
+The word *emergent* describes observed behavior, not a settled mechanism or universal scale threshold. Abrupt benchmark gains can depend on the scoring metric; inspect both the task and the measurement. [@emergence; @mirage]
 
 At its core, most text-generating AI operates on a deceptively simple principle: **predict the next token**. Given a sequence of words, what is the most probable next word? This is a far more sophisticated version of your phone's autocomplete, trained on hundreds of billions of words and capable of maintaining coherence across thousands of tokens.
 
@@ -120,7 +124,7 @@ Understanding where we are requires knowing where we've been. The path from earl
 
 The dream of machines that understand and generate human language is as old as computing itself. In 1950, Alan Turing proposed his famous "Imitation Game" (now the Turing Test): could a machine's conversation be indistinguishable from a human's?
 
-**ELIZA (1966)** was the first program to convince people they were talking to something intelligent, and it was remarkably simple. Created by Joseph Weizenbaum at MIT, ELIZA used pattern matching and substitution rules to simulate a Rogerian psychotherapist. Type "I am feeling sad today," and ELIZA might respond, "Why do you say you are feeling sad today?" ELIZA understood nothing; it recognized patterns and applied rules. Yet people grew emotionally attached to it, an early and durable lesson: humans readily anthropomorphize anything that responds in human-like ways.
+**ELIZA (1966)** was an influential early conversational program, and it was remarkably simple. Created by Joseph Weizenbaum at MIT, ELIZA used pattern matching and substitution rules to simulate a Rogerian psychotherapist. Type "I am feeling sad today," and ELIZA might respond, "Why do you say you are feeling sad today?" ELIZA understood nothing; it recognized patterns and applied rules. Yet people grew emotionally attached to it, an early and durable lesson: humans readily anthropomorphize anything that responds in human-like ways.
 
 ### The Statistical Revolution (1980s–1990s)
 
@@ -128,13 +132,15 @@ As computing power grew, researchers applied statistical methods to language, wo
 
 ### The Neural Network Era (2000s–2010s)
 
-Neural networks, invented decades earlier, became practical for language in the 2000s as computing power and training techniques improved. **Recurrent Neural Networks (RNNs)** introduced a form of memory, carrying information forward from earlier in a sequence rather than only looking at immediate neighbors. **Long Short-Term Memory (LSTM)** networks solved a critical weakness: plain RNNs tended to "forget" information over long sequences. LSTMs added gates that control what to remember, forget, and output. By the mid-2010s, LSTM-based systems powered genuinely useful products: predictive text, dramatically improved machine translation, and early conversational agents. But processing remained sequential, one word at a time, which made training slow and long documents difficult to handle well.
+Recurrent networks process a sequence through a state passed between positions. Gated variants such as LSTMs address difficulties in carrying information across long sequences, but do not guarantee perfect long-range memory. The original Transformer paper contrasts attention-based processing with recurrent approaches and explains their computational trade-offs. [@vaswani2017attention]
 
 ### The Transformer Revolution (2017–Present)
 
-The 2017 paper "Attention Is All You Need" changed everything. The Transformer architecture introduced parallel processing (all words handled simultaneously, not one at a time), self-attention (every word can directly relate to every other word, regardless of distance), and an architecture that scales efficiently with more data and compute.
+The transformer paper dates to 2017; GPT-3's 2020 report documents in-context task performance without updating weights. Such performance is evidence on evaluated tasks, not proof of human understanding. [@vaswani2017attention; @gpt3]
 
-GPT-1 (2018) showed that pre-training on a broad text corpus, then fine-tuning for specific tasks, beat purpose-built systems across multiple benchmarks. GPT-2 (2019) generated coherent multi-paragraph text at a scale that made OpenAI initially withhold the full model over misuse concerns, an early hint of the ethical questions this book returns to throughout. GPT-3 (2020) demonstrated striking few-shot learning: shown just a couple of examples in the prompt itself, it could perform tasks it was never explicitly trained on.
+The 2017 paper *Attention Is All You Need* introduced a Transformer encoder-decoder for sequence transduction. Attention allows parallel processing of available positions during training; a causal decoder masks future tokens and generates autoregressively. Parallel training does not mean every output token is generated simultaneously. [@vaswani2017attention]
+
+The GPT-3 report (2020) demonstrated task performance from prompt demonstrations without gradient updates at inference time. Its results vary across tasks; few-shot prompting does not mean that a model was never exposed to related material during pre-training. [@gpt3]
 
 The generations since have added multimodal understanding (text and images together), stronger reasoning, open-weight alternatives that broadened who can build on this technology, and increasingly tight integration with real-world tools and data. We'll meet today's major model families in @sec-1-7.
 
@@ -142,7 +148,7 @@ The generations since have added multimodal understanding (text and images toget
 
 *Proposed Figure 1.2: The Evolution of Text Generation — From Rule-Based Systems to Modern Transformers*
 
-The most remarkable part? We're still in the early days of this revolution. The architecture that powers today's most capable systems is less than a decade old.
+The 2017 Transformer paper established an architecture that remains central to the examples in this book; later systems combine architectural, data, training, and deployment changes. [@vaswani2017attention]
 
 ---
 
@@ -152,13 +158,15 @@ Before exploring how modern AI generates text, we need to understand how it "see
 
 ### Tokenization: Breaking Language into Building Blocks
 
+The splits below are illustrative, not output from a named tokenizer. Subwords need not align with morphemes; byte-level encodings can represent unseen strings, while character vocabularies still need a policy for unseen characters.
+
 Imagine teaching someone a language using individual LEGO bricks versus complete pre-assembled LEGO sets. Tokenization is the process of choosing what size "blocks" to feed a model.
 
 **Word-level tokenization** ("The quick brown fox" → ["The", "quick", "brown", "fox"]) is the most intuitive approach, but it creates real problems: English has hundreds of thousands of words and gains new ones constantly ("selfie," "unfriend"), unseen words break the system, and storing every possible word demands an enormous vocabulary.
 
-**Subword tokenization (Byte-Pair Encoding, or BPE)** finds the sweet spot: chunks smaller than words but larger than characters, like having LEGO bricks in several sizes. "Unhappiness" becomes ["un", "happiness"]; "preprocessing" becomes ["pre", "process", "ing"]. This is genuinely clever: the model learns that "un-" typically signals negation, and it can handle brand-new words by combining familiar pieces, "unfathomable" becomes ["un", "fathom", "able"] even if the model has never seen that exact word before.
+**Subword tokenization, including Byte-Pair Encoding (BPE),** finds the sweet spot: chunks smaller than words but larger than characters, like having LEGO bricks in several sizes. "Unhappiness" becomes ["un", "happiness"]; "preprocessing" becomes ["pre", "process", "ing"]. This is genuinely clever: the model learns that "un-" typically signals negation, and it can handle brand-new words by combining familiar pieces, "unfathomable" becomes ["un", "fathom", "able"] even if the model has never seen that exact word before.
 
-**Character-level tokenization** ("Hello" → ["H", "e", "l", "l", "o"]) eliminates vocabulary problems entirely but is like reading a book one letter at a time, technically possible, but demanding enormous context to reconstruct meaning. Most modern LLMs use subword tokenization as the practical middle ground.
+**Character-level tokenization** ("Hello" → ["H", "e", "l", "l", "o"]) reduces word-level vocabulary problems but is like reading a book one letter at a time, technically possible, but demanding enormous context to reconstruct meaning. Most modern LLMs use subword tokenization as the practical middle ground.
 
 ### Embeddings: Teaching AI the Geography of Meaning
 
@@ -174,9 +182,9 @@ Now that text has become numbers, let's explore the architecture that processes 
 
 Imagine reading a complex sentence while mentally highlighting the words most important to understanding each other word. Self-attention does exactly this: for every word, it calculates how relevant every other word in the sequence is to it.
 
-Consider: "The animal didn't cross the street because *it* was tired." When processing "it," attention looks at every other word and assigns relevance: "animal" scores high, "street" scores low, "tired" scores moderate. The model builds its understanding of "it" as a weighted blend of these relationships, which is why modern models correctly resolve "it" to "the animal," not "the street", a distinction that reliably tripped up earlier systems.
+Consider: "The animal didn't cross the street because *it* was tired." Attention can combine information from relevant token positions, but pronoun resolution is not guaranteed. An encoder can use later words such as "tired" when representing "it"; a causally masked decoder at that position cannot. Attention weights alone are not a faithful explanation of an answer. [@vaswani2017attention]
 
-Transformers don't use a single attention mechanism; they run many "heads" (typically 8–16) in parallel, each free to specialize in a different kind of relationship: one might track subject-verb agreement, another pronoun reference, another cause-and-effect.
+Transformers don't use a single attention mechanism; they run many "heads" (with counts depending on the architecture) in parallel, each free to specialize in a different kind of relationship: one might track subject-verb agreement, another pronoun reference, another cause-and-effect.
 
 ### Core Architecture Components
 
@@ -184,7 +192,7 @@ Some models use an **encoder-decoder** structure: think of a translator who full
 
 Because Transformers process all words simultaneously rather than reading left to right, they need **positional encoding** to preserve word order, a "position signature" attached to each token, since "Dog bites man" and "Man bites dog" share the same words but mean very different things.
 
-Finally, Transformers stack many layers, dozens in modern models, with each layer building more abstract understanding: early layers handle grammar and syntax, middle layers capture relationships and local context, and deeper layers support inference and generation that draws on broader world knowledge.
+Transformers stack attention and feed-forward layers with residual connections and normalization. Different layers can learn different representations, but there is no universal mapping from layer number to grammar, reasoning, or knowledge. Training can process sequence positions in parallel subject to an attention mask; ordinary autoregressive generation still advances token by token. [@vaswani2017attention]
 
 **Illustration unavailable.** Transformer Architecture - Core Components and Information Flow — source artwork was not supplied.
 
@@ -198,7 +206,7 @@ Now let's assemble these pieces into a picture of how the assistants you use eve
 
 ### Training: Learning from an Enormous Corpus
 
-LLMs train on a deceptively simple objective: **predict the next word.** Given "The sky is ___," the model learns "blue," "gray," and "cloudy" are far more probable than "purple" or "triangular." Applied across trillions of words, this simple objective produces emergent competence in grammar, factual recall, basic reasoning ("If it's raining, the ground will be ___" → "wet"), stylistic range, and contextual sensitivity, none of which were explicitly programmed.
+Many autoregressive LLMs pre-train with the objective **predict the next token**; masked-language and other objectives also exist. Given "The sky is ___," the model learns "blue," "gray," and "cloudy" are far more probable than "purple" or "triangular." Applied across trillions of words, this simple objective produces emergent competence in grammar, factual recall, basic reasoning ("If it's raining, the ground will be ___" → "wet"), stylistic range, and contextual sensitivity, none of which were explicitly programmed.
 
 What separates modern LLMs from earlier attempts isn't a fundamentally new algorithm, it's scale, in both parameters and training data, by several orders of magnitude across just a few model generations. That scaling trend, and the debate over where it runs out of road, is a thread we'll pick up again in Chapter 2.
 
@@ -206,13 +214,13 @@ What separates modern LLMs from earlier attempts isn't a fundamentally new algor
 
 When you send a prompt, six things happen in sequence: your text is tokenized; each token becomes an embedding vector; the transformer layers process those vectors; the model outputs a probability distribution over possible next tokens; one token is selected (influenced by the temperature setting); and the cycle repeats, feeding the growing sequence back in, until the response is complete.
 
-**Temperature** controls how that selection happens. At temperature 0, the model always picks the single most probable token, producing deterministic, sometimes repetitive output. At a moderate setting like 0.7, output balances coherence with variety, a common default. Push temperature past 1.0 and output grows more surprising, and more prone to incoherence. Given the prompt "The best way to learn programming is...", temperature 0 might complete it with "...to practice regularly and work on projects," while a higher temperature could produce something far more exploratory in phrasing, without necessarily improving the underlying advice.
+**Temperature** rescales sampling logits. Lower settings concentrate probability on higher-scoring tokens; greedy decoding is a common interpretation of zero. This is not a factuality control or a guarantee of identical outputs across serving environments. Higher temperature increases sampling diversity, not necessarily creativity or quality. The examples here illustrate possible styles, not measured model outputs; supported settings depend on the model and API.
 
 ### Context Windows: The Model's Working Memory
 
-Every LLM has a **context window**, the maximum text it can consider at once, counting both your input and its output. Context windows have grown from a few thousand tokens in early models to hundreds of thousands in current ones, a change that has real consequences: a longer window lets a model reason over an entire contract or codebase at once, but it also costs more to process, and text that falls outside the window is, as far as the model is concerned, simply not there. We'll return to exactly how large this gap can get, and how retrieval systems work around it, in Chapter 6.
+A model’s **context window** bounds the tokens it can process in a request. Providers may impose separate input, output, and total limits. A larger window permits more supplied context but does not guarantee reliable use of every passage; retrieval and evaluation remain important. [@lostmiddle]
 
-Understanding these mechanisms pays off immediately: tokenization awareness shapes how you write prompts, temperature choice depends on whether you want reliability or exploration, and context-window limits explain why a model can "forget" something you told it earlier in a long conversation, not because it's being careless, but because the information has literally scrolled out of view.
+Tokenization determines input length and billing units; sampling settings affect output variability; context limits bound what is supplied to the model. A system can also fail to use information that remains inside its context, so a missed detail is not proof that it was truncated. [@lostmiddle]
 
 **Illustration unavailable.** Summary of Foundational Concepts — source artwork was not supplied.
 
@@ -230,11 +238,11 @@ A model's knowledge, and its blind spots, are a direct reflection of its trainin
 
 ### The Cutoff Problem
 
-Every pre-trained model has a **training cutoff**, the point after which it has no knowledge of the world unless that information is supplied to it at inference time (a topic we'll cover in depth in Chapter 6, on retrieval). Ask a model about an event from after its cutoff, and it faces a choice it cannot actually make consciously: admit it doesn't know, or generate something plausible-sounding anyway. Well-aligned models are trained to prefer the former, but the tendency toward the latter is real and persistent enough to have its own name.
+A reported **training cutoff** summarizes data coverage; it is not a clean boundary guaranteeing complete knowledge before a date or zero knowledge afterward. Later post-training, retrieval, and tools can add information. Check the model version and available sources, and verify answers on both sides of any stated cutoff. [@gpt4; @lewis2020rag]
 
 ### Hallucination: Confident Fabrication
 
-A **hallucination** is a fluent, confident output that is simply wrong, a citation to a court case that was never decided, a biography detail that was never true, a function that doesn't exist in the library it claims to. Hallucination isn't a bug in the ordinary sense; it's a direct consequence of how these models work. A model doesn't have a database of facts it looks up, it has a learned probability distribution over plausible-sounding text, and "plausible" and "true" are not the same property. This single idea, more than any other in this chapter, should shape how you evaluate everything a generative AI system tells you, and it's a thread that runs through nearly every remaining chapter in this book.
+A **hallucination** is a fluent, confident output that is simply wrong, a citation to a court case that was never decided, a biography detail that was never true, a function that doesn't exist in the library it claims to. Hallucination isn't a bug in the ordinary sense; it's a direct consequence of how these models work. A model doesn't have a database of facts it looks up, it has a learned probability distribution over plausible-sounding text, and "plausible" and "true" are not the same property. This single idea, more than any other in this chapter, should shape how you evaluate everything a generative AI system tells you, and it's a thread that runs through nearly every remaining chapter in this book. [@gpt4]
 
 ---
 
@@ -242,13 +250,13 @@ A **hallucination** is a fluent, confident output that is simply wrong, a citati
 
 You don't need to memorize a leaderboard, model rankings shift constantly, but you do need a durable mental map of how the major providers differ, because that map is what lets you make good decisions long after today's specific model names are obsolete.
 
-**OpenAI's GPT family** established much of the commercial template for LLM products: broad general capability, a large third-party ecosystem, and continual expansion into multimodal input and tool use.
+**OpenAI’s GPT family** provides historical examples of autoregressive pre-training and later instruction tuning; the 2023 GPT-4 report describes image-and-text inputs and text outputs. These dated reports are evidence about specific models, not specifications for every later product. [@gpt3; @gpt4]
 
-**Anthropic's Claude family** places particular emphasis on being helpful, honest, and safe by design, an approach called Constitutional AI, which trains the model against a written set of principles rather than relying solely on human feedback after the fact. We'll unpack Constitutional AI properly in Chapter 12.
+**Anthropic’s Claude family** illustrates a provider using Constitutional AI research and reporting capability and safety evaluations. The 2022 research method and 2024 Claude 3 launch are historical examples; current product behavior requires separate evaluation. [@constitutional; @claude3]
 
-**Google's Gemini family** was built multimodal from the start rather than adding it later, and benefits from tight integration with Google's existing infrastructure and search capabilities.
+**Google’s Gemini family** illustrates integrated multimodal training in its 2023 technical report. Supported modalities and product integrations must be checked for the particular deployed version. [@gemini]
 
-**Meta's Llama family**, and the broader open-weight ecosystem it helped popularize, made it possible for researchers, startups, and hobbyists to download, inspect, modify, and self-host serious language models rather than only accessing them through an API. This openness carries real trade-offs, discussed further in Chapter 4, between control and convenience.
+**Meta’s Llama family** illustrates downloadable model weights, including the 2023 Llama 2 release. Open weights permit forms of local deployment and adaptation, subject to the particular license; they do not imply that training data or every component is open source. [@llama2]
 
 ### The Model Landscape: How to Think About Choices
 
@@ -269,9 +277,9 @@ We'll turn this framework into a concrete decision process in Chapter 2, once we
 
 Every technology this powerful raises questions that can't be answered by engineering alone, and generative AI raises them earlier and more sharply than most.
 
-**Who creates the training data, and under what terms?** Large models are trained on text and images produced by millions of writers, artists, and coders, the overwhelming majority of whom never consented to that use and are not compensated for it. This question is contested, unresolved, and directly relevant to anyone building on top of these models professionally.
+**Who creates the training data, and under what terms?** Large models are trained on text and images produced by millions of writers, artists, and coders, under differing licenses, agreements, and exceptions, with substantial disputes about authorization and compensation. This question is contested, unresolved, and directly relevant to anyone building on top of these models professionally.
 
-**What does this technology cost the planet?** Training a frontier model consumes enormous amounts of electricity and water for cooling, and every inference call, every prompt you send, carries a small additional cost. That cost is often invisible to the end user, which makes it easy to ignore and important to remember.
+**What does this technology cost the planet?** Training and serving models consume energy; their environmental impact depends on hardware, utilization, electricity sources, and operating conditions. Assess the actual deployment rather than assigning a universal footprint to a prompt. [@stochastic]
 
 **Who actually benefits?** Access to the most capable models requires money, reliable infrastructure, and often English fluency. A technology with this much leverage over research, writing, and problem-solving will not distribute its benefits evenly unless real effort is made to ensure it does.
 
@@ -308,7 +316,7 @@ Keep your notes. You'll draw on this comparative exercise directly when you writ
 
 ## Case Study: The Associated Press and Automated News Generation
 
-Since 2014, the Associated Press has used automated generation to produce thousands of corporate earnings reports each quarter, stories that follow a predictable structure (revenue, comparison to the prior year, analyst expectations) but that no newsroom had the staff to cover at that volume by hand. The system doesn't replace AP's financial journalists; it handles the formulaic, high-volume layer of coverage so human reporters can focus on the stories that require judgment, investigation, and context a template cannot supply.
+In its June 2015 account, the Associated Press reported automatically producing more than 3,000 corporate earnings stories per quarter after starting the effort in 2014. AP described a system using Automated Insights and Zacks data, with reporting time freed for other work. This is a historical, firsthand organizational report about structured-data news automation, not evidence of modern LLM reliability. [@apautomation]
 
 The arrangement is instructive precisely because it's unglamorous. AP didn't attempt to automate investigative journalism, the task most obviously requiring human judgment. It automated the narrowest, most repetitive slice of the work, where the risk of hallucination is lowest because the output is tightly constrained by structured financial data rather than open-ended generation. That's a design pattern worth internalizing early: the best uses of generative AI often aren't the most ambitious ones, they're the ones that match the technology's actual strengths to a real, bounded need.
 
@@ -316,9 +324,9 @@ The arrangement is instructive precisely because it's unglamorous. AP didn't att
 
 ## Chapter Summary
 
-Generative AI creates new content rather than merely classifying existing data, and the mechanism behind most of today's text generation is a deceptively simple one: predicting the next token, repeated at enormous scale. That simplicity is misleading; scale itself produces emergent capabilities that were never explicitly programmed.
+Generative AI creates new content rather than merely classifying existing data, and the mechanism behind most of today's text generation is a deceptively simple one: predicting the next token, repeated at enormous scale. That simplicity is misleading; scale can improve performance, while claims of abrupt emergence depend on the task and metric. [@emergence; @mirage]
 
-Getting from raw text to a generated response requires tokenization (breaking text into manageable pieces), embeddings (turning those pieces into meaning-bearing numbers), and the Transformer architecture's attention mechanism (weighing which pieces matter to which other pieces). Training data shapes everything a model knows and everything it doesn't, including a hard cutoff date and a persistent tendency toward confident-sounding fabrication when it doesn't actually know an answer.
+Getting from raw text to a generated response requires tokenization (breaking text into manageable pieces), embeddings (turning those pieces into meaning-bearing numbers), and the Transformer architecture's attention mechanism (weighing which pieces matter to which other pieces). Training data shapes everything a model knows and everything it doesn't, including uneven temporal coverage and a persistent tendency toward confident-sounding fabrication when it doesn't actually know an answer. [@vaswani2017attention]
 
 No two major model families are interchangeable; the right choice depends on capability needs, context window, cost, latency, and how much control and openness a project actually requires. And none of this is ethically neutral: the data, the compute, the access, and the responsibility for what these systems produce are all live, contested questions that this book will keep returning to.
 
@@ -332,9 +340,9 @@ No two major model families are interchangeable; the right choice depends on cap
 
 ## Further Reading
 
-- Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). "On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?" — A foundational critique of scale-first LLM development, still essential context for the debates in this book.
-- Vaswani, A., et al. (2017). "Attention Is All You Need." — The original Transformer paper; dense but worth attempting once you've finished this chapter.
-- Marcus, G. (2022). "Deep Learning Is Hitting a Wall." — A skeptical counterpoint to scaling-law optimism, useful for calibrating your own view of the field's trajectory.
+- *On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?* (2021). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@stochastic]
+- *Attention Is All You Need* (2017). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@vaswani2017attention]
+- *Deep Learning Is Hitting a Wall* (2022). A signed critical essay; treat its arguments as a perspective, not experimental evidence. [@marcus]
 
 ---
 
@@ -342,9 +350,9 @@ No two major model families are interchangeable; the right choice depends on cap
 
 ### Key Takeaways
 
-- Generative AI creates new content by predicting probable continuations, not by retrieving stored answers.
+- Autoregressive language models generate token continuations; retrieval can supply context, and generation can also reproduce memorized material.
 - Tokens, embeddings, and attention are the three concepts that make text generation computationally possible.
-- Emergent capabilities appear at scale without being explicitly programmed.
+- Some benchmark abilities improve sharply with scale; apparent thresholds also depend on measurement. [@emergence; @mirage]
 - Training data determines both what a model knows and where it is most likely to be wrong or biased.
 - Hallucination is a structural feature of how these models work, not an occasional bug.
 - Model choice is a multidimensional trade-off between capability, cost, context window, and control, not a search for a single "best" model.

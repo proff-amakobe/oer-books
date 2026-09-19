@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Prompt engineering and RAG, the last two chapters, can take you remarkably far. But both have real limits: a prompt can only shape behavior the model is already capable of, and RAG can only supply facts, not a genuinely different writing style, a consistent specialized format, or fluency in a narrow technical vocabulary the base model barely saw during training. When you hit that ceiling, fine-tuning, continuing a pre-trained model's training on your own data, becomes the tool worth considering.
+Prompt engineering and RAG, the last two chapters, can take you remarkably far. But both have real limits: a prompt can only shape behavior the model is already capable of, and retrieval can supply examples, terminology, and style guidance as well as facts, although context alone may not achieve the desired consistency. When you hit that ceiling, fine-tuning, continuing a pre-trained model's training on your own data, becomes the tool worth considering.
 
-Fine-tuning is powerful and genuinely complex, and it's also the customization approach most often reached for prematurely. This chapter is built around a decision framework first and an implementation overview second, because the most common fine-tuning mistake isn't a bad training run, it's fine-tuning when a better prompt or a RAG system would have solved the problem for a fraction of the cost and complexity.
+Fine-tuning adds training, data, evaluation, and maintenance work. This chapter therefore begins with a decision framework: diagnose the unmet requirement, compare available approaches, and invest in adaptation only when the evidence justifies its cost.
 
 ## Learning Outcomes
 
@@ -23,9 +23,9 @@ By the end of this chapter, you will be able to:
 |---|---|---|
 | **Fine-tuning** | Continuing a pre-trained model's training on a smaller, targeted dataset to specialize its behavior | Training a general model on legal documents to write in precise legal style |
 | **Full Fine-tuning** | Updating all of a model's parameters during additional training | The traditional approach; powerful but computationally expensive |
-| **Parameter-Efficient Fine-tuning (PEFT)** | A family of techniques that update only a small fraction of parameters | LoRA, QLoRA, adapters |
-| **LoRA (Low-Rank Adaptation)** | A PEFT technique that adds small trainable matrices rather than updating existing weights | Fine-tuning a model by adjusting well under 1% of its parameters |
-| **QLoRA** | LoRA combined with 4-bit quantization, enabling fine-tuning of large models on modest hardware | Fine-tuning a large open-weight model on a single consumer GPU |
+| **Parameter-Efficient Fine-tuning (PEFT)** | A family of techniques that update only a small fraction of parameters | LoRA, QLoRA, adapters [@lora; @qlora] |
+| **LoRA (Low-Rank Adaptation)** | A PEFT technique that adds small trainable matrices rather than updating existing weights | Fine-tuning a model by adjusting well under 1% of its parameters [@lora] |
+| **QLoRA** | LoRA combined with 4-bit quantization, enabling fine-tuning of large models on modest hardware | QLoRA reported a 65B model on one 48 GB GPU; requirements vary [@qlora] |
 | **Adapters** | Small, swappable neural network modules inserted between existing layers | Task-specific modules that share one base model across use cases |
 | **Catastrophic Forgetting** | A model losing previously learned general capabilities while being fine-tuned on narrow data | A model that becomes excellent at one task but noticeably worse at general conversation |
 | **Training Data Curation** | The process of selecting, cleaning, and validating examples for fine-tuning | Removing duplicate or low-quality examples before training |
@@ -40,27 +40,27 @@ By the end of this chapter, you will be able to:
 
 Before investing in fine-tuning, weigh it honestly against the two approaches from the last two chapters.
 
-**Prompt engineering** is usually the right call when the desired behavior can be described in natural language, when you have limited example data (fewer than roughly a hundred cases), when quick iteration matters, or when cost and simplicity are the priority. This is nearly always worth trying first, precisely because it's the cheapest to test and the cheapest to abandon.
+**Prompt engineering** is worth testing when instructions and demonstrations can express the desired behavior and rapid iteration matters. There is no universal hundred-example cutoff for choosing prompting over training. Compare costs and measured performance for the actual task. [@gpt3; @lima]
 
 **RAG** is the right call when the problem is fundamentally about knowledge access, current information, private documents, facts that need citations, rather than about behavior or style.
 
-**Fine-tuning** earns its cost when you need consistent behavior that's genuinely difficult to achieve through prompting alone, when you have substantial high-quality training data (roughly a thousand examples or more, as a rough floor, not a guarantee), when the domain has specialized language or formatting conventions a general model doesn't reliably produce, or when you specifically need a smaller, cheaper, specialized model to replace a larger general one at inference time.
+**Fine-tuning** earns its cost when you need consistent behavior that's genuinely difficult to achieve through prompting alone, when you have substantial high-quality training data (the necessary amount depends on the task, base model, supervision, and evaluation), when the domain has specialized language or formatting conventions a general model doesn't reliably produce, or when you specifically need a smaller, cheaper, specialized model to replace a larger general one at inference time.
 
 *Proposed Figure 7.1: Customization decision framework — prompting → RAG → fine-tuning*
 
-Notice that this is a genuine escalation path, not three equally weighted options. Reaching for fine-tuning before ruling out the cheaper approaches is the single most common way teams waste both money and time on customization.
+Treat this as a cost-conscious decision framework, not a mandatory sequence. Prompting, retrieval, and fine-tuning can be combined, and their value depends on the diagnosed failure and measured alternatives.
 
 ## Types of Fine-tuning Approaches {#sec-7-2}
 
 **Full fine-tuning** updates every parameter in the model. It offers the maximum adaptation potential and can produce dramatic behavior changes, at real cost: it's computationally expensive, requires substantial training data to avoid overfitting, and carries a genuine risk of **catastrophic forgetting**, the model becoming excellent at your narrow task while quietly losing general capability it had before.
 
-**Parameter-efficient fine-tuning (PEFT)** achieves comparable results while updating far fewer parameters. **LoRA** adds small trainable matrices alongside a model's existing weights rather than modifying them directly, typically touching well under 1% of total parameters, with results that can be merged back into the base model for deployment. **QLoRA** combines that same approach with 4-bit quantization, which is what makes it possible to fine-tune a genuinely large model on a single consumer-grade GPU rather than a data-center cluster, a meaningful democratization of a technique that used to require serious infrastructure. **Adapters** take a related but distinct approach: small, swappable modules inserted between existing layers, useful when you need several task-specific variants sharing one underlying base model.
+**Parameter-efficient fine-tuning (PEFT)** updates a subset of parameters or adds trainable parameters while freezing the base. **LoRA** learns low-rank weight updates; the trainable fraction depends on rank and targeted matrices. **QLoRA** trains adapters through a frozen quantized base. Its paper demonstrated a 65B model on a 48 GB GPU, not a guarantee that an arbitrary large model fits a consumer card. Sequence length, batch size, activations, optimizer state, and runtime overhead also consume memory. **Adapters** are another approach, inserting trainable modules; they are not identical to LoRA matrices. Compare methods on your task. [@lora; @qlora]
 
-For nearly all practical purposes today, PEFT approaches, LoRA and QLoRA especially, are the sensible default; full fine-tuning is reserved for cases with substantial resources and a genuine need for maximum adaptation.
+PEFT is worth evaluating when adaptation memory or storage is constrained. Full fine-tuning remains an option when the task, resources, and empirical comparisons justify updating the whole model; neither method is a universal default. [@lora; @qlora]
 
 ## Data Preparation: The Critical Factor {#sec-7-3}
 
-More fine-tuning projects fail from data problems than from anything about the training process itself. **Quality consistently beats quantity**: a smaller set of high-quality, representative, carefully curated examples, including deliberately chosen edge cases, will outperform a much larger set of noisy or repetitive ones. As a rough volume guide, expect diminishing but real value from roughly 500–1,000 examples as a minimum viable set, 5,000–10,000 for solid performance on most tasks, and tens of thousands for the most demanding cases, though these numbers vary enormously by task complexity and shouldn't be treated as a formula.
+Data quality, representativeness, coverage, and volume interact. Counts such as 500–1,000 or 5,000–10,000 are **illustrative experiment sizes**, not minimums or guarantees for most tasks. LIMA studied 1,000 curated examples in a particular setup; that result does not establish a universal learning curve. Measure held-out performance as you add data and compare against prompting and retrieval baselines. [@lima]
 
 Training examples typically follow either an **instruction-following format** or a **conversational format**, depending on how the model will actually be used:
 
@@ -96,11 +96,15 @@ The hyperparameters that matter most for outcomes, learning rate, number of epoc
 
 ## Evaluation and Iteration {#sec-7-5}
 
+Perplexity is the exponential of average negative log likelihood under a specified tokenizer and evaluation corpus. It measures predictive fit, not factual accuracy, safety, or instruction following; comparisons across tokenizers are not directly meaningful. Keep validation data for tuning separate from a final untouched test set, including near-duplicate and document-level separation. [@gpt3; @helm]
+
 Evaluating a fine-tuned model, covered more fully in Chapter 10, combines automated metrics (perplexity, task-specific measures like accuracy or ROUGE where you have reference outputs) with human evaluation (relevance, factual accuracy, fluency, and practical helpfulness, dimensions an automated score often can't fully capture) and, where the domain calls for it, expert review from someone who actually knows the field.
 
 Two disciplines matter more here than the specific metric you choose. First, **avoid data contamination**: your test examples must never have appeared in training, which sounds obvious and is nonetheless a common, quiet source of misleadingly good results. Second, **always compare against real baselines**, the un-fine-tuned base model, and a well-prompted version of it, not just against your own model's earlier checkpoints. A fine-tuning project that can't demonstrate a real improvement over a strong prompted baseline hasn't actually justified its cost.
 
 ## Fine-Tuning for Safety and Alignment {#sec-7-6}
+
+Experiments have demonstrated safety degradation after some benign fine-tuning procedures. This is a measured risk, not a claim that every fine-tune becomes unsafe. Re-evaluate the adapted model under the intended deployment controls. [@safetytuning]
 
 Fine-tuning on narrow data can, sometimes without any deliberate intent, degrade a model's safety properties: training heavily on domain-specific completions can quietly erode a general model's tendency to refuse harmful requests or acknowledge uncertainty, simply because those behaviors weren't well-represented in the narrow fine-tuning set. This isn't a hypothetical concern reserved for adversarial actors, it's a real risk of ordinary, well-intentioned fine-tuning work, which is exactly why re-running your safety and refusal evaluations after fine-tuning, not just your task-performance evaluations, is a responsible default rather than an optional extra step. Chapter 12 covers the underlying alignment mechanics in depth.
 
@@ -118,9 +122,9 @@ Rather than running a fine-tuning job, your task in this chapter is to make, and
 
 ## Case Study: Harvey AI's Legal Model Development
 
-Harvey, a legal AI company, didn't start from a general-purpose model and stop at prompting, legal work depends on precise terminology, jurisdiction-specific reasoning, and citation conventions that a general model handles inconsistently even with excellent prompts. Harvey's approach combines retrieval over authoritative legal sources with models adapted specifically for legal reasoning and drafting, reflecting exactly the layered escalation this chapter argues for: prompting and retrieval do most of the work, and customization is reserved for the parts of the task, precise legal register, jurisdiction-aware reasoning, that those approaches alone don't reliably deliver.
+Harvey's July 2024 technical post describes a custom legal **embedding** model developed with Voyage AI using case-law data. This supports a concrete historical example of domain adaptation in retrieval. It does not, by itself, verify the company's generative-model training sequence or establish that prompting and RAG were tried and found insufficient before customization. Vendor evaluation claims should be read with their setup and incentives in view. [@harvey]
 
-The instructive part isn't that Harvey chose to fine-tune, it's that the decision was scoped narrowly to where prompting and RAG genuinely fell short, rather than applied as a default first move. That's the discipline this chapter is asking you to apply to your own, much smaller project.
+The design lesson is to identify the component that needs adaptation: a retrieval embedding model and a response-generating model serve different purposes. For your own project, compare an adapted component against a strong unadapted baseline before attributing an improvement to fine-tuning.
 
 ## Discussion Questions
 
@@ -130,8 +134,8 @@ The instructive part isn't that Harvey chose to fine-tune, it's that the decisio
 
 ## Further Reading
 
-- Hu, E., et al. (2021). "LoRA: Low-Rank Adaptation of Large Language Models" — The paper behind the technique covered in @sec-7-2.
-- Zhou, C., et al. (2023). "LIMA: Less Is More for Alignment" — A striking demonstration of how far a small, carefully curated dataset can go, directly relevant to @sec-7-3's quality-over-quantity argument.
+- *LoRA: Low-Rank Adaptation of Large Language Models* (2021). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@lora]
+- *LIMA: Less Is More for Alignment* (2023). A study using a small curated dataset, not a general minimum-data rule. [@lima]
 
 ---
 
@@ -139,8 +143,8 @@ The instructive part isn't that Harvey chose to fine-tune, it's that the decisio
 
 ### Key Takeaways
 
-- Fine-tuning is the last resort in a three-step escalation: prompting, then RAG, then fine-tuning, not a default first choice.
-- Parameter-efficient methods (LoRA, QLoRA) have made fine-tuning dramatically more accessible than full fine-tuning, without sacrificing much quality for most tasks.
+- Compare prompting, retrieval, and fine-tuning against the actual objective; they can be complementary rather than a mandatory sequence.
+- Parameter-efficient methods (LoRA, QLoRA) have made fine-tuning dramatically more accessible than full fine-tuning, with task-dependent quality trade-offs that require evaluation.
 - Data quality and curation determine a fine-tuning project's outcome more reliably than any hyperparameter choice.
 - A fine-tuned model must be evaluated against real baselines, especially a well-prompted version of the base model, or its value can't actually be demonstrated.
 - Fine-tuning can quietly degrade safety behavior even without adversarial intent, which is why safety re-evaluation belongs in every fine-tuning project, not just the task-performance evaluation.

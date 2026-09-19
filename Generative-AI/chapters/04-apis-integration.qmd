@@ -85,6 +85,8 @@ The design question worth answering on paper, before any of this gets built, is 
 
 ## Error Handling and Resilience Patterns {#sec-4-3}
 
+Retry only eligible transient failures, with a bounded attempt count and deadline. Honor provider retry headers, account for SDK retries, distinguish rate limits from exhausted credits, and do not retry authentication or malformed requests unchanged. A timeout can occur after a request was processed: retries may duplicate cost or actions unless idempotency is actually supported. [@openairelimits; @nygard]
+
 Production systems fail in fairly predictable ways: network issues (timeouts, DNS problems), rate limiting, quota exhaustion, provider-side outages, malformed requests, and authentication failures. None of these are exotic, which is exactly why they're worth designing for deliberately rather than discovering them in production.
 
 **Exponential backoff with jitter** is the standard retry strategy: wait a little longer after each failed attempt, and add a small random offset ("jitter") so that many clients retrying at once don't all hammer the service at the exact same moment.
@@ -94,7 +96,7 @@ Production systems fail in fairly predictable ways: network issues (timeouts, DN
 def backoff_delay(attempt, base_delay=1, max_delay=60):
     delay = min(base_delay * (2 ** attempt), max_delay)
     jitter = random_between(0, delay * 0.1)
-    return delay + jitter
+    return min(max_delay, delay + jitter)
 ```
 
 **The circuit breaker pattern** prevents cascading failures by temporarily stopping requests to a service that's clearly failing, rather than letting every request individually time out. A circuit breaker has three states: *closed* (normal operation), *open* (the service is failing, so requests are rejected immediately without even trying), and *half-open* (a small number of test requests check whether the service has recovered).
@@ -102,6 +104,8 @@ def backoff_delay(attempt, base_delay=1, max_delay=60):
 **Graceful degradation** is what happens when neither retry nor failover fully solves the problem: falling back to a simpler model, serving a cached response, or honestly telling the user that functionality is temporarily reduced, all of which beat a silent failure or a hung request.
 
 ## Cost Optimization Strategies {#sec-4-4}
+
+Response caching is distinct from provider prompt-prefix caching. Include model/version, instructions, generation settings, retrieval version, and authorization context in cache eligibility; expire or invalidate stale entries and isolate tenants. Semantic similarity alone cannot authorize reuse. A batch API may be asynchronous and impose separate limits; streaming yields partial output and can fail after output has begun. [@nygard; @openairelimits]
 
 Providers price their APIs differently, per-token, per-request, by subscription, or by compute time, which means "which provider is cheaper" doesn't have a single answer independent of your actual usage pattern. Five levers matter most in practice:
 
@@ -126,6 +130,8 @@ Beyond that, parallelizing independent requests (careful not to blow through you
 
 ## Security and Best Practices {#sec-4-6}
 
+Environment variables are a delivery mechanism, not a complete secret-management system: redact logs, restrict credentials, and revoke exposed keys. Input validation does not solve prompt injection. Verify retention, training use, regional processing, and contractual terms for the selected endpoint; the provider abstraction must reject unsupported capabilities rather than silently change their meaning. [@indirectinjection; @nistrmf]
+
 **API key management** follows the same discipline as any other production credential: never hard-code keys in source, use environment variables or a proper secrets manager, rotate keys periodically, and monitor for unusual usage that might indicate a leaked key.
 
 **Data protection** deserves particular attention with AI APIs specifically because the payload is often unstructured user text that's easy to send carelessly: sanitize and validate input before it reaches the model, watch for prompt injection (covered in depth in Chapter 3), and know what your provider does and doesn't retain, especially for regulated domains under GDPR, HIPAA, or similar frameworks, a topic Chapter 14 covers in full.
@@ -146,6 +152,8 @@ Bring @sec-4-2 through @sec-4-6 together into a single design for your own assis
 
 ## Case Study: A Provider Outage, Worked Through
 
+**Illustrative scenario.** The volume and maintenance window below are invented planning assumptions.
+
 Imagine you're the lead engineer for a customer service assistant processing 100,000 queries a day, and your primary provider announces a three-day maintenance window starting tomorrow. What do you actually do?
 
 The technical answer starts with failover: is a secondary provider already integrated and warmed up, or does switching require emergency engineering work under time pressure? The honest answer for most teams is closer to the second, which is precisely the argument for designing multi-provider failover *before* you need it, not during an incident. But the technical answer is only part of the picture. There's a cost dimension (your fallback provider may be more expensive, and for three days that's a real, defensible budget line, not an afterthought), a user-experience dimension (does response quality or latency visibly change, and should you tell users why), and a communication dimension (what do you tell stakeholders, and when).
@@ -160,9 +168,9 @@ Working through a scenario like this on paper, before it happens to you, is exac
 
 ## Further Reading
 
-- Nygard, M. (2018). *Release It!* — The standard reference for resilience patterns (circuit breakers, bulkheads, timeouts) that this chapter applies to AI APIs specifically.
-- Kleppmann, M. (2017). *Designing Data-Intensive Applications* — Broader systems-design grounding for the caching and reliability trade-offs in @sec-4-3 through @sec-4-5.
-- Provider documentation for whichever models you selected in Chapter 2, rate limits, pricing, and SLAs change often enough that primary sources beat secondhand summaries, including this one.
+- *Release It! Second Edition* (2018). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@nygard]
+- *Designing Data-Intensive Applications* (2017). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@ddia]
+- *Rate limits* (n.d.). Living provider documentation checked 2026-09-18; recheck model, account tier, and limits before deployment. [@openairelimits]
 
 ---
 

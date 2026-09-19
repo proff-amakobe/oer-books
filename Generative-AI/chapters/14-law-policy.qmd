@@ -2,9 +2,11 @@
 
 ## Introduction
 
+**Educational scope and verification date: 2026-09-18.** This chapter discusses selected EU and US examples, not legal advice or a complete compliance determination. Distinguish enacted text, effective obligations, pending rules, and case-specific decisions; obtain qualified jurisdiction-specific advice before deployment. The dates below apply to this review, not indefinitely.
+
 Your assistant works well, tests cleanly, and passes its Chapter 13 ethics review. Is it legal to deploy? That's a genuinely different question, and one this book has deliberately saved for its own chapter rather than folding it into Chapter 13's ethics discussion, because "ethical" and "compliant" are related but not identical, a system can be one without being the other, and a practitioner needs to be able to reason about both.
 
-This chapter covers the legal and regulatory landscape a real AI deployment has to navigate: the emerging body of AI-specific regulation, the older bodies of law (copyright, liability) that AI has forced into new and unsettled territory, and the organizational governance structures that turn legal obligations into actual practice. None of this is settled law in the way, say, contract law is settled; you're studying a genuinely moving target, which is exactly why this chapter emphasizes the shape of the landscape and how to navigate it, rather than a fixed set of rules to memorize.
+This chapter covers AI-specific regulation, existing copyright and liability law, and organizational governance. Some rules are enacted and operative; others have future effective dates, and some applications remain contested. Calling the entire field unsettled would obscure duties that already apply. Use the dated EU and US examples below to learn how to check scope, status, and authority. [@aiact; @gdpr; @ftc]
 
 ## Learning Outcomes
 
@@ -20,14 +22,14 @@ By the end of this chapter, you will be able to:
 
 | **Term** | **Definition** | **Example/Context** |
 |---|---|---|
-| **EU AI Act** | The European Union's comprehensive AI regulation, classifying systems by risk level | A risk-based framework imposing different obligations on low-risk versus high-risk AI systems |
-| **GDPR** | The EU's data protection regulation, with specific provisions affecting automated decision-making | The right to an explanation for certain automated decisions affecting an individual |
-| **Risk-Based Classification** | Regulating AI systems differently based on their potential for harm, rather than uniformly | A resume-screening tool faces stricter requirements than a spam filter |
-| **Algorithmic Accountability** | Legal and regulatory requirements that organizations be answerable for their AI systems' effects | Bias-auditing requirements in certain jurisdictions or sectors |
-| **Copyright and Training Data** | The unsettled legal question of whether and how copyrighted material can be used to train AI models | Ongoing litigation over whether training on copyrighted text constitutes infringement |
+| **EU AI Act** | The European Union's comprehensive AI regulation, classifying systems by risk level | EU, 2026-09-18: obligations depend on intended purpose, actor, and staged application dates [@aiact; @aitimeline] |
+| **GDPR** | The EU's data protection regulation, with specific provisions affecting automated decision-making | EU, as of 2026-09-18: Articles 13–15 and 22 govern information and safeguards for qualifying automated decisions [@gdpr; @cjeu] |
+| **Risk-Based Classification** | Regulating AI systems differently based on their potential for harm, rather than uniformly | EU, 2026-09-18: employment uses may fall under Annex III, subject to scope, exceptions, and application dates [@aiact; @aitimeline] |
+| **Algorithmic Accountability** | Legal and regulatory requirements that organizations be answerable for their AI systems' effects | NYC, 2026-09-18: covered employment tools face bias-audit and notice requirements [@nycaedt] |
+| **Copyright and Training Data** | Rights and exceptions governing training-data use; outcomes depend on jurisdiction and facts | US, 2026-09-18: the 2025 Bartz holding is case-specific; EU text-and-data-mining exceptions differ [@bartz; @eucopyright] |
 | **Output Liability** | The question of who is legally responsible when an AI system's output causes harm | If an AI-generated recommendation causes financial loss, who bears responsibility? |
-| **Data Residency** | Legal requirements that certain data be stored or processed within specific geographic boundaries | A regulation requiring healthcare data to remain within the country where it was collected |
-| **Conformity Assessment** | A formal process verifying that a system meets required regulatory standards before deployment | Required for certain high-risk AI systems under the EU AI Act |
+| **Data Residency** | Legal requirements that certain data be stored or processed within specific geographic boundaries | Jurisdiction-specific localization rules differ from EU cross-border transfer conditions [@gdpr] |
+| **Conformity Assessment** | A formal process verifying that a system meets required regulatory standards before deployment | EU, 2026-09-18: Article 43 governs applicable high-risk assessments, subject to application dates [@aiact; @aitimeline] |
 | **AI Governance** | The organizational structures, policies, and processes that operationalize legal and ethical obligations | An AI ethics review board with authority to block a risky deployment |
 
 ---
@@ -36,41 +38,43 @@ By the end of this chapter, you will be able to:
 
 AI regulation is being written in real time, across multiple jurisdictions simultaneously, with real differences in approach, which means "is this legal" often depends heavily on where your system operates and who it affects, not a single global answer.
 
-The **EU AI Act** takes a risk-based approach: AI systems are classified by their potential for harm, with correspondingly different obligations. Certain practices are prohibited outright (manipulative techniques that exploit vulnerabilities, for instance); high-risk systems, those affecting employment, credit, law enforcement, or similar consequential domains, face requirements including conformity assessments and detailed documentation; lower-risk systems face lighter transparency obligations, and the lowest-risk tier faces essentially none. This tiered structure is worth understanding even if you're not building for the EU specifically, because it's become an influential template other jurisdictions are drawing from.
+**European Union, as of 2026-09-18 — enacted rules with staged application.** Regulation (EU) 2024/1689 defines prohibited practices, high-risk categories, transparency duties, and obligations for general-purpose AI models. Classification depends on intended purpose, role, exceptions, and relevant Annexes, not simply a broad sector label. The Commission's updated timeline reports Article 50 transparency rules applying from 2 August 2026, with transitions for some existing systems. It reports Annex III high-risk rules applying from 2 December 2027 and Annex I regulated-product high-risk rules from 2 August 2028 following the July 2026 amendment. Do not treat a future high-risk deadline as exemption from already applicable privacy or sector law. [@aiact; @aiomnibus; @aitimeline]
 
-**GDPR**, though not AI-specific legislation, has real teeth for AI systems specifically through its provisions on automated decision-making: a right to explanation for certain automated decisions, requirements for data protection impact assessments, and data subject rights including deletion, all of which interact directly with the explainability material from Chapter 13.
+**European Union, as of 2026-09-18 — in force.** GDPR applies to personal-data processing within its scope, including relevant AI use. Article 22 addresses solely automated decisions with legal or similarly significant effects, subject to exceptions and safeguards; Articles 13–15 require relevant information about the logic, significance, and envisaged consequences. The CJEU's 27 February 2025 Dun & Bradstreet Austria ruling addresses an intelligible explanation in this context, not unrestricted disclosure of any model's internals. Article 35 requires a DPIA for qualifying high-risk processing; erasure under Article 17 has exceptions. [@gdpr; @cjeu]
 
-**US regulation** is more fragmented: sector-specific rules (finance, healthcare, employment each carry their own established regulatory bodies now grappling with AI), state-level algorithmic accountability laws, consumer protection law being applied to AI systems by analogy, and executive-branch guidance that shifts with administrations, a genuinely less unified picture than the EU's, and one that requires checking the specific sector and state your project would operate in rather than assuming a single federal standard.
+**United States, as of 2026-09-18 — overlapping federal, state, and local regimes.** Existing consumer-protection and sector laws apply to covered AI conduct; the FTC's enforcement materials demonstrate that AI claims are not exempt from those laws. This is not a complete federal inventory. In **New York City**, the regulator describes bias-audit, public-summary, and notice requirements for covered automated employment decision tools, with enforcement beginning 5 July 2023. In **Colorado**, the Attorney General reports that SB26-189 replaced the earlier 2024 framework, with new ADMT provisions effective 1 January 2027; implementing rules are proposed, not final, at this review date. These examples cannot be generalized to every employer, state, or AI system. [@ftc; @nycaedt; @colorado]
 
-**Industry standards**, ISO/IEC frameworks for AI systems, IEEE standards for ethical design, and sector-specific professional codes of conduct, aren't legally binding in the way government regulation is, but they increasingly function as the practical benchmark regulators and courts point to when evaluating whether an organization exercised reasonable care.
+**Standards and governance, as of 2026-09-18.** NIST's US AI Risk Management Framework 1.0 is voluntary guidance, not a statute or certification of compliance. Standards can acquire significance through contracts or incorporation into a particular legal scheme. Under the EU AI Act, harmonized standards and conformity assessment have specified roles; a generic ISO, IEEE, or NIST reference does not establish that a system meets every applicable duty. Verify the particular instrument and edition. [@nistrmf; @aiact]
 
 ## Copyright and Training Data {#sec-14-2}
 
-Whether training an AI model on copyrighted material constitutes infringement is, at the time of this writing, genuinely unsettled law, actively being litigated across multiple cases and jurisdictions, with real arguments on more than one side rather than an obvious answer either way.
+**United States, as of 2026-09-18 — fact-specific and contested applications of existing law.** Fair use is not a universal training exemption. The Copyright Office's May 2025 Part 3 pre-publication report distinguishes uses, acquisition methods, and market effects; it is an agency report, not binding adjudication. The Office's summary of the Northern District of California's 23 June 2025 Bartz order describes fair use for the training use at issue but not for building a permanent library from pirated copies. This dated holding is not a statement that every model-training practice is lawful or a complete account of subsequent litigation. [@copyrighttraining; @bartz]
 
-The argument for permissibility typically rests on some version of fair use (in US law) or a similar exception: training extracts statistical patterns rather than reproducing specific expression, the argument goes, similar in kind to how a human writer's reading informs their later original work without each influence constituting infringement. The argument against rests on the sheer scale and commercial nature of the copying involved, and on the observation that a model can, in some documented cases, reproduce recognizable fragments of specific training text, which looks considerably less like "learning from" and more like "copying," at least in those instances.
+**European Union, as of 2026-09-18 — statutory exceptions with conditions.** Articles 3 and 4 of Directive (EU) 2019/790 address text and data mining, including lawful-access conditions and, for Article 4, rights reservation. They are not the US fair-use test. National implementation, the use at issue, and relevant AI Act obligations must be considered; do not assume that publicly accessible material is unlicensed or unrestricted. [@eucopyright]
 
-This matters directly for your own project work in two ways. First, if your project involves fine-tuning, covered in Chapter 7, on any copyrighted corpus, the same unsettled questions apply to your training data as apply to a frontier lab's, at a different scale but not a different kind. Second, if your assistant generates content resembling a specific author's or artist's style, the question of whether that output itself carries any legal risk is a live one, not obviously resolved by "the model just learned a general style," particularly if the output is used commercially.
+For a US or EU project at this review date, document the source, license, access conditions, and intended use of training and retrieval material. Separate authorization to obtain a work, use it in training or retrieval, and distribute generated output. US copyrightability of outputs depends on human authorship; the Copyright Office's 2025 Part 2 report does not grant copyright merely for supplying prompts. Style resemblance alone is not a complete infringement analysis; protected expression and other jurisdiction-specific rights need separate review. [@copyrightoutput; @copyrighttraining; @eucopyright]
 
 ## Liability: Who's Responsible When AI Causes Harm {#sec-14-3}
 
-When an AI system's output causes real harm, a bad medical suggestion acted on, a biased hiring recommendation followed, a hallucinated legal citation relied on in court, existing liability frameworks (built around human decision-makers and more predictable software) don't map cleanly onto the situation, and this is an active area of legal development rather than settled doctrine.
+**United States and European Union, as of 2026-09-18 — jurisdiction-dependent liability.** An AI label does not itself identify who bears liability. Applicable contract, tort, product, consumer-protection, professional, and data-protection rules depend on facts and jurisdiction. For a concrete EU example, GDPR Article 82 addresses compensation for damage and controller/processor responsibility under its conditions; it is not a general rule for all AI harm. [@gdpr; @ftc]
 
-Several parties could plausibly bear responsibility, and the honest answer is that it often depends on specifics current law hasn't fully resolved: the **model developer**, whose training choices shaped the system's behavior; the **deploying organization**, who chose to put the system in front of users for this specific purpose; and the **end user**, who acted on the output, particularly if they had reason to know it required verification. A useful, if imperfect, analogy is professional malpractice law: a doctor using a diagnostic tool that gives a wrong suggestion is generally still expected to exercise independent judgment, and doesn't get to point entirely at the tool, but the tool's manufacturer isn't necessarily absolved either if the tool was negligently designed or marketed. AI liability law is, in large part, working out how much of that existing structure transfers and how much needs genuinely new doctrine.
+As an **illustrative responsibility-mapping exercise**, consider the model supplier, deploying organization, and user: who controlled the risk, what obligations applied, what caused the harm, and what remedies or contracts are relevant? This is a set of questions for legal analysis, not a finding that any of those parties automatically is or is not liable. Under EU GDPR Article 82, the applicable statutory conditions cannot be replaced by a product's own assignment of roles. [@gdpr]
 
-For your own project, this connects directly to a decision from Chapter 5's agent safety discussion: the human-in-the-loop spectrum isn't just a safety design choice, it's also, practically, a liability-allocation choice. A fully autonomous action shifts more of the practical and legal weight toward the system's designers; a suggest-and-confirm design keeps a human's independent judgment clearly in the loop, which matters both ethically and, potentially, legally.
+Human review is a risk-control choice, not an automatic legal transfer of responsibility. Under the EU GDPR framework as of this review date, identify actual roles and whether human involvement is meaningful; merely adding an approval button does not resolve the legal analysis. Record operational ownership separately from any legal conclusion. [@gdpr; @cjeu]
 
 ## Organizational AI Governance {#sec-14-4}
 
 Legal and regulatory obligations only matter in practice if an organization has real structures that turn them into action, not just a policy document nobody consults.
 
-**AI ethics committees or review boards**, drawing directly on the responsibility framework from Chapter 13, provide cross-functional review of AI projects before and during deployment, ideally with genuine authority to delay or block a deployment when a review surfaces real risk, the same test the Chapter 13 Microsoft case study emphasized. **Risk management frameworks** formalize the process of identifying, assessing, and mitigating risk systematically, rather than relying on whoever happens to notice a problem first. **Documentation requirements**, records of training data provenance, model validation procedures, and deployment monitoring, serve two purposes at once: they support the explainability and accountability goals from Chapter 13, and they're increasingly what a regulator or court will actually ask to see if something goes wrong.
+As **organizational recommendations**, use cross-functional review with documented decision rights, escalation paths, data provenance, validation records, and deployment monitoring. These practices are supported by voluntary NIST guidance; which records or assessments are legally mandatory depends on a particular jurisdiction and instrument. For EU high-risk AI, consult the applicable AI Act duties and dates rather than equating an internal ethics review with conformity assessment. [@nistrmf; @aiact; @aitimeline]
 
-**Data residency and cross-border considerations** deserve specific mention for any project touching data from multiple jurisdictions: requirements that certain data remain within specific geographic boundaries interact directly with the provider and infrastructure choices from Chapter 4, a cloud API hosted in one country may not be an option at all for data that's legally required to stay in another.
+**European Union, as of 2026-09-18 — transfers and localization are distinct.** GDPR Chapter V permits certain third-country transfers under specified mechanisms and conditions; GDPR is not a blanket requirement that all personal data stay in the EU. Other sectoral or national localization rules may differ. Record processing and storage locations, subprocessors, contracts, and the applicable transfer mechanism for the actual service. [@gdpr, Chapter V]
 
 ---
 
 ## Connecting to Your Project: A Compliance Checklist
+
+This is an educational issue-spotting exercise as of 2026-09-18, not a compliance certification. For each identified duty, record jurisdiction, actor, activity, exact provision, application date, exceptions, and whether qualified advice is needed. [@aiact; @gdpr; @nycaedt; @colorado]
 
 Rather than a generic regulatory overview, produce a checklist specific to your project's actual domain and deployment.
 
@@ -80,13 +84,15 @@ Rather than a generic regulatory overview, produce a checklist specific to your 
 
 **Address copyright, if relevant.** If your Chapter 7 customization decision involved fine-tuning on a specific corpus, or if your assistant generates content in a recognizable style, name the consideration explicitly, even if your answer is "this needs legal review beyond what this book covers," which is itself an honest, correct answer for a real project.
 
-**Name your liability allocation.** Referencing your Chapter 5 human-in-the-loop design, where does responsibility sit if your assistant's output causes harm, and does your current design reflect that allocation deliberately?
+**Map operational responsibility and seek legal review.** Referencing your Chapter 5 human-in-the-loop design, where does responsibility sit if your assistant's output causes harm, and does your current design reflect that allocation deliberately?
 
 ## Case Study: A Legal Research Assistant at 50,000 Documents
 
+**Illustrative scenario, with US/EU issue spotting as of 2026-09-18.** The firm and document count are fictional and are not a Glean customer report. Public access does not itself establish reuse rights; verify the applicable jurisdiction and source terms.
+
 Consider, concretely, a firm building a RAG-based legal research assistant (the Chapter 6 case study's Glean example, applied to a domain where the stakes of an error are especially high) searching across 50,000 case files and statutes, with an explicit requirement that its outputs be trustworthy enough for a lawyer to actually rely on in preparing a filing.
 
-Working through this scenario surfaces nearly every idea from this chapter at once. **Regulatory**: legal-sector-specific rules about the practice of law and professional responsibility interact with general AI regulation in ways that vary significantly by jurisdiction. **Copyright**: case law and statutes are generally public, but secondary legal commentary and analysis often aren't, and training or retrieving from the latter raises the @sec-14-2 questions directly. **Liability**: if the assistant hallucinates a citation (the Chapter 1 hallucination risk, at maximum real-world stakes) and a lawyer relies on it without independent verification, @sec-14-3's liability question isn't hypothetical, it's exactly the scenario current courts are actively working through in real malpractice and sanctions proceedings. **Governance**: a firm deploying this system would need real documentation, a real review process, and a real policy on independent verification, not an informal understanding.
+For this scenario, ask which professional and regulatory rules apply; whether the documents may be accessed, indexed, and reproduced; who verifies citations before use; and who can halt deployment. These are unresolved facts of the fictional project, not legal conclusions. For a US copyright starting point use the Copyright Office reports; for EU personal data and AI-system obligations consult GDPR and the AI Act under the dates above. [@copyrighttraining; @gdpr; @aiact]
 
 The instructive takeaway isn't that legal AI is uniquely risky, it's that this chapter's four sections are rarely independent in a real deployment; they interact, and a compliance checklist that addresses them one at a time without noticing the interactions misses exactly the risks that matter most.
 
@@ -98,8 +104,8 @@ The instructive takeaway isn't that legal AI is uniquely risky, it's that this c
 
 ## Further Reading
 
-- The current text of the EU AI Act (search for the official European Commission source, this is exactly the kind of regulation worth reading directly rather than through a secondary summary, given how consequential its risk-tier definitions are).
-- Any current tracking resource for major AI copyright litigation (several are actively maintained and updated as cases progress; search for the most current one, given how quickly this area is developing).
+- *Regulation (EU) 2024/1689: Artificial Intelligence Act* (2024). Read the original regulation with the amendments and implementation timeline cited in this chapter; status checked 2026-09-18. [@aiact]
+- *Bartz v. Anthropic PBC: Fair Use Index case summary* (2025). Official US Copyright Office summary of the June 2025 district-court decision; a specific ruling, not a universal rule or complete litigation tracker. [@bartz]
 
 ---
 
@@ -109,9 +115,9 @@ The instructive takeaway isn't that legal AI is uniquely risky, it's that this c
 
 - "Ethical" and "legally compliant" are related but distinct; a responsible system still needs to be checked against both separately.
 - AI regulation varies significantly by jurisdiction, and a global product needs to navigate multiple frameworks, not assume one standard applies everywhere.
-- Copyright's application to AI training data remains genuinely unsettled law, worth tracking rather than assuming resolved in either direction.
-- AI liability doesn't map cleanly onto existing frameworks built for human decision-makers; how responsibility gets allocated is still actively being worked out.
-- The human-in-the-loop design choices from Chapter 5 aren't just a safety decision, they're also, practically, a liability-allocation decision.
+- US and EU, 2026-09-18: training-data rights depend on the use and legal regime; case-specific holdings and statutory exceptions do not create a universal exemption. [@bartz; @eucopyright]
+- EU, 2026-09-18: GDPR Article 82 is one concrete liability provision; other harms require analysis under the applicable jurisdiction and legal cause of action. [@gdpr]
+- Human-in-the-loop controls do not automatically transfer legal liability; distinguish operational responsibility from legal obligations. [@gdpr]
 - Real governance requires structures with actual authority to block a risky deployment, not a policy document nobody consults.
 
 ### Practice
@@ -126,6 +132,6 @@ In this chapter, add a **Compliance Checklist** to your project portfolio:
 1. **Applicable regulations**: Which frameworks from @sec-14-1 plausibly apply to your project, and which clearly don't, with reasoning for both.
 2. **Risk tier**: If relevant, your assistant's likely EU AI Act risk classification.
 3. **Copyright consideration**: Addressed explicitly, even if the honest answer is "needs review beyond this book."
-4. **Liability allocation**: Where responsibility sits given your Chapter 5 design, stated explicitly rather than left implicit.
+4. **Responsibility map**: Operational owners, applicable jurisdiction, and liability questions requiring qualified review; do not infer legal immunity from human approval.
 
 *End of Chapter 14. Chapter 15 turns to the practical work of actually shipping your assistant, and to where this fast-moving field is headed next.*

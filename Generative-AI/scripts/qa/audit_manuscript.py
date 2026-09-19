@@ -50,6 +50,8 @@ def semantic(ch,b,source):
     return 'PLAIN_VERBATIM'
 
 def main():
+    if (ED/'phase-1-review-counts.json').exists():
+        raise SystemExit('Phase 1 queues are adjudicated. Refusing to overwrite them; use verify_phase1.py.')
     ED.mkdir(exist_ok=True)
     snapshot=ED/'source-baseline.json'
     if not snapshot.exists():

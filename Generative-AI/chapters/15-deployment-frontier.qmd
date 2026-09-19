@@ -21,7 +21,7 @@ By the end of this chapter, you will be able to:
 | **Term** | **Definition** | **Example/Context** |
 |---|---|---|
 | **Microservices Architecture** | Breaking a system into independently deployable, specialized services | Separate services for model inference, retrieval, and monitoring |
-| **Blue-Green Deployment** | Maintaining two identical production environments and switching traffic between them | Instant cutover to a new version, with instant rollback if problems appear |
+| **Blue-Green Deployment** | Maintaining two identical production environments and switching traffic between them | Traffic cutover with a tested rollback plan; stateful changes may not be reversible |
 | **Canary Deployment** | Gradually rolling out a change to a small percentage of traffic before a full release | Testing a new prompt version on 5% of users before expanding to everyone |
 | **Feature Flags** | Configuration switches that enable or disable functionality without a new code deployment | Instantly disabling a problematic feature without waiting for a rebuild |
 | **CI/CD (Continuous Integration/Continuous Deployment)** | Automated pipelines that test and deploy changes systematically | Automated tests running on every proposed change before it reaches production |
@@ -34,15 +34,19 @@ By the end of this chapter, you will be able to:
 
 ## Production Architecture {#sec-15-1}
 
+Microservices are one option, not a maturity requirement. A modular monolith or managed service may meet the same needs with less operational burden. Define service objectives, capacity and cost budgets, access boundaries, and incident ownership before choosing the architecture. [@nygard; @nistrmf]
+
 A system designed for reliable production use looks different from a working prototype, even when both implement the same core logic. **Microservices architecture** breaks an AI system into independently deployable pieces, an API gateway, model-serving, data processing, storage, and monitoring, each scaled and updated separately rather than as one monolithic block. This buys real benefits: independent scaling of whichever component is under the most load, isolated testing and deployment of individual capabilities, and fault isolation, so one component's failure doesn't necessarily take down the whole system.
 
 The underlying infrastructure, container orchestration, infrastructure-as-code tooling, managed configuration and secrets, is largely the same discipline that supports any serious production software, applied to AI-specific components: a model-serving container has real resource requirements (memory, and often GPU access) that need to be specified and managed just as deliberately as any other production workload's.
 
 ## Deployment Strategies {#sec-15-2}
 
-How a change actually reaches users matters as much as what the change is. **Blue-green deployment** keeps two complete, identical environments, current production and a new version, and switches traffic between them in a single instant cutover, with an equally instant rollback available if something goes wrong. **Canary deployment** takes a more gradual approach: expose a new version to a small percentage of real traffic first, watch the metrics that matter (error rate, latency, and, for an AI system specifically, quality signals from your Chapter 10 evaluation plan), and only expand further if those metrics hold up, rolling back automatically if they don't.
+Rollback is not necessarily instant or complete: database migrations, cached state, in-flight tool actions, and external side effects may not be reversible. Plan compatibility, traffic draining, rollback tests, and compensating actions. Canary quality gates need enough observations to detect important regressions; a small rollout alone is not evidence of safety. [@nygard]
 
-**Feature flags** decouple deployment from release entirely: new functionality can be shipped into production dark, disabled by default, then enabled for specific user segments or gradually rolled out, all through configuration rather than a new code deployment, which makes both gradual rollout and instant rollback dramatically less risky operations.
+How a change actually reaches users matters as much as what the change is. **Blue-green deployment** keeps two complete, identical environments, current production and a new version, and switches traffic between them in a single instant cutover, with a traffic rollback path whose safety depends on compatible state and reversible effects. **Canary deployment** takes a more gradual approach: expose a new version to a small percentage of real traffic first, watch the metrics that matter (error rate, latency, and, for an AI system specifically, quality signals from your Chapter 10 evaluation plan), and only expand further if those metrics hold up, rolling back automatically if they don't.
+
+**Feature flags** separate deploying code from enabling a feature. They can support staged releases and rapid disabling, but propagation delays, in-flight requests, persisted data, and external actions can prevent immediate recovery. Test those failure modes rather than treating a flag as an undo operation. [@nygard]
 
 A **CI/CD pipeline** automates the testing and deployment of changes systematically: unit and integration tests, but for an AI system specifically, this should also mean automated checks against your Chapter 10 evaluation suite and your Chapter 12 safety red-team cases, not just traditional software tests, catching a quality or safety regression before it ever reaches a real user, the same discipline as Chapter 10's regression testing, now automated into the deployment process itself rather than run manually.
 
@@ -59,6 +63,8 @@ A well-engineered system that users don't understand how to use well is, from th
 **Feedback loops**, in-app ratings, usage analytics, periodic surveys, feed directly back into the continuous improvement cycle: collect, analyze, prioritize, implement, measure, repeat, the same disciplined, iterative posture this entire book has tried to model in how it treats every design decision as provisional and testable rather than final.
 
 ## Maintenance and Long-Term Evolution {#sec-15-5}
+
+Version the complete system: model identifier, prompts, retrieval index, embeddings, tools, and evaluation suite. Track deprecation notices, test replacements before deadlines, and retain rollback-compatible configurations. Log provenance and errors while minimizing sensitive content and restricting access. Cost estimates must include retries, tools, storage, evaluation, and operations, not only generation tokens. [@nistrmf; @openairelimits]
 
 A deployed system needs ongoing care that's easy to underestimate from the design phase. **Model lifecycle management** means tracking a deployed model's performance over time (which can genuinely drift as real-world usage patterns shift away from what training or evaluation anticipated), planning retraining or replacement on a deliberate schedule rather than reactively, and having an actual plan for retiring an outdated model and migrating users, not just launching new versions indefinitely alongside old ones.
 
@@ -84,15 +90,19 @@ Every other chapter in this book has taught you something reasonably settled: th
 
 ## Architectural Directions {#sec-15-6}
 
+**Evidence boundary, checked 2026-09-18.** Reasoning-oriented post-training and added inference computation have documented task-specific results; they do not necessarily replace autoregressive next-token generation or expose faithful internal reasoning. DeepSeek-R1 is one public 2025 research report. MoE is an established architecture; future capability trajectories remain uncertain. [@deepseekr1; @switch; @unfaithful]
+
 **Reasoning models**, architectures or training approaches specifically optimized to spend more computation deliberating before producing a final answer, represent a meaningful shift from the "predict the next token quickly" framing that opened this book in Chapter 1. Early results suggest genuine gains on tasks requiring multi-step logical reasoning, at the direct cost of slower, more expensive responses, exactly the kind of capability-versus-cost trade-off Chapter 2 taught you to reason about, now showing up at the frontier of model design itself.
 
 **Mixture-of-Experts architectures at increasing scale**, introduced in Chapter 11, continue to be a major direction for balancing capability against inference cost, letting a model be very large in total parameter count while activating only a fraction of that capacity for any given query.
 
-**Smaller, more efficient models** are advancing in parallel with frontier scale, driven by the genuinely practical needs Chapter 4 and Chapter 11 covered: not every application needs, or can afford, the largest available model, and the gap between a well-optimized small model and a frontier model's capability continues to narrow for many practical tasks, even as the frontier itself keeps moving.
+**Smaller, more efficient models** are advancing in parallel with frontier scale, driven by the genuinely practical needs Chapter 4 and Chapter 11 covered: not every application needs, or can afford, the largest available model, and whether a smaller model is sufficient must be measured on the intended task, even as the frontier itself keeps moving.
 
 ## Open Debates {#sec-15-7}
 
-The **scaling laws debate**, whether continuing to make models larger keeps producing proportionate capability gains, or whether that curve is flattening, is genuinely contested among serious researchers, not a settled question with an obvious answer either direction. Both a strong "scaling continues to deliver" case and a serious "we're hitting diminishing returns, and the next gains come from elsewhere, architecture, data quality, reasoning techniques" case have real, current evidence behind them, exactly the kind of contested claim Chapter 8 asked you to learn to recognize and represent fairly rather than resolve prematurely.
+Scaling-law evidence concerns specific losses and training regimes, not guaranteed indefinitely proportional capability gains. Synthetic-data results depend on filtering, feedback, diversity, and retention of real data: recursive degradation is a documented experimental result, not an inevitable outcome of any synthetic data use. Treat forecasts about future models as hypotheses. [@scaling; @chinchilla; @synthetic; @deepseekr1]
+
+The **scaling debate** separates empirical pre-training loss trends from the value of further scale on practical tasks. Parameter count, data allocation, and inference-time computation all matter. The cited historical studies support particular experimental regimes, not a universal forecast of future gains. [@scaling; @chinchilla; @deepseekr1]
 
 **Synthetic data**, using AI-generated content to train the next generation of models, raises a real open question about whether this improves models (by providing cleaner, more targeted training signal) or degrades them over successive generations (a risk sometimes called model collapse, if a model trains too heavily on other models' output rather than ground-truth human-generated content). The honest answer, as of this book's writing, is that both outcomes have been observed under different conditions, and the field hasn't yet converged on when each applies.
 
@@ -104,7 +114,7 @@ That, ultimately, is the last thing this book has to teach: not a fixed body of 
 
 ## Case Study: A Model Deprecation, Handled Well
 
-Every major AI provider eventually deprecates older models as newer ones supersede them, and how an organization handles that transition says as much about production maturity as anything covered in @sec-15-1 through @sec-15-5. A well-handled deprecation gives real advance notice, provides a clear migration path with documented behavioral differences between old and new versions, and, critically, gives the deploying organization time to re-run their Chapter 10 evaluation suite against the replacement model before the old one actually goes away, since even a "strictly better" model can behave differently enough on your specific use case to need real re-validation, not just a config change.
+**Illustrative scenario, not a named company outcome.** A provider announces a model retirement. A well-prepared team records the deadline, checks the proposed replacement and migration documentation, re-runs task and safety evaluations, and stages the switch. Notice periods and migration support vary; the team must verify them for its actual service.
 
 The organizations that handle this well are the ones that treated their evaluation plan, their monitoring, and their deployment pipeline as living infrastructure from the start, exactly this chapter's argument, rather than a one-time launch checklist. A migration is just another deployment, and everything from @sec-15-2's gradual rollout strategies applies directly.
 
@@ -116,8 +126,8 @@ The organizations that handle this well are the ones that treated their evaluati
 
 ## Further Reading
 
-- Any current state-of-the-industry report from a major AI research organization (search for the most recent one, these are typically published annually and are a good single-source snapshot of where the field's frontier actually sits).
-- Return to your Chapter 8 research methods, and to the specific sources your Chapter 8 literature review surfaced, they're a better guide to this book's own "frontier" section than any fixed reading list could be by the time you're reading this.
+- *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning* (2025). A dated 2025 reasoning-model report; evaluate benchmark scope and reproduction details. [@deepseekr1]
+- *The Curse of Recursion: Training on Generated Data Makes Models Forget* (2023). A research result about recursive synthetic training under studied conditions, not proof that all synthetic data is harmful. [@synthetic]
 
 ---
 
@@ -125,7 +135,7 @@ The organizations that handle this well are the ones that treated their evaluati
 
 ### Key Takeaways
 
-- Production architecture, microservices, gradual deployment strategies, and layered monitoring, is what separates a system that works in a demo from one that holds up under real, unpredictable use.
+- Production needs measured reliability, deployment controls, and monitoring; a modular monolith or microservices can support these goals.
 - Canary deployment and feature flags both trade deployment speed for real risk reduction, worth the added complexity once real users are actually depending on a system.
 - Monitoring needs to span technical, AI-specific, and business dimensions together, not just whichever is easiest to measure.
 - A deployed system's maintenance never really ends: model drift, provider changes, and evolving regulation are all ongoing, not one-time launch concerns.

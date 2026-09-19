@@ -42,7 +42,7 @@ By the end of this chapter, you will be able to:
 | **Reflexion / Self-Correction** | A pattern where an agent evaluates its own prior attempt and revises its approach before trying again | An agent that reviews a failed code execution and adjusts its next attempt |
 | **Orchestration** | The logic that manages an agent's loop of reasoning, acting, and observing until a task is complete or abandoned | The controller that decides whether to call another tool or return a final answer |
 | **Human-in-the-Loop** | A design where a human must approve certain agent actions before they execute | Requiring explicit confirmation before an agent sends an email on your behalf |
-| **Sandboxing** | Restricting an agent's actions to an isolated environment where mistakes can't cause real-world harm | Letting an agent execute code in a container with no access to production systems |
+| **Sandboxing** | Restricting an agent's actions to an isolated environment to reduce access and potential harm; isolation can fail or be misconfigured | Letting an agent execute code in a container with no access to production systems |
 | **Permission Scoping** | Limiting exactly which tools and data an agent can access, following the principle of least privilege | An agent that can read a calendar but not delete events |
 | **Multi-Agent System** | An architecture where multiple specialized agents collaborate, each handling part of a larger task | One agent researches, another drafts, a third fact-checks |
 | **Goal Hijacking** | An attack where malicious input redirects an agent's actions away from its intended task | A webpage an agent is browsing contains hidden text instructing it to leak data |
@@ -103,6 +103,8 @@ Once a model can call tools, the next design question is: how does it decide *wh
 
 ### ReAct: Reasoning and Acting Together
 
+ReAct is a research pattern with task-specific results, not a universal reliability guarantee. Its textual reasoning trace is generated text. Reflexion uses feedback and verbal memory rather than necessarily changing model weights; passing one test is not proof of correctness. [@react; @reflexion; @unfaithful]
+
 **ReAct** interleaves explicit reasoning with tool calls, one step at a time. The model reasons about what it needs, takes one action, observes the result, then reasons again about what to do next, rather than trying to plan the whole task in advance. For a question like "Is the flagship product cheaper on our site or a competitor's right now," a ReAct agent might reason: "I need our current price," call a tool, observe the result, reason: "Now I need the competitor's price," call another tool, observe that result, then finally reason its way to an answer.
 
 The appeal of ReAct is its adaptability: because each step only commits to the *next* action rather than the whole plan, it handles surprises gracefully, if the first tool call reveals something unexpected, the agent's next reasoning step can adapt.
@@ -119,7 +121,7 @@ The trade-off is brittleness: if step two reveals that the original plan doesn't
 
 *Proposed Figure 5.2: Three agent architectures compared — ReAct's step-by-step loop, plan-and-execute's upfront plan, and Reflexion's revise-and-retry cycle*
 
-In practice, most production agent systems combine elements of these patterns rather than picking exactly one, and the "best" architecture is really a question of which failure mode (rigidity vs. unpredictability vs. over-trusting self-assessment) you're least willing to tolerate for your specific task.
+A practical design can combine elements of these patterns rather than picking exactly one, and the "best" architecture is really a question of which failure mode (rigidity vs. unpredictability vs. over-trusting self-assessment) you're least willing to tolerate for your specific task.
 
 ---
 
@@ -139,7 +141,7 @@ A capable model with badly designed tools will still perform badly, which makes 
 
 Some tasks are more naturally split across several specialized agents than handled by one generalist. A research task might involve one agent that searches, one that synthesizes findings, and one that fact-checks the synthesis against the original sources, each with a narrower job than an all-purpose agent would have, and each individually easier to evaluate and constrain.
 
-The appeal is real: specialization can improve quality, and narrower agents are easier to sandbox and permission individually. The cost is also real: coordination between agents introduces new failure modes (agents can disagree, get stuck waiting on each other, or compound each other's errors), and debugging a multi-agent trajectory is considerably harder than debugging a single agent's. For most student projects, and for a great many production systems, a single well-designed agent with well-scoped tools outperforms a multi-agent system that adds coordination complexity without a task that actually needs the specialization.
+The appeal is real: specialization can improve quality, and narrower agents are easier to sandbox and permission individually. The cost is also real: coordination between agents introduces new failure modes (agents can disagree, get stuck waiting on each other, or compound each other's errors), and debugging a multi-agent trajectory is considerably harder than debugging a single agent's. For most student projects, and for a great many production systems, a single well-designed agent with well-scoped tools is a useful baseline against which to test any benefit from multi-agent coordination.
 
 ---
 
@@ -154,6 +156,8 @@ A plain chatbot's worst-case failure from adversarial input is generating text y
 This is not a hypothetical concern reserved for advanced systems. Any agent that reads content from an untrusted source (a webpage, a user-uploaded document, an incoming email) as part of deciding what action to take is exposed to this risk by design, and the exposure scales directly with how much the agent is permitted to do.
 
 ### Designing for Containment, Not Just Correctness
+
+Enforce permission checks on every tool call in the controller, bind approval to the exact action and arguments, restrict network egress and filesystem access, and apply step/time/spend budgets. A plan or tool description is not an authorization mechanism. [@indirectinjection; @nistrmf]
 
 Three practices, all introduced briefly above, deserve to be named together here because they form your actual defense:
 
@@ -173,7 +177,7 @@ Chapter 12 covers the technical alignment problem in depth, but it's worth namin
 
 ## The Practical Reality {#sec-5-7}
 
-It's worth being honest about where agent technology actually stands, separate from how it's often marketed. Agents perform reliably today on tasks that are well-scoped, have a small number of tools, and involve actions that are either low-stakes or easily reversible: looking things up, drafting content for human review, executing well-defined multi-step workflows in a narrow domain. They perform far less reliably on open-ended, long-horizon tasks requiring many correct decisions in a row, on tasks where a single tool-selection mistake compounds into a badly wrong outcome, and on tasks where "success" is genuinely ambiguous rather than checkable.
+It's worth being honest about where agent technology actually stands, separate from how it's often marketed. Reliability must be measured on the intended tasks; well-scoped workflows are more tractable to evaluate than open-ended ones. Candidate tasks include those that are well-scoped, have a small number of tools, and involve actions that are either low-stakes or easily reversible: looking things up, drafting content for human review, executing well-defined multi-step workflows in a narrow domain. They perform far less reliably on open-ended, long-horizon tasks requiring many correct decisions in a row, on tasks where a single tool-selection mistake compounds into a badly wrong outcome, and on tasks where "success" is genuinely ambiguous rather than checkable.
 
 The gap between demo and production is real and it matters for your design choices in this chapter: a compelling demo often works because it was run a handful of times by someone who knew what to expect. A production agent runs thousands of times against messy, unexpected real-world input, which is exactly where narrow scoping, legible failure, and human checkpoints earn their keep.
 
@@ -197,9 +201,9 @@ That's the shape of your Chapter 5 milestone.
 
 ## Case Study: Klarna's AI Customer Service Agent
 
-In 2024, the fintech company Klarna deployed an AI assistant to handle customer service, and it's a genuinely useful case study precisely because it's real, deployed at scale, and public about its results rather than a research demo. The assistant handled a substantial share of Klarna's customer service chats, work equivalent to a large number of full-time human agents, and was reported to resolve issues faster than the human-staffed process it partly replaced, while also reducing repeat contacts, a sign the resolutions were actually sticking, not just closing tickets quickly.
+In a 27 February 2024 company announcement, Klarna reported 2.3 million conversations in its assistant's first month, representing two-thirds of its customer-service chats. It also reported faster resolution and fewer repeat inquiries. These are dated, self-reported operational claims, not an independent causal evaluation or a description of the company's current staffing or service quality. [@klarna]
 
-What makes this a good agent case study, rather than just a chatbot one, is that it didn't simply answer questions, it took actions within defined boundaries: processing refunds, handling returns, adjusting orders, the kind of consequential, real-world actions this chapter has centered on throughout. Klarna scoped those actions carefully rather than giving the assistant unrestricted account access, the narrow-tool-design principle from @sec-5-4 at production scale.
+The announcement describes support for tasks including refunds and returns, making it relevant to tool-enabled service workflows. It does not establish the internal permission architecture, the autonomy of every transaction, or the degree of human involvement. Narrow tools and approval controls are this chapter's design recommendations, not verified facts about Klarna's implementation. [@klarna]
 
 The instructive part for your own design work isn't the specific efficiency numbers, those will be dated by the time you read this. It's the shape of the deployment: a narrow, well-defined, high-volume task; clearly scoped actions rather than open-ended autonomy; and a domain (customer service refunds and returns) where mistakes are costly but bounded and recoverable, exactly the profile @sec-5-1 argues is where agents are strongest today.
 
@@ -207,13 +211,13 @@ The instructive part for your own design work isn't the specific efficiency numb
 
 1. At what point does an AI agent's autonomy require mandatory human oversight? Who should get to make that call, the engineering team, the company's leadership, a regulator?
 2. If an agent causes harm through a sequence of individually reasonable-looking actions, none of which was obviously wrong on its own, who is responsible: the developer who built the agent, the company that deployed it, or the user who approved its actions?
-3. Klarna's deployment succeeded in a domain with clear, checkable outcomes (was the refund processed correctly?). What features of a domain make it a poor fit for early agent deployment, even if the underlying model is highly capable?
+3. Klarna reported results in a domain with some checkable outcomes (was the refund processed correctly?). What features of a domain make it a poor fit for early agent deployment, even if the underlying model is highly capable?
 
 ## Further Reading
 
-- Yao, S., et al. (2022). "ReAct: Synergizing Reasoning and Acting in Language Models" — The paper that introduced the ReAct pattern covered in @sec-5-3.
-- Park, J. S., et al. (2023). "Generative Agents: Interactive Simulacra of Human Behavior" — A widely cited exploration of what emerges when multiple agents interact over time, relevant background for @sec-5-5.
-- Shinn, N., et al. (2023). "Reflexion: Language Agents with Verbal Reinforcement Learning" — The paper behind the self-correction pattern in @sec-5-3.
+- *ReAct: Synergizing Reasoning and Acting in Language Models* (2022). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@react]
+- *Generative Agents: Interactive Simulacra of Human Behavior* (2023). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@generativeagents]
+- *Reflexion: Language Agents with Verbal Reinforcement Learning* (2023). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@reflexion]
 
 ---
 

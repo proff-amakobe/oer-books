@@ -24,7 +24,7 @@ By the end of this chapter, you will be able to:
 | **Term** | **Definition** | **Example/Context** |
 |---|---|---|
 | **Retrieval-Augmented Generation (RAG)** | An approach combining information retrieval with text generation, grounding responses in retrieved content | A support bot that answers from your company's actual documentation |
-| **Vector Database** | A database optimized for storing and searching high-dimensional embeddings | Pinecone, Weaviate, Chroma, FAISS |
+| **Vector Database** | A database optimized for storing and searching high-dimensional embeddings | Database services and vector-search libraries; FAISS is a similarity-search library, not a complete database |
 | **Embeddings** | Dense vector representations that capture the semantic meaning of text | Converting "artificial intelligence" into a vector like [0.2, -0.1, 0.8, ...] |
 | **Semantic Search** | Finding information based on meaning rather than exact keyword matches | Searching "car problems" surfaces results about "automotive issues" |
 | **Document Chunking** | Breaking large documents into smaller, manageable pieces for processing | Splitting a 50-page report into ~500-word chunks |
@@ -42,9 +42,11 @@ By the end of this chapter, you will be able to:
 
 ## Understanding Retrieval-Augmented Generation {#sec-6-1}
 
+Lewis and colleagues evaluated a specific retrieval-augmented architecture; today the term also covers many retrieve-then-prompt systems. Retrieval can improve source access but cannot guarantee correctness, current information, or faithful citation. [@lewis2020rag; @ragsurvey]
+
 ### The Knowledge Problem in LLMs
 
-Four limitations, all touched on in Chapter 1, motivate RAG directly. **Knowledge cutoff**: a model trained through a certain date simply has no information about anything after it. **Private information**: a general-purpose model has never seen your company's internal documents, and never will, unless you give it access at the moment you ask. **Factual accuracy**: even within its training data, a model can hallucinate specific facts, dates, or statistics with total confidence. **Dynamic information**: anything that changes frequently, prices, news, live data, needs a live source, not a static training run.
+Four limitations, all touched on in Chapter 1, motivate RAG directly. **Knowledge cutoff**: parametric knowledge may be stale, and a reported cutoff is not a complete inventory of what the model knows. **Private information**: a general-purpose model has never seen your company's internal documents, unless they were included in training, supplied as context, or accessed through tools. **Factual accuracy**: even within its training data, a model can hallucinate specific facts, dates, or statistics with total confidence. **Dynamic information**: anything that changes frequently, prices, news, live data, needs a live source, not a static training run.
 
 ### The Two-Stage Architecture
 
@@ -58,7 +60,7 @@ The benefits follow directly from this structure: **accuracy** grounded in speci
 
 ### Understanding Embeddings
 
-An embedding, introduced conceptually in Chapter 1, transforms text into a high-dimensional vector that captures semantic meaning: related concepts cluster together in that vector space, which is exactly what makes similarity search possible. A good embedding model produces vectors that are consistent (the same text always maps to the same vector), dimensionally reasonable (typically a few hundred to a couple thousand dimensions), and genuinely sensitive to context and grammar, not just keyword overlap.
+An embedding maps text to a numerical vector used by a similarity function. Semantic proximity is learned and task-dependent, not a guarantee that relevant documents are nearest. Reproducible vectors require a fixed model, tokenizer, preprocessing, and inference configuration; changing the embedding model generally requires re-embedding and rebuilding the index. Evaluate dimensions and similarity settings on your corpus. [@ragsurvey; @faiss]
 
 General-purpose embedding models work well across broad content; domain-specific embedding models (tuned on scientific papers, legal text, or source code, for instance) often outperform general models within their specific domain, a trade-off worth weighing the same way you weighed general-purpose versus specialized generation models back in Chapter 2.
 
@@ -74,11 +76,13 @@ Real-world content arrives in messy, heterogeneous forms, PDFs, web pages, offic
 
 ### The Chunking Decision
 
-Chunking, how you split a long document into retrievable pieces, is one of the highest-leverage and most underrated design decisions in a RAG system. **Fixed-size chunking** (split every N tokens) is simple and predictable but can carve a sentence, or an idea, in half. **Semantic chunking** splits on natural boundaries, sentences, paragraphs, sections, preserving meaning at the cost of more complex implementation. **Overlapping chunks**, typically 10–20% overlap between adjacent pieces, help ensure information near a chunk boundary isn't lost entirely. **Hierarchical chunking** indexes a document at multiple levels at once, document, section, paragraph, letting retrieval choose the right granularity for a given query.
+Chunking, how you split a long document into retrievable pieces, is one of the highest-leverage and most underrated design decisions in a RAG system. **Fixed-size chunking** (split every N tokens) is simple and predictable but can carve a sentence, or an idea, in half. **Semantic chunking** splits on natural boundaries, sentences, paragraphs, sections, preserving meaning at the cost of more complex implementation. **Overlapping chunks**, for example 10–20% overlap as an illustrative starting experiment, not a default requirement, between adjacent pieces, help ensure information near a chunk boundary isn't lost entirely. **Hierarchical chunking** indexes a document at multiple levels at once, document, section, paragraph, letting retrieval choose the right granularity for a given query.
 
 There is no universally correct chunk size; a legal contract and a customer support FAQ have genuinely different natural units, which is exactly why this decision belongs in your project's design document, reasoned through for your specific domain, rather than borrowed as a default.
 
 ## Advanced Retrieval Strategies {#sec-6-4}
+
+BM25 is a lexical ranking function using term frequency, inverse document frequency, and length normalization; it is not simply exact-match filtering. Combine lexical and dense scores only after calibration, or use rank fusion. Reranking and query expansion can also hurt: evaluate candidate recall, latency, and query drift. [@irbook; @ragsurvey]
 
 **Hybrid search** combines semantic similarity (which understands meaning but can miss an exact required term, a legal citation, a product SKU) with keyword search like BM25 (which is precise about exact terms but blind to paraphrase), weighted together for results that are both meaning-aware and precise where precision matters.
 
@@ -88,11 +92,15 @@ There is no universally correct chunk size; a legal contract and a customer supp
 
 ## Context Assembly and Grounded Generation {#sec-6-5}
 
+Position effects were measured on particular tasks and models, not established as a universal ordering rule. Test ordering and context length on held-out queries. Treat retrieved text as untrusted and enforce permissions before it reaches the generator; a grounding instruction is not an access control. [@lostmiddle; @indirectinjection]
+
 Retrieving the right chunks is only half the job; what you do with them before generation matters just as much. **Information selection** decides how many chunks to include and how to avoid redundant, overlapping content. **Context ordering** matters too, most models weight information differently depending on its position, so putting the most relevant material first (or, for some models, first and last) is not a cosmetic choice.
 
 **Grounded generation** depends heavily on prompt design, exactly the discipline from Chapter 3 applied to a new problem: instructing the model explicitly to use only the provided information, to cite sources in a specified format, and, critically, to say so clearly when the retrieved context doesn't actually contain an answer, rather than falling back on its parametric memory and quietly reintroducing the hallucination risk RAG was supposed to solve.
 
 ## Evaluating RAG Systems {#sec-6-6}
+
+Define relevance judgments and the retrieval unit (document or chunk) first. Recall@K divides relevant retrieved items by all judged relevant items; precision@K divides by K when K results are returned. MRR averages the reciprocal rank of the first relevant result, assigning zero when none appears. NDCG discounts graded relevance by rank and normalizes against an ideal ranking under the same cutoff and gain convention. State how unjudged documents and zero-relevance queries are treated. Faithfulness to a source is separate from whether that source is true. [@irbook]
 
 RAG evaluation, covered in full in Chapter 10, has two halves that need separate attention. **Retrieval quality** is measured with recall@K (what fraction of the truly relevant documents appear in the top K results) and precision@K (what fraction of the top K results are actually relevant), alongside ranking-quality metrics like MRR and NDCG. **Generation quality**, given good retrieval, asks whether the response is faithful to what was retrieved, whether it actually addresses the query, and whether its citations are accurate, three genuinely different failure modes that a single "was this a good answer?" rating would blur together.
 
@@ -116,7 +124,7 @@ Rather than building a document-ingestion pipeline, vector store, and reranking 
 
 ## Case Study: How Glean Built Enterprise Search with RAG
 
-Glean built an enterprise search and AI assistant product around exactly the problem this chapter is built around: employees at a company have questions whose answers exist somewhere across dozens of disconnected internal systems, wikis, chat history, documents, tickets, but no single search box that spans all of them well. Glean's approach connects to those internal sources, builds a unified, permission-aware index across them, and uses retrieval-augmented generation to answer employee questions grounded in the company's own, current information, not the model's general training knowledge.
+Glean's documentation, checked 2026-09-18, describes enterprise search across connected sources and enforcement of source permissions in search results. This is a firsthand description of product behavior, not an independent security audit. Its relevance to RAG design is the need to join retrieval quality with authorization; connector configuration, indexing updates, and permission synchronization still require validation. [@glean]
 
 The permission-aware part is the detail most worth dwelling on for your own design work. A naive RAG system indexes everything and retrieves whatever seems most relevant, but in an enterprise context, "most relevant" and "this specific user is allowed to see" are two different filters that both have to apply before a chunk ever reaches the generation stage. That's not a generation-quality problem at all, it's a retrieval-and-access-control problem, and it's exactly the kind of design consideration that separates a RAG demo from a RAG system you could actually deploy inside a real organization. If your own project's domain involves any access-sensitive information, this is worth addressing explicitly in your design document, not as an afterthought.
 
@@ -128,8 +136,8 @@ The permission-aware part is the detail most worth dwelling on for your own desi
 
 ## Further Reading
 
-- Lewis, P., et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" — The paper that introduced the RAG approach this chapter is built around.
-- Gao, Y., et al. (2023). "Retrieval-Augmented Generation for Large Language Models: A Survey" — A comprehensive map of the RAG design space, useful once you're ready to go deeper than this chapter.
+- *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks* (2020). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@lewis2020rag]
+- *Retrieval-Augmented Generation for Large Language Models: A Survey* (2023). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@ragsurvey]
 
 ---
 

@@ -1,6 +1,6 @@
 # Title and subtitle options
 
-Working title: **Generative AI**. The configured subtitle remains **TEMPORARY — pending author approval**.
+Working title: **Generative AI**. The approved subtitle is **Foundations, Systems, Evaluation, and Responsible Deployment** (Phase 1, 2026-09-18). The options below are retained as editorial history.
 
 Based on all fifteen chapters, three options for author selection:
 

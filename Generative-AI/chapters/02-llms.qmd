@@ -2,6 +2,8 @@
 
 ## Introduction
 
+**Illustrative scenario.** Sarah, the organizations in the size examples, and their costs, timings, and outcomes are fictional teaching assumptions, not clinical evidence, vendor quotations, or reported company results. Medical deployment requires domain-specific validation and professional oversight.
+
 Sarah, a data scientist at a healthcare startup, was frustrated. Her AI-powered patient triage system worked brilliantly in testing; it could answer medical questions, understand symptoms, and provide helpful guidance. Then came production day.
 
 Within hours, problems emerged. Simple questions like "What's a normal temperature?" were taking eight seconds and costing \$0.03 each, using the company's most powerful (and expensive) AI model for what should be instant, cheap answers. Meanwhile, complex diagnostic questions were being routed to the fast but limited model, producing oversimplified responses that missed important nuances.
@@ -10,7 +12,7 @@ The monthly API bill projection: \$47,000. For 50,000 queries.
 
 Sarah's CTO was blunt: "We can't ship this. Figure out what's wrong or we're pulling the plug."
 
-That weekend, Sarah dove into something she'd previously skipped: understanding how these AI models actually worked under the hood. Why were there so many different models? What made GPT-4 cost 20 times more than GPT-3.5 Turbo? How could she tell which model was right for which task?
+That weekend, Sarah dove into something she'd previously skipped: understanding how these AI models actually worked under the hood. Why were there so many different models? What could make one model deployment cost much more than another? How could she tell which model was right for which task?
 
 As she studied transformer architecture, attention mechanisms, and model training processes, everything clicked. The models weren't mysteriously different, they had fundamentally different designs, training approaches, and capabilities. More importantly, she realized she could build a system that automatically routed each query to the optimal model based on its complexity and requirements.
 
@@ -42,40 +44,40 @@ By the end of this chapter, you will be able to:
 
 | **Term** | **Definition** | **Example/Context** |
 |------------------------|------------------------|------------------------|
-| **Transformer** | The neural network architecture that revolutionized AI, using attention mechanisms to process sequences in parallel rather than sequentially | The "T" in GPT; introduced in 2017's "Attention Is All You Need" paper |
+| **Transformer** | The neural network architecture that revolutionized AI, using attention mechanisms to process sequences in parallel rather than sequentially | The "T" in GPT; introduced in 2017's "Attention Is All You Need" paper [@vaswani2017attention] |
 | **Attention Mechanism** | A technique that allows models to weigh the importance of different parts of the input when processing each element | When processing "it" in a sentence, attention determines whether "it" refers to "trophy" or "suitcase" |
-| **Self-Attention** | A specific form of attention where the model compares each word to every other word in the same sequence to understand relationships | Analyzing "The animal didn't cross the street because it was too big" to determine "it" = "animal" |
-| **Multi-Head Attention** | Running multiple attention mechanisms in parallel, each specializing in different types of relationships (syntax, semantics, references) | GPT-3 uses 96 attention heads per layer, each learning different linguistic patterns |
+| **Self-Attention** | A specific form of attention where tokens attend to allowed positions in the same sequence; causal masks exclude future tokens | Analyzing "The animal didn't cross the street because it was too big" to determine "it" = "animal" |
+| **Multi-Head Attention** | Running multiple attention mechanisms in parallel, using distinct learned projections; specialization is not prescribed | The largest 175B GPT-3 configuration has 96 heads per layer [@gpt3] |
 | **Encoder** | The part of a transformer that processes and understands input, building rich representations | BERT is encoder-only; excels at understanding and classification tasks |
 | **Decoder** | The part of a transformer that generates output based on learned representations | GPT models are decoder-only; specialized for text generation |
-| **Pre-training** | The initial training phase where models learn language patterns from massive datasets by predicting the next token | GPT-3 trained on \~570GB of text over several months |
+| **Pre-training** | The initial training phase where models learn language patterns from massive datasets by predicting the next token | The GPT-3 report describes its data mixture and training setup [@gpt3] |
 | **Fine-tuning** | Additional training on specific tasks or domains after pre-training to specialize the model | Training a general model on medical data to create a healthcare AI assistant |
-| **RLHF (Reinforcement Learning from Human Feedback)** | Training technique where humans compare model outputs and the model learns to produce responses that align with human preferences | Used to make ChatGPT helpful, honest, and harmless by learning from human rankings |
+| **RLHF (Reinforcement Learning from Human Feedback)** | Training technique where humans compare model outputs and the model learns to produce responses that align with human preferences | Used to make ChatGPT helpful, honest, and harmless by learning from human rankings [@rlhf] |
 | **Inference** | The process of using a trained model to generate predictions or outputs | What happens when you send a prompt to ChatGPT and get a response |
 | **Autoregressive Generation** | Building outputs one token at a time, where each new token depends on all previous tokens | "Machine" → "learning" → "is" → "a" → "field..." (each word informed by all previous words) |
-| **Temperature** | A parameter controlling randomness in generation; lower = more deterministic, higher = more creative | Temperature 0.0 for factual answers; 1.0+ for creative writing |
-| **Parameters** | The learned weights in a neural network that determine its behavior; more parameters generally mean more capability | GPT-3: 175 billion parameters; GPT-4: \~1.7 trillion parameters |
-| **Context Window** | The maximum amount of text (in tokens) a model can process in a single interaction | GPT-3.5: 4K tokens (\~3K words); Claude 2: 100K tokens (\~75K words) |
-| **Latency** | The time between sending a request and receiving the first token of the response | Small models: \<1 second; Large models: 5-8 seconds |
-| **Throughput** | The number of tokens or requests a system can process per unit time | Haiku processes \~1000 tokens/second; Opus \~200 tokens/second |
+| **Temperature** | A parameter controlling randomness in generation; lower = more deterministic, higher = more creative | Temperature changes sampling, not truthfulness; supported controls vary |
+| **Parameters** | The learned weights in a neural network that determine its behavior; parameter count alone does not determine task performance | GPT-3: 175 billion parameters; GPT-4 parameter count was not disclosed in its technical report [@gpt3; @gpt4] |
+| **Context Window** | The maximum amount of text (in tokens) a model can process in a single interaction | Check the exact model/version and separate input, output, and total limits |
+| **Latency** | The time between sending a request and receiving the first token of the response | Measure time to first token and total completion latency on the target workload |
+| **Throughput** | The number of tokens or requests a system can process per unit time | Report aggregate versus per-request throughput, hardware, load, and token lengths |
 | **Model Family** | A collection of related models from the same organization, often with different sizes and capabilities | OpenAI GPT family: GPT-3.5 Turbo, GPT-4, GPT-4 Turbo |
-| **Constitutional AI** | Anthropic's approach to AI safety where models are trained to follow a set of principles (constitution) for helpful, honest, harmless behavior | Claude models use Constitutional AI to refuse harmful requests while remaining helpful |
-| **Quantization** | Reducing model precision (e.g., from 32-bit to 8-bit) to decrease memory usage and increase speed, with minimal quality loss | Running Llama 2 70B in 4-bit quantization to fit on consumer GPUs |
-| **LoRA (Low-Rank Adaptation)** | An efficient fine-tuning technique that updates only small adapter layers instead of all model weights | Fine-tuning a 7B model by updating only 0.1% of parameters |
+| **Constitutional AI** | Anthropic's approach to AI safety where models are trained to follow a set of principles (constitution) for helpful, honest, harmless behavior | Claude models use Constitutional AI to refuse harmful requests while remaining helpful [@constitutional] |
+| **Quantization** | Reducing model precision (e.g., from 32-bit to 8-bit) to reduce storage; speed and quality effects depend on hardware and method | A 70B model needs about 35 GB for 4-bit weights alone, plus runtime memory |
+| **LoRA (Low-Rank Adaptation)** | An efficient fine-tuning technique that updates only small adapter layers instead of all model weights | The trainable fraction depends on rank and which modules are adapted [@lora] |
 | **Emergent Capabilities** | Abilities that appear unexpectedly as models scale up, not explicitly programmed during training | Chain-of-thought reasoning emerged in large models without specific training for it |
-| **Scaling Laws** | Predictable relationships between model size, data size, compute, and performance | Doubling model size typically improves performance by a consistent amount |
-| **Zero-shot** | Model performs a task without any task-specific training or examples | Asking GPT-4 to translate French without providing translation examples |
-| **Few-shot** | Model learns from a small number of examples provided in the prompt | Showing 3 examples of sentiment classification, then asking it to classify new text |
-| **Prompt Engineering** | The practice of carefully crafting inputs to elicit desired outputs from language models | Adding "Let's think step by step" dramatically improves reasoning performance |
+| **Scaling Laws** | Predictable relationships between model size, data size, compute, and performance | Empirical loss trends depend on data, compute, and model scale [@scaling; @chinchilla] |
+| **Zero-shot** | Model is prompted without task demonstrations; pre-training or prior tuning may include related tasks | Asking GPT-4 to translate French without providing translation examples |
+| **Few-shot** | Model conditions on a few prompt demonstrations without updating its weights | Showing 3 examples of sentiment classification, then asking it to classify new text |
+| **Prompt Engineering** | The practice of carefully crafting inputs to elicit desired outputs from language models | Step-by-step prompting improved selected historical benchmarks; evaluate it per model [@zerocot] |
 | **System Prompt** | Instructions that set the model's behavior, role, or constraints before the conversation begins | "You are a helpful medical assistant. Always cite sources and acknowledge uncertainty." |
 | **Hallucination** | When a model generates plausible-sounding but factually incorrect information | Confidently stating that a person won an award they never received |
-| **Model Routing** | Intelligently selecting which model to use based on query complexity, cost, and performance requirements | Using Haiku for simple queries, Sonnet for moderate tasks, Opus for complex research |
+| **Model Routing** | Intelligently selecting which model to use based on query complexity, cost, and performance requirements | Route among deployments whose quality, latency, and cost you have measured |
 | **Caching** | Storing and reusing previous model outputs to reduce cost and latency for repeated or similar queries | Storing FAQ answers to avoid re-generating the same response |
-| **Fallback Strategy** | Having backup models available if the primary model fails or is unavailable | If GPT-4 is rate-limited, automatically switch to Claude Sonnet |
-| **API (Application Programming Interface)** | A standardized way to access model capabilities programmatically | OpenAI's `/v1/chat/completions` endpoint for GPT models |
-| **Batch Processing** | Processing multiple requests together for efficiency, trading immediate response for lower cost | Running 1000 document summaries overnight at 50% cost reduction |
+| **Fallback Strategy** | Having backup models available if the primary model fails or is unavailable | Use an approved compatible fallback after checking data-handling and capability constraints |
+| **API (Application Programming Interface)** | A standardized way to access model capabilities programmatically | A provider endpoint accepting a documented request schema |
+| **Batch Processing** | Processing multiple requests together for efficiency, trading immediate response for lower cost | An asynchronous batch service may trade turnaround time for lower prices; check its terms |
 | **Streaming** | Receiving model output token-by-token as it's generated rather than waiting for completion | ChatGPT showing words appear gradually rather than all at once |
-| **Rate Limiting** | Restrictions on how many requests can be made to an API in a given time period | OpenAI: 10,000 requests per minute for GPT-3.5; 500 for GPT-4 |
+| **Rate Limiting** | Restrictions on how many requests can be made to an API in a given time period | Limits depend on model, account tier, and request/token budgets [@openairelimits] |
 
 ------------------------------------------------------------------------
 
@@ -85,7 +87,7 @@ By the end of this chapter, you will be able to:
 
 Recall the statistical language models discussed in Chapter 1. It could predict the next word based on what came immediately before, like remembering the last few words of a conversation but forgetting everything else. This fundamental limitation plagued AI systems for decades.
 
-Then in 2017, a team at Google published a paper with an audacious title: "Attention Is All You Need." They introduced an architecture so elegant, so powerful, that it sparked the AI revolution we're experiencing today. That architecture was the **transformer**.
+Then in 2017, a team at Google published a paper with an audacious title: "Attention Is All You Need." They introduced an architecture so elegant, so powerful, that it sparked the AI revolution we're experiencing today. That architecture was the **transformer**. [@vaswani2017attention]
 
 ### The Cocktail Party Problem
 
@@ -95,11 +97,11 @@ To understand why transformers matter, imagine you're at a crowded cocktail part
 
 Your brain performs an incredible feat: despite the distance between words, you instantly know that "it" refers to "the project about renewable energy," not "the budget" or "the timeline." You understand that "Sarah mentioned" refers back to information from earlier in the sentence. You're simultaneously tracking multiple threads of meaning, weighing their importance, and assembling them into coherent understanding.
 
-This is **exactly** what transformers do, and what earlier AI systems couldn't.
+This is an analogy for combining context, not a claim that transformers reproduce human cognition or that earlier systems could never resolve references.
 
 ### The Sequential Processing Bottleneck
 
-Before transformers, AI systems read text like a person reading a book one letter at a time through a tiny peephole. They processed words sequentially, from left to right, maintaining a "memory" of what came before. But this memory faded with distance, and the system couldn't look ahead or simultaneously consider relationships between distant words.
+Recurrent sequence models process successive positions through a recurrent state. Bidirectional RNNs and attention-augmented recurrent models can also use wider context; it would be incorrect to say that all earlier systems only looked left or could not model distant relationships. The Transformer removed recurrence from the original sequence-transduction architecture. [@vaswani2017attention]
 
 **Example: Understanding this sentence required multiple skills that sequential systems struggled with:**
 
@@ -116,20 +118,20 @@ Sequential systems often failed this task. They might focus on "suitcase" simply
 
 ### Enter the Attention Mechanism
 
-The transformer's breakthrough was **self-attention**: every word simultaneously considers its relationship with every other word in the passage. Think of it as the difference between:
+The transformer uses **self-attention** to combine token representations at positions permitted by a mask. Encoder attention can be bidirectional; causal decoder attention cannot use later tokens. Attention predates the transformer, which made it central to an architecture without recurrence. [@vaswani2017attention] Think of it as the difference between:
 
 -   **Sequential reading**: Following a conversation by listening to one word at a time, trying to remember what came before
 -   **Attention-based reading**: Having the entire conversation spread out before you, with the ability to instantly identify which parts are relevant to understanding any specific word
 
-When processing "it" in our trophy sentence, the transformer's attention mechanism:
+For an **illustrative encoder attention row** at "it", suppose the permitted tokens receive normalized weights; these numbers are invented, not measured explanations:
 
-1.  **Examines all previous words** simultaneously
+1.  **Scores permitted token positions** simultaneously
 2.  **Calculates relevance scores**: How important is each word for understanding "it"?
-    -   "trophy": 0.85 (high relevance)
-    -   "suitcase": 0.12 (low relevance)
-    -   "brown": 0.01 (minimal relevance)
-    -   "big": 0.62 (contextually relevant)
-3.  **Creates a weighted understanding** that correctly identifies the referent
+    -   "trophy": 0.60 (high relevance)
+    -   "suitcase": 0.10 (low relevance)
+    -   "brown": 0.05 (minimal relevance)
+    -   "big": 0.15; remaining tokens together: 0.10 (contextually relevant)
+3.  **Combines value vectors using these weights**; correct reference resolution is not guaranteed. A causal decoder at "it" cannot attend to the later token "big"
 
 **Illustration unavailable.** Attention Mechanism Visualization - How transformers weigh word relationships — source artwork was not supplied. *Proposed Figure 2.1: Attention Mechanism Visualization - How transformers weigh word relationships*
 
@@ -153,7 +155,7 @@ Each specialist focuses on their expertise, then the team collaborates to build 
 -   **Head 3 (References)**: "her" → "researcher" (pronoun resolution)
 -   **Head 4 (Position)**: Tracks word order and clause relationships
 
-GPT-3 uses 96 attention heads per layer. Claude uses similar numbers. Each head specializes in different aspects of language understanding.
+The largest GPT-3 configuration has 96 attention heads per layer. The named roles above are teaching analogies, not a fixed division of labor. Do not infer undocumented Claude architecture from GPT-3. [@gpt3]
 
 **Illustration unavailable.** Multi-Head Attention - Different heads focusing on different relationship types — source artwork was not supplied. *Proposed Figure 2.2: Multi-Head Attention - Different heads focusing on different relationship types*
 
@@ -163,7 +165,7 @@ The transformer isn't just attention mechanisms, it's a carefully orchestrated s
 
 #### 1. Token Embeddings: Words as Mathematical Positions {.unnumbered}
 
-Remember from Chapter 1 how we convert words into numbers? The transformer begins by converting each token into a high-dimensional vector (typically 768 or 1,024 dimensions) that captures its meaning in mathematical space.
+Each token is mapped to a learned vector. The vector width is an architecture choice, not a universal 768- or 1,024-dimensional default; contextual representations then change through the network. [@vaswani2017attention]
 
 Think of embeddings as GPS coordinates for meaning. Just as GPS places every location on Earth into a coordinate system where nearby places have similar coordinates, embeddings place every word into a mathematical space where words with similar meanings cluster together.
 
@@ -183,12 +185,12 @@ Modern transformers stack dozens of identical layers (GPT-3 has 96 layers!), eac
 
 **Residual Connections**: Creates "shortcuts" that allow information to bypass layers, preventing degradation
 
-As information flows through these layers, understanding becomes progressively more sophisticated:
+Representations change across layers, but the following stages are a **conceptual teaching analogy**, not an empirically established assignment of functions to GPT-3 layer ranges:
 
--   **Layers 1-10**: Basic syntax and simple relationships
--   **Layers 11-40**: Complex grammatical structures and semantic relationships
--   **Layers 41-70**: Abstract reasoning and knowledge integration
--   **Layers 71-96**: Sophisticated inference and creative synthesis
+-   **Local patterns**: Basic syntax and simple relationships
+-   **Relationships**: Complex grammatical structures and semantic relationships
+-   **Integration**: Abstract reasoning and knowledge integration
+-   **Output representations**: Sophisticated inference and creative synthesis
 
 **Illustration unavailable.** Transformer Layer Stack - Progressive sophistication through depth — source artwork was not supplied. *Proposed Figure 2.3: Transformer Layer Stack - Progressive sophistication through depth*
 
@@ -200,7 +202,7 @@ The transformer solved multiple problems that had plagued AI for decades:
 
 **2. Long-Range Dependencies**: Attention mechanisms can connect words regardless of how far apart they appear in the text. The model understands that "The company, which was founded in 1985 and weathered multiple recessions, announced record profits" with equal ease.
 
-**3. Scalability**: The architecture scales beautifully with more data and computing power. Bigger transformers trained on more data consistently perform better, leading to the scaling laws we'll explore shortly.
+**3. Scalability**: Empirical pre-training loss trends motivate scaling within tested regimes, but downstream gains depend on data, compute allocation, architecture, and task. [@scaling; @chinchilla]
 
 **4. Transfer Learning**: A transformer pre-trained on general text develops broadly useful language understanding that can be fine-tuned for specific tasks with relatively little additional data.
 
@@ -234,7 +236,7 @@ Understanding transformer architecture isn't academic knowledge, it directly inf
 
 ### Looking Ahead
 
-The transformer architecture you've just learned about is the foundation for every modern LLM you'll work with. In the next section, we'll explore how these architectural components are actually trained to develop the remarkable language capabilities you experienced in Chapter 1.
+The transformer architecture you've just learned about is the foundation for the language-model examples in this book. In the next section, we'll explore how these architectural components are actually trained to develop the remarkable language capabilities you experienced in Chapter 1.
 
 But first, take a moment to appreciate what you now understand. You're no longer just a user of AI systems, you understand the fundamental innovation that makes them work. This knowledge will serve you well as we explore model selection, optimization, and orchestration in the sections ahead.
 
@@ -254,11 +256,11 @@ This is **pre-training**, where models learn the fundamental patterns of languag
 
 The numbers are almost incomprehensible:
 
--   **Dataset Size**: Trillions of tokens, roughly equivalent to millions of full-length books
--   **Training Duration**: Months of continuous training on massive computing clusters
--   **Computing Power**: Thousands of high-end GPUs working in parallel
--   **Energy Consumption**: Equivalent to powering a small city for several months
--   **Cost**: Millions to hundreds of millions of dollars for the largest models
+-   **Dataset Size**: Record tokens, deduplication, and sampling mixture from the specific technical report
+-   **Training Duration**: Depends on model, hardware, token count, and training schedule
+-   **Computing Power**: Record accelerator type, count, utilization, and training setup rather than assuming one cluster size
+-   **Energy Consumption**: Depends on hardware, training duration, utilization, and energy supply; avoid city-equivalent comparisons without measured boundaries
+-   **Cost**: Separate measured training compute from data, research, and deployment costs; do not infer an undisclosed budget
 
 **What the training data includes:**
 
@@ -336,7 +338,9 @@ Through thousands of these examples, the model learns to:
 
 #### RLHF: Aligning with Human Values
 
-Perhaps the most fascinating part of modern AI development is **Reinforcement Learning from Human Feedback (RLHF)**. Human evaluators compare different responses and indicate their preferences:
+In a common RLHF pipeline, preference comparisons train a reward model and a policy is optimized against that reward, often with a constraint limiting drift. Preferences are imperfect proxies for truth and safety. DPO instead optimizes a preference objective directly without a separate reward-model-and-RL loop; not every assistant follows one fixed training recipe. [@rlhf; @dpo]
+
+Perhaps the most fascinating part of modern AI development is **Reinforcement Learning from Human Feedback (RLHF)**. Human evaluators compare different responses and indicate their preferences: [@rlhf]
 
 ```{#tech-02-003 .technical-block .data}
 Question: "How do I resolve a conflict with my coworker?"
@@ -389,7 +393,7 @@ Why this works so well:
 -   Each token generation benefits from the model's vast pre-trained knowledge
 -   The context of your specific question guides generation
 -   All previously generated tokens inform the next choice
--   Fine-tuning ensures responses are helpful and accurate
+-   Fine-tuning can improve evaluated behavior but does not ensure accuracy or safety [@rlhf]
 
 **Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.6: Autoregressive Generation - Building responses token by token*
 
@@ -419,7 +423,7 @@ Response: "dancing with golden warmth and cheerful brightness that makes
 everything sparkle."
 ```
 
-For your research assistant, you'll typically want moderate temperature for balanced, helpful responses.
+These temperature bands and weather completions are illustrative, not measured outputs or recommended defaults. Some models expose different sampling controls. Evaluate supported settings against your task; no temperature supplies current weather information.
 
 ### Why Understanding These Phases Matters
 
@@ -429,7 +433,7 @@ This knowledge directly informs practical decisions you'll make as an AI develop
 
 **Cost Optimization**: Understanding inference costs helps you choose between different model sizes for different tasks. Simple queries don't need the most expensive models.
 
-**Performance Expectations**: Knowing how models are trained helps you understand their capabilities and limitations. Models can't reliably answer questions about events after their training cutoff, for instance.
+**Performance Expectations**: Knowing how models are trained helps you understand their capabilities and limitations. Parametric knowledge alone cannot establish newly occurring facts; current retrieved or user-supplied evidence can extend what a system can answer.
 
 **Customization Decisions**: Understanding fine-tuning helps you decide when to use existing models versus training custom variants (which we'll explore in Chapter 7).
 
@@ -469,7 +473,7 @@ They implemented a small model (Llama 2 7B) for simple queries:
 -   Cost per query: \$0.0002 (99% cheaper)
 -   Accuracy: Actually improved for simple questions (the model didn't overthink)
 
-Monthly cost for 70% of queries: \$2,800. Monthly savings: \$29,400.
+For an illustrative 30-day month: 50,000 × 30 × 70% × \$0.0002 = \$210 for the routed queries. Keeping the other 30% at their original assumed cost gives \$12,600 + \$210 = \$12,810 total, saving \$29,190 from the \$42,000 baseline.
 
 **When Small Models Excel:**
 
@@ -493,7 +497,7 @@ Monthly cost for 70% of queries: \$2,800. Monthly savings: \$29,400.
 
 ContentCraft creates marketing copy for clients. They started with small models (too simple) and large models (too expensive). Their breakthrough came with medium models:
 
-Claude 3 Sonnet provided the perfect balance:
+A hypothetical mid-budget deployment provided a useful balance (a commercial product tier does not disclose its parameter count):
 
 -   **Quality**: Professional writing that satisfied clients
 -   **Speed**: 3-second responses kept writers productive
@@ -509,7 +513,7 @@ Their head of engineering explained: "We were using a sledgehammer to hang pictu
 -   **Educational applications**: Tutoring systems with explanation
 -   **Research synthesis**: Summarizing papers and extracting insights
 
-**The Sweet Spot:** Medium models often provide 80% of large model capability at 20% of the cost, making them the practical choice for most business applications.
+**The Sweet Spot:** Determine the quality-cost frontier on your own workload. There is no universal 80/20 relationship between parameter count, capability, and price.
 
 #### Large Models (70B+ parameters): The Heavy Hitters
 
@@ -533,7 +537,7 @@ The cost was 10x higher, but for this high-stakes application, the superior perf
 -   **High-stakes decisions**: Medical, legal, or financial applications where accuracy is critical
 -   **Advanced creative tasks**: High-quality writing, complex code generation
 
-**The Premium Price Tag:** Large models cost 10-100x more than smaller alternatives, but for high-value tasks, their superior capabilities justify the expense.
+**The Premium Price Tag:** Prices are deployment-specific. A higher price or larger model does not itself establish better performance, clinical validity, or value.
 
 **Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.8: Model Size vs. Task Complexity Decision Matrix*
 
@@ -541,16 +545,16 @@ The cost was 10x higher, but for this high-stakes application, the superior perf
 
 Research has revealed fascinating patterns about how model performance scales with size:
 
-**1. Predictable Improvement**: Model performance improves predictably with scale, double the parameters and training data, and performance improves by a consistent amount.
+**1. Empirical loss trends**: Scaling studies model pre-training loss as a function of parameters, tokens, and compute within studied regimes. They do not promise constant improvements on every downstream task. [@scaling; @chinchilla]
 
-**2. Emergent Abilities**: At certain scale thresholds, new capabilities suddenly appear. Models around 100B parameters start showing abilities that smaller models simply don't have:
+**2. Emergent Abilities**: Some evaluations show abrupt gains, but the appearance of a threshold depends partly on the metric and task. There is no universal 100B-parameter boundary for the following capabilities. [@emergence; @mirage]
 
 -   Complex multi-step reasoning
 -   Sophisticated code generation
 -   Advanced creative synthesis
 -   Nuanced instruction following
 
-**3. Diminishing Returns**: Each doubling in size provides smaller improvement gains. Going from 7B to 70B parameters provides massive gains. Going from 175B to 350B provides more modest improvements.
+**3. Compute allocation**: Compare models at a specified training and inference budget. Data quality, token count, architecture, post-training, and evaluation all matter; parameter count alone does not determine returns. [@chinchilla]
 
 ### Making the Right Choice: A Decision Framework
 
@@ -580,27 +584,29 @@ Research has revealed fascinating patterns about how model performance scales wi
     -   Professional quality → Medium models
     -   Excellence required → Large models
 
-### Real-World Example: Your Research Assistant
+### Illustrative Scenario: Your Research Assistant
+
+The prices and timings below are independent hypothetical assumptions, not current provider rates or benchmarks. The labels small, medium, and large describe resource budgets; proprietary product tiers cannot establish parameter counts.
 
 Let's apply this framework to typical queries your research assistant might receive:
 
 **Query 1**: "What is the capital of France?"
 
--   **Best Choice**: Small model (Claude 3 Haiku or GPT-3.5 Turbo)
+-   **Best Choice**: Small model (a tested low-cost deployment)
 -   **Reasoning**: Simple factual query, any model knows this
 -   **Estimated Cost**: \$0.0001
 -   **Response Time**: \< 1 second
 
 **Query 2**: "Explain the main methodologies used in qualitative research"
 
--   **Best Choice**: Medium model (Claude 3 Sonnet)
+-   **Best Choice**: Medium model (a tested intermediate deployment)
 -   **Reasoning**: Requires structured explanation and domain knowledge
 -   **Estimated Cost**: \$0.003
 -   **Response Time**: 2-3 seconds
 
 **Query 3**: "Compare and contrast the epistemological foundations of positivist and interpretivist research paradigms"
 
--   **Best Choice**: Large model (GPT-4 or Claude 3 Opus)
+-   **Best Choice**: Large model (a tested higher-capability deployment)
 -   **Reasoning**: Requires sophisticated understanding and nuanced analysis
 -   **Estimated Cost**: \$0.02
 -   **Response Time**: 5-7 seconds
@@ -633,6 +639,8 @@ Understanding these trade-offs isn't just about choosing models, it's about buil
 
 ## Meeting the Model Families: A Guide to the AI Landscape {#sec-2-4}
 
+**Historical examples, 2022–2024.** These names illustrate product families and deployment choices at that time, not a current buying guide as of 2026-09-18. Availability, price, context, supported modalities, and fine-tuning must be checked for an exact version. Product tiers do not reveal parameter counts. The consultant personalities are metaphors, not benchmark findings. [@gpt4; @claude3; @llama2; @palm2; @gemini]
+
 Choosing the right LLM for your application is like assembling a team of specialists, each with unique strengths, personalities, and areas of expertise. Let's meet the major families and learn when to call on each one.
 
 ### OpenAI GPT Family: The Versatile Pioneers
@@ -641,33 +649,11 @@ OpenAI's GPT family represents the models that brought generative AI into mainst
 
 #### GPT-3.5 Turbo: The Reliable Workhorse
 
-**Personality**: The experienced professional who gets things done efficiently and accurately, without unnecessary complications or expense.
-
-**Strengths**:
-
--   **Exceptional speed**: Responses typically arrive in 1-3 seconds
--   **Cost-effective**: Roughly 10x cheaper than GPT-4 for most tasks
--   **Broad competency**: Handles writing, analysis, coding, and conversation well
--   **Reliable performance**: Consistent quality across different query types
-
-**When to Choose It**: When you need reliable, fast responses for straightforward tasks and cost efficiency matters. It's the default choice for many production applications.
-
-**Real-World Example**: A customer service chatbot handling common inquiries would use GPT-3.5 Turbo for 80% of queries, reserving more expensive models for complex cases.
+A historical example of a lower-cost hosted chat model. Its inclusion illustrates why an application might route routine work to a cheaper deployment while reserving a more capable model for difficult cases. It is not a current default recommendation. Measure quality, latency, availability, and total token cost rather than assuming a fixed response time or price ratio.
 
 #### GPT-4: The Strategic Advisor
 
-**Personality**: The senior consultant you bring in for your most challenging problems, more expensive, but capable of insights that justify the premium.
-
-**Strengths**:
-
--   **Superior reasoning**: Excels at complex logical problems and multi-step analysis
--   **Multimodal capabilities**: Can analyze images, charts, and diagrams alongside text
--   **Nuanced understanding**: Better at context, subtext, and sophisticated communication
--   **Creative excellence**: Produces higher-quality creative writing and original content
-
-**When to Choose It**: When the quality of output justifies the higher cost (typically 10-20x more expensive than GPT-3.5 Turbo), or when you need capabilities like vision that smaller models don't provide.
-
-**Real-World Example**: An architecture firm uses GPT-4 to analyze building plans and regulations, justify design decisions, and generate detailed specifications, tasks where the superior reasoning and multimodal capabilities are essential.
+The 2023 GPT-4 report describes a model accepting text and images and producing text, with evaluated strengths and limitations. Product endpoints did not necessarily expose every research capability. The report does not disclose parameter count. An illustrative architecture-firm workflow could compare plan analysis and drafting with expert review, but neither general benchmarks nor a product name validate safety-critical building decisions. [@gpt4]
 
 ### Anthropic Claude Family: The Thoughtful Analysts
 
@@ -675,73 +661,27 @@ Anthropic's Claude models are like the consulting firm known for their methodica
 
 #### Claude 3 Haiku: The Swift Analyst
 
-**Personality**: The junior analyst who's incredibly quick and efficient, perfect for routine tasks that need to be done well but don't require senior-level expertise.
-
-**Best For**:
-
--   High-volume processing (customer support, content moderation)
--   Real-time applications (chat interfaces, mobile apps)
--   Cost-sensitive deployments with tight budget constraints
-
-**Notable Feature**: Often faster than GPT-3.5 Turbo while maintaining solid performance, making it ideal for applications where every millisecond counts.
+Anthropic introduced the Claude 3 family in 2024 with Haiku positioned around speed and cost. This is a historical vendor positioning, not independent proof that it is faster than another provider on your workload. Routine support or classification are candidate evaluation tasks; include tail latency, quality, and failure handling rather than selecting solely by a tier name. [@claude3]
 
 #### Claude 3 Sonnet: The Balanced Professional
 
-**Personality**: The well-rounded consultant who provides the sweet spot between capability and cost, your go-to choice for most professional applications.
-
-**Particularly Strong At**:
-
--   **Professional writing**: Reports, proposals, business communication
--   **Research assistance**: Literature reviews, data analysis, synthesis
--   **Code analysis**: Understanding and improving existing code
--   **Clear explanations**: Breaking down complex concepts
-
-**When to Choose It**: For tasks requiring more sophistication than Haiku can provide but not necessarily demanding the premium capabilities of Opus. Many developers find Sonnet hits the "just right" balance for everyday work.
+Sonnet was positioned between Haiku and Opus in the 2024 family. Writing, code analysis, and synthesis are examples of tasks on which to compare deployments, not guaranteed specializations. A balanced product tier is a price/capability proposition and does not establish that a model has 13B–34B parameters. Keep task-specific evaluation results separate from marketing categories. [@claude3]
 
 #### Claude 3 Opus: The Senior Research Fellow
 
-**Personality**: The brilliant senior researcher you consult for your most challenging intellectual problems, expensive, but capable of insights that justify the premium.
+Opus was the highest-capability tier in the original Claude 3 launch framing. A think-tank workflow is an **illustrative scenario**, not a reported deployment: evaluate source coverage, citation accuracy, and expert judgment for policy analysis. A premium tier cannot substitute for validation in a high-stakes domain, and the historical positioning does not establish current availability or relative performance. [@claude3]
 
-**Exceptional For**:
-
--   **Complex research projects**: Academic research, policy analysis, strategic planning
--   **High-stakes decision-making**: When you need the most sophisticated analysis available
--   **Creative and analytical synthesis**: Combining multiple complex concepts
--   **Careful, thorough responses**: When quality matters more than speed or cost
-
-**Real-World Example**: A think tank uses Claude 3 Opus to analyze policy proposals, synthesizing research from hundreds of sources and identifying implications that less capable models miss.
-
-### Meta Llama Family: The Open-Source Specialists
+### Meta Llama Family: The Open-Weight Specialists
 
 Meta's Llama models are like the boutique consulting firm that shares their methodologies openly, allowing you to customize and adapt their approaches to your specific needs.
 
 #### Llama 2: The Customizable Foundation
 
-**Key Advantage**: Full access to model weights and architecture, you can run it on your own infrastructure and customize it for specific domains.
-
-**Size Options**:
-
--   **Llama 2 7B**: For applications needing decent performance with minimal resources
--   **Llama 2 13B**: The sweet spot for most custom applications
--   **Llama 2 70B**: When you need large-model capabilities with full control
-
-**Ideal Scenarios**:
-
--   **Custom applications**: When you need specialized behavior or domain expertise
--   **Privacy-sensitive tasks**: Healthcare, legal, or confidential business applications where data can't leave your environment
--   **Long-term projects**: When building sustained AI capabilities makes sense
--   **Research and experimentation**: Academic work or AI development projects
+Meta's 2023 Llama 2 release included 7B, 13B, and 70B variants. These disclosed sizes make historical size comparisons possible. Available weights permit self-hosting and customization subject to the release license and hardware requirements. **Open-weight** is more precise than assuming unrestricted open-source rights; downloading weights does not by itself provide privacy, security, or complete training-data transparency. Evaluate the actual deployment. [@llama2]
 
 #### Code Llama: The Programming Specialist
 
-**Specialized For**:
-
--   Code generation across Python, JavaScript, Java, C++, and more
--   Intelligent code completion and autocompletion
--   Bug detection and fix suggestions
--   Code explanation and documentation
-
-**Perfect For**: Development tools, educational platforms, code review systems, and rapid prototyping.
+Code Llama is a 2023 code-focused model family built on Llama 2. The report evaluates code generation and related capabilities. Code completion, explanation, and review assistance are possible applications, but generated code still needs tests, security review, and license/provenance consideration. These historical results do not establish current superiority over other coding systems. [@codellama]
 
 ### Google PaLM/Gemini Family: The Multilingual Innovators
 
@@ -749,23 +689,11 @@ Google's models bring deep expertise in multiple languages and cutting-edge mult
 
 #### PaLM 2: The Reasoning Powerhouse
 
-**Distinctive Strengths**:
-
--   **Mathematical reasoning**: Particularly strong at complex calculations and logical proofs
--   **Multilingual excellence**: Natural fluency across many languages
--   **Scientific analysis**: Strong performance on technical and scientific tasks
-
-**Best For**: International businesses, scientific computing, educational platforms, and complex reasoning tasks.
+The 2023 PaLM 2 report describes multilingual and reasoning evaluations relative to its predecessor. It is a historical research reference, not a current product recommendation. For multilingual or scientific work, assess each language, domain, and task rather than translating a report's aggregate benchmark into a blanket claim of fluency or mathematical reliability. [@palm2]
 
 #### Gemini: The Multimodal Future
 
-**Breakthrough Capabilities**:
-
--   **Integrated multimodal**: Native ability to process text and images together
--   **Advanced reasoning**: Competitive with the best text-only models
--   **Versatile applications**: From document analysis to creative projects
-
-**Emerging Use Cases**: Document analysis with charts and images, educational tools, business intelligence, and multimedia content creation.
+The 2023 Gemini report describes a multimodal model family evaluated across text, images, audio, and video. Treat this as a historical architecture example. The modalities supported by an actual application depend on its model version and endpoint; integrated multimodality does not guarantee accurate chart reading, spatial reasoning, or document analysis. [@gemini]
 
 **Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.9: Model Family Comparison Matrix - Strengths and specializations*
 
@@ -777,22 +705,22 @@ Consider these factors when choosing between model families:
 
 1.  **Task Complexity**
 
-    -   Simple → Haiku, GPT-3.5 Turbo, or Llama 2 7B
-    -   Moderate → Sonnet, GPT-3.5 Turbo, or Llama 2 13B
-    -   Complex → Opus, GPT-4, or Llama 2 70B
+    -   Simple → a validated low-cost model or a deterministic non-LLM solution
+    -   Moderate → a deployment meeting the task rubric within budget
+    -   Complex → a stronger evaluated model with appropriate human review
 
 2.  **Special Requirements**
 
-    -   Multimodal → GPT-4, Gemini
-    -   Coding → Code Llama, GPT-4, Sonnet
-    -   Multilingual → PaLM 2, GPT-4, Gemini
-    -   Privacy/customization → Llama 2
+    -   Multimodal → a version and endpoint supporting the required inputs and outputs
+    -   Coding → a model evaluated on representative code tasks
+    -   Multilingual → evidence for each target language and task
+    -   Privacy/customization → suitable deployment controls, license, and adaptation support
 
 3.  **Budget and Scale**
 
-    -   Cost-sensitive → Haiku, GPT-3.5 Turbo, self-hosted Llama
-    -   Balanced → Sonnet, PaLM 2
-    -   Quality-first → Opus, GPT-4
+    -   Cost-sensitive → measured total cost, including hosting and operations
+    -   Balanced → measured quality, latency, and cost trade-offs
+    -   Quality-first → task-specific evidence, error analysis, and oversight
 
 ### The Evolving Landscape
 
@@ -816,7 +744,7 @@ Return to Sarah's story from the opening of this chapter. Her fix wasn't a smart
 
 **Routing logic.** Once you can estimate complexity, the routing decision itself is usually simple by design, a small number of tiers (fast/cheap, balanced, powerful) rather than a continuous optimization. Simplicity here is a feature: a routing system nobody can explain is a routing system nobody will trust when it makes an expensive mistake.
 
-**Caching and monitoring as a safety net.** No complexity estimate is perfect. Caching catches the queries you'll see again (often 30–60% of real traffic in production systems), and monitoring catches the cases where your complexity estimate was simply wrong, so you can correct the design rather than silently overpaying or under-delivering forever.
+**Caching and monitoring as a safety net.** No complexity estimate is perfect. Caching can reuse eligible repeated queries (measure the hit rate on your own traffic), and monitoring catches the cases where your complexity estimate was simply wrong, so you can correct the design rather than silently overpaying or under-delivering forever.
 
 *Proposed Figure 2.10: The three-layer decision a model router makes: analyze, route, monitor*
 
@@ -826,7 +754,7 @@ Rather than implementing all of this, your task is to design it, on paper, for y
 
 1. What are the two or three strongest signals of query complexity in your domain?
 2. What tiers of model capability do you actually need, and which model or provider fills each tier?
-3. Where would caching help most, and where would it be actively wrong (a research assistant answering "what's today's exchange rate?" should never serve a cached answer)?
+3. Where would caching help most, and where would it be actively wrong (a research assistant answering "what's today's exchange rate?" needs an explicit freshness policy before serving a cached answer)?
 4. What single metric would tell you, within a week of launch, that your routing decisions were wrong?
 
 The logic itself, once you've thought it through, is small enough to sketch in a few lines. Here is the shape of that decision, not a working implementation, just enough to make the design concrete:
@@ -835,7 +763,7 @@ The logic itself, once you've thought it through, is small enough to sketch in a
 # Conceptual sketch of a routing decision — not a full implementation
 def choose_model(complexity_score, cache_hit):
     if cache_hit:
-        return "cache"          # free, instant, but only ever a repeat query
+        return "cache"          # eligible cached result; lookup and validation still have costs
     if complexity_score <= 3:
         return "fast_cheap_model"
     if complexity_score <= 7:
@@ -857,13 +785,15 @@ When you started this chapter, transformers, training phases, and model families
 
 ### Key Takeaways
 
-1.  **Architecture matters**: The transformer's attention mechanism enables capabilities that previous architectures couldn't achieve.
+1.  **Architecture matters**: Attention provides direct context interactions and parallel training opportunities; it is not the only architecture capable of modeling language. [@vaswani2017attention]
 2.  **Training shapes capability**: Pre-training, fine-tuning, and RLHF work together to create helpful, capable AI systems, and each phase leaves a different kind of fingerprint on model behavior.
 3.  **Size isn't everything**: The right model for a task balances complexity, speed, cost, and capability, not raw parameter count.
 4.  **Intelligent routing is a design problem before it's a code problem**: matching query complexity to model capability is where the real savings and the real risk both live.
 5.  **Specific models age quickly; the reasoning doesn't**: build your judgment around trade-offs, not this year's leaderboard.
 
 ## Case Study: Bloomberg's Domain-Specific Financial Model
+
+**Historical research report, 2023.** BloombergGPT was a 50B-parameter model trained on financial and general text; its authors reported advantages on their financial evaluation suite. These are task- and comparator-specific results, not a claim of universal superiority or proof that a new domain requires training from scratch. [@bloomberg]
 
 Bloomberg didn't reach for the largest general-purpose model available when it built BloombergGPT, its model for financial-domain tasks like sentiment analysis, named-entity recognition, and financial question-answering. Instead, it trained a purpose-built model on a mixture of general text and a carefully curated corpus of financial documents, filings, and news spanning decades.
 
@@ -879,52 +809,33 @@ The result illustrates exactly the trade-off this chapter has been building towa
 
 ### Academic Papers
 
-1.  **Vaswani, A., et al. (2017). "Attention Is All You Need"**
+- *Attention Is All You Need* (2017). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@vaswani2017attention]
 
-    -   The original transformer paper. Dense but foundational. Read at least the introduction and conclusion to understand the motivation.
+- *Language Models are Few-Shot Learners* (2020). The 2020 report evaluates in-context learning; prompt examples do not update model weights. [@gpt3]
 
-2.  **Brown, T., et al. (2020). "Language Models are Few-Shot Learners" (GPT-3 paper)**
-
-    -   Introduces the scaling hypothesis and demonstrates emergent capabilities.
-
-3.  **Wei, J., et al. (2022). "Emergent Abilities of Large Language Models"**
-
-    -   Fascinating exploration of capabilities that appear only at certain model scales.
+- *Emergent Abilities of Large Language Models* (2022). Read alongside the measurement critique cited in the chapter; reported thresholds are not universal. [@emergence]
 
 ### Technical Resources
 
-4.  **Hugging Face Transformers Documentation**
+- *Transformers documentation* (n.d.). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@transformersdocs]
 
-    -   Practical guide to working with transformer models in production.
-
-5.  **Anthropic's "Model Card and Evaluations for Claude Models"**
-
-    -   Detailed technical specifications and performance benchmarks.
+- *Introducing the next generation of Claude* (2024). A dated March 2024 company launch and evaluation account, replacing the ambiguous model-card title. [@claude3]
 
 ### Industry Perspectives
 
-6.  **OpenAI's "GPT-4 Technical Report"**
+- *GPT-4 Technical Report* (2023). The 2023 report does not disclose parameter count or a complete training recipe. [@gpt4]
 
-    -   Insights into training and capabilities of frontier models.
-
-7.  **Google's "PaLM: Scaling Language Modeling with Pathways"**
-
-    -   Alternative approaches to training very large models.
+- *PaLM: Scaling Language Modeling with Pathways* (2022). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@palm]
 
 ### Practical Optimization
 
-8.  **vLLM and LLM Inference Optimization Guides**
-    -   Advanced techniques for production deployment.
+- *Efficient Memory Management for Large Language Model Serving with PagedAttention* (2023). The original PagedAttention serving study; results are configuration-specific. [@vllm]
 
 ### Ethics and Safety
 
-9.  **Bender, E. M., et al. (2021). "On the Dangers of Stochastic Parrots"**
+- *On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?* (2021). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@stochastic]
 
-    -   Critical perspective on environmental and social costs of large models.
-
-10. **Anthropic's Constitutional AI Paper**
-
-    -   Approaches to aligning AI systems with human values.
+- *Constitutional AI: Harmlessness from AI Feedback* (2022). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@constitutional]
 
 ------------------------------------------------------------------------
 

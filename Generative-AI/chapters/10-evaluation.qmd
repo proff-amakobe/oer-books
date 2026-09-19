@@ -2,6 +2,8 @@
 
 ## Introduction
 
+**Illustrative scenario.** The two teams and their 95% figures are invented to contrast metric definitions, not reported company results.
+
 Two teams, at two different companies, each announce that their AI system is "95% accurate." The first team measured this against a fixed test set of questions with known correct answers. The second team measured it as the percentage of customer conversations that ended without a human escalation. Both numbers are real. Both numbers are called "accuracy." They measure almost entirely different things, and neither one, on its own, tells you whether the system is actually good at the job it was built to do.
 
 This is the problem this chapter exists to solve. Every chapter before this one has asked you to design something, a prompt, a retrieval system, an agent's capability boundary, and every chapter from here forward will ask you to defend a claim about how well something works. Evaluation is the discipline that makes that defense honest rather than wishful. It's also, not coincidentally, the discipline most often skipped or done badly in real AI projects, because a working demo *feels* like evidence of quality in a way that's genuinely seductive and genuinely misleading.
@@ -41,7 +43,9 @@ There's also a persistent gap between benchmark performance and real-world perfo
 
 ## Defining Success Before You Measure Anything {#sec-10-2}
 
-The single most common evaluation mistake is picking a metric before clearly defining what success actually means for the specific application. Start instead from the business or user outcome you actually care about, then work backward to something measurable, resisting the pull toward whatever's easiest to compute.
+Separate **validity** (does the measure capture the intended construct?) from **reliability** (does it behave consistently across raters or runs?). Specify the target population, task distribution, evaluation unit, sampling method, error costs, and acceptance criteria before testing. Use held-out data with contamination checks, report sample sizes and uncertainty, and break results down by relevant language, domain, and user group. A single aggregate score can hide serious failures. [@helm]
+
+A consequential evaluation mistake is choosing a convenient metric before defining success. Start from the user outcome, identify relevant failure types, and select measures that expose those failures rather than hiding them in an aggregate score. [@helm]
 
 This is where **proxy metrics** become dangerous if you're not careful. "Response length" is easy to measure and completely unrelated to whether a response is actually good, and yet it's tempting to optimize because it's right there, measurable, in a way "did this genuinely help the user" isn't. The discipline worth building here: name the real outcome first, in plain language, and only then ask what measurable signal would actually track it, rather than starting from what's convenient to compute and hoping it correlates with what matters.
 
@@ -49,17 +53,23 @@ This is where **proxy metrics** become dangerous if you're not careful. "Respons
 
 ## Automated Metrics {#sec-10-3}
 
+BLEU uses modified n-gram precision with a brevity penalty; ROUGE is a family including overlap and longest-common-subsequence measures. Report the variant, tokenizer, reference set, and aggregation convention. BERTScore compares contextual token representations rather than simply averaging sentence embeddings. None directly establishes truth, groundedness, or usefulness. Passing generated-code tests only establishes success on those tests; inspect coverage and run code in a restricted environment. [@bleu; @rouge; @bertscore]
+
 Traditional NLP metrics like **BLEU** and **ROUGE**, which measure text overlap against a reference answer, have real, narrow uses (translation and summarization tasks with a clear reference text) and real limits: they penalize a correct answer phrased differently from the reference, and reward a wrong answer that happens to share vocabulary with it. **Semantic similarity** approaches, comparing embeddings rather than exact word overlap, do somewhat better at recognizing paraphrase, but still can't judge factual correctness, only similarity of meaning.
 
-Task-specific automated evaluation, checking whether generated code actually runs and passes tests, or whether a generated SQL query returns the correct result, works well precisely because it has an objective, checkable target, a property most open-ended generation tasks simply don't have. This is the core ceiling on automated measurement: it's genuinely reliable exactly where the task is checkable, and it degrades quickly as the task becomes more open-ended.
+Task-specific checks, such as code tests or comparing SQL results on a controlled database, provide reproducible evidence for the tested cases. Passing them does not establish general correctness: test coverage, oracle errors, distribution shift, and hidden requirements still matter. Execute generated programs only within appropriate isolation and resource limits. [@helm]
 
 ## Human Evaluation {#sec-10-4}
 
-Human judgment remains essential wherever quality is inherently subjective, tone, helpfulness, appropriateness for a specific audience, none of which reduces cleanly to a formula. Designing a good human evaluation task means writing rating criteria specific and concrete enough that two different raters would reach the same conclusion, a bland "rate this response 1–5" invites inconsistent, low-value ratings, while a rubric that says exactly what a 5 versus a 3 versus a 1 looks like produces something you can actually trust.
+Train raters with examples and pilot the rubric. Blind model identities where possible, randomize presentation, collect independent ratings before discussion, and report disagreement rather than erasing it through consensus. Choose an agreement statistic suited to nominal, ordinal, or continuous scores; percentage agreement alone does not account for chance. Report rater expertise, sampling, and uncertainty. Agreement supports consistency, not truth or representativeness. [@helm]
+
+Human ratings can assess subjective or context-dependent qualities. Define anchored criteria, train raters, sample relevant populations, and measure agreement and uncertainty. A detailed rubric helps make judgments inspectable; it does not itself make them reliable or objectively true. [@helm; @judge]
 
 **Inter-rater reliability**, how consistently independent raters agree, is the honest check on whether your rating task is well-defined at all. Low agreement isn't necessarily a sign of bad raters, it's often a sign the task itself is ambiguous and needs a clearer rubric before the ratings mean anything. Human evaluation is also expensive to scale, which motivates careful sampling (rating a representative subset rather than every single output) and the LLM-as-judge approach covered next, as a way to extend human-level judgment further than human raters alone could reach.
 
 ## LLM-as-Judge {#sec-10-5}
+
+Position bias can favor the first or second answer; verbosity and self-preference can reward style over substance. Swap answer order, blind identities, specify a rubric, and calibrate against independent domain experts. Track disagreement by task and group, fix the judge version, and prevent candidate answers from acting as instructions to the judge. A judge is an imperfect measurement instrument, not ground truth. [@judge; @indirectinjection]
 
 Using a strong model to evaluate another model's output, sometimes even its own, has become a genuinely useful way to scale evaluation closer to human-evaluation quality without human-evaluation cost. Designing this well means writing an evaluation prompt with the same care as any other prompt from Chapter 3: a specific rubric, and ideally a few graded examples showing what a good versus poor response looks like, produces far more reliable judgments than a vague "is this good?"
 
@@ -67,11 +77,15 @@ This approach has real, documented biases worth knowing before you lean on it. L
 
 ## RAG-Specific Evaluation {#sec-10-6}
 
+Separate citation **correctness** (a cited passage supports a claim) from citation **coverage** (material claims have support). Faithfulness can be high even when a source is false or stale. Evaluate empty retrieval, contradictory sources, malicious passages, and abstention, using source passage identifiers and independent fact checks. [@lewis2020rag; @ragsurvey]
+
 Chapter 6 already flagged the core insight this section builds on: RAG systems fail in retrieval and in generation independently, and a single end-to-end quality score blurs the two together in a way that makes debugging much harder than it needs to be. **Retrieval quality** (recall and precision at K, covered in Chapter 6) tells you whether the right documents were found at all. **Faithfulness** tells you something different: given the documents that actually were retrieved, does the generated response accurately reflect them, or does it drift, contradict, or quietly reintroduce information the retrieved context never supported? **Attribution accuracy** asks a third, related question: when the response cites a source, does that source actually say what the response claims it says?
 
 Evaluating these three dimensions separately, rather than one blended "was this a good RAG response" rating, is what actually lets you diagnose which part of your Chapter 6 design needs fixing when something goes wrong.
 
 ## Testing and Quality Assurance {#sec-10-7}
+
+For **agents**, score task completion, tool selection and arguments, unauthorized actions, budget overruns, recovery, and safe stopping; inspect trajectories rather than only the final answer. For **multimodal systems**, separately test OCR, transcription, visual grounding, and cross-modal contradictions. Maintain typical, rare, adversarial, and subgroup test slices. Red-team discoveries are useful failures, not an estimate of prevalence or proof that no other attack exists. [@react; @redteam; @helm]
 
 Treating prompts and AI-powered features with the same testing discipline as any other software pays off directly. **Regression testing**, maintaining a fixed set of test cases you re-run after any change, catches the common and frustrating failure where fixing one case quietly breaks another that used to work. **Red teaming**, deliberately probing your system with adversarial or edge-case inputs (drawing directly on Chapter 3's prompt-injection material and Chapter 5's goal-hijacking discussion), surfaces failure modes before your users do, which is a substantially better way to find them.
 
@@ -97,7 +111,7 @@ Design the evaluation your assistant would actually need, specific to your domai
 
 ## Case Study: How Anthropic Evaluates Claude
 
-Frontier AI labs, Anthropic included, evaluate their own models across a deliberately wide combination of the approaches this chapter has covered: standardized benchmarks for capability comparison, extensive human evaluation for qualities benchmarks can't capture (helpfulness, tone, harmlessness), and red-teaming specifically aimed at surfacing safety failures before release rather than after. No single one of these approaches is treated as sufficient on its own, which is exactly the lesson this chapter has been building toward.
+Anthropic's 2024 Claude 3 release materials describe multiple capability and safety evaluations. This is a historical example of a provider reporting an evaluation program, not independent validation of every result or proof that the current product uses an identical suite. Read the task definitions, comparison models, and limitations before applying the results to a new use case. [@claude3]
 
 What's most instructive for your own project isn't the specific evaluation suite, it changes with every model generation, it's the underlying discipline: benchmarks alone would miss real safety failures, human evaluation alone doesn't scale to catch rare edge cases, and red-teaming alone doesn't tell you anything about typical-case quality. A rigorous evaluation practice combines multiple approaches precisely because each one has blind spots the others cover, the same reasoning your own Evaluation Plan should reflect, just scaled to your project's size.
 
@@ -109,8 +123,8 @@ What's most instructive for your own project isn't the specific evaluation suite
 
 ## Further Reading
 
-- Liang, P., et al. (2022). "Holistic Evaluation of Language Models (HELM)" — A model for evaluating language models across many dimensions at once, rather than a single leaderboard score.
-- Zheng, L., et al. (2023). "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena" — The paper most directly behind the LLM-as-judge approach in @sec-10-5, including its documented biases.
+- *Holistic Evaluation of Language Models* (2022). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@helm]
+- *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena* (2023). Read the original source for its methods, assumptions, and limits; the bibliography identifies the verified version. [@judge]
 
 ---
 
