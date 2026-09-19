@@ -22,7 +22,7 @@ with sync_playwright() as p:
  assert page.locator('.book-part li a').count()==15
  assert page.locator('.book-cover img').evaluate('(x)=>x.complete&&x.naturalWidth>0')
  cover=page.locator('.book-cover img').get_attribute('src');raw=page.request.get(urllib.parse.urljoin(base,cover)).body()
- assert raw==(R/'original/images/cover.png').read_bytes()
+ assert raw==(R/'assets/cover/generative-ai-cover.png').read_bytes()
  for width in [1440,1024,768,390]:
   page.set_viewport_size({'width':width,'height':1000})
   for mode in ['light','dark']:
@@ -50,7 +50,7 @@ with sync_playwright() as p:
  assert any(x['href']=='https://github.com/proff-amakobe/oer-books/tree/main/Generative-AI' for x in links)
  for name in ['og:title','og:description','og:image','twitter:card','twitter:image']:
   el=page.locator(f'meta[property="{name}"],meta[name="{name}"]');assert el.count()==1 and el.get_attribute('content'),name
- assert page.locator('meta[property="og:image"]').get_attribute('content')=='https://proff-amakobe.github.io/oer-books/Generative-AI/assets/images/cover.jpg'
+ assert page.locator('meta[property="og:image"]').get_attribute('content')=='https://proff-amakobe.github.io/oer-books/Generative-AI/assets/cover/generative-ai-cover.png'
  assert page.locator('link[rel=canonical]').get_attribute('href')=='https://proff-amakobe.github.io/oer-books/Generative-AI/'
  data=json.loads(page.locator('script[type="application/ld+json"]').inner_text());assert data['@type']=='Book' and data['bookEdition']=='First Open Edition' and 'isbn' not in data
  page.get_by_role('link',name='Read Online',exact=True).click();assert page.url.endswith('original/01-foundations.html')
