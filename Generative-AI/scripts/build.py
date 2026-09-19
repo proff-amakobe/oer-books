@@ -8,7 +8,7 @@ profiles=['print','epub','html'] if args.format=='all' else [{'pdf':'print'}.get
 for profile in profiles:
     subprocess.run(['quarto','render','--profile',profile],cwd=ROOT,check=True)
     if profile=='print':
-        for name in ['Generative-AI-PHASE-1-REVIEW.tex', 'index.tex']:
+        for name in ['Generative-AI-PHASE-1B-REVIEW.tex', 'index.tex']:
             if (ROOT/name).exists():
                 shutil.move(ROOT/name, ROOT/'output/pdf'/name)
 subprocess.run(['python3',str(ROOT/'scripts/assemble_web.py')],cwd=ROOT,check=True)

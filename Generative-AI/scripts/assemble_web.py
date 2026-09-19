@@ -4,7 +4,7 @@ import re,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];WEB=ROOT/'output/html'
 if WEB.exists():
-    for src in ['pdf/Generative-AI-PHASE-1-REVIEW.pdf','epub/Generative-AI.epub']:
+    for src in ['pdf/Generative-AI-PHASE-1B-REVIEW.pdf','epub/Generative-AI.epub']:
         source=ROOT/'output'/src
         if source.exists():
             (WEB/'downloads').mkdir(exist_ok=True);shutil.copy2(source,WEB/'downloads'/source.name)

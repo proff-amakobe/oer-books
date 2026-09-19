@@ -28,8 +28,8 @@ def pdf_symbols(t):
     for a,b in {'👍':'[thumbs up]','👎':'[thumbs down]','→':'->','↑':'[up]','↓':'[down]','├':'|','└':'+','─':'-'}.items():t=t.replace(a,b)
     return t
 
-baseline={Path(k).name:v for k,v in json.loads((ED/'phase-0-review-baseline.json').read_text()).items()}
-authorized=json.loads((ED/'phase-1-content-changes.json').read_text())
+baseline={Path(k).name:v for k,v in json.loads((ED/'phase-1b-source-baseline.json').read_text()).items()}
+authorized=json.loads((ED/'phase-1b-content-changes.json').read_text())
 chapters=sorted((ROOT/'chapters').glob('[0-9][0-9]-*.qmd'))
 check(len(chapters)==15,'Expected exactly 15 source chapters')
 epub_path=ROOT/'output/epub/Generative-AI.epub'
@@ -53,9 +53,9 @@ with zipfile.ZipFile(epub_path) as z:
             check(target in names,f'EPUB missing target {name}: {href}')
             if u.fragment and target in epubs:
                 check(epubs[target].find(id=unquote(u.fragment)) is not None,f'EPUB broken fragment {name}: {href}')
-reader=PdfReader(ROOT/'output/pdf/Generative-AI-PHASE-1-REVIEW.pdf')
+reader=PdfReader(ROOT/'output/pdf/Generative-AI-PHASE-1B-REVIEW.pdf')
 check(all(abs(float(p.mediabox.width)-612)<.1 and abs(float(p.mediabox.height)-792)<.1 for p in reader.pages),'PDF not 612 x 792 pt on every page')
-doc=pymupdf.open(ROOT/'output/pdf/Generative-AI-PHASE-1-REVIEW.pdf')
+doc=pymupdf.open(ROOT/'output/pdf/Generative-AI-PHASE-1B-REVIEW.pdf')
 pdftext='\n'.join(p.get_text(clip=pymupdf.Rect(0,0,612,735),sort=False) for p in doc);pdfnorm=norm(pdftext);pdfwords=words(pdftext)
 stats['pdf_pages']=len(reader.pages)
 for forbidden in ['Read Online','Download PDF','Download EPUB','View Source on GitHub','What the book covers','Five Parts, fifteen chapters']:
@@ -102,6 +102,7 @@ for path in chapters:
     check(len(source_heads)==len(expected.find_all(re.compile('^h[1-6]$'))),f'Unexpected Markdown heading interpretation {ch}')
     parsed_heads=[heading_words(h.get_text(' ',strip=True)) for h in expected.find_all(re.compile('^h[1-6]$'))]
     for _,title,_ in original_heads:
+        if any(r["chapter"]==ch and r["old"]==title for r in authorized.get("removed_headings",[])):continue
         check(heading_words(next((r['new'] for r in authorized['headings'] if r['chapter']==ch and r['old']==title),title)) in parsed_heads, f'Substantive source heading lost {ch}: {title}')
     # Payload fidelity against originals: one documented conversion from verbatim to native math.
     _,oldblocks,_=parse(baseline[path.name]);_,newblocks,_=parse(source)
@@ -141,8 +142,8 @@ for path in chapters:
             check(n in hay,f'{fmt} paragraph missing {ch}: {text[:100]}')
         stats['paragraphs_checked']+=1
     for line in source.splitlines():
-        if '*Proposed Figure ' in line:
-            text=re.search(r'\*Proposed Figure .*',line).group().strip('* \\');n=words(text)
+        if '[Figure pending: ' in line:
+            text=line.strip();n=words(text)
             for fmt,hay in [('HTML',htext),('EPUB',etext),('PDF',pdfwords)]:check(n in hay,f'{fmt} figure description lost: {text}')
             stats['figure_descriptions_checked']+=1
     # Intentional Markdown inside pre is exempt; readers must see it literally.
@@ -178,7 +179,7 @@ for p,s in pages.items():
         if u.fragment and target in pages and not pages[target].find(id=unquote(u.fragment)):
             stats['broken_local_links']+=1;errors.append(f'HTML missing fragment {p.name}: {href}')
 check(len(pages[WEB/'index.html'].find_all('h1'))==1,'Landing page title duplicated')
-for name in ['search.json','sitemap.xml','robots.txt','downloads/Generative-AI-PHASE-1-REVIEW.pdf','downloads/Generative-AI.epub']:
+for name in ['search.json','sitemap.xml','robots.txt','downloads/Generative-AI-PHASE-1B-REVIEW.pdf','downloads/Generative-AI.epub']:
     check((WEB/name).exists(),'Missing web resource '+name)
 search=(WEB/'search.json').read_text()
 for p in chapters:check(p.with_suffix('.html').name in search,'Chapter absent from search '+p.name)

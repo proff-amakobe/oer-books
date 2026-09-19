@@ -14,11 +14,11 @@ Sarah's CTO was blunt: "We can't ship this. Figure out what's wrong or we're pul
 
 That weekend, Sarah dove into something she'd previously skipped: understanding how these AI models actually worked under the hood. Why were there so many different models? What could make one model deployment cost much more than another? How could she tell which model was right for which task?
 
-As she studied transformer architecture, attention mechanisms, and model training processes, everything clicked. The models weren't mysteriously different, they had fundamentally different designs, training approaches, and capabilities. More importantly, she realized she could build a system that automatically routed each query to the optimal model based on its complexity and requirements.
+As she studied transformer architecture, attention mechanisms, and model training processes, everything clicked. The models weren't mysteriously different, they had fundamentally different designs, training approaches, and capabilities. More importantly, she realized she could build a system that compared candidate routes against task-specific quality, latency, and cost requirements.
 
 Monday morning, Sarah deployed her intelligent routing system. Simple queries hit the fast, cheap models. Complex diagnostics went to the powerful ones. Moderate questions found the sweet spot in between.
 
-New monthly cost projection: \$8,200. Response times: 90% under 2 seconds. Diagnostic accuracy: actually improved.
+New monthly cost projection: \$8,200. Response times: 90% under 2 seconds. Diagnostic accuracy: assumed to improve in this fictional scenario; no clinical validation is reported.
 
 Her CTO's response: "This is why we need to understand our tools, not just use them."
 
@@ -30,7 +30,7 @@ This chapter is about developing Sarah's level of understanding, not as an acade
 
 By the end of this chapter, you will be able to:
 
-1.  **Explain** the transformer architecture and understand why it revolutionized natural language processing
+1.  **Explain** the transformer architecture and analyze its contribution to natural language processing
 2.  **Distinguish** between pre-training, fine-tuning, and inference phases of LLM development
 3.  **Analyze** the relationship between model size, capability, cost, and performance
 4.  **Compare** different LLM families (GPT, Claude, Llama) and their specific strengths
@@ -48,14 +48,14 @@ By the end of this chapter, you will be able to:
 | **Attention Mechanism** | A technique that allows models to weigh the importance of different parts of the input when processing each element | When processing "it" in a sentence, attention determines whether "it" refers to "trophy" or "suitcase" |
 | **Self-Attention** | A specific form of attention where tokens attend to allowed positions in the same sequence; causal masks exclude future tokens | Analyzing "The animal didn't cross the street because it was too big" to determine "it" = "animal" |
 | **Multi-Head Attention** | Running multiple attention mechanisms in parallel, using distinct learned projections; specialization is not prescribed | The largest 175B GPT-3 configuration has 96 heads per layer [@gpt3] |
-| **Encoder** | The part of a transformer that processes and understands input, building rich representations | BERT is encoder-only; excels at understanding and classification tasks |
+| **Encoder** | The part of a transformer that processes and understands input, building rich representations | BERT is encoder-only; it can be adapted and evaluated for classification tasks |
 | **Decoder** | The part of a transformer that generates output based on learned representations | GPT models are decoder-only; specialized for text generation |
-| **Pre-training** | The initial training phase where models learn language patterns from massive datasets by predicting the next token | The GPT-3 report describes its data mixture and training setup [@gpt3] |
+| **Pre-training** | The initial training phase where models learn language patterns from massive datasets using objectives such as next-token prediction in autoregressive LLMs | The GPT-3 report describes its data mixture and training setup [@gpt3] |
 | **Fine-tuning** | Additional training on specific tasks or domains after pre-training to specialize the model | Training a general model on medical data to create a healthcare AI assistant |
 | **RLHF (Reinforcement Learning from Human Feedback)** | Training technique where humans compare model outputs and the model learns to produce responses that align with human preferences | Used to make ChatGPT helpful, honest, and harmless by learning from human rankings [@rlhf] |
 | **Inference** | The process of using a trained model to generate predictions or outputs | What happens when you send a prompt to ChatGPT and get a response |
 | **Autoregressive Generation** | Building outputs one token at a time, where each new token depends on all previous tokens | "Machine" → "learning" → "is" → "a" → "field..." (each word informed by all previous words) |
-| **Temperature** | A parameter controlling randomness in generation; lower = more deterministic, higher = more creative | Temperature changes sampling, not truthfulness; supported controls vary |
+| **Temperature** | A parameter controlling randomness in generation; lower generally concentrates sampling probability, higher generally increases sampling diversity | Temperature changes sampling, not truthfulness; supported controls vary |
 | **Parameters** | The learned weights in a neural network that determine its behavior; parameter count alone does not determine task performance | GPT-3: 175 billion parameters; GPT-4 parameter count was not disclosed in its technical report [@gpt3; @gpt4] |
 | **Context Window** | The maximum amount of text (in tokens) a model can process in a single interaction | Check the exact model/version and separate input, output, and total limits |
 | **Latency** | The time between sending a request and receiving the first token of the response | Measure time to first token and total completion latency on the target workload |
@@ -63,7 +63,7 @@ By the end of this chapter, you will be able to:
 | **Model Family** | A collection of related models from the same organization, often with different sizes and capabilities | OpenAI GPT family: GPT-3.5 Turbo, GPT-4, GPT-4 Turbo |
 | **Constitutional AI** | Anthropic's approach to AI safety where models are trained to follow a set of principles (constitution) for helpful, honest, harmless behavior | Claude models use Constitutional AI to refuse harmful requests while remaining helpful [@constitutional] |
 | **Quantization** | Reducing model precision (e.g., from 32-bit to 8-bit) to reduce storage; speed and quality effects depend on hardware and method | A 70B model needs about 35 GB for 4-bit weights alone, plus runtime memory |
-| **LoRA (Low-Rank Adaptation)** | An efficient fine-tuning technique that updates only small adapter layers instead of all model weights | The trainable fraction depends on rank and which modules are adapted [@lora] |
+| **LoRA (Low-Rank Adaptation)** | A fine-tuning technique that learns low-rank weight updates while freezing base weights | The trainable fraction depends on rank and which modules are adapted [@lora] |
 | **Emergent Capabilities** | Abilities that appear unexpectedly as models scale up, not explicitly programmed during training | Chain-of-thought reasoning emerged in large models without specific training for it |
 | **Scaling Laws** | Predictable relationships between model size, data size, compute, and performance | Empirical loss trends depend on data, compute, and model scale [@scaling; @chinchilla] |
 | **Zero-shot** | Model is prompted without task demonstrations; pre-training or prior tuning may include related tasks | Asking GPT-4 to translate French without providing translation examples |
@@ -133,7 +133,7 @@ For an **illustrative encoder attention row** at "it", suppose the permitted tok
     -   "big": 0.15; remaining tokens together: 0.10 (contextually relevant)
 3.  **Combines value vectors using these weights**; correct reference resolution is not guaranteed. A causal decoder at "it" cannot attend to the later token "big"
 
-**Illustration unavailable.** Attention Mechanism Visualization - How transformers weigh word relationships — source artwork was not supplied. *Proposed Figure 2.1: Attention Mechanism Visualization - How transformers weigh word relationships*
+[Figure pending: Attention Mechanism Visualization - How transformers weigh word relationships]
 
 ### Multi-Head Attention: Multiple Specialists Working Together
 
@@ -157,7 +157,7 @@ Each specialist focuses on their expertise, then the team collaborates to build 
 
 The largest GPT-3 configuration has 96 attention heads per layer. The named roles above are teaching analogies, not a fixed division of labor. Do not infer undocumented Claude architecture from GPT-3. [@gpt3]
 
-**Illustration unavailable.** Multi-Head Attention - Different heads focusing on different relationship types — source artwork was not supplied. *Proposed Figure 2.2: Multi-Head Attention - Different heads focusing on different relationship types*
+[Figure pending: Multi-Head Attention - Different heads focusing on different relationship types]
 
 ### The Complete Transformer Architecture
 
@@ -192,7 +192,7 @@ Representations change across layers, but the following stages are a **conceptua
 -   **Integration**: Abstract reasoning and knowledge integration
 -   **Output representations**: Sophisticated inference and creative synthesis
 
-**Illustration unavailable.** Transformer Layer Stack - Progressive sophistication through depth — source artwork was not supplied. *Proposed Figure 2.3: Transformer Layer Stack - Progressive sophistication through depth*
+[Figure pending: Transformer Layer Stack - Progressive sophistication through depth]
 
 ### Why This Architecture Revolutionized AI
 
@@ -294,7 +294,7 @@ But here's the remarkable thing: to successfully predict the next word across bi
 -   **Cultural context**: Understanding references, humor, and social norms
 -   **Domain expertise**: Learning specialized knowledge from technical texts
 
-**Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.4: Pre-training Process - Learning language patterns at massive scale*
+[Figure pending: Pre-training Process - Learning language patterns at massive scale]
 
 #### The Emergence of Understanding
 
@@ -359,7 +359,7 @@ The model learns from thousands of these preference comparisons, gradually align
 -   **Helpful** in ways that humans actually find useful
 -   **Harmless** by avoiding dangerous or inappropriate content
 
-**Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.5: RLHF Process - Learning from human preferences*
+[Figure pending: RLHF Process - Learning from human preferences]
 
 #### Domain Specialization
 
@@ -395,27 +395,27 @@ Why this works so well:
 -   All previously generated tokens inform the next choice
 -   Fine-tuning can improve evaluated behavior but does not ensure accuracy or safety [@rlhf]
 
-**Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.6: Autoregressive Generation - Building responses token by token*
+[Figure pending: Autoregressive Generation - Building responses token by token]
 
-#### The Temperature Dial: Balancing Creativity and Consistency
+#### The Temperature Dial: Adjusting Sampling Diversity
 
 Remember the temperature parameter from Chapter 1? It controls how the model samples from its predictions:
 
-**Low Temperature (0.1-0.3)**: Conservative, predictable
+**Low Temperature (0.1-0.3)**: More concentrated sampling in this illustration
 
 ```{#tech-02-005 .technical-block .model-response}
 Query: "The weather today is..."
 Response: "sunny and pleasant."
 ```
 
-**Medium Temperature (0.7-0.9)**: Balanced creativity
+**Medium Temperature (0.7-0.9)**: Intermediate sampling diversity in this illustration
 
 ```{#tech-02-006 .technical-block .model-response}
 Query: "The weather today is..."  
 Response: "exceptionally beautiful with clear skies and a gentle breeze."
 ```
 
-**High Temperature (1.0+)**: Creative but potentially erratic
+**High Temperature (1.0+)**: More varied sampling in this illustration
 
 ```{#tech-02-007 .technical-block .model-response}
 Query: "The weather today is..."
@@ -465,7 +465,7 @@ Let me tell you about three companies that learned the importance of matching mo
 
 TechSupport Inc. handles 50,000 customer service inquiries daily. Initially, they routed everything through GPT-4, their "smartest" option. Monthly cost: \$42,000. Average response time: 6 seconds.
 
-Then their engineer, Maria, had an insight: "Why are we using our most powerful model to answer 'What's your return policy?' when a small, fast model could handle that perfectly?"
+Then their engineer, Maria, had an insight: "Why are we using our most powerful model to answer 'What's your return policy?' when a smaller deployment might meet our quality requirements?"
 
 They implemented a small model (Llama 2 7B) for simple queries:
 
@@ -489,7 +489,7 @@ For an illustrative 30-day month: 50,000 × 30 × 70% × \$0.0002 = \$210 for th
 -   Simpler language patterns (less sophisticated writing)
 -   Shorter context windows (often work with less text)
 
-**Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.7: Small vs. Large Model Performance Comparison*
+[Figure pending: Small vs. Large Model Performance Comparison]
 
 #### Medium Models (13B-34B parameters): The Balanced Performers
 
@@ -517,20 +517,20 @@ Their head of engineering explained: "We were using a sledgehammer to hang pictu
 
 #### Large Models (70B+ parameters): The Heavy Hitters
 
-**MedicalAI Research's Story:**
+**MedicalAI Research’s fictional scenario (invented outcomes, not clinical evidence):**
 
 MedicalAI built a diagnostic assistance tool for rare diseases. They initially tried medium models to save costs. The results were concerning, subtle diagnostic nuances were missed, and complex medical reasoning often fell short.
 
-Switching to GPT-4 and Claude 3 Opus changed everything:
+The scenario assumes a switch to higher-cost candidate deployments with these invented outcomes; these are not verified comparisons or parameter-count disclosures:
 
 -   **Diagnostic accuracy**: Improved by 34%
 -   **Complex reasoning**: Successfully handled multi-system analysis
 -   **Research synthesis**: Connected insights across hundreds of papers
 -   **Specialist-level insights**: Matched expert physician analysis
 
-The cost was 10x higher, but for this high-stakes application, the superior performance justified every penny.
+The fictional cost is 10x higher. In an actual high-stakes application, clinical validation, oversight, and measured benefit would be needed to justify deployment and cost.
 
-**When Large Models Shine:**
+**Tasks on which to compare higher-capacity candidates:**
 
 -   **Complex research and analysis**: Multi-faceted problems requiring sophisticated reasoning
 -   **Strategic work**: Business planning, technical architecture decisions
@@ -539,7 +539,7 @@ The cost was 10x higher, but for this high-stakes application, the superior perf
 
 **The Premium Price Tag:** Prices are deployment-specific. A higher price or larger model does not itself establish better performance, clinical validity, or value.
 
-**Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.8: Model Size vs. Task Complexity Decision Matrix*
+[Figure pending: Model Size vs. Task Complexity Decision Matrix]
 
 ### The Scaling Laws: What We've Learned About Size
 
@@ -562,27 +562,13 @@ Research has revealed fascinating patterns about how model performance scales wi
 
 1.  **Complexity**: Does this task require sophisticated reasoning or simple pattern matching?
 
-    -   Simple factual query → Small model
-    -   Moderate analysis → Medium model
-    -   Complex research → Large model
+    -   Compare candidate models on representative queries; complexity is one feature, not a quality guarantee.
 
-2.  **Speed Requirements**: Do you need instant responses or can you wait?
+2.  **Speed Requirements**: Set time-to-first-token and completion-latency budgets, then measure under expected load.
 
-    -   Real-time (\< 1 second) → Small model
-    -   Interactive (\< 3 seconds) → Medium model
-    -   Batch processing → Any model (optimize for cost)
+3.  **Volume**: Estimate total cost using measured token lengths, concurrency, cache eligibility, and deployment prices.
 
-3.  **Volume**: How many queries will you process?
-
-    -   Thousands per day → Prioritize cost (smaller models)
-    -   Hundreds per day → Balance capability and cost (medium models)
-    -   Dozens per day → Can afford quality (large models)
-
-4.  **Quality Bar**: Is "good enough" sufficient, or do you need exceptional results?
-
-    -   Acceptable quality → Smaller models
-    -   Professional quality → Medium models
-    -   Excellence required → Large models
+4.  **Quality Bar**: Define task-specific acceptance criteria, including failure costs and oversight for high-stakes uses. Choose a deployment only after it meets those criteria; size and price are not substitutes for validation.
 
 ### Illustrative Scenario: Your Research Assistant
 
@@ -592,21 +578,21 @@ Let's apply this framework to typical queries your research assistant might rece
 
 **Query 1**: "What is the capital of France?"
 
--   **Best Choice**: Small model (a tested low-cost deployment)
--   **Reasoning**: Simple factual query, any model knows this
+-   **Illustrative candidate**: Small model (a tested low-cost deployment)
+-   **Reasoning**: Simple factual query; test answer correctness and compare with direct lookup
 -   **Estimated Cost**: \$0.0001
 -   **Response Time**: \< 1 second
 
 **Query 2**: "Explain the main methodologies used in qualitative research"
 
--   **Best Choice**: Medium model (a tested intermediate deployment)
+-   **Illustrative candidate**: Medium model (a tested intermediate deployment)
 -   **Reasoning**: Requires structured explanation and domain knowledge
 -   **Estimated Cost**: \$0.003
 -   **Response Time**: 2-3 seconds
 
 **Query 3**: "Compare and contrast the epistemological foundations of positivist and interpretivist research paradigms"
 
--   **Best Choice**: Large model (a tested higher-capability deployment)
+-   **Illustrative candidate**: Large model (a tested higher-capability deployment)
 -   **Reasoning**: Requires sophisticated understanding and nuanced analysis
 -   **Estimated Cost**: \$0.02
 -   **Response Time**: 5-7 seconds
@@ -695,7 +681,7 @@ The 2023 PaLM 2 report describes multilingual and reasoning evaluations relative
 
 The 2023 Gemini report describes a multimodal model family evaluated across text, images, audio, and video. Treat this as a historical architecture example. The modalities supported by an actual application depend on its model version and endpoint; integrated multimodality does not guarantee accurate chart reading, spatial reasoning, or document analysis. [@gemini]
 
-**Illustration unavailable.** The illustration described below — source artwork was not supplied. *Proposed Figure 2.9: Model Family Comparison Matrix - Strengths and specializations*
+[Figure pending: Model Family Comparison Matrix - Strengths and specializations]
 
 ### Making Strategic Selections
 
@@ -746,7 +732,7 @@ Return to Sarah's story from the opening of this chapter. Her fix wasn't a smart
 
 **Caching and monitoring as a safety net.** No complexity estimate is perfect. Caching can reuse eligible repeated queries (measure the hit rate on your own traffic), and monitoring catches the cases where your complexity estimate was simply wrong, so you can correct the design rather than silently overpaying or under-delivering forever.
 
-*Proposed Figure 2.10: The three-layer decision a model router makes: analyze, route, monitor*
+[Figure pending: The three-layer decision a model router makes: analyze, route, monitor]
 
 ### A Decision Framework, Not a Build
 
@@ -802,7 +788,7 @@ The result illustrates exactly the trade-off this chapter has been building towa
 ## Discussion Questions
 
 1. How does understanding transformer architecture change how you evaluate a vendor's claims about a new model?
-2. When would you deliberately choose a smaller, less capable model over a larger one, even if cost were no object?
+2. When would you deliberately choose a smaller model over a larger one that scores better on a general benchmark, even if cost were no object?
 3. Bloomberg trained a custom model rather than fine-tuning a general one. What would have to be true about your own project's domain for that same trade-off to make sense?
 
 ## Further Reading

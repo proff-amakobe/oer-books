@@ -39,7 +39,7 @@ ld=landing.find('script',type='application/ld+json');check(ld and subtitle in ld
 og=landing.find('meta',property='og:title');check(og and subtitle in og.get('content',''),'OpenGraph subtitle missing')
 with zipfile.ZipFile(R/'output/epub/Generative-AI.epub') as z:
     opf=next(z.read(n).decode() for n in z.namelist() if n.endswith('.opf'));check(subtitle in opf,'EPUB metadata subtitle missing')
-pdf=PdfReader(R/'output/pdf/Generative-AI-PHASE-1-REVIEW.pdf');check(subtitle.replace(' ','') in ''.join(p.extract_text() for p in pdf.pages[:3]).replace('\n','').replace(' ',''),'PDF title page subtitle missing')
+pdf=PdfReader(R/'output/pdf/Generative-AI-PHASE-1B-REVIEW.pdf');check(subtitle.replace(' ','') in ''.join(p.extract_text() for p in pdf.pages[:3]).replace('\n','').replace(' ',''),'PDF title page subtitle missing')
 check(all(abs(float(p.mediabox.width)-612)<.1 and abs(float(p.mediabox.height)-792)<.1 for p in pdf.pages),'PDF geometry')
 counts.update(bibliography=len(bibkeys),further_reading=len(readings),technical_examples=dict(collections.Counter(x['classification'] for x in examples)),case_studies=len(read('case-study-audit.csv')),law_statements=len(read('law-policy-audit.csv')))
 result={'status':'FAIL' if errors else 'PASS','verification_date':'2026-09-18','counts':counts,'errors':errors}

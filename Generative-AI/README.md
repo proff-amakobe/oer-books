@@ -2,7 +2,7 @@
 
 **Moody Amakobe · Global Data Science Institute · First Open Edition · 2026**
 
-Approved subtitle: **Foundations, Systems, Evaluation, and Responsible Deployment**. This is a Phase 1 technical and scholarly review edition, not final print production. Print and ebook ISBNs are TBD.
+Approved subtitle: **Foundations, Systems, Evaluation, and Responsible Deployment**. This is the Phase 1B editorial consistency review edition, not final print production. Print and ebook ISBNs are TBD.
 
 Fifteen chapters in five Parts cover foundations and language models; prompt engineering; APIs, agents, RAG, and fine-tuning; research methods, multimodal AI, evaluation, and optimization; safety, ethics, and law; deployment and the frontier. A sustained research-assistant design portfolio connects the chapters. The canonical manuscript is exclusively `chapters/` in this project; the separate old book is not a source dependency.
 
@@ -24,7 +24,7 @@ Equivalent direct render commands are `quarto render --profile html`, `quarto re
 Outputs:
 
 - `output/html/index.html`: responsive web edition, search, navigation, and downloads.
-- `output/pdf/Generative-AI-PHASE-1-REVIEW.pdf`: US Letter review PDF, 612 × 792 pt.
+- `output/pdf/Generative-AI-PHASE-1B-REVIEW.pdf`: US Letter review PDF, 612 × 792 pt.
 - `output/epub/Generative-AI.epub`: portable ebook with semantic prompts and code.
 
 ## Verification
@@ -33,10 +33,10 @@ Outputs:
 python3 -m venv .venv
 .venv/bin/pip install -r scripts/qa/requirements.txt
 .venv/bin/python scripts/qa/verify_book.py
-.venv/bin/python scripts/qa/verify_phase1.py
+.venv/bin/python scripts/qa/verify_phase1b.py
 ```
 
-QA uses the Pandoc executable bundled with Quarto (or `PANDOC`/`pandoc` on PATH), and Poppler's `pdftotext`/`pdfinfo` for independent PDF inspection when available. Current results are documented in `editorial/PHASE-1-TECHNICAL-AND-SCHOLARLY-REVIEW.md`. Original queue lines point to the immutable Phase 0 source snapshot; added columns identify current locations. Do not regenerate the adjudicated queues. `technical-example-review.csv` distinguishes offline execution from static review. The audit distinguishes existing missing artwork from content lost in conversion. Twenty image files were absent from the supplied manuscript; review editions explicitly identify their absence and retain all visual descriptions. No replacement artwork has been imported from the old book.
+QA uses the Pandoc executable bundled with Quarto (or `PANDOC`/`pandoc` on PATH), and Poppler's `pdftotext`/`pdfinfo` for independent PDF inspection when available. Current results are documented in `editorial/PHASE-1B-EDITORIAL-CONSISTENCY.md`; the accepted technical and scholarly baseline remains in `editorial/PHASE-1-TECHNICAL-AND-SCHOLARLY-REVIEW.md`. Original queue lines point to the immutable Phase 0 source snapshot; added columns identify current locations. Do not regenerate the adjudicated queues. `technical-example-review.csv` distinguishes offline execution from static review. The audit distinguishes existing missing artwork from content lost in conversion. Twenty image files were absent from the supplied manuscript; review editions explicitly identify their absence and retain all visual descriptions. No replacement artwork has been imported from the old book.
 
 ## Repository layout
 

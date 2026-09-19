@@ -30,7 +30,10 @@ jobs:
 
       - name: Install new Generative AI review dependencies
         run: |
-          tlmgr install tex-gyre fvextra newunicodechar needspace
+          # Quarto installs TinyTeX without adding its binary directory to PATH.
+          tex_bin="$(find "$HOME/.TinyTeX/bin" -name tlmgr -type f -o -name tlmgr -type l | head -n 1)"
+          test -n "$tex_bin"
+          "$tex_bin" install tex-gyre fvextra newunicodechar needspace
           python -m pip install -r Generative-AI/scripts/qa/requirements.txt
 
       - name: Render books
@@ -68,6 +71,7 @@ jobs:
           cd Generative-AI
           python3 scripts/build.py
           python3 scripts/qa/verify_book.py
+          python3 scripts/qa/verify_phase1b.py
           cd ..
 
           # ---- Prepare public directory ----

@@ -8,17 +8,6 @@ This opening chapter lays the groundwork for understanding how machines can crea
 
 But this isn't just a theoretical exploration. Throughout this book, you'll build a real, sustained artifact of your own: the design for an AI-powered research assistant, carried forward and refined chapter by chapter throughout the book. This chapter isn't where you write code for that assistant, it's where you make the first, most important decision about it: *what problem is it actually solving, and why does that problem call for generative AI rather than something simpler?* Getting that question right now will make every later technical decision easier.
 
-### What You'll Learn
-
-By the end of this chapter, you will:
-
-- Understand the core principles that enable machines to generate human-like content
-- Trace the historical evolution from early AI systems to modern generative models
-- Grasp the key concepts of neural networks, transformers, and attention mechanisms
-- Distinguish between different types of generative AI approaches and their use cases
-- Recognize how training data shapes a model's knowledge, biases, and blind spots
-- Compare the major model families and the trade-offs between them
-- Evaluate the strengths, limitations, and ethical considerations of generative AI systems
 
 ### Your Practical Project
 
@@ -36,7 +25,7 @@ Let's begin this adventure together!
 
 ---
 
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
@@ -47,6 +36,7 @@ By the end of this chapter, you will be able to:
 5. **Evaluate** how training data composition shapes a model's knowledge, blind spots, and biases
 6. **Compare** the major model families along dimensions that matter for real decisions: capability, cost, context window, and openness
 7. **Justify**, in writing, why a given problem does or does not call for a generative approach
+8. **Compare** generative approaches and their use cases, and evaluate their strengths, limitations, and ethical implications
 
 ---
 
@@ -65,28 +55,27 @@ By the end of this chapter, you will be able to:
 |**Inference**|The process of using an already-trained model to generate new outputs|Asking a chatbot a question and receiving an answer|
 |**Prompt**|The input text given to a generative model to elicit a specific response|"Write a professional email about..."|
 |**Temperature**|A parameter controlling randomness in a model's output (lower settings concentrate sampling probability; supported values vary)|Temperature changes sampling variability; it does not verify facts|
-|**Context Window**|The maximum amount of text (measured in tokens) a model can consider at once, including both prompt and response|A 128,000-token window can hold a lengthy document plus a long conversation|
-|**Hallucination**|A confident, fluent output that is factually wrong or unsupported by any real source|A model citing a legal case that does not exist|
+|**Context Window**|The token budget available to a request; input, output, and combined limits depend on the model/API|A larger window permits more context but does not ensure every passage is used reliably|
+|**Hallucination**|Generated content that is factually incorrect or unsupported by the relevant evidence; fluency and confidence are separate properties|A model citing a legal case that does not exist|
 
 ---
 
 ## What Is Generative AI? {#sec-1-1}
 
-Imagine having a conversation with a computer that doesn't just understand what you're saying, but responds with original thoughts, tells stories you've never heard, or writes code to solve problems you describe in plain English. This isn't science fiction; it's the everyday reality of Generative Artificial Intelligence.
+Imagine having a conversation with a computer that doesn't just understand what you're saying, but responds with generated text, tells stories, or writes code to solve problems you describe in plain English. This isn't science fiction; it's the everyday reality of Generative Artificial Intelligence.
 
-Generative Artificial Intelligence (GenAI) is a subset of AI focused on creating new, original content, text, images, music, video, or code, rather than merely analyzing or classifying existing data. Think of it as the difference between a critic who can tell you whether a painting is a Picasso or a Monet, and an artist who can create an entirely new painting in either style.
+Generative Artificial Intelligence (GenAI) is a subset of AI focused on generating content, text, images, music, video, or code, rather than merely analyzing or classifying existing data. Think of it as the difference between a critic who can tell you whether a painting is a Picasso or a Monet, and an artist who can create an entirely new painting in either style.
 
 Generative models sample outputs from learned distributions. Those outputs can combine familiar patterns in new ways, but can also reproduce training material; novelty is not guaranteed. [@gpt3; @extraction]
 
 ### Key Distinctions: The Analyst vs. The Creator
 
-**Illustration unavailable.** Discriminative AI vs Generative AI - Fundamental Approaches to Artificial Intelligence — source artwork was not supplied.
 
-*Proposed Figure 1.1: Discriminative AI vs. Generative AI — Fundamental Approaches to Artificial Intelligence*
+[Figure pending: Discriminative AI vs. Generative AI — Fundamental Approaches to Artificial Intelligence]
 
 **Discriminative models** learn a conditional prediction or decision rule, such as a class given an input. Generative models learn distributions used to produce samples, possibly conditioned on a prompt. A generative language model can also classify text, and a larger system can combine both approaches; the distinction is not an absolute division between systems that can and cannot explain a result. [@gpt3]
 
-**Generative AI**, by contrast, produces something that did not exist a moment before. Ask a model to "write a poem about artificial intelligence in the style of Shakespeare," and it doesn't search a database for a matching poem, it generates an original one, word by word, that captures Shakespearean rhythm and diction while addressing a subject Shakespeare never wrote about.
+**Generative AI**, by contrast, produces something that did not exist a moment before. Ask a model to "write a poem about artificial intelligence in the style of Shakespeare," and an autoregressive model samples a poem token by token, drawing on learned patterns of rhythm and diction. The result may include memorized material, and an application may also use retrieval.
 
 Consider the practical distinction:
 
@@ -97,7 +86,7 @@ Consider the practical distinction:
 
 Generation does not guarantee originality. Training examples can be memorized and sometimes reproduced; the existence of generation also does not rule out retrieval in the surrounding application. [@extraction]
 
-Generative AI's revolutionary quality lies in its ability to recombine learned concepts into genuinely novel outputs. When an image model generates a "cyberpunk cat wearing a space helmet," it may combine learned visual patterns, although novelty and non-memorization are not guaranteed. It has learned the underlying concepts of "cyberpunk aesthetics," "cats," "space helmets," and "composition," then combines them into something new.
+Generative AI's revolutionary quality lies in its ability to recombine learned patterns into potentially new outputs. When an image model generates a "cyberpunk cat wearing a space helmet," it may combine learned visual patterns, although novelty and non-memorization are not guaranteed. The output can reflect learned associations among these visual features; its originality needs separate assessment.
 
 The same principle governs text generation:
 
@@ -110,7 +99,7 @@ The model isn't retrieving this from storage; it's constructing it from patterns
 
 The word *emergent* describes observed behavior, not a settled mechanism or universal scale threshold. Abrupt benchmark gains can depend on the scoring metric; inspect both the task and the measurement. [@emergence; @mirage]
 
-At its core, most text-generating AI operates on a deceptively simple principle: **predict the next token**. Given a sequence of words, what is the most probable next word? This is a far more sophisticated version of your phone's autocomplete, trained on hundreds of billions of words and capable of maintaining coherence across thousands of tokens.
+Autoregressive text-generating models operate on a deceptively simple principle: **predict the next token**. Given a sequence of words, what is the most probable next word? This is a far more sophisticated version of your phone's autocomplete, trained on hundreds of billions of words and capable of maintaining coherence across thousands of tokens.
 
 What makes this simple mechanism so powerful is scale, both in training data and in network sophistication. At sufficient scale, models develop what researchers call **emergent capabilities**, abilities that weren't explicitly programmed but arise from the patterns absorbed during training, including understanding context and nuance, following multi-step instructions, reasoning through novel problems, and adapting tone to the situation.
 
@@ -144,9 +133,8 @@ The GPT-3 report (2020) demonstrated task performance from prompt demonstrations
 
 The generations since have added multimodal understanding (text and images together), stronger reasoning, open-weight alternatives that broadened who can build on this technology, and increasingly tight integration with real-world tools and data. We'll meet today's major model families in @sec-1-7.
 
-**Illustration unavailable.** The Evolution of Text Generation — source artwork was not supplied.
 
-*Proposed Figure 1.2: The Evolution of Text Generation — From Rule-Based Systems to Modern Transformers*
+[Figure pending: The Evolution of Text Generation — From Rule-Based Systems to Modern Transformers]
 
 The 2017 Transformer paper established an architecture that remains central to the examples in this book; later systems combine architectural, data, training, and deployment changes. [@vaswani2017attention]
 
@@ -170,7 +158,7 @@ Imagine teaching someone a language using individual LEGO bricks versus complete
 
 ### Embeddings: Teaching AI the Geography of Meaning
 
-Tokens still need to become numbers before any neural network can process them. An **embedding** converts each token into a vector, a long list of numbers, positioned in a high-dimensional space such that similar meanings land near each other. "King" and "queen" sit closer together in this space than "king" and "banana" do, and the *directions* between points carry meaning too: the vector from "king" to "queen" is roughly parallel to the vector from "man" to "woman." This geometric structure is what lets a model generalize: it has never seen your exact sentence before, but it has learned the neighborhood your words live in.
+Tokens still need to become numbers before any neural network can process them. An **embedding** converts each token into a vector, a long list of numbers, positioned in a high-dimensional space such that similar meanings land near each other. "King" and "queen" sit closer together in this space than "king" and "banana" do, and the *directions* between points carry meaning too: the vector from "king" to "queen" is roughly parallel to the vector from "man" to "woman." This geometric structure is what lets a model generalize: it can represent a sentence it has not seen before using learned relationships, though this does not rule out memorization.
 
 ---
 
@@ -194,9 +182,8 @@ Because Transformers process all words simultaneously rather than reading left t
 
 Transformers stack attention and feed-forward layers with residual connections and normalization. Different layers can learn different representations, but there is no universal mapping from layer number to grammar, reasoning, or knowledge. Training can process sequence positions in parallel subject to an attention mask; ordinary autoregressive generation still advances token by token. [@vaswani2017attention]
 
-**Illustration unavailable.** Transformer Architecture - Core Components and Information Flow — source artwork was not supplied.
 
-*Proposed Figure 1.3: Transformer Architecture — Core Components and Information Flow*
+[Figure pending: Transformer Architecture — Core Components and Information Flow]
 
 ---
 
@@ -222,9 +209,8 @@ A model’s **context window** bounds the tokens it can process in a request. Pr
 
 Tokenization determines input length and billing units; sampling settings affect output variability; context limits bound what is supplied to the model. A system can also fail to use information that remains inside its context, so a missed detail is not proof that it was truncated. [@lostmiddle]
 
-**Illustration unavailable.** Summary of Foundational Concepts — source artwork was not supplied.
 
-*Proposed Figure 1.4: Summary of Foundational Concepts in Generative AI*
+[Figure pending: Summary of Foundational Concepts in Generative AI]
 
 ---
 
@@ -242,7 +228,7 @@ A reported **training cutoff** summarizes data coverage; it is not a clean bound
 
 ### Hallucination: Confident Fabrication
 
-A **hallucination** is a fluent, confident output that is simply wrong, a citation to a court case that was never decided, a biography detail that was never true, a function that doesn't exist in the library it claims to. Hallucination isn't a bug in the ordinary sense; it's a direct consequence of how these models work. A model doesn't have a database of facts it looks up, it has a learned probability distribution over plausible-sounding text, and "plausible" and "true" are not the same property. This single idea, more than any other in this chapter, should shape how you evaluate everything a generative AI system tells you, and it's a thread that runs through nearly every remaining chapter in this book. [@gpt4]
+A **hallucination** is generated content that is factually wrong or unsupported by relevant evidence, often expressed fluently and confidently, a citation to a court case that was never decided, a biography detail that was never true, a function that doesn't exist in the library it claims to. Hallucination isn't a bug in the ordinary sense; it's a direct consequence of how these models work. A model doesn't have a database of facts it looks up, it has a learned probability distribution over plausible-sounding text, and "plausible" and "true" are not the same property. This single idea, more than any other in this chapter, should shape how you evaluate everything a generative AI system tells you, and it's a thread that runs through nearly every remaining chapter in this book. [@gpt4]
 
 ---
 
@@ -267,7 +253,7 @@ Rather than asking "which model is best," a more useful question is "best for wh
 - **Cost and latency**: What does each request cost, and how fast does it need to respond?
 - **Openness and control**: Do you need to self-host for privacy or customization reasons, or is an API sufficient?
 
-*Proposed Figure 1.5: Model family comparison across capability, context, cost, and openness*
+[Figure pending: Model family comparison across capability, context, cost, and openness]
 
 We'll turn this framework into a concrete decision process in Chapter 2, once we've looked more closely at what "capability" actually means at the architecture level.
 
@@ -324,7 +310,7 @@ The arrangement is instructive precisely because it's unglamorous. AP didn't att
 
 ## Chapter Summary
 
-Generative AI creates new content rather than merely classifying existing data, and the mechanism behind most of today's text generation is a deceptively simple one: predicting the next token, repeated at enormous scale. That simplicity is misleading; scale can improve performance, while claims of abrupt emergence depend on the task and metric. [@emergence; @mirage]
+Generative AI creates new content rather than merely classifying existing data, and the mechanism behind autoregressive text generation is a deceptively simple one: predicting the next token, repeated at enormous scale. That simplicity is misleading; scale can improve performance, while claims of abrupt emergence depend on the task and metric. [@emergence; @mirage]
 
 Getting from raw text to a generated response requires tokenization (breaking text into manageable pieces), embeddings (turning those pieces into meaning-bearing numbers), and the Transformer architecture's attention mechanism (weighing which pieces matter to which other pieces). Training data shapes everything a model knows and everything it doesn't, including uneven temporal coverage and a persistent tendency toward confident-sounding fabrication when it doesn't actually know an answer. [@vaswani2017attention]
 
@@ -351,9 +337,9 @@ No two major model families are interchangeable; the right choice depends on cap
 ### Key Takeaways
 
 - Autoregressive language models generate token continuations; retrieval can supply context, and generation can also reproduce memorized material.
-- Tokens, embeddings, and attention are the three concepts that make text generation computationally possible.
+- Tokens, embeddings, and attention are central concepts in the transformer language models studied here; other generative architectures also exist.
 - Some benchmark abilities improve sharply with scale; apparent thresholds also depend on measurement. [@emergence; @mirage]
-- Training data determines both what a model knows and where it is most likely to be wrong or biased.
+- Training data strongly shapes learned behavior and biases; architecture, post-training, prompts, retrieval, and tools also affect outputs.
 - Hallucination is a structural feature of how these models work, not an occasional bug.
 - Model choice is a multidimensional trade-off between capability, cost, context window, and control, not a search for a single "best" model.
 - Every design decision in this space carries ethical weight worth naming explicitly, not treating as someone else's problem.

@@ -10,23 +10,14 @@ The second version does something categorically different. It checks your calend
 
 Both versions used the same underlying language model. The difference between them has nothing to do with how smart the model is and everything to do with what it's allowed to *do*. That difference, from answering questions to taking action in the world, is what this chapter is about, and it's arguably the single most consequential shift happening in applied generative AI right now. It's also the shift that raises this book's safety and control questions most sharply, not as an abstract concern for a later chapter, but as a design problem you'll need to solve for your own project in this chapter.
 
-### What You'll Learn
 
-By the end of this chapter, you will:
-
-- Distinguish clearly between an AI assistant that answers and an AI agent that acts
-- Understand how tool use and function calling actually work, conceptually
-- Compare the major agent architectural patterns and know when each fits
-- Recognize the safety and control challenges that are unique to, or dramatically amplified by, giving an AI system the ability to act
-- Design a bounded, human-appropriate set of capabilities for an agent in your own domain
-
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
 1. **Distinguish** between the oracle paradigm (AI that answers) and the agent paradigm (AI that acts)
 2. **Explain** how function calling lets a model request the execution of code or an API outside itself
-3. **Compare** ReAct, plan-and-execute, and reflection-based agent architectures
+3. **Compare** ReAct, plan-and-execute, and reflection-based agent architectures and justify when each fits a task
 4. **Identify** the specific new risks that tool-using agents introduce beyond the risks already covered for plain generation
 5. **Design** a capability boundary for an agent, specifying what it may do autonomously and what requires human approval
 
@@ -67,7 +58,7 @@ Not every agent needs to be, or should be, fully autonomous. A useful way to thi
 - **Act-and-notify**: the AI takes the action immediately and tells the human afterward, appropriate only for low-stakes, easily reversible actions.
 - **Fully autonomous**: the AI acts with no human checkpoint at all, appropriate for a narrow set of well-tested, low-risk, high-volume tasks.
 
-*Proposed Figure 5.1: The human-in-the-loop spectrum, from fully manual to fully autonomous*
+[Figure pending: The human-in-the-loop spectrum, from fully manual to fully autonomous]
 
 Where a given capability sits on this spectrum should never be an accident. It's a deliberate design decision, and it's the first thing you'll be asked to specify for your own project's agent.
 
@@ -119,7 +110,7 @@ The trade-off is brittleness: if step two reveals that the original plan doesn't
 
 **Reflexion**, and self-correction patterns more broadly, add a review step: after an attempt (a piece of generated code that failed to run, a plan that produced an unsatisfying result), the agent evaluates what went wrong and revises its approach before trying again. This is genuinely useful for tasks with a clear, checkable success signal (code that either runs or doesn't), and considerably less reliable for tasks where "success" is subjective and the agent's own self-assessment can't be fully trusted, a limitation worth remembering when you design your own project's evaluation approach in Chapter 10.
 
-*Proposed Figure 5.2: Three agent architectures compared — ReAct's step-by-step loop, plan-and-execute's upfront plan, and Reflexion's revise-and-retry cycle*
+[Figure pending: Three agent architectures compared — ReAct's step-by-step loop, plan-and-execute's upfront plan, and Reflexion's revise-and-retry cycle]
 
 A practical design can combine elements of these patterns rather than picking exactly one, and the "best" architecture is really a question of which failure mode (rigidity vs. unpredictability vs. over-trusting self-assessment) you're least willing to tolerate for your specific task.
 

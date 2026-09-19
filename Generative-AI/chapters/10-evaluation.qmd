@@ -4,11 +4,11 @@
 
 **Illustrative scenario.** The two teams and their 95% figures are invented to contrast metric definitions, not reported company results.
 
-Two teams, at two different companies, each announce that their AI system is "95% accurate." The first team measured this against a fixed test set of questions with known correct answers. The second team measured it as the percentage of customer conversations that ended without a human escalation. Both numbers are real. Both numbers are called "accuracy." They measure almost entirely different things, and neither one, on its own, tells you whether the system is actually good at the job it was built to do.
+Two teams, at two different companies, each announce that their AI system is "95% accurate." The first team measured this against a fixed test set of questions with known correct answers. The second team measured it as the percentage of customer conversations that ended without a human escalation. Both numbers are assumptions in this scenario. Both teams call them "accuracy," although the second measures non-escalation. They measure almost entirely different things, and neither one, on its own, tells you whether the system is actually good at the job it was built to do.
 
 This is the problem this chapter exists to solve. Every chapter before this one has asked you to design something, a prompt, a retrieval system, an agent's capability boundary, and every chapter from here forward will ask you to defend a claim about how well something works. Evaluation is the discipline that makes that defense honest rather than wishful. It's also, not coincidentally, the discipline most often skipped or done badly in real AI projects, because a working demo *feels* like evidence of quality in a way that's genuinely seductive and genuinely misleading.
 
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
@@ -49,7 +49,7 @@ A consequential evaluation mistake is choosing a convenient metric before defini
 
 This is where **proxy metrics** become dangerous if you're not careful. "Response length" is easy to measure and completely unrelated to whether a response is actually good, and yet it's tempting to optimize because it's right there, measurable, in a way "did this genuinely help the user" isn't. The discipline worth building here: name the real outcome first, in plain language, and only then ask what measurable signal would actually track it, rather than starting from what's convenient to compute and hoping it correlates with what matters.
 
-*Proposed Figure 10.1: From business goal to measurable metric, and where proxy metrics quietly substitute for the real target*
+[Figure pending: From business goal to measurable metric, and where proxy metrics quietly substitute for the real target]
 
 ## Automated Metrics {#sec-10-3}
 
@@ -65,21 +65,23 @@ Train raters with examples and pilot the rubric. Blind model identities where po
 
 Human ratings can assess subjective or context-dependent qualities. Define anchored criteria, train raters, sample relevant populations, and measure agreement and uncertainty. A detailed rubric helps make judgments inspectable; it does not itself make them reliable or objectively true. [@helm; @judge]
 
-**Inter-rater reliability**, how consistently independent raters agree, is the honest check on whether your rating task is well-defined at all. Low agreement isn't necessarily a sign of bad raters, it's often a sign the task itself is ambiguous and needs a clearer rubric before the ratings mean anything. Human evaluation is also expensive to scale, which motivates careful sampling (rating a representative subset rather than every single output) and the LLM-as-judge approach covered next, as a way to extend human-level judgment further than human raters alone could reach.
+**Inter-rater reliability**, how consistently independent raters agree, is the honest check on whether your rating task is well-defined at all. Low agreement isn't necessarily a sign of bad raters, it's often a sign the task itself is ambiguous and needs a clearer rubric before the ratings mean anything. Human evaluation is also expensive to scale, which motivates careful sampling (rating a representative subset rather than every single output) and the LLM-as-judge approach covered next, as a way to scale an imperfect measurement process with continued human calibration.
 
 ## LLM-as-Judge {#sec-10-5}
 
 Position bias can favor the first or second answer; verbosity and self-preference can reward style over substance. Swap answer order, blind identities, specify a rubric, and calibrate against independent domain experts. Track disagreement by task and group, fix the judge version, and prevent candidate answers from acting as instructions to the judge. A judge is an imperfect measurement instrument, not ground truth. [@judge; @indirectinjection]
 
-Using a strong model to evaluate another model's output, sometimes even its own, has become a genuinely useful way to scale evaluation closer to human-evaluation quality without human-evaluation cost. Designing this well means writing an evaluation prompt with the same care as any other prompt from Chapter 3: a specific rubric, and ideally a few graded examples showing what a good versus poor response looks like, produces far more reliable judgments than a vague "is this good?"
+Using a model to evaluate another model’s output, sometimes even its own, can scale some evaluation tasks at lower per-item cost, but requires human calibration and does not establish human-equivalent judgment. Designing this well means writing an evaluation prompt with the same care as any other prompt from Chapter 3: a specific rubric and graded examples make judgments easier to inspect and calibrate; test whether they improve agreement with independent expert ratings
 
 This approach has real, documented biases worth knowing before you lean on it. LLM judges tend to favor longer responses even when length doesn't correspond to quality, and tend to favor responses stylistically similar to their own default output, both of which can silently distort your results in a consistent direction if you don't calibrate for them. The right response isn't to discard the technique, it's to periodically **calibrate** it: compare LLM-judge ratings against human ratings on a sample, and trust the automated judge only to the extent that comparison holds up.
 
 ## RAG-Specific Evaluation {#sec-10-6}
 
+Use **accuracy** for a specified correctness criterion and denominator; **quality** for the named set of task-relevant dimensions. **Task success** measures satisfaction of explicit task criteria; **human preference** records raters’ choices and need not imply correctness. **Groundedness** describes support in supplied evidence, while **faithfulness** here concerns whether a response accurately reflects that evidence. Neither establishes external factual truth. Retrieval **precision** and **recall** use relevance judgments; **citation correctness** asks whether each cited passage supports the associated claim. Keep these measures separate.
+
 Separate citation **correctness** (a cited passage supports a claim) from citation **coverage** (material claims have support). Faithfulness can be high even when a source is false or stale. Evaluate empty retrieval, contradictory sources, malicious passages, and abstention, using source passage identifiers and independent fact checks. [@lewis2020rag; @ragsurvey]
 
-Chapter 6 already flagged the core insight this section builds on: RAG systems fail in retrieval and in generation independently, and a single end-to-end quality score blurs the two together in a way that makes debugging much harder than it needs to be. **Retrieval quality** (recall and precision at K, covered in Chapter 6) tells you whether the right documents were found at all. **Faithfulness** tells you something different: given the documents that actually were retrieved, does the generated response accurately reflect them, or does it drift, contradict, or quietly reintroduce information the retrieved context never supported? **Attribution accuracy** asks a third, related question: when the response cites a source, does that source actually say what the response claims it says?
+Chapter 6 already flagged the core insight this section builds on: RAG systems fail in retrieval and in generation independently, and a single end-to-end quality score blurs the two together in a way that makes debugging much harder than it needs to be. **Retrieval quality** (recall and precision at K, covered in Chapter 6) tells you whether the right documents were found at all. **Faithfulness** tells you something different: given the documents that actually were retrieved, does the generated response accurately reflect them, or does it drift, contradict, or quietly reintroduce information the retrieved context never supported? **Citation correctness** asks a third, related question: when the response cites a source, does that source actually say what the response claims it says?
 
 Evaluating these three dimensions separately, rather than one blended "was this a good RAG response" rating, is what actually lets you diagnose which part of your Chapter 6 design needs fixing when something goes wrong.
 
@@ -89,7 +91,7 @@ For **agents**, score task completion, tool selection and arguments, unauthorize
 
 Treating prompts and AI-powered features with the same testing discipline as any other software pays off directly. **Regression testing**, maintaining a fixed set of test cases you re-run after any change, catches the common and frustrating failure where fixing one case quietly breaks another that used to work. **Red teaming**, deliberately probing your system with adversarial or edge-case inputs (drawing directly on Chapter 3's prompt-injection material and Chapter 5's goal-hijacking discussion), surfaces failure modes before your users do, which is a substantially better way to find them.
 
-*Proposed Figure 10.2: An evaluation pyramid — unit-level prompt checks, integration tests, and full red-team exercises, each catching different failure classes*
+[Figure pending: An evaluation pyramid — unit-level prompt checks, integration tests, and full red-team exercises, each catching different failure classes]
 
 ## Production Monitoring {#sec-10-8}
 
@@ -105,7 +107,7 @@ Design the evaluation your assistant would actually need, specific to your domai
 
 **Select your metrics deliberately.** For your domain, which combination of automated metrics, human evaluation, and (if applicable) RAG-specific measures from @sec-10-6 actually captures what matters? Justify each choice against the real outcome you named first.
 
-**Write one human-evaluation rubric.** Pick your assistant's single most important quality dimension (accuracy, helpfulness, tone, whatever matters most for your users) and write a concrete rubric, the kind specific enough that two raters would agree, per @sec-10-4.
+**Write one human-evaluation rubric.** Pick your assistant's single most important quality dimension (accuracy, helpfulness, tone, whatever matters most for your users) and write a concrete rubric, the kind you can pilot with independent raters and revise after measuring disagreement, per @sec-10-4.
 
 **Design three test cases**: one typical, one edge case, and one adversarial, that you'd run before considering your assistant ready to show anyone.
 

@@ -2,17 +2,17 @@
 
 ## Introduction
 
-Back in Chapter 1, you learned that a language model is, at its mechanical core, a system trained to predict the next token. Nothing in that description says anything about being helpful, honest, or willing to refuse a harmful request. Those behaviors, the ones that make a model something you can actually deploy in front of real users, come from somewhere else, a deliberate, separate layer of training built specifically to shape *how* a capable model behaves, not just what it knows. That layer is called alignment, and this chapter is about how it actually works.
+Back in Chapter 1, you learned that an autoregressive language model is typically pre-trained to predict the next token. Nothing in that description says anything about being helpful, honest, or willing to refuse a harmful request. Those behaviors, the ones that make a model something you can actually deploy in front of real users, come from somewhere else, a deliberate, separate layer of training built specifically to shape *how* a capable model behaves, not just what it knows. That layer is called alignment, and this chapter is about how it actually works.
 
-This is a different kind of chapter than Chapter 13, which follows it. Chapter 13 asks applied questions: is this system biased, is it being used responsibly, what should an organization's AI governance look like? This chapter asks a more technical question underneath those: what actually makes a model behave safely in the first place, what are the engineering techniques involved, and where do they fall short? If Chapter 13 is about using AI responsibly, this chapter is about how the AI itself was built to be usable responsibly, or wasn't.
+This is a different kind of chapter than Chapter 13, which follows it. Chapter 13 asks applied questions: is this system biased, is it being used responsibly, what should an organization's AI governance look like? This chapter asks a more technical question underneath those: how training and controls seek to reduce unsafe behavior, what are the engineering techniques involved, and where do they fall short? If Chapter 13 is about using AI responsibly, this chapter is about how the AI itself was built to be usable responsibly, or wasn't.
 
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
 - Explain what the alignment problem actually is, and why it's harder than it sounds
 - Describe how RLHF and Constitutional AI shape model behavior after pre-training
-- Understand, at a conceptual level, what interpretability research is trying to achieve and why it's difficult
+- Explain, at a conceptual level, what interpretability research is trying to achieve and why it's difficult
 - Apply red-teaming as a systematic practice, not an afterthought
 - Recognize the specific alignment risks that compound as systems gain more capability and autonomy
 
@@ -20,7 +20,7 @@ By the end of this chapter, you will be able to:
 
 | **Term** | **Definition** | **Example/Context** |
 |---|---|---|
-| **Alignment** | The problem of ensuring an AI system's behavior actually matches human intentions and values | Refusal behavior is one evaluated property, not proof of overall alignment |
+| **Alignment** | The problem of bringing system behavior into better correspondence with specified human intentions and values, while evaluating failures | Refusal behavior is one evaluated property, not proof of overall alignment |
 | **RLHF (Reinforcement Learning from Human Feedback)** | A training technique where human preference comparisons teach a model to produce more helpful, honest responses | Humans rank multiple model responses; the model learns to produce more of what's ranked highly [@rlhf] |
 | **Constitutional AI** | An approach where a model is trained against a written set of principles, reducing reliance on case-by-case human feedback | A model critiques and revises its own responses against explicit written guidelines |
 | **Reward Hacking** | A model finding a way to score well on its training objective without actually achieving the intended goal | A model optimized for "user approval" learning to be agreeable rather than accurate |
@@ -51,7 +51,7 @@ Pre-training, covered in Chapter 2, teaches a model to predict text; it does not
 
 **Constitutional AI**, Anthropic's approach and the one referenced back in Chapter 1's discussion of Claude, modifies this recipe: instead of relying entirely on case-by-case human feedback for every training signal, a model is trained against a written set of principles, a "constitution", critiquing and revising its own draft responses against those principles before the final training step. This reduces dependence on human raters having to personally review every single harmful-content edge case, and it makes the model's guiding principles more explicit and inspectable than a purely feedback-driven approach would allow.
 
-Neither approach is a guarantee. Both are better described as substantially reducing the frequency and severity of misaligned behavior relative to a purely pre-trained model, not eliminating the underlying problem from @sec-12-1.
+Neither approach is a guarantee. Both aim to reduce unwanted behavior; measured gains depend on the model, training setup, and evaluation, not eliminating the underlying problem from @sec-12-1.
 
 ## Interpretability: Looking Inside the Black Box {#sec-12-3}
 
@@ -124,7 +124,7 @@ Explicit principles make intended behavior easier to inspect, but the 2022 Const
 - Interpretability research tries to understand what's actually happening inside a model, rather than only inferring from its outputs, and remains genuinely early relative to how capable current systems are.
 - A model's own stated reasoning is a generated output, not necessarily a transparent account of its actual process, worth real caution.
 - Red-teaming is a systematic discipline, not an occasional afterthought, and it connects directly to the prompt injection and goal hijacking material from earlier chapters.
-- Alignment gets harder, not easier, as systems gain capability and autonomy, exactly the trajectory Chapter 5's agents represent.
+- Greater capability and autonomy can introduce harder oversight and control problems, including the agent risks in Chapter 5; evaluate the specific system and deployment.
 
 ### Practice
 

@@ -6,7 +6,7 @@ Prompt engineering and RAG, the last two chapters, can take you remarkably far. 
 
 Fine-tuning adds training, data, evaluation, and maintenance work. This chapter therefore begins with a decision framework: diagnose the unmet requirement, compare available approaches, and invest in adaptation only when the evidence justifies its cost.
 
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
@@ -24,15 +24,15 @@ By the end of this chapter, you will be able to:
 | **Fine-tuning** | Continuing a pre-trained model's training on a smaller, targeted dataset to specialize its behavior | Training a general model on legal documents to write in precise legal style |
 | **Full Fine-tuning** | Updating all of a model's parameters during additional training | The traditional approach; powerful but computationally expensive |
 | **Parameter-Efficient Fine-tuning (PEFT)** | A family of techniques that update only a small fraction of parameters | LoRA, QLoRA, adapters [@lora; @qlora] |
-| **LoRA (Low-Rank Adaptation)** | A PEFT technique that adds small trainable matrices rather than updating existing weights | Fine-tuning a model by adjusting well under 1% of its parameters [@lora] |
-| **QLoRA** | LoRA combined with 4-bit quantization, enabling fine-tuning of large models on modest hardware | QLoRA reported a 65B model on one 48 GB GPU; requirements vary [@qlora] |
+| **LoRA (Low-Rank Adaptation)** | A PEFT technique that adds small trainable matrices rather than updating existing weights | The trainable fraction depends on rank and targeted matrices [@lora] |
+| **QLoRA** | LoRA combined with 4-bit quantization, reducing base-weight memory while other training memory costs remain | QLoRA reported a 65B model on one 48 GB GPU; requirements vary [@qlora] |
 | **Adapters** | Small, swappable neural network modules inserted between existing layers | Task-specific modules that share one base model across use cases |
 | **Catastrophic Forgetting** | A model losing previously learned general capabilities while being fine-tuned on narrow data | A model that becomes excellent at one task but noticeably worse at general conversation |
 | **Training Data Curation** | The process of selecting, cleaning, and validating examples for fine-tuning | Removing duplicate or low-quality examples before training |
 | **Hyperparameters** | Configuration values that control the training process itself | Learning rate, batch size, number of epochs |
 | **Overfitting** | A model that performs well on training data but poorly on new, unseen inputs | A model that has memorized training examples rather than learned generalizable patterns |
 | **Perplexity** | An automated metric measuring how well a model predicts held-out text | Lower perplexity generally indicates a better language model fit |
-| **Held-Out Evaluation Set** | Data set aside and never used in training, reserved for honest evaluation | Confirms a model didn't just memorize its training examples |
+| **Held-Out Evaluation Set** | Data set aside and never used in training, reserved for honest evaluation | Tests generalization on separated data; does not prove absence of memorization |
 
 ---
 
@@ -46,7 +46,7 @@ Before investing in fine-tuning, weigh it honestly against the two approaches fr
 
 **Fine-tuning** earns its cost when you need consistent behavior that's genuinely difficult to achieve through prompting alone, when you have substantial high-quality training data (the necessary amount depends on the task, base model, supervision, and evaluation), when the domain has specialized language or formatting conventions a general model doesn't reliably produce, or when you specifically need a smaller, cheaper, specialized model to replace a larger general one at inference time.
 
-*Proposed Figure 7.1: Customization decision framework — prompting → RAG → fine-tuning*
+[Figure pending: Customization decision framework — comparing prompting, RAG, and fine-tuning]
 
 Treat this as a cost-conscious decision framework, not a mandatory sequence. Prompting, retrieval, and fine-tuning can be combined, and their value depends on the diagnosed failure and measured alternatives.
 
@@ -145,7 +145,7 @@ The design lesson is to identify the component that needs adaptation: a retrieva
 
 - Compare prompting, retrieval, and fine-tuning against the actual objective; they can be complementary rather than a mandatory sequence.
 - Parameter-efficient methods (LoRA, QLoRA) have made fine-tuning dramatically more accessible than full fine-tuning, with task-dependent quality trade-offs that require evaluation.
-- Data quality and curation determine a fine-tuning project's outcome more reliably than any hyperparameter choice.
+- Data quality, coverage, quantity, and training settings interact; evaluate them with separated validation and test data.
 - A fine-tuned model must be evaluated against real baselines, especially a well-prompted version of the base model, or its value can't actually be demonstrated.
 - Fine-tuning can quietly degrade safety behavior even without adversarial intent, which is why safety re-evaluation belongs in every fine-tuning project, not just the task-performance evaluation.
 

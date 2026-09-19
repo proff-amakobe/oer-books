@@ -4,9 +4,9 @@
 
 Chapter 2 introduced model routing as a design problem: match query complexity to model capability. Chapter 4 covered cost optimization at the integration layer: caching, batching, provider comparison. Both were genuinely useful, and both stopped short of a harder question that only shows up once a system is actually running at real scale: what do you do when routing and caching alone aren't enough, when you need the underlying models themselves to run faster, cheaper, and more reliably under real load, not just be chosen intelligently?
 
-This chapter goes one level deeper into that question: combining multiple models for better results than any one alone, shrinking models without gutting their quality, and the performance engineering that separates a system that works in a demo from one that holds up under thousands of simultaneous users. None of this is required reading for every project, if your assistant handles modest traffic, Chapters 2 and 4's routing and caching may be all you ever need, but understanding what's available at this next level of scale is part of being able to recognize when you'd actually need it.
+This chapter goes one level deeper into that question: testing combinations of models for possible gains, measuring the quality trade-offs of compression, and the performance engineering that separates a system that works in a demo from one that holds up under thousands of simultaneous users. None of this is required reading for every project, if your assistant handles modest traffic, Chapters 2 and 4's routing and caching may be all you ever need, but understanding what's available at this next level of scale is part of being able to recognize when you'd actually need it.
 
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
@@ -21,7 +21,7 @@ By the end of this chapter, you will be able to:
 | **Term** | **Definition** | **Example/Context** |
 |---|---|---|
 | **Ensemble Method** | Combining outputs from multiple models to improve reliability or quality | Using a second model to verify a first model's factual claims |
-| **Mixture of Experts (MoE)** | An architecture where different specialized sub-models handle different types of input, with a gating mechanism deciding which to activate | Only the relevant "expert" runs for a given query, saving compute |
+| **Mixture of Experts (MoE)** | An architecture where different specialized sub-models handle different types of input, with a gating mechanism deciding which to activate | A router selects a subset of expert blocks per token; experts need not match human specialties |
 | **Quantization** | Reducing a model's numerical precision to decrease memory use and increase speed | Converting a model from 32-bit to 8-bit or 4-bit precision |
 | **Pruning** | Removing less-important parameters from a trained model to make it smaller and faster | Removing attention heads that contribute little to output quality |
 | **Knowledge Distillation** | Training a smaller "student" model to replicate a larger "teacher" model's behavior | A fast, cheap model trained to mimic a slower, more capable one |
@@ -46,7 +46,7 @@ Quantization reduces representation size; speed gains depend on hardware and ker
 
 Three related techniques shrink a model's footprint without necessarily requiring you to accept proportionally worse quality.
 
-**Quantization**, reducing a model's numerical precision (32-bit down to 8-bit or even 4-bit), decreases memory use and increases speed, generally with real but often modest quality loss. Post-training quantization is simple to apply to an existing model; quantization-aware training, incorporating the precision reduction during training itself, preserves quality better at the cost of a more involved training pipeline.
+**Quantization**, reducing a model's numerical precision (32-bit down to 8-bit or even 4-bit), reduces weight memory; speed and quality effects depend on the method, model, hardware, and kernels. Post-training quantization is simple to apply to an existing model; quantization-aware training, incorporating the precision reduction during training itself, may retain more quality in some settings at the cost of a more involved training pipeline; compare both approaches on the intended workload.
 
 **Pruning** removes parameters that contribute little to a model's output, whole attention heads or layers (structured pruning) or individual weights (unstructured pruning), producing a smaller, faster model that, done carefully, loses surprisingly little capability.
 
@@ -117,7 +117,7 @@ The lesson for your own design thinking: these techniques compound. A system usi
 
 ### Key Takeaways
 
-- Ensembles and Mixture-of-Experts architectures trade added complexity for improved reliability or efficiency, worth it at genuine scale, often not below it.
+- Ensembles and Mixture-of-Experts architectures add complexity in pursuit of quality or efficiency gains; measure whether those gains justify the cost at the intended scale.
 - Quantization, pruning, and distillation each shrink a model differently, with different quality trade-offs worth matching to your actual constraints.
 - Performance engineering (batching, KV-caching, speculative decoding) mostly lives inside a provider's infrastructure, but understanding it helps you evaluate providers and interpret their claims.
 - Optimization is a continuous, experiment-driven practice (A/B testing, production monitoring from Chapter 10), not a one-time pass before launch.

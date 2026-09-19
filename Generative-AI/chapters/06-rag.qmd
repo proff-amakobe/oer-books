@@ -2,13 +2,13 @@
 
 ## Introduction
 
-Large Language Models possess impressive knowledge from their training data, but they face fundamental limits: a knowledge cutoff, no access to private or recent information, and a persistent tendency toward confident fabrication when they don't actually know something, the hallucination problem from Chapter 1. Retrieval-Augmented Generation, RAG, addresses these limits not by making the model smarter, but by giving it something to actually look at before it answers.
+Large Language Models possess impressive knowledge from their training data, but they face fundamental limits: a knowledge cutoff, no inherent access to private or recent information outside their training, supplied context, or connected tools, and a persistent tendency toward confident fabrication when they don't actually know something, the hallucination problem from Chapter 1. Retrieval-Augmented Generation, RAG, addresses these limits not by making the model smarter, but by giving it something to actually look at before it answers.
 
 RAG represents a shift from closed-book AI, answer from memory alone, to open-book AI, retrieve relevant information first, then answer grounded in what was found. This is essential for working with proprietary documents, staying current with information that changes faster than any training run, and producing responses a user can actually verify against a real source.
 
 In this chapter, you'll design the knowledge layer for your research assistant: how it would ingest documents, build a searchable knowledge base, and ground its responses in specific, retrievable sources, the architecture behind everything from customer support systems to legal research tools.
 
-## Learning Outcomes
+## Learning Objectives
 
 By the end of this chapter, you will be able to:
 
@@ -23,7 +23,7 @@ By the end of this chapter, you will be able to:
 
 | **Term** | **Definition** | **Example/Context** |
 |---|---|---|
-| **Retrieval-Augmented Generation (RAG)** | An approach combining information retrieval with text generation, grounding responses in retrieved content | A support bot that answers from your company's actual documentation |
+| **Retrieval-Augmented Generation (RAG)** | An approach supplying retrieved content to a generator; grounding and citation correctness require evaluation | A support bot that answers from your company's actual documentation |
 | **Vector Database** | A database optimized for storing and searching high-dimensional embeddings | Database services and vector-search libraries; FAISS is a similarity-search library, not a complete database |
 | **Embeddings** | Dense vector representations that capture the semantic meaning of text | Converting "artificial intelligence" into a vector like [0.2, -0.1, 0.8, ...] |
 | **Semantic Search** | Finding information based on meaning rather than exact keyword matches | Searching "car problems" surfaces results about "automotive issues" |
@@ -50,9 +50,9 @@ Four limitations, all touched on in Chapter 1, motivate RAG directly. **Knowledg
 
 ### The Two-Stage Architecture
 
-RAG systems follow a consistent two-stage process. In the **retrieval stage**, the user's query is converted into a search-optimized form, the knowledge base is searched for relevant material, and the most relevant chunks are selected and prepared as context. In the **generation stage**, that retrieved context is combined with the original query, and the model generates a response explicitly grounded in what was retrieved, ideally with source attribution attached.
+RAG systems follow a consistent two-stage process. In the **retrieval stage**, the user's query is converted into a search-optimized form, the knowledge base is searched for relevant material, and the most relevant chunks are selected and prepared as context. In the **generation stage**, that retrieved context is combined with the original query, and the model is instructed to generate a response grounded in what was retrieved, with source attribution. Check that it follows those instructions.
 
-*Proposed Figure 6.1: The RAG architecture — retrieve, then generate*
+[Figure pending: The RAG architecture — retrieve, then generate]
 
 The benefits follow directly from this structure: **accuracy** grounded in specific, checkable sources rather than parametric memory; **currency**, since updating the knowledge base is far cheaper than retraining a model; **transparency**, because a cited source lets a user verify a claim themselves; and **cost-effectiveness**, since domain knowledge lives in a document store you can update at any time, not in model weights you'd need to retrain.
 
@@ -84,11 +84,11 @@ There is no universally correct chunk size; a legal contract and a customer supp
 
 BM25 is a lexical ranking function using term frequency, inverse document frequency, and length normalization; it is not simply exact-match filtering. Combine lexical and dense scores only after calibration, or use rank fusion. Reranking and query expansion can also hurt: evaluate candidate recall, latency, and query drift. [@irbook; @ragsurvey]
 
-**Hybrid search** combines semantic similarity (which understands meaning but can miss an exact required term, a legal citation, a product SKU) with keyword search like BM25 (which is precise about exact terms but blind to paraphrase), weighted together for results that are both meaning-aware and precise where precision matters.
+**Hybrid search** combines semantic similarity (which understands meaning but can miss an exact required term, a legal citation, a product SKU) with keyword search like BM25 (which is precise about exact terms but blind to paraphrase), combined using calibrated scores or rank fusion, then evaluated for relevance on the actual corpus.
 
-**Query enhancement** improves what actually gets searched for: query expansion adds related terms or synonyms (sometimes generated by the LLM itself); query decomposition breaks a complex, multi-part question into simpler sub-queries processed independently and then combined; contextual reformulation uses conversation history to resolve pronouns and implicit references in a multi-turn exchange.
+**Query enhancement** changes what gets searched for: query expansion adds related terms or synonyms (sometimes generated by the LLM itself); query decomposition breaks a complex, multi-part question into simpler sub-queries processed independently and then combined; contextual reformulation uses conversation history to resolve pronouns and implicit references in a multi-turn exchange.
 
-**Reranking** adds a second, more computationally expensive but more accurate scoring pass over an initial set of candidates, useful when the first-pass retrieval is fast but imprecise and you can afford a slower, better second look at just the top candidates.
+**Reranking** adds a second scoring pass that may improve relevance at additional computational cost over an initial set of candidates, useful when the first-pass retrieval is fast but imprecise and you can afford a slower, better second look at just the top candidates.
 
 ## Context Assembly and Grounded Generation {#sec-6-5}
 
@@ -96,7 +96,7 @@ Position effects were measured on particular tasks and models, not established a
 
 Retrieving the right chunks is only half the job; what you do with them before generation matters just as much. **Information selection** decides how many chunks to include and how to avoid redundant, overlapping content. **Context ordering** matters too, most models weight information differently depending on its position, so putting the most relevant material first (or, for some models, first and last) is not a cosmetic choice.
 
-**Grounded generation** depends heavily on prompt design, exactly the discipline from Chapter 3 applied to a new problem: instructing the model explicitly to use only the provided information, to cite sources in a specified format, and, critically, to say so clearly when the retrieved context doesn't actually contain an answer, rather than falling back on its parametric memory and quietly reintroducing the hallucination risk RAG was supposed to solve.
+**Grounded generation** depends heavily on prompt design, exactly the discipline from Chapter 3 applied to a new problem: instructing the model explicitly to use only the provided information, to cite sources in a specified format, and, critically, to say so clearly when the retrieved context doesn't actually contain an answer, rather than falling back on its parametric memory and quietly reintroducing the hallucination risk RAG aims to reduce.
 
 ## Evaluating RAG Systems {#sec-6-6}
 
@@ -120,7 +120,7 @@ Rather than building a document-ingestion pipeline, vector store, and reranking 
 
 **A worked example**: Walk through one realistic query for your domain, end to end: what would be retrieved, how would it be assembled into context, and what would a grounded, well-cited response look like?
 
-*Proposed Figure 6.2: RAG-enhanced architecture — from document ingestion through retrieval to grounded response*
+[Figure pending: RAG-enhanced architecture — from document ingestion through retrieval to grounded response]
 
 ## Case Study: How Glean Built Enterprise Search with RAG
 
@@ -149,8 +149,8 @@ The permission-aware part is the detail most worth dwelling on for your own desi
 - The two-stage architecture, retrieve then generate, means retrieval quality and generation quality are separate failure modes that need to be evaluated separately.
 - Chunking strategy is a high-leverage, domain-specific design decision with no universal default.
 - Hybrid search earns its complexity in domains with exact terms (citations, codes, names) that pure semantic search tends to miss.
-- A grounded response is only as trustworthy as the prompt discipline that tells the model what to do when the retrieved context doesn't actually answer the question.
-- Access control and retrieval are the same problem in any system where not every user should see every document.
+- Trustworthiness depends on source quality, retrieval, generation, citation checks, and abstention behavior; prompting alone cannot establish it.
+- Access control must constrain retrieval whenever users have different document permissions; relevance ranking is a separate requirement.
 
 ### Practice
 
