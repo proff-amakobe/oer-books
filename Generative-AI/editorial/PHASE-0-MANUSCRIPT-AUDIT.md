@@ -1,3 +1,5 @@
+> **SUPERSEDED BY ORIGINAL MANUSCRIPT RESET.** Historical record only; the rewritten manuscript is not authoritative. See ORIGINAL-MANUSCRIPT-LOCK.md.
+
 # Phase 0 manuscript audit
 
 Audit date: 2026-09-18. Canonical source: the fifteen QMD files originally at the root of `Generative-AI/`. No old-book manuscript, assets, filters, or configuration imported. All chapters inspected before restructuring. `source-baseline.json` preserves exact original text and `chapter-inventory.csv` records its SHA-256 hashes; the original files were untracked, so Git has no earlier file history to move.

@@ -1,3 +1,5 @@
+> **SUPERSEDED BY ORIGINAL MANUSCRIPT RESET.** Historical record only; the rewritten manuscript is not authoritative. See ORIGINAL-MANUSCRIPT-LOCK.md.
+
 # Generative AI
 ## Phase 0 — Book Creation and Structural Baseline
 

@@ -1,3 +1,5 @@
+> **SUPERSEDED BY ORIGINAL MANUSCRIPT RESET.** Historical record only; the rewritten manuscript is not authoritative. See ORIGINAL-MANUSCRIPT-LOCK.md.
+
 # Phase 1B — Editorial Consistency and Publication Cleanup
 
 **Generative AI**

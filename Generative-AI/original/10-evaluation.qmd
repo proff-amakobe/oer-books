@@ -1,0 +1,146 @@
+---
+title: "Chapter 10: Evaluating Generative AI Systems"
+---
+
+# Chapter 10: Evaluating Generative AI Systems
+
+## Introduction
+
+Two teams, at two different companies, each announce that their AI system is "95% accurate." The first team measured this against a fixed test set of questions with known correct answers. The second team measured it as the percentage of customer conversations that ended without a human escalation. Both numbers are real. Both numbers are called "accuracy." They measure almost entirely different things, and neither one, on its own, tells you whether the system is actually good at the job it was built to do.
+
+This is the problem this chapter exists to solve. Every chapter before this one has asked you to design something, a prompt, a retrieval system, an agent's capability boundary, and every chapter from here forward will ask you to defend a claim about how well something works. Evaluation is the discipline that makes that defense honest rather than wishful. It's also, not coincidentally, the discipline most often skipped or done badly in real AI projects, because a working demo *feels* like evidence of quality in a way that's genuinely seductive and genuinely misleading.
+
+## Learning Outcomes
+
+By the end of this chapter, you will be able to:
+
+- Design an evaluation strategy appropriate to a specific generative AI application, not a generic one borrowed from elsewhere
+- Select metrics that actually connect to real business or user outcomes, rather than metrics that are merely easy to compute
+- Explain the strengths and real limitations of automated metrics, human evaluation, and LLM-as-judge approaches
+- Apply evaluation specifically to RAG and agentic systems, which fail in different ways than plain generation
+- Build a habit of continuous evaluation rather than a one-time pre-launch test
+
+## Key Terminologies and Concepts
+
+| **Term** | **Definition** | **Example/Context** |
+|---|---|---|
+| **Evaluation Metric** | A quantifiable measure used to assess a system's performance | Accuracy, faithfulness score, response latency |
+| **Proxy Metric** | A measurable stand-in for something you actually care about but can't measure directly | Using "response length" as a proxy for "thoroughness," imperfectly |
+| **Benchmark** | A standardized test set used to compare systems on a common task | A fixed set of questions with known correct answers |
+| **Human Evaluation** | Assessment performed by human raters, often for qualities automated metrics can't capture | Rating a response's helpfulness on a 1–5 scale |
+| **LLM-as-Judge** | Using one AI model to evaluate the output of another (or the same) model | Asking a strong model to score a response's quality against a rubric |
+| **Inter-Rater Reliability** | A measure of how consistently different human evaluators agree | Low agreement suggests the rating task itself is poorly defined |
+| **Faithfulness** | In RAG, how well a generated response actually reflects the retrieved source material | A response that contradicts its own cited source has low faithfulness |
+| **Regression Testing** | Re-running past evaluation cases to catch newly introduced failures | Confirming a prompt update didn't break a previously working case |
+| **Red Teaming** | Deliberately probing a system for failure modes and vulnerabilities | Trying adversarial inputs to see if an assistant can be manipulated |
+| **Production Monitoring** | Continuous evaluation of a live system using real usage data | Tracking success rate and user feedback after launch, not just before |
+
+---
+
+## 10.1 The Evaluation Challenge
+
+Evaluating generative AI is hard in a way that evaluating traditional software mostly isn't. A traditional function either returns the correct value or it doesn't; a generative system can produce many different responses that are all reasonably good, and many that are all reasonably bad, with no single "correct" output to check against. This is exactly the same open-endedness that makes generative AI powerful in the first place, and it's precisely why evaluating it responsibly takes real design effort rather than a simple pass/fail test.
+
+There's also a persistent gap between benchmark performance and real-world performance. A model that scores impressively on a standardized test set can still fail regularly on your specific users' actual, messier requests, because benchmarks necessarily simplify and standardize in ways real usage never does. And evaluation isn't a box you check once before launch, it's an ongoing process, because a system's inputs, and sometimes the underlying model itself, keep changing after you ship.
+
+## 10.2 Defining Success Before You Measure Anything
+
+The single most common evaluation mistake is picking a metric before clearly defining what success actually means for the specific application. Start instead from the business or user outcome you actually care about, then work backward to something measurable, resisting the pull toward whatever's easiest to compute.
+
+This is where **proxy metrics** become dangerous if you're not careful. "Response length" is easy to measure and completely unrelated to whether a response is actually good, and yet it's tempting to optimize because it's right there, measurable, in a way "did this genuinely help the user" isn't. The discipline worth building here: name the real outcome first, in plain language, and only then ask what measurable signal would actually track it, rather than starting from what's convenient to compute and hoping it correlates with what matters.
+
+*Figure 10.1: From business goal to measurable metric, and where proxy metrics quietly substitute for the real target*
+
+## 10.3 Automated Metrics
+
+Traditional NLP metrics like **BLEU** and **ROUGE**, which measure text overlap against a reference answer, have real, narrow uses (translation and summarization tasks with a clear reference text) and real limits: they penalize a correct answer phrased differently from the reference, and reward a wrong answer that happens to share vocabulary with it. **Semantic similarity** approaches, comparing embeddings rather than exact word overlap, do somewhat better at recognizing paraphrase, but still can't judge factual correctness, only similarity of meaning.
+
+Task-specific automated evaluation, checking whether generated code actually runs and passes tests, or whether a generated SQL query returns the correct result, works well precisely because it has an objective, checkable target, a property most open-ended generation tasks simply don't have. This is the core ceiling on automated measurement: it's genuinely reliable exactly where the task is checkable, and it degrades quickly as the task becomes more open-ended.
+
+## 10.4 Human Evaluation
+
+Human judgment remains essential wherever quality is inherently subjective, tone, helpfulness, appropriateness for a specific audience, none of which reduces cleanly to a formula. Designing a good human evaluation task means writing rating criteria specific and concrete enough that two different raters would reach the same conclusion, a bland "rate this response 1–5" invites inconsistent, low-value ratings, while a rubric that says exactly what a 5 versus a 3 versus a 1 looks like produces something you can actually trust.
+
+**Inter-rater reliability**, how consistently independent raters agree, is the honest check on whether your rating task is well-defined at all. Low agreement isn't necessarily a sign of bad raters, it's often a sign the task itself is ambiguous and needs a clearer rubric before the ratings mean anything. Human evaluation is also expensive to scale, which motivates careful sampling (rating a representative subset rather than every single output) and the LLM-as-judge approach covered next, as a way to extend human-level judgment further than human raters alone could reach.
+
+## 10.5 LLM-as-Judge
+
+Using a strong model to evaluate another model's output, sometimes even its own, has become a genuinely useful way to scale evaluation closer to human-evaluation quality without human-evaluation cost. Designing this well means writing an evaluation prompt with the same care as any other prompt from Chapter 3: a specific rubric, and ideally a few graded examples showing what a good versus poor response looks like, produces far more reliable judgments than a vague "is this good?"
+
+This approach has real, documented biases worth knowing before you lean on it. LLM judges tend to favor longer responses even when length doesn't correspond to quality, and tend to favor responses stylistically similar to their own default output, both of which can silently distort your results in a consistent direction if you don't calibrate for them. The right response isn't to discard the technique, it's to periodically **calibrate** it: compare LLM-judge ratings against human ratings on a sample, and trust the automated judge only to the extent that comparison holds up.
+
+## 10.6 RAG-Specific Evaluation
+
+Chapter 6 already flagged the core insight this section builds on: RAG systems fail in retrieval and in generation independently, and a single end-to-end quality score blurs the two together in a way that makes debugging much harder than it needs to be. **Retrieval quality** (recall and precision at K, covered in Chapter 6) tells you whether the right documents were found at all. **Faithfulness** tells you something different: given the documents that actually were retrieved, does the generated response accurately reflect them, or does it drift, contradict, or quietly reintroduce information the retrieved context never supported? **Attribution accuracy** asks a third, related question: when the response cites a source, does that source actually say what the response claims it says?
+
+Evaluating these three dimensions separately, rather than one blended "was this a good RAG response" rating, is what actually lets you diagnose which part of your Chapter 6 design needs fixing when something goes wrong.
+
+## 10.7 Testing and Quality Assurance
+
+Treating prompts and AI-powered features with the same testing discipline as any other software pays off directly. **Regression testing**, maintaining a fixed set of test cases you re-run after any change, catches the common and frustrating failure where fixing one case quietly breaks another that used to work. **Red teaming**, deliberately probing your system with adversarial or edge-case inputs (drawing directly on Chapter 3's prompt-injection material and Chapter 5's goal-hijacking discussion), surfaces failure modes before your users do, which is a substantially better way to find them.
+
+*Figure 10.2: An evaluation pyramid — unit-level prompt checks, integration tests, and full red-team exercises, each catching different failure classes*
+
+## 10.8 Production Monitoring
+
+Pre-launch evaluation, however careful, is necessarily incomplete: real users ask things you didn't anticipate, in ways your test set didn't cover. **Production monitoring** closes that gap by treating evaluation as continuous rather than a milestone you pass once. The metrics worth watching in production are the ones that would actually change a decision, success rate trends, user feedback signals (explicit ratings, but also implicit ones like whether a user immediately rephrased their question, a sign the first answer probably wasn't good enough), and degradation over time, since a system that scored well at launch can quietly get worse as usage patterns shift or an underlying model is updated by its provider.
+
+---
+
+## Connecting to Your Project: An Evaluation Plan
+
+Design the evaluation your assistant would actually need, specific to your domain, not a generic checklist borrowed from this chapter.
+
+**Define success concretely**, per section 10.2, in terms of what your actual users need, before picking a single metric.
+
+**Select your metrics deliberately.** For your domain, which combination of automated metrics, human evaluation, and (if applicable) RAG-specific measures from section 10.6 actually captures what matters? Justify each choice against the real outcome you named first.
+
+**Write one human-evaluation rubric.** Pick your assistant's single most important quality dimension (accuracy, helpfulness, tone, whatever matters most for your users) and write a concrete rubric, the kind specific enough that two raters would agree, per section 10.4.
+
+**Design three test cases**: one typical, one edge case, and one adversarial, that you'd run before considering your assistant ready to show anyone.
+
+## Case Study: How Anthropic Evaluates Claude
+
+Frontier AI labs, Anthropic included, evaluate their own models across a deliberately wide combination of the approaches this chapter has covered: standardized benchmarks for capability comparison, extensive human evaluation for qualities benchmarks can't capture (helpfulness, tone, harmlessness), and red-teaming specifically aimed at surfacing safety failures before release rather than after. No single one of these approaches is treated as sufficient on its own, which is exactly the lesson this chapter has been building toward.
+
+What's most instructive for your own project isn't the specific evaluation suite, it changes with every model generation, it's the underlying discipline: benchmarks alone would miss real safety failures, human evaluation alone doesn't scale to catch rare edge cases, and red-teaming alone doesn't tell you anything about typical-case quality. A rigorous evaluation practice combines multiple approaches precisely because each one has blind spots the others cover, the same reasoning your own Evaluation Plan should reflect, just scaled to your project's size.
+
+## Discussion Questions
+
+1. When automated metrics and human evaluation disagree about a system's quality, which should you trust, and does the answer depend on the specific metric involved?
+2. How should evaluation account for different user populations who might have genuinely different needs from the same system?
+3. What responsibility do AI developers have to publish honest evaluation results, including the failures, not just the benchmark wins?
+
+## Further Reading
+
+- Liang, P., et al. (2022). "Holistic Evaluation of Language Models (HELM)" — A model for evaluating language models across many dimensions at once, rather than a single leaderboard score.
+- Zheng, L., et al. (2023). "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena" — The paper most directly behind the LLM-as-judge approach in section 10.5, including its documented biases.
+
+---
+
+## Chapter Wrap-Up
+
+### Key Takeaways
+
+- Generative AI's open-endedness makes evaluation harder than traditional software testing, and more necessary, not less.
+- Define the real outcome you care about before choosing a metric, or you'll end up optimizing a convenient proxy instead.
+- Automated metrics, human evaluation, and LLM-as-judge each have real strengths and real blind spots; robust evaluation combines them rather than picking one.
+- RAG systems fail in retrieval and generation independently; evaluate them separately to know what to actually fix.
+- Regression testing and red-teaming catch failures before launch that a one-time evaluation pass would miss.
+- Evaluation doesn't end at launch. Production monitoring is what catches the failures your pre-launch test set never anticipated.
+
+### Practice
+
+- Take one claim you've made about your project so far ("this prompt works well," "retrieval is accurate enough") and write down exactly how you'd verify it, specifically, not in general terms.
+- Design one adversarial test case for your assistant, drawing on Chapter 3's prompt injection or Chapter 5's goal hijacking, and predict what you expect to happen.
+
+### Project Milestone: Evaluation Plan
+
+This week, add an **Evaluation Plan** to your project portfolio:
+
+1. **Success definition**: What does "working well" concretely mean for your assistant's actual users?
+2. **Metrics**: Your chosen combination of automated, human, and (if applicable) RAG-specific metrics, justified against your success definition.
+3. **Human-evaluation rubric**: One concrete, specific rubric for your assistant's most important quality dimension.
+4. **Three test cases**: Typical, edge, and adversarial, with what you'd expect a good system to do in each.
+
+*End of Chapter 10. Chapter 11 turns from measuring quality to a different kind of measurement entirely: cost, latency, and the optimization decisions that keep a good system affordable at scale.*

@@ -1,52 +1,45 @@
 # Generative AI
 
-**Moody Amakobe · Global Data Science Institute · First Open Edition · 2026**
+Moody Amakobe · Global Data Science Institute · First Open Edition · 2026 · CC BY 4.0
 
-Approved subtitle: **Foundations, Systems, Evaluation, and Responsible Deployment**. This is the Phase 1B editorial consistency review edition, not final print production. Print and ebook ISBNs are TBD.
+Subtitle: **Foundations, Systems, Evaluation, and Responsible Deployment**.
 
-Fifteen chapters in five Parts cover foundations and language models; prompt engineering; APIs, agents, RAG, and fine-tuning; research methods, multimodal AI, evaluation, and optimization; safety, ethics, and law; deployment and the frontier. A sustained research-assistant design portfolio connects the chapters. The canonical manuscript is exclusively `chapters/` in this project; the separate old book is not a source dependency.
+**The sole canonical manuscript is `original/`. Its files are immutable author-supplied content. Do not edit, normalize, correct, rename, or merge rewritten material into them.** Suggestions belong in `editorial/AUTHOR-REVIEW-QUEUE.csv` and require author approval before any future content change.
 
-## Requirements
+The supplied directory contains 15 chapter QMDs, 32 images, and `PROJECT_ARC.md`, plus two incidental `.DS_Store` files covered by the local integrity lock but excluded from Git. Exact order and titles are recorded in `editorial/ORIGINAL-CHAPTER-INVENTORY.csv`. The project arc is a production reference, not an additional chapter.
 
-Quarto 1.7.31 or later, Python 3.10+, and TinyTeX/TeX Live with XeLaTeX for PDF. Install the TeX packages `tex-gyre`, `fvextra` through `tlmgr install tex-gyre fvextra newunicodechar needspace` if needed. Fonts come from TeX, are referenced by filename for portability, and are not committed. Examples are not executed, so no API account or chapter-specific Python packages are required.
+`chapters/` contains the previous automated rewrite and is **NOT ACTIVE MANUSCRIPT**. Prior Phase 0, 1, and 1B reports are superseded historical records. They do not authorize manuscript changes.
+
+## Build
+
+Use Quarto, Python 3.10+, and TinyTeX/TeX Live. Python QA dependencies are in `scripts/qa/requirements.txt`. PDF dependencies include XeLaTeX, `tex-gyre`, `fvextra`, `newunicodechar`, and `wrapfig`. On Linux install `librsvg2-bin`, `fonts-dejavu-core`, `poppler-utils`, and `qpdf`.
 
 ```sh
-# From Generative-AI/
+python3 scripts/lock_original.py
 python3 scripts/build.py
-# Or build an individual edition:
-python3 scripts/build.py --format html
-python3 scripts/build.py --format pdf
-python3 scripts/build.py --format epub
+python3 scripts/qa/verify_original.py
 ```
 
-Equivalent direct render commands are `quarto render --profile html`, `quarto render --profile print`, and `quarto render --profile epub`. Run `python3 scripts/assemble_web.py` afterward to assemble downloads and canonical URLs. A standalone HTML build has working download links only after PDF and EPUB have been built and assembled. Use `scripts/build.py` for a complete publication bundle. Render profiles sequentially.
+Use a Python environment containing the QA dependencies for the verification command. Build profiles sequentially; `scripts/build.py --format html`, `--format pdf`, or `--format epub` selects one edition. The script stages image resources, verifies source hashes, renders, assembles downloads, and verifies hashes again. Never execute the chapter examples as part of publication.
+
+The original image references resolve through generated, byte-identical aliases under ignored `assets/images/`. Two supplied `.png` filenames contain JPEG data; additional `.jpg` aliases preserve those exact bytes. A narrowly scoped Lua bridge renders the authored raw-LaTeX Marcus image in HTML/EPUB and selects the JPEG alias in PDF. It has no code-block or heading transformation.
+
+PDF fonts are generated dependencies outside the manuscript and are not committed. The build uses DejaVu Sans Mono from the standard Linux font path or the documented local Matplotlib installation, plus a SHA-256-checked Noto Sans Symbols 2 font downloaded to `output/reset/fonts/` for the original thumbs-up/down characters. Ordinary verbatim blocks retain their authored content, type, and normal font size.
 
 Outputs:
 
-- `output/html/index.html`: responsive web edition, search, navigation, and downloads.
-- `output/pdf/Generative-AI-PHASE-1B-REVIEW.pdf`: US Letter review PDF, 612 × 792 pt.
-- `output/epub/Generative-AI.epub`: portable ebook with semantic prompts and code.
+- `output/reset/html/`: web edition, navigation, search, and downloads.
+- `output/reset/pdf/Generative-AI-ORIGINAL-MANUSCRIPT-REVIEW.pdf`: neutral US Letter review PDF.
+- `output/reset/epub/Generative-AI-ORIGINAL-MANUSCRIPT.epub`: EPUB from the same sources.
 
-## Verification
+Earlier outputs remain outside `output/reset/`. No final print design, new illustration, or ISBN assignment is part of this reset.
 
-```sh
-python3 -m venv .venv
-.venv/bin/pip install -r scripts/qa/requirements.txt
-.venv/bin/python scripts/qa/verify_book.py
-.venv/bin/python scripts/qa/verify_phase1b.py
-```
+## Integrity and fidelity
 
-QA uses the Pandoc executable bundled with Quarto (or `PANDOC`/`pandoc` on PATH), and Poppler's `pdftotext`/`pdfinfo` for independent PDF inspection when available. Current results are documented in `editorial/PHASE-1B-EDITORIAL-CONSISTENCY.md`; the accepted technical and scholarly baseline remains in `editorial/PHASE-1-TECHNICAL-AND-SCHOLARLY-REVIEW.md`. Original queue lines point to the immutable Phase 0 source snapshot; added columns identify current locations. Do not regenerate the adjudicated queues. `technical-example-review.csv` distinguishes offline execution from static review. The audit distinguishes existing missing artwork from content lost in conversion. Twenty image files were absent from the supplied manuscript; review editions explicitly identify their absence and retain all visual descriptions. No replacement artwork has been imported from the old book.
+`editorial/ORIGINAL-MANUSCRIPT-LOCK.csv` locks raw bytes for all 50 supplied files. `.gitattributes` disables Git newline conversion for `original/**`. Local verification checks all 50 files; CI checks the 48 publishable files, excluding only the two uncommitted `.DS_Store` files. An unexpected change, addition, or loss fails verification.
 
-## Repository layout
+`verify_original.py` checks original headings, paragraphs, list items, technical payloads and language classes, table cells, and referenced images against HTML/PDF/EPUB. EPUB image names may change, so embedded bytes are checked by hash. PDF comparisons ignore line wrapping and its generated continuation marker; HTML/EPUB code comparison preserves whitespace and indentation. See the integrity, infrastructure, and reset reports in `editorial/`.
 
-- `_quarto.yml`: shared metadata and canonical order; `_quarto-{html,print,epub}.yml`: edition profiles.
-- `chapters/`: fifteen canonical chapters; root QMDs: front matter and references.
-- `styles/`: lightweight HTML, print, and EPUB styles.
-- `scripts/`: build assembly, semantic-block filter, and reproducible QA.
-- `editorial/`: audits, inventories, subtitle options, preserved source snapshot, and the non-reader-facing project plan.
-- `output/`: ignored generated editions. No empty asset or glossary directories.
+Automatic section numbering is disabled. Authored headings, repeated material, manual figure captions, metadata titles, and Chapter 15’s additional top-level Frontier heading remain unchanged. Quarto may show a metadata title as well as a repeated body heading; this is retained for author review rather than removing an authored heading.
 
-The monorepo's established `.github/workflows/publish.yml` builds the new project and copies its HTML/download bundle to `public/Generative-AI/` alongside existing books. The intended URL is https://proff-amakobe.github.io/oer-books/Generative-AI/; a successful local build does not by itself establish a live deployment.
-
-License: [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/). © 2026 Moody Amakobe. See `copyright.qmd`.
+The GitHub workflow builds this edition and publishes `output/reset/html/` at https://proff-amakobe.github.io/oer-books/Generative-AI/. Publication requires a successful workflow and live-site verification.

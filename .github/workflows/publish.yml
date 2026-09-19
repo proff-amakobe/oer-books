@@ -25,7 +25,7 @@ jobs:
       - name: Install SVG → PDF dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y librsvg2-bin
+          sudo apt-get install -y librsvg2-bin poppler-utils qpdf fonts-dejavu-core
 
 
       - name: Install new Generative AI review dependencies
@@ -33,7 +33,7 @@ jobs:
           # Quarto installs TinyTeX without adding its binary directory to PATH.
           tex_bin="$(find "$HOME/.TinyTeX/bin" -name tlmgr -type f -o -name tlmgr -type l | head -n 1)"
           test -n "$tex_bin"
-          "$tex_bin" install tex-gyre fvextra newunicodechar needspace
+          "$tex_bin" install tex-gyre fvextra newunicodechar needspace wrapfig
           python -m pip install -r Generative-AI/scripts/qa/requirements.txt
 
       - name: Render books
@@ -70,8 +70,11 @@ jobs:
           # ---- Generative AI: independent fifteen-chapter book ----
           cd Generative-AI
           python3 scripts/build.py
-          python3 scripts/qa/verify_book.py
-          python3 scripts/qa/verify_phase1b.py
+          python3 scripts/lock_original.py --ci
+          python3 scripts/qa/verify_original.py
+          pdfinfo output/reset/pdf/Generative-AI-ORIGINAL-MANUSCRIPT-REVIEW.pdf
+          pdffonts output/reset/pdf/Generative-AI-ORIGINAL-MANUSCRIPT-REVIEW.pdf
+          qpdf --check output/reset/pdf/Generative-AI-ORIGINAL-MANUSCRIPT-REVIEW.pdf
           cd ..
 
           # ---- Prepare public directory ----
@@ -99,7 +102,7 @@ jobs:
 
           # Copy Generative AI, including PDF and EPUB downloads
           mkdir -p public/Generative-AI
-          cp -r Generative-AI/output/html/* public/Generative-AI/
+          cp -r Generative-AI/output/reset/html/* public/Generative-AI/
 
           echo "----- Deployed tree -----"
           ls -R public

@@ -1,0 +1,165 @@
+---
+title: "Chapter 6: Retrieval-Augmented Generation"
+---
+
+# Chapter 6: Retrieval-Augmented Generation
+
+## Introduction
+
+Large Language Models possess impressive knowledge from their training data, but they face fundamental limits: a knowledge cutoff, no access to private or recent information, and a persistent tendency toward confident fabrication when they don't actually know something, the hallucination problem from Chapter 1. Retrieval-Augmented Generation, RAG, addresses these limits not by making the model smarter, but by giving it something to actually look at before it answers.
+
+RAG represents a shift from closed-book AI, answer from memory alone, to open-book AI, retrieve relevant information first, then answer grounded in what was found. This is essential for working with proprietary documents, staying current with information that changes faster than any training run, and producing responses a user can actually verify against a real source.
+
+In this chapter, you'll design the knowledge layer for your research assistant: how it would ingest documents, build a searchable knowledge base, and ground its responses in specific, retrievable sources, the architecture behind everything from customer support systems to legal research tools.
+
+## Learning Outcomes
+
+By the end of this chapter, you will be able to:
+
+- Explain why retrieval augmentation addresses core LLM limitations that fine-tuning and prompting alone cannot
+- Describe how embeddings and vector similarity enable semantic search
+- Design a document-processing and chunking strategy appropriate to a given content type
+- Compare retrieval strategies (semantic, keyword, hybrid) and know when each is the right default
+- Evaluate a RAG system's performance using retrieval and generation metrics
+- Identify the most common RAG failure modes and design around them
+
+## Key Terminologies and Concepts
+
+| **Term** | **Definition** | **Example/Context** |
+|---|---|---|
+| **Retrieval-Augmented Generation (RAG)** | An approach combining information retrieval with text generation, grounding responses in retrieved content | A support bot that answers from your company's actual documentation |
+| **Vector Database** | A database optimized for storing and searching high-dimensional embeddings | Pinecone, Weaviate, Chroma, FAISS |
+| **Embeddings** | Dense vector representations that capture the semantic meaning of text | Converting "artificial intelligence" into a vector like [0.2, -0.1, 0.8, ...] |
+| **Semantic Search** | Finding information based on meaning rather than exact keyword matches | Searching "car problems" surfaces results about "automotive issues" |
+| **Document Chunking** | Breaking large documents into smaller, manageable pieces for processing | Splitting a 50-page report into ~500-word chunks |
+| **Vector Similarity** | A measure of how semantically similar two pieces of text are | Cosine similarity between two embedding vectors |
+| **Hybrid Search** | Combining semantic search with traditional keyword search (e.g., BM25) | Using both vector similarity and exact term matching together |
+| **Reranking** | Improving initial search results with a second, more precise scoring pass | Using a cross-encoder model to refine an initial vector search |
+| **Embedding Model** | A neural network that converts text into vector representations | A general-purpose or domain-specific embedding model |
+| **Metadata Filtering** | Restricting search to documents with specific attributes before or alongside similarity search | Only searching documents from a given year or author |
+| **Source Attribution** | Linking a generated response back to the original source document | "According to the Q3 report..." with a citation the user can check |
+| **Retrieval Recall** | The percentage of relevant documents successfully surfaced by a search | Finding 8 of 10 truly relevant documents = 80% recall |
+| **Retrieval Precision** | The percentage of retrieved documents that are actually relevant | 7 relevant out of 10 retrieved = 70% precision |
+| **Faithfulness** | How well a generated response actually reflects the retrieved content, rather than drifting from it | A faithful response makes no claims the sources don't support |
+
+---
+
+## 6.1 Understanding Retrieval-Augmented Generation
+
+### The Knowledge Problem in LLMs
+
+Four limitations, all touched on in Chapter 1, motivate RAG directly. **Knowledge cutoff**: a model trained through a certain date simply has no information about anything after it. **Private information**: a general-purpose model has never seen your company's internal documents, and never will, unless you give it access at the moment you ask. **Factual accuracy**: even within its training data, a model can hallucinate specific facts, dates, or statistics with total confidence. **Dynamic information**: anything that changes frequently, prices, news, live data, needs a live source, not a static training run.
+
+### The Two-Stage Architecture
+
+RAG systems follow a consistent two-stage process. In the **retrieval stage**, the user's query is converted into a search-optimized form, the knowledge base is searched for relevant material, and the most relevant chunks are selected and prepared as context. In the **generation stage**, that retrieved context is combined with the original query, and the model generates a response explicitly grounded in what was retrieved, ideally with source attribution attached.
+
+*Figure 6.1: The RAG architecture — retrieve, then generate*
+
+The benefits follow directly from this structure: **accuracy** grounded in specific, checkable sources rather than parametric memory; **currency**, since updating the knowledge base is far cheaper than retraining a model; **transparency**, because a cited source lets a user verify a claim themselves; and **cost-effectiveness**, since domain knowledge lives in a document store you can update at any time, not in model weights you'd need to retrain.
+
+## 6.2 Vector Databases and Semantic Search
+
+### Understanding Embeddings
+
+An embedding, introduced conceptually in Chapter 1, transforms text into a high-dimensional vector that captures semantic meaning: related concepts cluster together in that vector space, which is exactly what makes similarity search possible. A good embedding model produces vectors that are consistent (the same text always maps to the same vector), dimensionally reasonable (typically a few hundred to a couple thousand dimensions), and genuinely sensitive to context and grammar, not just keyword overlap.
+
+General-purpose embedding models work well across broad content; domain-specific embedding models (tuned on scientific papers, legal text, or source code, for instance) often outperform general models within their specific domain, a trade-off worth weighing the same way you weighed general-purpose versus specialized generation models back in Chapter 2.
+
+### Choosing a Vector Database
+
+Vector databases exist on a spectrum from fully managed cloud services (simpler to operate, less control) to self-hosted libraries and databases (more control, more operational burden). The right choice depends on the same four factors that mattered for model selection in Chapter 2: **scale** (how many documents, how much query volume), **performance** (latency and accuracy requirements), **features** (does your use case need metadata filtering, hybrid search, real-time updates), and **cost and integration** (pricing model and fit with your existing stack).
+
+## 6.3 Document Processing and Chunking
+
+### From Raw Documents to Searchable Chunks
+
+Real-world content arrives in messy, heterogeneous forms, PDFs, web pages, office documents, code repositories, structured data, each requiring different extraction logic before it can be embedded and indexed at all. Once extracted, the text is cleaned (removing formatting artifacts, normalizing whitespace), filtered for quality (removing duplicates or genuinely low-value content), and, if the document has real structure, that structure (headings, sections) is worth preserving rather than discarding.
+
+### The Chunking Decision
+
+Chunking, how you split a long document into retrievable pieces, is one of the highest-leverage and most underrated design decisions in a RAG system. **Fixed-size chunking** (split every N tokens) is simple and predictable but can carve a sentence, or an idea, in half. **Semantic chunking** splits on natural boundaries, sentences, paragraphs, sections, preserving meaning at the cost of more complex implementation. **Overlapping chunks**, typically 10–20% overlap between adjacent pieces, help ensure information near a chunk boundary isn't lost entirely. **Hierarchical chunking** indexes a document at multiple levels at once, document, section, paragraph, letting retrieval choose the right granularity for a given query.
+
+There is no universally correct chunk size; a legal contract and a customer support FAQ have genuinely different natural units, which is exactly why this decision belongs in your project's design document, reasoned through for your specific domain, rather than borrowed as a default.
+
+## 6.4 Advanced Retrieval Strategies
+
+**Hybrid search** combines semantic similarity (which understands meaning but can miss an exact required term, a legal citation, a product SKU) with keyword search like BM25 (which is precise about exact terms but blind to paraphrase), weighted together for results that are both meaning-aware and precise where precision matters.
+
+**Query enhancement** improves what actually gets searched for: query expansion adds related terms or synonyms (sometimes generated by the LLM itself); query decomposition breaks a complex, multi-part question into simpler sub-queries processed independently and then combined; contextual reformulation uses conversation history to resolve pronouns and implicit references in a multi-turn exchange.
+
+**Reranking** adds a second, more computationally expensive but more accurate scoring pass over an initial set of candidates, useful when the first-pass retrieval is fast but imprecise and you can afford a slower, better second look at just the top candidates.
+
+## 6.5 Context Assembly and Grounded Generation
+
+Retrieving the right chunks is only half the job; what you do with them before generation matters just as much. **Information selection** decides how many chunks to include and how to avoid redundant, overlapping content. **Context ordering** matters too, most models weight information differently depending on its position, so putting the most relevant material first (or, for some models, first and last) is not a cosmetic choice.
+
+**Grounded generation** depends heavily on prompt design, exactly the discipline from Chapter 3 applied to a new problem: instructing the model explicitly to use only the provided information, to cite sources in a specified format, and, critically, to say so clearly when the retrieved context doesn't actually contain an answer, rather than falling back on its parametric memory and quietly reintroducing the hallucination risk RAG was supposed to solve.
+
+## 6.6 Evaluating RAG Systems
+
+RAG evaluation, covered in full in Chapter 10, has two halves that need separate attention. **Retrieval quality** is measured with recall@K (what fraction of the truly relevant documents appear in the top K results) and precision@K (what fraction of the top K results are actually relevant), alongside ranking-quality metrics like MRR and NDCG. **Generation quality**, given good retrieval, asks whether the response is faithful to what was retrieved, whether it actually addresses the query, and whether its citations are accurate, three genuinely different failure modes that a single "was this a good answer?" rating would blur together.
+
+It's worth internalizing early that these two halves fail independently: a system can retrieve perfectly and still generate a response that ignores the retrieved context, and a system can generate beautifully while retrieving the wrong documents entirely. Good RAG evaluation always separates the two.
+
+---
+
+## Connecting to Your Project: A RAG Design Document
+
+Rather than building a document-ingestion pipeline, vector store, and reranking system, your task is to design one, specified clearly enough that the architecture and its trade-offs are obvious to a reader who's never seen your project before.
+
+**Knowledge source**: What documents, exactly, would your assistant retrieve from? Be specific, not "legal documents" but "the firm's own case files and publicly available statutes for this jurisdiction."
+
+**Chunking strategy**: Given the structure of your actual source material, which chunking approach from section 6.3 fits, and why? What chunk size and overlap would you start with, and how would you know if that choice was wrong?
+
+**Retrieval approach**: Pure semantic search, hybrid, or something more elaborate? Justify the choice against your domain, a domain full of exact terms, product codes, or citations leans hybrid; a domain that's mostly conceptual leans semantic.
+
+**A worked example**: Walk through one realistic query for your domain, end to end: what would be retrieved, how would it be assembled into context, and what would a grounded, well-cited response look like?
+
+*Figure 6.2: RAG-enhanced architecture — from document ingestion through retrieval to grounded response*
+
+## Case Study: How Glean Built Enterprise Search with RAG
+
+Glean built an enterprise search and AI assistant product around exactly the problem this chapter is built around: employees at a company have questions whose answers exist somewhere across dozens of disconnected internal systems, wikis, chat history, documents, tickets, but no single search box that spans all of them well. Glean's approach connects to those internal sources, builds a unified, permission-aware index across them, and uses retrieval-augmented generation to answer employee questions grounded in the company's own, current information, not the model's general training knowledge.
+
+The permission-aware part is the detail most worth dwelling on for your own design work. A naive RAG system indexes everything and retrieves whatever seems most relevant, but in an enterprise context, "most relevant" and "this specific user is allowed to see" are two different filters that both have to apply before a chunk ever reaches the generation stage. That's not a generation-quality problem at all, it's a retrieval-and-access-control problem, and it's exactly the kind of design consideration that separates a RAG demo from a RAG system you could actually deploy inside a real organization. If your own project's domain involves any access-sensitive information, this is worth addressing explicitly in your design document, not as an afterthought.
+
+## Discussion Questions
+
+1. If an AI system cites a source for a claim, what responsibility does it have to represent that source accurately, and what should happen when it doesn't?
+2. How should a RAG system handle two retrieved sources that genuinely disagree with each other?
+3. What happens to the trustworthiness of a RAG system's answers when the underlying documents themselves contain errors or outdated information? Whose job is it to catch that?
+
+## Further Reading
+
+- Lewis, P., et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" — The paper that introduced the RAG approach this chapter is built around.
+- Gao, Y., et al. (2023). "Retrieval-Augmented Generation for Large Language Models: A Survey" — A comprehensive map of the RAG design space, useful once you're ready to go deeper than this chapter.
+
+---
+
+## Chapter Wrap-Up
+
+### Key Takeaways
+
+- RAG addresses knowledge cutoff, private information, and hallucination risk by grounding generation in retrieved, checkable content, not by making the model itself smarter.
+- The two-stage architecture, retrieve then generate, means retrieval quality and generation quality are separate failure modes that need to be evaluated separately.
+- Chunking strategy is a high-leverage, domain-specific design decision with no universal default.
+- Hybrid search earns its complexity in domains with exact terms (citations, codes, names) that pure semantic search tends to miss.
+- A grounded response is only as trustworthy as the prompt discipline that tells the model what to do when the retrieved context doesn't actually answer the question.
+- Access control and retrieval are the same problem in any system where not every user should see every document.
+
+### Practice
+
+- For your project's domain, name one query where semantic search alone would likely fail, and explain why hybrid search or query decomposition would help.
+- Write, in one or two sentences, what your assistant should say when retrieval comes back empty or clearly irrelevant. This is a design decision, not an edge case to skip.
+
+### Project Milestone: RAG Design Document
+
+This week, add a **RAG Design Document** to your project portfolio:
+
+1. **Knowledge source**: The specific documents or data your assistant would retrieve from.
+2. **Chunking strategy**: Your approach and reasoning, per section 6.3.
+3. **Retrieval approach**: Semantic, hybrid, or otherwise, justified for your domain.
+4. **Worked example**: One realistic query, walked through end to end, from retrieval through a grounded, cited response.
+
+*End of Chapter 6. Chapter 7 turns to a different question entirely: when retrieval and prompting aren't enough, and it's time to consider actually customizing the model itself.*
