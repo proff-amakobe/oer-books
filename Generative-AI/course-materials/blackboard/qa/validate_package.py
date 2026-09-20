@@ -42,5 +42,6 @@ for w in range(1,17):
  rows.append({'week':w,'pages':len(pdf.pages),'start_here_words':count,'points':sum(rubrics),'source_fidelity':'PASS','co_pslo':'PASS','rubric_arithmetic':'PASS','docx':'PASS'})
  offset+=len(pdf.pages)
 assert offset==len(combined.pages)
-(base/'qa/content-validation.json').write_text(json.dumps({'weeks':rows,'rubrics':48,'total_points':sum(r['points'] for r in rows),'combined_pages':offset,'combined_pixel_matches':sum(x['pixel_equal'] for x in pixels),'page_comparison':pixels},indent=2)+'\n')
+assert all(r['points']==50 for r in rows) and sum(r['points'] for r in rows)==800
+(base/'qa/content-validation.json').write_text(json.dumps({'weeks':rows,'rubrics':48,'weekly_points':sum(r['points'] for r in rows),'residency_points':200,'total_points':sum(r['points'] for r in rows)+200,'combined_pages':offset,'combined_pixel_matches':sum(x['pixel_equal'] for x in pixels),'page_comparison':pixels},indent=2)+'\n')
 print(json.dumps({'weeks':rows,'combined_pages':offset,'pixel_matches':sum(x['pixel_equal'] for x in pixels)},indent=2))

@@ -18,7 +18,7 @@
 | Applied assignments | 16/16 — 15 analyses plus final integrated portfolio |
 | Project/final assessments | 16/16 — 15 milestones plus final demonstration |
 | Rubrics | 48 |
-| Rubric point arithmetic | PASS — 175 points × 15 + 250 = 2,875 |
+| Rubric point arithmetic | PASS — 50 points × 16 = 800; separate residency 200; course total 1,000 |
 | CO alignment | PASS |
 | PSLO alignment | PASS |
 | Week 1 author introduction | PASS — original welcome and generative-AI problem question |
@@ -63,3 +63,7 @@ The author’s case studies and source readings anchor the applied assignments. 
 All weekly guides use Letter pages, 0.75-inch margins, Arial 10.5-point body text, 9.5-point table text, navy table headers, blue headings, yellow faculty notes, and green submission instructions. The sample served as a design reference, not as a binary template or instructional authority. Lists are real Word lists; tables use fixed column geometry and repeating headers. Render review found no clipping, overlap, broken tables, or orphaned headings.
 
 Only this Blackboard package and `scripts/build_blackboard_guides.py` are included in the change. No original chapter, Quarto manuscript, homepage, Preface, cover, or chapter asset is changed. The materials are ready for faculty upload/copy; no Blackboard account was modified.
+
+## Revised grading allocation
+
+The author approved 800 points distributed equally across the sixteen weeks and 200 reserved for a separate residency assessment. Weeks 1–15 use 10 discussion / 25 applied / 15 milestone points. Week 16 uses 10 reflection / 20 portfolio / 20 demonstration points. All 48 rubric totals and weekly summary tables were reweighted. Residency has a distinct gradebook allocation; no residency activity or grading criteria were invented.

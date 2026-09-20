@@ -4,7 +4,7 @@
 
 ### Assignment 1 — How Much Autonomy Should an AI Agent Have?
 
-> [SUBMISSION] Type: Discussion Board. Points: 50. Submit one initial post and two peer responses in the Week 5 Discussion item. Use Blackboard’s displayed due dates.
+> [SUBMISSION] Type: Discussion Board. Points: 10. Submit one initial post and two peer responses in the Week 5 Discussion item. Use Blackboard’s displayed due dates.
 
 Write an initial post of approximately **350–500 words**. Make a defensible claim, compare alternatives, and use evidence from the assigned material. Connect your judgment to your research-assistant design rather than summarizing the chapter.
 
@@ -24,11 +24,11 @@ Reply to **two classmates, 150–200 words each**. Challenge an assumption, intr
 
 | Criterion | Full-credit evidence | Points |
 | --- | --- | --- |
-| Conceptual application | Applies the week’s concepts accurately to the concrete problem and compares alternatives. | 15 |
-| Evidence and judgment | Uses chapter evidence to defend a position, identifies a limitation, and explains a trade-off. | 15 |
-| Project connection | Connects the argument to the same research assistant and its users. | 10 |
-| Peer engagement | Two substantive replies meet the length guidance and advance the reasoning. | 10 |
-| Total |  | 50 |
+| Conceptual application | Applies the week’s concepts accurately to the concrete problem and compares alternatives. | 3 |
+| Evidence and judgment | Uses chapter evidence to defend a position, identifies a limitation, and explains a trade-off. | 3 |
+| Project connection | Connects the argument to the same research assistant and its users. | 2 |
+| Peer engagement | Two substantive replies meet the length guidance and advance the reasoning. | 2 |
+| Total |  | 10 |
 
 Cite the chapter or companion selection when it supports your reasoning. Cite outside claims to identifiable sources; an unsupported assertion does not become evidence because a model generated it.
 
@@ -37,7 +37,7 @@ Cite the chapter or companion selection when it supports your reasoning. Cite ou
 
 ### Assignment 2 — Klarna Agent Case + Human-in-the-Loop Boundary Analysis
 
-> [SUBMISSION] Type: Applied analysis. Points: 75. Submit one PDF or DOCX to Week 5 Assignment 2. Aim for 600–800 words of analysis plus the requested matrix, diagram, prompts, or evidence appendix; these artifacts are not included in the word guide.
+> [SUBMISSION] Type: Applied analysis. Points: 25. Submit one PDF or DOCX to Week 5 Assignment 2. Aim for 600–800 words of analysis plus the requested matrix, diagram, prompts, or evidence appendix; these artifacts are not included in the word guide.
 
 Use **Klarna's AI Customer Service Agent** as the anchor. Your task is to explain and test the design reasoning, not retell the case. Work through the following connected steps with informative headings.
 
@@ -59,19 +59,19 @@ Use the same assumptions consistently across the response. A design exercise can
 
 | Criterion | Full-credit evidence | Points |
 | --- | --- | --- |
-| Case and problem framing | Accurately identifies the case’s design tension and separates given facts from assumptions. | 15 |
-| Analysis and comparison | Completes the requested comparison or experiment with a defensible method and evidence. | 25 |
-| Limits and trade-offs | Evaluates failure modes, alternative explanations, and relevant constraints. | 15 |
-| Recommendation and transfer | Connects a justified recommendation to the research-assistant design. | 15 |
-| Traceability and clarity | Includes requested artifacts, source references, and clear labels for measured/projected results. | 5 |
-| Total |  | 75 |
+| Case and problem framing | Accurately identifies the case’s design tension and separates given facts from assumptions. | 5 |
+| Analysis and comparison | Completes the requested comparison or experiment with a defensible method and evidence. | 8 |
+| Limits and trade-offs | Evaluates failure modes, alternative explanations, and relevant constraints. | 5 |
+| Recommendation and transfer | Connects a justified recommendation to the research-assistant design. | 5 |
+| Traceability and clarity | Includes requested artifacts, source references, and clear labels for measured/projected results. | 2 |
+| Total |  | 25 |
 
 
 ## Project Milestone
 
 ### Assignment 3 — Research Assistant Milestone 5: Agent Capability Plan
 
-> [SUBMISSION] Type: Project portfolio milestone. Points: 50. Submit a PDF or DOCX to Week 5 Project Milestone. Preserve the author’s required elements below and retain an editable copy for Week 16.
+> [SUBMISSION] Type: Project portfolio milestone. Points: 15. Submit a PDF or DOCX to Week 5 Project Milestone. Preserve the author’s required elements below and retain an editable copy for Week 16.
 
 #### Detailed Milestone Instructions — Author’s Requirements
 
@@ -92,11 +92,11 @@ Use the scope and length stated by the author. Where no length is specified, a f
 
 | Criterion | Full-credit evidence | Points |
 | --- | --- | --- |
-| Chosen capability | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 15 |
-| Human-in-the-loop placement | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 10 |
-| Tool specification | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 15 |
-| Risk and mitigation | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 10 |
-| Total |  | 50 |
+| Chosen capability | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 4 |
+| Human-in-the-loop placement | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 3 |
+| Tool specification | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 5 |
+| Risk and mitigation | Addresses this author-required element specifically for the project, with reasoning and evidence consistent with prior milestones. | 3 |
+| Total |  | 15 |
 
 
 ## Start Here Page
