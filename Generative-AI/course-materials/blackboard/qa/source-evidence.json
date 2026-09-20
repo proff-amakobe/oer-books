@@ -1,0 +1,395 @@
+[
+  {
+    "week": 1,
+    "chapter_source": "original/01-foundations.qmd",
+    "introduction_sha256": "624bb9728c366d3945b96ef41610c0847425eea49f1ec445851ab9223baea95b",
+    "introduction": "Welcome to your journey into the fascinating world of Generative Artificial Intelligence! If you've ever wondered how ChatGPT writes coherent essays, how Midjourney creates stunning artwork from text descriptions, or how GitHub Copilot suggests code completions, you're about to discover the foundational principles that make these remarkable capabilities possible.\n\nThis opening chapter lays the groundwork for understanding how machines can create human-like text, images, and other content that often seems indistinguishable from human-generated work. We'll explore the remarkable evolution from simple rule-based systems of the 1960s to today's powerful Large Language Models (LLMs) that can write essays, answer complex questions, engage in creative storytelling, and even help with programming tasks.\n\nBut this isn't just a theoretical exploration. Throughout this book, you'll build a real, sustained artifact of your own: the design for an AI-powered research assistant, carried forward and refined chapter by chapter across the entire semester. This chapter isn't where you write code for that assistant, it's where you make the first, most important decision about it: *what problem is it actually solving, and why does that problem call for generative AI rather than something simpler?* Getting that question right now will make every later technical decision easier.",
+    "milestone": "This week, produce a one- to two-page **Project Charter** for your semester-long AI-powered research assistant project. It should include:\n\n1. **Domain and problem statement**: What specific problem, in what domain, will your assistant address? Be concrete, not aspirational, \"helps small nonprofit staff draft grant reports\" is workable; \"helps people with research\" is not.\n2. **Target user**: Who, specifically, will use this? What do they already know, and what do they need help with?\n3. **Why generative AI?**: In a substantive paragraph, justify why this problem calls for a generative approach rather than a simpler rule-based system, a search tool, or a traditional classifier. If you can't build this case convincingly, that's valuable information, reconsider the domain before moving on.\n4. **What success looks like**: One or two sentences describing what a good outcome would concretely look like for your target user, three months in.\n\nKeep this document. You'll revisit and extend it in every remaining chapter, and it becomes the opening section of your Week 16 final demo.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      1,
+      3,
+      4
+    ],
+    "pslo": [
+      1,
+      3,
+      4,
+      5
+    ],
+    "source_sha256": "388fcce8c7122b7b7a7d6996610393ea46238563133db09710803f475b7506e4"
+  },
+  {
+    "week": 2,
+    "chapter_source": "original/02-llms.qmd",
+    "introduction_sha256": "176e0393554d23ff516f33b3623fd3f214d1d0166161ed85511922f35e7c4fde",
+    "introduction": "Sarah, a data scientist at a healthcare startup, was frustrated. Her AI-powered patient triage system worked brilliantly in testing; it could answer medical questions, understand symptoms, and provide helpful guidance. Then came production day.\n\nWithin hours, problems emerged. Simple questions like \"What's a normal temperature?\" were taking eight seconds and costing \\$0.03 each, using the company's most powerful (and expensive) AI model for what should be instant, cheap answers. Meanwhile, complex diagnostic questions were being routed to the fast but limited model, producing oversimplified responses that missed important nuances.\n\nThe monthly API bill projection: \\$47,000. For 50,000 queries.\n\nSarah's CTO was blunt: \"We can't ship this. Figure out what's wrong or we're pulling the plug.\"\n\nThat weekend, Sarah dove into something she'd previously skipped: understanding how these AI models actually worked under the hood. Why were there so many different models? What made GPT-4 cost 20 times more than GPT-3.5 Turbo? How could she tell which model was right for which task?\n\nAs she studied transformer architecture, attention mechanisms, and model training processes, everything clicked. The models weren't mysteriously different, they had fundamentally different designs, training approaches, and capabilities. More importantly, she realized she could build a system that automatically routed each query to the optimal model based on its complexity and requirements.\n\nMonday morning, Sarah deployed her intelligent routing system. Simple queries hit the fast, cheap models. Complex diagnostics went to the powerful ones. Moderate questions found the sweet spot in between.\n\nNew monthly cost projection: \\$8,200. Response times: 90% under 2 seconds. Diagnostic accuracy: actually improved.\n\nHer CTO's response: \"This is why we need to understand our tools, not just use them.\"\n\nThis chapter is about developing Sarah's level of understanding, not as an academic exercise, but as practical knowledge that transforms how you build AI applications. You'll learn why different models exist, how their architecture shapes their capabilities, and most importantly, how to intelligently choose and orchestrate them.",
+    "milestone": "This week, add a **Model Selection Memo** to your project portfolio. In one to two pages:\n\n1. **Candidate models**: Name 2–3 models or model families you'd realistically consider for your assistant, spanning at least two tiers of capability/cost.\n2. **Comparison**: For each candidate, assess capability fit, context window, approximate cost, and latency against your project's actual requirements from the Chapter 1 charter.\n3. **Recommendation**: State which model you'd use for the *majority* of your assistant's traffic, and which (if any) you'd reserve for harder queries, with reasoning grounded in this chapter's architecture and training discussion, not just vendor marketing claims.\n4. **Open question**: Name one thing about your domain that makes this decision genuinely uncertain, the honest kind of uncertainty a real engineering team would flag, not a rhetorical one.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      1,
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "998851911065315ca98a3d3dbbd0810ef18fdfbf430630dacffaa0a19c9a24f2"
+  },
+  {
+    "week": 3,
+    "chapter_source": "original/03-prompt-engineering.qmd",
+    "introduction_sha256": "46d5b8486ea28730ae45a806c59fa474792dad692782566bb683d1ab02c3dd8d",
+    "introduction": "Welcome to the art and science of prompt engineering—the critical skill that transforms generic AI models into powerful, specialized tools. While the previous chapters focused on understanding and selecting the right models, this chapter is about learning to communicate effectively with those models to achieve precise, reliable, and high-quality results.\n\nPrompt engineering is often described as the \"new programming language\" of the AI era. Just as traditional programming requires understanding syntax, logic, and best practices, prompt engineering requires understanding how to structure requests, provide context, and guide model behavior to achieve desired outcomes.\n\nIn this chapter, you'll master the fundamental techniques that separate novice AI users from experts: few-shot learning, chain-of-thought prompting, prompt templates, and safety considerations. You'll enhance your research assistant with a sophisticated prompt management system that can automatically select and optimize prompts based on the type of research query being processed.",
+    "milestone": "This week, add a **Prompt Library v1** to your project portfolio:\n\n1. **System prompt**: The full text of your assistant's system prompt, plus 2–3 sentences justifying the role, tone, and constraints you chose.\n2. **3–5 task prompts**: The full text of each, covering the distinct request types your assistant needs to handle.\n3. **One worked test**: For at least one prompt, show a typical input, the response it produced (real or realistically projected), and one honest note on where it still falls short.\n4. **Adversarial check**: Briefly describe one prompt-injection attempt you tested against your system prompt, and what happened.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      2,
+      3,
+      4
+    ],
+    "pslo": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "source_sha256": "3ef2352a521aa344f44e1ef1666b37fecd2c37cadd754e1f76e013c707006f20"
+  },
+  {
+    "week": 4,
+    "chapter_source": "original/04-apis-integration.qmd",
+    "introduction_sha256": "bc544083d376511712ad6048b0a07ba5f120269813972f2324e0196524342665",
+    "introduction": "Now that you've mastered the art of crafting effective prompts, it's time to think through how a well-chosen model and a well-designed prompt actually reach your users reliably. This chapter bridges the gap between experimental AI projects and applications that handle real users, real budgets, and real uptime expectations.\n\nWorking with AI APIs presents challenges that don't show up in a quick prototype: managing rate limits, handling unpredictable latency, optimizing cost across providers, and staying available when an external service fails. These are the engineering practices that separate a weekend demo from something a business can actually depend on.\n\nIn this chapter, you'll design, not implement, the integration layer for your research assistant: how it talks to one or more providers, what happens when a call fails, how caching and cost tracking fit together, and what a provider outage would actually mean for your users. As with every chapter so far, the deliverable is a design document, not a working system, though nothing stops you from building it if you want the extra practice.",
+    "milestone": "This week, add an **Integration Architecture Diagram** to your project portfolio, a visual diagram plus a short narrative (one page is plenty):\n\n1. **The diagram**: Show your assistant's request flow, from user input through provider selection to response, including where failover and caching sit in that flow.\n2. **Failure handling table**: List your three most likely failure modes (from section 4.3) and your designed response to each.\n3. **Cost and rate-limit plan**: One paragraph on your expected usage pattern and which cost-optimization lever from section 4.4 you'd apply first.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      2,
+      3
+    ],
+    "pslo": [
+      2,
+      3,
+      4
+    ],
+    "source_sha256": "065a0752359d210f24f637b0b7182593dc44b948f2e78ee28cdc80bd28334b14"
+  },
+  {
+    "week": 5,
+    "chapter_source": "original/05-agents.qmd",
+    "introduction_sha256": "11040ab35bea1ce7dc4bca2cf8ab630d0b5d895361ae8cda66fb4af0c1d2a9d0",
+    "introduction": "Picture two versions of the same assistant. You ask both: \"Do I have a scheduling conflict next Tuesday, and if so, can you fix it?\"\n\nThe first version reads your calendar, if you've pasted it in, and tells you: \"Yes, you have two meetings booked at 2 PM: the budget review and the client call.\" That's the end of the interaction. You now know something you didn't know before, and you're on your own to actually resolve it, open your calendar, decide which meeting to move, draft a message to the other attendees, send it.\n\nThe second version does something categorically different. It checks your calendar directly. It identifies the conflict. It proposes that the client call be moved thirty minutes later, checks that the new time also works for everyone else on the invite, drafts a reschedule message, and asks you one question before sending anything: \"Move the client call to 2:30 PM and notify attendees? Yes/No.\" You say yes, and it's done.\n\nBoth versions used the same underlying language model. The difference between them has nothing to do with how smart the model is and everything to do with what it's allowed to *do*. That difference, from answering questions to taking action in the world, is what this chapter is about, and it's arguably the single most consequential shift happening in applied generative AI right now. It's also the shift that raises this book's safety and control questions most sharply, not as an abstract concern for a later chapter, but as a design problem you'll need to solve for your own project this week.",
+    "milestone": "This week, add an **Agent Capability Plan** to your project portfolio:\n\n1. **Chosen capability**: The one action-taking capability from section 5.8 that you designed, stated clearly.\n2. **Human-in-the-loop placement**: Where it sits on the spectrum, and your reasoning, grounded explicitly in cost and reversibility.\n3. **Tool specification**: The narrowly scoped tool this capability would need, named and described the way you'd write it for a model to actually use correctly.\n4. **Risk and mitigation**: One plausible failure mode (goal hijacking, a malformed input, an ambiguous instruction) and the specific safeguard, sandboxing, scoping, or a human checkpoint, that addresses it.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      2,
+      3,
+      4
+    ],
+    "pslo": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "source_sha256": "d8a1e48d43f818c97b84dda961e08813cf5304707c90799b562a6bd14fc42be3"
+  },
+  {
+    "week": 6,
+    "chapter_source": "original/06-rag.qmd",
+    "introduction_sha256": "22b80ea272dabf01d737fb8dd9f9d7a222916915ce4d5b6052b502f4b7a70d3c",
+    "introduction": "Large Language Models possess impressive knowledge from their training data, but they face fundamental limits: a knowledge cutoff, no access to private or recent information, and a persistent tendency toward confident fabrication when they don't actually know something, the hallucination problem from Chapter 1. Retrieval-Augmented Generation, RAG, addresses these limits not by making the model smarter, but by giving it something to actually look at before it answers.\n\nRAG represents a shift from closed-book AI, answer from memory alone, to open-book AI, retrieve relevant information first, then answer grounded in what was found. This is essential for working with proprietary documents, staying current with information that changes faster than any training run, and producing responses a user can actually verify against a real source.\n\nIn this chapter, you'll design the knowledge layer for your research assistant: how it would ingest documents, build a searchable knowledge base, and ground its responses in specific, retrievable sources, the architecture behind everything from customer support systems to legal research tools.",
+    "milestone": "This week, add a **RAG Design Document** to your project portfolio:\n\n1. **Knowledge source**: The specific documents or data your assistant would retrieve from.\n2. **Chunking strategy**: Your approach and reasoning, per section 6.3.\n3. **Retrieval approach**: Semantic, hybrid, or otherwise, justified for your domain.\n4. **Worked example**: One realistic query, walked through end to end, from retrieval through a grounded, cited response.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      2,
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "058dfd9edab2e221d86e00b047feadaf3dc75c12b3fba15b65dd31bca308ded6"
+  },
+  {
+    "week": 7,
+    "chapter_source": "original/07-finetuning.qmd",
+    "introduction_sha256": "51f025236ea406ccf6c03fbcdd8ce53477d6d8f5fc13c43b8119757f0c47b3c4",
+    "introduction": "Prompt engineering and RAG, the last two chapters, can take you remarkably far. But both have real limits: a prompt can only shape behavior the model is already capable of, and RAG can only supply facts, not a genuinely different writing style, a consistent specialized format, or fluency in a narrow technical vocabulary the base model barely saw during training. When you hit that ceiling, fine-tuning, continuing a pre-trained model's training on your own data, becomes the tool worth considering.\n\nFine-tuning is powerful and genuinely complex, and it's also the customization approach most often reached for prematurely. This chapter is built around a decision framework first and an implementation overview second, because the most common fine-tuning mistake isn't a bad training run, it's fine-tuning when a better prompt or a RAG system would have solved the problem for a fraction of the cost and complexity.",
+    "milestone": "This week, add a **Customization Decision Memo** to your project portfolio:\n\n1. **Recommendation**: Prompting, RAG, fine-tuning, or some combination, for your specific assistant, stated clearly.\n2. **Reasoning**: Walk through the decision framework from section 7.1 explicitly; don't just assert the conclusion.\n3. **If fine-tuning is recommended**: A rough data-sourcing plan, approach (PEFT vs. full), and the baseline you'd compare against.\n4. **If fine-tuning is not recommended**: What would need to be true about your project for that to change.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "ddbac642ac482015a37745b6a5f649806fa71d501c519befa1d1475094ee120d"
+  },
+  {
+    "week": 8,
+    "chapter_source": "original/08-research-methods.qmd",
+    "introduction_sha256": "bb5c58e61efef8c146956a0b05e7fd008266d734ff4bdd56cd98d34cb8dedb28",
+    "introduction": "Every chapter so far has asked you to make a design decision, which model, which prompt, which retrieval strategy, and defend it in writing. But defend it against what, exactly? So far, mostly against your own reasoning and the concepts covered in each chapter. That's a real skill, but it has a ceiling: this field moves fast enough that a genuinely good decision often depends on knowing what's been tried, what's been shown to work, and what the field currently disagrees about, none of which you can reason your way to from first principles alone.\n\nThis chapter is different from the others in one important way: it's not primarily about a new AI capability. It's about a skill this entire book has been assuming you'd eventually need and hasn't yet taught directly, how to find, read, and synthesize the research literature well enough to ground a real technical decision in something more solid than intuition. You're going to need this skill in two places immediately: your Week 8 project proposal, due at the end of this chapter, and every chapter from here forward, which will lean more heavily on primary sources than the earlier, more foundational chapters did.",
+    "milestone": "This week's milestone is your formal midterm checkpoint. Submit:\n\n1. **5–8 sources** grounding your project's key design decisions so far, drawn from a mix of papers, technical reports, and (where genuinely relevant) high-quality secondary sources.\n2. **A synthesized review**, organized by theme per section 8.4, not by chapter or by source.\n3. **An honest gaps section**: what's genuinely underexplored in the literature for your specific domain.\n4. **A revised project summary**: given what the literature review surfaced, does anything about your Chapter 1 charter or later decisions need to change? Say so explicitly if it does.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "fc4468e050ce90846ae8689af6fa054ac0e8e6ed722cd725ebf455ab3b4b713d"
+  },
+  {
+    "week": 9,
+    "chapter_source": "original/09-multimodal.qmd",
+    "introduction_sha256": "09c1bccfff0947685767a4e8c6d2413ad414d24bfd5a3c6ad0c19de619aae5f2",
+    "introduction": "An accessibility app points a phone's camera at a busy intersection and, through a synthesized voice, tells a blind user what's in front of them: a crosswalk signal, a cyclist approaching from the left, a café awning overhead. Nothing about that sentence involves text input or output as you've thought about it through this entire book, it involves an AI system perceiving the world visually and translating that perception into language, in real time, in a context where a wrong or slow answer has real consequences for someone's safety.\n\nEvery capability this book has covered so far, prompting, retrieval, agentic action, fine-tuning, has been about text: text in, text out, even when an agent's *actions* touch the world, its reasoning has stayed linguistic. Multimodal AI breaks that boundary: models that can see images, hear audio, and increasingly generate visual and audio content directly, not by bolting a separate tool onto a text model, but through architectures trained from the start to relate meaning across different kinds of input.\n\nThis chapter asks a narrower, more useful question than \"how do multimodal models work internally\": given that your project's assistant might need to see a chart, transcribe a recording, or generate a diagram, when does that capability genuinely help your users, and when is it an impressive feature nobody actually needed?",
+    "milestone": "This week, add a **Multimodal Extension Plan** to your project portfolio:\n\n1. **Decision**: Does your project need a multimodal capability? State it clearly, yes or no.\n2. **Justification**: Grounded in your actual users and domain, per the connecting section above, not in the novelty of the capability.\n3. **If yes**: Which specific capability (vision, audio, generation) and one concrete use case it would serve.\n4. **If no**: What would need to be true about your domain for that to change.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "7c1ff146ec8355824991271c5a5001633bda6ffe2a1a56281dc14d016faea6a3"
+  },
+  {
+    "week": 10,
+    "chapter_source": "original/10-evaluation.qmd",
+    "introduction_sha256": "79af4f7040bddd012164ecf83f3a8ebb37ba3deba0915c5af0f9d9516addc885",
+    "introduction": "Two teams, at two different companies, each announce that their AI system is \"95% accurate.\" The first team measured this against a fixed test set of questions with known correct answers. The second team measured it as the percentage of customer conversations that ended without a human escalation. Both numbers are real. Both numbers are called \"accuracy.\" They measure almost entirely different things, and neither one, on its own, tells you whether the system is actually good at the job it was built to do.\n\nThis is the problem this chapter exists to solve. Every chapter before this one has asked you to design something, a prompt, a retrieval system, an agent's capability boundary, and every chapter from here forward will ask you to defend a claim about how well something works. Evaluation is the discipline that makes that defense honest rather than wishful. It's also, not coincidentally, the discipline most often skipped or done badly in real AI projects, because a working demo *feels* like evidence of quality in a way that's genuinely seductive and genuinely misleading.",
+    "milestone": "This week, add an **Evaluation Plan** to your project portfolio:\n\n1. **Success definition**: What does \"working well\" concretely mean for your assistant's actual users?\n2. **Metrics**: Your chosen combination of automated, human, and (if applicable) RAG-specific metrics, justified against your success definition.\n3. **Human-evaluation rubric**: One concrete, specific rubric for your assistant's most important quality dimension.\n4. **Three test cases**: Typical, edge, and adversarial, with what you'd expect a good system to do in each.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "03aa44404ab102c8a61bcce0349f64e230dda27b4ef8a52b4c7072888e866cca"
+  },
+  {
+    "week": 11,
+    "chapter_source": "original/11-optimization.qmd",
+    "introduction_sha256": "39f03818723023b8380c4717ab9b16c9b75fc2b1f1aae4d7a9b2e18c2e5b7fda",
+    "introduction": "Chapter 2 introduced model routing as a design problem: match query complexity to model capability. Chapter 4 covered cost optimization at the integration layer: caching, batching, provider comparison. Both were genuinely useful, and both stopped short of a harder question that only shows up once a system is actually running at real scale: what do you do when routing and caching alone aren't enough, when you need the underlying models themselves to run faster, cheaper, and more reliably under real load, not just be chosen intelligently?\n\nThis chapter goes one level deeper into that question: combining multiple models for better results than any one alone, shrinking models without gutting their quality, and the performance engineering that separates a system that works in a demo from one that holds up under thousands of simultaneous users. None of this is required reading for every project, if your assistant handles modest traffic, Chapters 2 and 4's routing and caching may be all you ever need, but understanding what's available at this next level of scale is part of being able to recognize when you'd actually need it.",
+    "milestone": "This week, add an **Optimization Plan** to your project portfolio:\n\n1. **Expected scale**: Your realistic query volume estimate.\n2. **Cost and latency budget**: What you'd expect to pay and how fast a response needs to be.\n3. **First bottleneck**: What would break first under significantly higher load, and why.\n4. **Applicability call**: Whether this chapter's advanced techniques apply to your project now, later, or not at all, with reasoning.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      2,
+      3,
+      5
+    ],
+    "pslo": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "source_sha256": "e559db498dbfec4d31373b47ff0478f7e4469e3b76bf91b6dd710f93fec9488d"
+  },
+  {
+    "week": 12,
+    "chapter_source": "original/12-safety-alignment.qmd",
+    "introduction_sha256": "b5b3efdee785661d769142407a97cec065ee4773834bc1640418fbc9e01049e5",
+    "introduction": "Back in Chapter 1, you learned that a language model is, at its mechanical core, a system trained to predict the next token. Nothing in that description says anything about being helpful, honest, or willing to refuse a harmful request. Those behaviors, the ones that make a model something you can actually deploy in front of real users, come from somewhere else, a deliberate, separate layer of training built specifically to shape *how* a capable model behaves, not just what it knows. That layer is called alignment, and this chapter is about how it actually works.\n\nThis is a different kind of chapter than Chapter 13, which follows it. Chapter 13 asks applied questions: is this system biased, is it being used responsibly, what should an organization's AI governance look like? This chapter asks a more technical question underneath those: what actually makes a model behave safely in the first place, what are the engineering techniques involved, and where do they fall short? If Chapter 13 is about using AI responsibly, this chapter is about how the AI itself was built to be usable responsibly, or wasn't.",
+    "milestone": "This week, add a **Red-Team Review** to your project portfolio:\n\n1. **Adversarial walkthrough**: What a deliberately adversarial user would try against your current design, and whether it would hold up.\n2. **Domain-specific alignment risk**: One concrete way your assistant's implicit objectives could conflict with accuracy or honesty in your specific domain.\n3. **Mitigation**: One concrete safeguard addressing the risk you identified, grounded in specific techniques from this book, not a general statement of good intentions.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      1,
+      3,
+      4,
+      5
+    ],
+    "pslo": [
+      1,
+      3,
+      4,
+      5,
+      6
+    ],
+    "source_sha256": "9df85f0ba316f8598fa293253d67751c9c89b1d25641dfa9af6ca53169686f18"
+  },
+  {
+    "week": 13,
+    "chapter_source": "original/13-ethics.qmd",
+    "introduction_sha256": "2e777b977e330393b4c6157c93c5219f7af4d43f722d408fdec1d839de0d2763",
+    "introduction": "A healthcare AI system saves clinicians real time, until a systematic bias in its recommendations is discovered, quietly affecting thousands of patients across months of routine use before anyone catches it. Nothing about the system's engineering was sloppy; it performed exactly as it was optimized to perform. The technical success and the ethical failure happened in the same system, at the same time, which is precisely the point: good engineering and responsible AI are not the same achievement, and a project can score highly on one while quietly failing the other.\n\nThis chapter is where Chapter 1's opening ethical questions, who creates the training data, who benefits, who's responsible when something goes wrong, become concrete, practical design work rather than open discussion prompts. Chapter 12 covered the technical machinery of alignment, how a model is trained to behave safely in the first place. This chapter asks the applied question that sits on top of that machinery: given a model that's been aligned as well as current techniques allow, what does it actually take to deploy it responsibly, and who's accountable when that deployment falls short?",
+    "milestone": "This week, add an **Ethics & Fairness Review** to your project portfolio:\n\n1. **Stakeholder map**: Who's directly and indirectly affected by your assistant.\n2. **Bias risk**: One concrete, domain-specific bias risk and where in your pipeline it could enter.\n3. **Explainability approach**: The level(s) your project needs, and why.\n4. **Privacy posture**: What sensitive data your project touches, if any, and your approach to protecting it.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      4,
+      5
+    ],
+    "pslo": [
+      1,
+      4,
+      5,
+      6
+    ],
+    "source_sha256": "825e3c9f4dd768c42481abea52a9391ada6556b920faeb2e9b9e9add22af1ec5"
+  },
+  {
+    "week": 14,
+    "chapter_source": "original/14-law-policy.qmd",
+    "introduction_sha256": "2fbd3efd116b0a69784832bf2162f9d25ca4c3ad224e461579d3552ba695e071",
+    "introduction": "Your assistant works well, tests cleanly, and passes its Chapter 13 ethics review. Is it legal to deploy? That's a genuinely different question, and one this book has deliberately saved for its own chapter rather than folding it into Chapter 13's ethics discussion, because \"ethical\" and \"compliant\" are related but not identical, a system can be one without being the other, and a practitioner needs to be able to reason about both.\n\nThis chapter covers the legal and regulatory landscape a real AI deployment has to navigate: the emerging body of AI-specific regulation, the older bodies of law (copyright, liability) that AI has forced into new and unsettled territory, and the organizational governance structures that turn legal obligations into actual practice. None of this is settled law in the way, say, contract law is settled; you're studying a genuinely moving target, which is exactly why this chapter emphasizes the shape of the landscape and how to navigate it, rather than a fixed set of rules to memorize.",
+    "milestone": "This week, add a **Compliance Checklist** to your project portfolio:\n\n1. **Applicable regulations**: Which frameworks from section 14.1 plausibly apply to your project, and which clearly don't, with reasoning for both.\n2. **Risk tier**: If relevant, your assistant's likely EU AI Act risk classification.\n3. **Copyright consideration**: Addressed explicitly, even if the honest answer is \"needs review beyond this course.\"\n4. **Liability allocation**: Where responsibility sits given your Chapter 5 design, stated explicitly rather than left implicit.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      4,
+      5
+    ],
+    "pslo": [
+      1,
+      4,
+      5,
+      6
+    ],
+    "source_sha256": "17d2d2d00838f785d7bb8674d287a117c6679ff57507eb737b1560a5a222210d"
+  },
+  {
+    "week": 15,
+    "chapter_source": "original/15-deployment-frontier.qmd",
+    "introduction_sha256": "ee7bffe1d0cc76f69de9ff3ede8e33196f892d1c55690292fc59393b7233acae",
+    "introduction": "You've now designed every layer of an AI-powered research assistant: model selection, prompting, integration, agentic capability, retrieval, customization, evaluation, optimization, safety, ethics, and legal compliance. Fourteen chapters of design work, and not one line of it has actually reached a real user yet. This chapter closes that final gap, and then does something no other chapter has done: it looks past the edge of what this book can teach you, at where the field is actually headed next.\n\nThese are two different kinds of \"last chapter\" material, deliberately combined into one. Deployment is about finishing what you started: taking a fully designed system and reasoning through what it actually takes to put it in front of real users reliably. The Frontier section that follows is about something else entirely: naming, honestly, what's unsettled, emerging, or actively debated in this field right now, so that your education doesn't quietly end at this book's last page but continues past it, using the research literacy skills from Chapter 8.",
+    "milestone": "This week, add a **Deployment Plan & Forward Look** to your project portfolio, the final piece before your Week 16 demo:\n\n1. **Production architecture sketch**: The major components of your assistant and how they'd be organized.\n2. **Deployment strategy**: Your choice, justified against your project's actual stakes.\n3. **Top three monitoring signals**: Grounded in your Chapter 10 Evaluation Plan.\n4. **Forward look**: One paragraph on how a development from section 15.6 or 15.7 could change your design in the next twelve months.",
+    "points": [
+      50,
+      75,
+      50
+    ],
+    "co": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "pslo": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "source_sha256": "de7b996cb4b10c029ccd6ed1d39e5e95af3b37e71e570241943cf443d7d41077"
+  },
+  {
+    "week": 16,
+    "chapter_source": "original/15-deployment-frontier.qmd and original/PROJECT_ARC.md",
+    "introduction_sha256": "314a48b764bc8952e83e3ca3aa181ff0c739ee41bfafb60020cddfc31ef98461",
+    "introduction": "You have carried one research-assistant design through fifteen milestones. Now bring those decisions together and explain what they make possible for your user. Your portfolio should show how model selection, prompts, retrieval, autonomy, evaluation, and responsibility fit the same problem, not fifteen different versions of it.\n\nChapter 15 calls the Deployment Plan & Forward Look “the final piece before your Week 16 demo.” This week is that handoff. Revisit the questions that opened your charter: what problem are you solving, why does it need generative AI, and what would success look like? Show how the evidence you gathered changed your answers.\n\nYour final demonstration is an opportunity to defend a coherent design, including its limits. A live prototype is optional; a clear storyboarded walkthrough can make the same decisions visible. The aim is to show what you understand, why you chose this approach, and what you would need to learn before putting it in front of real users.",
+    "milestone": "",
+    "points": [
+      50,
+      100,
+      100
+    ],
+    "co": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "pslo": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "source_sha256": "de7b996cb4b10c029ccd6ed1d39e5e95af3b37e71e570241943cf443d7d41077"
+  }
+]
